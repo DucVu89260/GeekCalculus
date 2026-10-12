@@ -1,7 +1,9 @@
 # GeekCalculus · Structural Platform
 
 Khung website kỹ thuật kết cấu chạy local: **Laravel 12 + SQLite + Vue 3/Vite**.
-UI có nút **VI / EN**, danh mục đa ngôn ngữ từ database và form tạo/lưu dự án.
+Trang chính dùng nền xanh dương nhạt và kiến trúc sáu nhóm: Steel Design, Concrete Design,
+Analysis Hub, Load Generator, Engineering Library và Future Labs.
+UI có nút **VI / EN**, danh mục đa ngôn ngữ và form tạo/lưu dự án mở khi cần.
 
 ## Chạy local bằng Docker
 
@@ -126,7 +128,7 @@ có PHP/SQLite cho phát triển; chưa thiết lập image production.
 
 ## Tham khảo và giả định
 
-Tham khảo các nhóm công cụ kết cấu và phong cách dashboard tối của
+Tham khảo các nhóm công cụ kết cấu và danh mục chức năng của
 [tinhketcau.com](https://tinhketcau.com/); không sao chép thương hiệu hoặc tài sản
 của trang. Bản thiết kế UI và danh mục này dựa trên cấu trúc dự án trong ngữ cảnh
 hiện tại; chưa có nội dung chi tiết của cuộc trò chuyện GeekCalculus trước đó.

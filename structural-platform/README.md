@@ -135,3 +135,32 @@ Luna max hỗ trợ phần Vue; backend, tích hợp và kiểm thử được t
 Composer lock dùng endpoint archive chính thức `codeload.github.com` với commit
 được pin vì proxy cloud không cho tải qua GitHub API. Setup giữ kiểm tra TLS,
 và trong môi trường proxy sử dụng CA bundle của máy nếu có.
+
+## Thử trên web với GitHub Pages
+
+Bản demo web đã được build và lưu trong `docs/` ở gốc repository. Bật tại
+GitHub repository **Settings → Pages → Build and deployment**:
+
+1. **Source**: Deploy from a branch.
+2. **Branch**: `main`; **Folder**: `/docs`; bấm **Save**.
+3. Đợi GitHub triển khai xong rồi mở `https://ducvu89260.github.io/GeekCalculus/`.
+
+Bản demo có UI Anh–Việt, dropdown từ cùng danh mục seed, tạo/lưu dự án,
+phân trang và nhớ ngôn ngữ. Dự án chỉ lưu trong localStorage của trình duyệt
+đang dùng, không được gửi lên Laravel và không đồng bộ giữa thiết bị/người dùng.
+Xóa dữ liệu trình duyệt sẽ xóa dự án demo. Banner ở đầu trang phân biệt rõ
+bản demo với bản có API/database. Chưa có tính toán kết cấu hoặc CSI adapters.
+
+Sau khi sửa UI/danh mục, chạy từ gốc repo (dependencies đã cài qua setup):
+
+```sh
+bash structural-platform/scripts/build-web-demo.sh
+git add docs structural-platform
+git commit -m "Update web demo"
+git push origin main
+```
+
+`docs/` là output build của demo; không sửa thủ công các tệp trong đó.
+GitHub Pages chỉ phục vụ frontend tĩnh. Để dùng database chung trực tuyến,
+cần triển khai Laravel lên hosting hỗ trợ PHP cùng database và bổ sung
+xác thực/phân quyền trước khi chia sẻ dữ liệu thực.

@@ -1,8 +1,12 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
+import { demoRequest } from './demo-api'
+
+const demoMode = import.meta.env.VITE_DEMO_MODE === 'true'
 
 const copy = {
   vi: {
+    demoNotice: 'Bản demo web: dự án chỉ lưu trong trình duyệt này, chưa kết nối database Laravel. Không nhập dữ liệu cần lưu lâu dài.', demoStatus: 'Demo trên trình duyệt', browserData: 'Trình duyệt',
     brand: 'GeekCalculus', brandSub: 'KỸ THUẬT KẾT CẤU', workspace: 'Không gian làm việc',
     overview: 'Tổng quan', projects: 'Dự án', integrations: 'Tích hợp', settings: 'Cài đặt',
     workspaceLabel: 'KHÔNG GIAN LÀM VIỆC', greeting: 'Chào mừng trở lại',
@@ -37,6 +41,7 @@ const copy = {
     standard_eurocode_2: 'Eurocode 2', standard_aci_318_19: 'ACI 318-19', standard_tcvn_2737_2023: 'TCVN 2737:2023',
   },
   en: {
+    demoNotice: 'Web demo: projects are stored only in this browser, without a Laravel database connection. Avoid entering data you need to keep long term.', demoStatus: 'Browser demo', browserData: 'Browser',
     brand: 'GeekCalculus', brandSub: 'STRUCTURAL ENGINEERING', workspace: 'Workspace',
     overview: 'Overview', projects: 'Projects', integrations: 'Integrations', settings: 'Settings',
     workspaceLabel: 'WORKSPACE', greeting: 'Welcome back', title: 'Design starts here.',
@@ -73,7 +78,10 @@ const copy = {
 }
 
 const locale = ref(localStorage.getItem('geekcalculus-locale') === 'en' ? 'en' : 'vi')
-const t = (key) => copy[locale.value][key] ?? copy.en[key] ?? key
+const t = (key) => {
+  const resolved = demoMode && ['apiOnline', 'apiHint'].includes(key) ? 'demoStatus' : key
+  return copy[locale.value][resolved] ?? copy.en[resolved] ?? resolved
+}
 const apiStatus = ref('checking')
 const catalogError = ref(false)
 const projectError = ref(false)
@@ -145,6 +153,7 @@ function translatedCode(group, code) {
 }
 
 function request(path, options = {}) {
+  if (demoMode) return demoRequest(path, options)
   const headers = { Accept: 'application/json', ...(options.body ? { 'Content-Type': 'application/json' } : {}), ...options.headers }
   return fetch(path, { ...options, headers }).then(async (response) => {
     const payload = await response.json().catch(() => ({}))
@@ -324,6 +333,7 @@ onMounted(() => {
       </header>
 
       <div class="page-wrap">
+        <p v-if="demoMode" class="demo-notice" role="note">{{ t('demoNotice') }}</p>
         <section class="welcome-row">
           <div>
             <div class="eyebrow"><span class="eyebrow-mark"></span>{{ t('greeting') }}</div>
@@ -415,7 +425,7 @@ onMounted(() => {
           <div v-if="catalogError" class="catalog-alert"><span class="api-dot offline"></span>{{ t('errorCatalog') }}</div>
         </section>
 
-        <footer class="page-footer"><span>© 2026 GeekCalculus</span><span class="footer-divider"></span><span>{{ locale === 'vi' ? 'Nền tảng kỹ thuật kết cấu' : 'Structural engineering platform' }}</span><span class="footer-right">{{ t('catalogSource') }}: <b>{{ catalogError ? (locale === 'vi' ? 'Mẫu cục bộ' : 'Local sample') : apiStatus === 'online' ? 'API' : (locale === 'vi' ? 'Mẫu cục bộ' : 'Local sample') }}</b></span></footer>
+        <footer class="page-footer"><span>© 2026 GeekCalculus</span><span class="footer-divider"></span><span>{{ locale === 'vi' ? 'Nền tảng kỹ thuật kết cấu' : 'Structural engineering platform' }}</span><span class="footer-right">{{ t('catalogSource') }}: <b>{{ catalogError ? (locale === 'vi' ? 'Mẫu cục bộ' : 'Local sample') : apiStatus === 'online' ? (demoMode ? t('browserData') : 'API') : (locale === 'vi' ? 'Mẫu cục bộ' : 'Local sample') }}</b></span></footer>
       </div>
     </main>
   </div>

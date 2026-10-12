@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\User;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -15,6 +16,7 @@ class EngineeringApiTest extends TestCase
     {
         parent::setUp();
         $this->seed(DatabaseSeeder::class);
+        $this->actingAs(User::factory()->create(['role' => 'admin']));
     }
 
     private function project(array $changes = []): array
@@ -49,7 +51,7 @@ class EngineeringApiTest extends TestCase
         $this->assertDatabaseCount('catalog_option_translations', 40);
         $this->assertDatabaseCount('locales', 2);
         $this->assertDatabaseCount('projects', 1);
-        $this->assertDatabaseCount('users', 0);
+        $this->assertDatabaseCount('users', 1);
     }
 
     public function test_created_project_is_persisted_with_localized_labels(): void

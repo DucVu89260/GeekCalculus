@@ -1,18 +1,16 @@
 import { computed, onMounted, ref, watch } from 'vue'
-import { demoRequest } from '../demo-api'
+import { request, demoMode } from '../api'
 import { copy } from '../i18n'
 
-export function useWorkspace() {
-  const demoMode = import.meta.env.VITE_DEMO_MODE === 'true'
-
-
-  const locale = ref(localStorage.getItem('geekcalculus-locale') === 'en' ? 'en' : 'vi')
+export function useWorkspace(sharedLocale = null) {
+  const locale = sharedLocale ?? ref(localStorage.getItem('geekcalculus-locale') === 'en' ? 'en' : 'vi')
   const t = (key) => {
     const resolved = demoMode && ['apiOnline', 'apiHint'].includes(key) ? 'demoStatus' : key
     return copy[locale.value][resolved] ?? copy.en[resolved] ?? resolved
   }
   const apiStatus = ref('checking')
   const catalogError = ref(false)
+  const catalogChecked = ref(false)
   const projectError = ref(false)
   const createError = ref(false)
   const projectLoading = ref(true)
@@ -55,7 +53,9 @@ export function useWorkspace() {
   const catalogOptions = computed(() => {
     const result = {}
     for (const key of Object.keys(sampleCatalog.value)) {
-      result[key] = (catalog.value[key]?.length ? catalog.value[key] : sampleCatalog.value[key]).map((entry) => {
+      const options = catalog.value[key] ?? []
+      const useFallback = catalogError.value || !catalogChecked.value
+      result[key] = (options.length || !useFallback ? options : sampleCatalog.value[key]).map((entry) => {
         if (typeof entry === 'string') return { value: entry, label: translatedCode(key, entry) || entry }
         const value = String(entry.code ?? entry.value ?? entry.id ?? entry.name ?? '')
         const label = entry.name ?? entry.label ?? entry.title ?? translatedCode(key, value) ?? value
@@ -73,16 +73,6 @@ export function useWorkspace() {
     }
     const key = `${aliases[group] ?? ''}${normalized}`
     return copy[locale.value][key] ?? copy.en[key] ?? ''
-  }
-
-  function request(path, options = {}) {
-    if (demoMode) return demoRequest(path, options)
-    const headers = { Accept: 'application/json', ...(options.body ? { 'Content-Type': 'application/json' } : {}), ...options.headers }
-    return fetch(path, { ...options, headers }).then(async (response) => {
-      const payload = await response.json().catch(() => ({}))
-      if (!response.ok) throw new Error(payload.message || `HTTP ${response.status}`)
-      return payload
-    })
   }
 
   async function loadHealth() {
@@ -108,10 +98,12 @@ export function useWorkspace() {
         project_types: Array.isArray(source.project_types) ? source.project_types : [],
       }
       catalogError.value = false
+      catalogChecked.value = true
     } catch {
       if (requestId !== catalogRequestId) return
       catalog.value = { modules: [], standards: [], materials: [], units: [], project_types: [] }
       catalogError.value = true
+      catalogChecked.value = true
     }
   }
 
@@ -148,7 +140,7 @@ export function useWorkspace() {
 
   function ensureSelection(selectionKey, optionsKey, value) {
     const options = selectOptions(optionsKey)
-    if (!options.some((option) => option.value === value) && options.length) selections.value[selectionKey] = options[0].value
+    if (!options.some((option) => option.value === value)) selections.value[selectionKey] = options[0]?.value ?? ''
   }
 
   watch(catalogOptions, () => {
@@ -189,6 +181,10 @@ export function useWorkspace() {
   async function createProject() {
     formErrorKey.value = ''
     createError.value = false
+    if (!selectOptions('materials').length) {
+      formErrorKey.value = 'emptyMaterialCatalog'
+      return
+    }
     if (!projectName.value.trim()) {
       formErrorKey.value = 'nameRequired'
       return
@@ -222,5 +218,5 @@ export function useWorkspace() {
     refresh()
   })
 
-  return { demoMode, locale, t, apiStatus, catalogError, projectError, createError, projectLoading, creating, projectName, projects, totalProjects, currentPage, lastPage, formErrorKey, selections, refresh, loadProjects, selectOptions, optionName, statusName, formatDate, createProject, changePage }
+  return { demoMode, locale, t, apiStatus, catalogError, projectError, createError, projectLoading, creating, projectName, projects, totalProjects, currentPage, lastPage, formErrorKey, selections, refresh, loadCatalog, loadProjects, selectOptions, optionName, statusName, formatDate, createProject, changePage }
 }

@@ -1,0 +1,582 @@
+{
+  "categories": {
+    "materials": [
+      {
+        "code": "steel",
+        "name_vi": "Thép kết cấu",
+        "name_en": "Structural steel"
+      },
+      {
+        "code": "concrete",
+        "name_vi": "Bê tông",
+        "name_en": "Concrete"
+      },
+      {
+        "code": "rebar",
+        "name_vi": "Thép cốt",
+        "name_en": "Rebar"
+      }
+    ],
+    "section_types": [
+      {
+        "code": "steel",
+        "name_vi": "Thép",
+        "name_en": "Steel"
+      },
+      {
+        "code": "rc",
+        "name_vi": "BTCT",
+        "name_en": "Reinforced concrete"
+      }
+    ]
+  },
+  "shapes": [
+    {
+      "code": "i",
+      "category": "steel",
+      "name_vi": "Chữ I / H",
+      "name_en": "I / H",
+      "geometry_fields": [
+        "depth",
+        "width",
+        "web_thickness",
+        "flange_thickness"
+      ]
+    },
+    {
+      "code": "channel",
+      "category": "steel",
+      "name_vi": "Chữ U / C",
+      "name_en": "Channel",
+      "geometry_fields": [
+        "depth",
+        "width",
+        "web_thickness",
+        "flange_thickness"
+      ]
+    },
+    {
+      "code": "angle",
+      "category": "steel",
+      "name_vi": "Thép góc L",
+      "name_en": "Angle",
+      "geometry_fields": [
+        "depth",
+        "width",
+        "thickness"
+      ]
+    },
+    {
+      "code": "tee",
+      "category": "steel",
+      "name_vi": "Chữ T",
+      "name_en": "Tee",
+      "geometry_fields": [
+        "depth",
+        "width",
+        "web_thickness",
+        "flange_thickness"
+      ]
+    },
+    {
+      "code": "rectangular_hollow",
+      "category": "steel",
+      "name_vi": "Hộp chữ nhật",
+      "name_en": "Rectangular hollow",
+      "geometry_fields": [
+        "depth",
+        "width",
+        "thickness"
+      ]
+    },
+    {
+      "code": "circular_hollow",
+      "category": "steel",
+      "name_vi": "Ống tròn",
+      "name_en": "Circular hollow",
+      "geometry_fields": [
+        "diameter",
+        "thickness"
+      ]
+    },
+    {
+      "code": "rectangle",
+      "category": "rc",
+      "name_vi": "BTCT chữ nhật",
+      "name_en": "RC rectangle",
+      "geometry_fields": [
+        "depth",
+        "width"
+      ]
+    },
+    {
+      "code": "circle",
+      "category": "rc",
+      "name_vi": "BTCT tròn",
+      "name_en": "RC circle",
+      "geometry_fields": [
+        "diameter"
+      ]
+    }
+  ],
+  "fields": {
+    "materials": [
+      {
+        "key": "elastic_modulus",
+        "label_vi": "Mô đun đàn hồi E",
+        "label_en": "Elastic modulus E",
+        "unit": "MPa",
+        "min": 1,
+        "required": true
+      },
+      {
+        "key": "poisson_ratio",
+        "label_vi": "Hệ số Poisson ν",
+        "label_en": "Poisson ratio ν",
+        "unit": "—",
+        "min": -0.99,
+        "required": true,
+        "max": 0.499
+      },
+      {
+        "key": "density",
+        "label_vi": "Khối lượng riêng ρ",
+        "label_en": "Mass density ρ",
+        "unit": "kg/m³",
+        "min": 1,
+        "required": true
+      },
+      {
+        "key": "thermal_expansion",
+        "label_vi": "Hệ số giãn nở nhiệt α",
+        "label_en": "Thermal expansion α",
+        "unit": "1/°C",
+        "min": 0,
+        "required": true,
+        "max": 0.001
+      },
+      {
+        "key": "damping_ratio",
+        "label_vi": "Tỷ số cản ξ",
+        "label_en": "Damping ratio ξ",
+        "unit": "—",
+        "min": 0,
+        "required": true,
+        "max": 1
+      },
+      {
+        "key": "yield_strength",
+        "label_vi": "Giới hạn chảy fy",
+        "label_en": "Yield strength fy",
+        "unit": "MPa",
+        "min": 1,
+        "required": true,
+        "categories": [
+          "steel",
+          "rebar"
+        ]
+      },
+      {
+        "key": "ultimate_strength",
+        "label_vi": "Giới hạn bền fu",
+        "label_en": "Ultimate strength fu",
+        "unit": "MPa",
+        "min": 1,
+        "required": true,
+        "categories": [
+          "steel",
+          "rebar"
+        ]
+      },
+      {
+        "key": "compressive_strength",
+        "label_vi": "Cường độ nén fc",
+        "label_en": "Compressive strength fc",
+        "unit": "MPa",
+        "min": 1,
+        "required": true,
+        "categories": [
+          "concrete"
+        ]
+      },
+      {
+        "key": "tensile_strength",
+        "label_vi": "Cường độ kéo ft",
+        "label_en": "Tensile strength ft",
+        "unit": "MPa",
+        "min": 0,
+        "required": true,
+        "categories": [
+          "concrete"
+        ]
+      },
+      {
+        "key": "ultimate_strain",
+        "label_vi": "Biến dạng nén giới hạn εcu",
+        "label_en": "Ultimate compressive strain εcu",
+        "unit": "—",
+        "min": 1e-06,
+        "required": true,
+        "categories": [
+          "concrete"
+        ],
+        "max": 0.1
+      },
+      {
+        "key": "design_compressive_strength",
+        "label_vi": "Cường độ nén thiết kế",
+        "label_en": "Design compressive strength",
+        "unit": "MPa",
+        "min": 0,
+        "required": false,
+        "categories": [
+          "concrete"
+        ]
+      },
+      {
+        "key": "design_tensile_strength",
+        "label_vi": "Cường độ kéo thiết kế",
+        "label_en": "Design tensile strength",
+        "unit": "MPa",
+        "min": 0,
+        "required": false,
+        "categories": [
+          "concrete"
+        ]
+      }
+    ],
+    "sections": [
+      {
+        "key": "depth",
+        "label_vi": "Chiều cao h",
+        "label_en": "Depth h",
+        "unit": "mm",
+        "min": 0.001,
+        "required": true,
+        "shapes": [
+          "i",
+          "channel",
+          "angle",
+          "tee",
+          "rectangular_hollow",
+          "rectangle"
+        ]
+      },
+      {
+        "key": "width",
+        "label_vi": "Bề rộng b",
+        "label_en": "Width b",
+        "unit": "mm",
+        "min": 0.001,
+        "required": true,
+        "shapes": [
+          "i",
+          "channel",
+          "angle",
+          "tee",
+          "rectangular_hollow",
+          "rectangle"
+        ]
+      },
+      {
+        "key": "diameter",
+        "label_vi": "Đường kính D",
+        "label_en": "Diameter D",
+        "unit": "mm",
+        "min": 0.001,
+        "required": true,
+        "shapes": [
+          "circular_hollow",
+          "circle"
+        ]
+      },
+      {
+        "key": "web_thickness",
+        "label_vi": "Bề dày bụng tw",
+        "label_en": "Web thickness tw",
+        "unit": "mm",
+        "min": 0.001,
+        "required": true,
+        "shapes": [
+          "i",
+          "channel",
+          "tee"
+        ]
+      },
+      {
+        "key": "flange_thickness",
+        "label_vi": "Bề dày cánh tf",
+        "label_en": "Flange thickness tf",
+        "unit": "mm",
+        "min": 0.001,
+        "required": true,
+        "shapes": [
+          "i",
+          "channel",
+          "tee"
+        ]
+      },
+      {
+        "key": "thickness",
+        "label_vi": "Bề dày t",
+        "label_en": "Thickness t",
+        "unit": "mm",
+        "min": 0.001,
+        "required": true,
+        "shapes": [
+          "angle",
+          "rectangular_hollow",
+          "circular_hollow"
+        ]
+      },
+      {
+        "key": "area",
+        "label_vi": "Diện tích A",
+        "label_en": "Area A",
+        "unit": "mm²",
+        "min": 1e-06,
+        "required": true
+      },
+      {
+        "key": "inertia_y",
+        "label_vi": "Mô men quán tính Iy",
+        "label_en": "Second moment Iy",
+        "unit": "mm⁴",
+        "min": 1e-06,
+        "required": true
+      },
+      {
+        "key": "inertia_z",
+        "label_vi": "Mô men quán tính Iz",
+        "label_en": "Second moment Iz",
+        "unit": "mm⁴",
+        "min": 1e-06,
+        "required": true
+      },
+      {
+        "key": "torsion_constant",
+        "label_vi": "Hằng số xoắn Saint-Venant J",
+        "label_en": "Saint-Venant torsion J",
+        "unit": "mm⁴",
+        "min": 1e-06,
+        "required": true
+      },
+      {
+        "key": "elastic_modulus_y",
+        "label_vi": "Mô đun chống uốn Wy",
+        "label_en": "Elastic section modulus Wy",
+        "unit": "mm³",
+        "min": 1e-06,
+        "required": true
+      },
+      {
+        "key": "elastic_modulus_z",
+        "label_vi": "Mô đun chống uốn Wz",
+        "label_en": "Elastic section modulus Wz",
+        "unit": "mm³",
+        "min": 1e-06,
+        "required": true
+      },
+      {
+        "key": "shear_area_y",
+        "label_vi": "Diện tích chịu cắt Ay",
+        "label_en": "Shear area Ay",
+        "unit": "mm²",
+        "min": 1e-06,
+        "required": true
+      },
+      {
+        "key": "shear_area_z",
+        "label_vi": "Diện tích chịu cắt Az",
+        "label_en": "Shear area Az",
+        "unit": "mm²",
+        "min": 1e-06,
+        "required": true
+      },
+      {
+        "key": "warping_constant",
+        "label_vi": "Hằng số vênh Iw",
+        "label_en": "Warping constant Iw",
+        "unit": "mm⁶",
+        "min": 0,
+        "required": false,
+        "categories": [
+          "steel"
+        ]
+      },
+      {
+        "key": "plastic_modulus_y",
+        "label_vi": "Mô đun dẻo Wpy",
+        "label_en": "Plastic section modulus Wpy",
+        "unit": "mm³",
+        "min": 0,
+        "required": false,
+        "categories": [
+          "steel"
+        ]
+      },
+      {
+        "key": "plastic_modulus_z",
+        "label_vi": "Mô đun dẻo Wpz",
+        "label_en": "Plastic section modulus Wpz",
+        "unit": "mm³",
+        "min": 0,
+        "required": false,
+        "categories": [
+          "steel"
+        ]
+      },
+      {
+        "key": "shear_center_y",
+        "label_vi": "Tâm cắt ey",
+        "label_en": "Shear center ey",
+        "unit": "mm",
+        "min": -1000000,
+        "required": false,
+        "categories": [
+          "steel"
+        ]
+      },
+      {
+        "key": "shear_center_z",
+        "label_vi": "Tâm cắt ez",
+        "label_en": "Shear center ez",
+        "unit": "mm",
+        "min": -1000000,
+        "required": false,
+        "categories": [
+          "steel"
+        ]
+      },
+      {
+        "key": "concrete_cover",
+        "label_vi": "Lớp bảo vệ cốt thép",
+        "label_en": "Rebar cover",
+        "unit": "mm",
+        "min": 0,
+        "required": false,
+        "categories": [
+          "rc"
+        ]
+      },
+      {
+        "key": "reinforcement_area",
+        "label_vi": "Diện tích cốt thép dọc As",
+        "label_en": "Longitudinal reinforcement area As",
+        "unit": "mm²",
+        "min": 0,
+        "required": false,
+        "categories": [
+          "rc"
+        ]
+      },
+      {
+        "key": "bar_diameter",
+        "label_vi": "Đường kính cốt thép dọc",
+        "label_en": "Longitudinal bar diameter",
+        "unit": "mm",
+        "min": 0,
+        "required": false,
+        "categories": [
+          "rc"
+        ]
+      },
+      {
+        "key": "tie_diameter",
+        "label_vi": "Đường kính đai",
+        "label_en": "Tie diameter",
+        "unit": "mm",
+        "min": 0,
+        "required": false,
+        "categories": [
+          "rc"
+        ]
+      },
+      {
+        "key": "tie_spacing",
+        "label_vi": "Khoảng cách đai",
+        "label_en": "Tie spacing",
+        "unit": "mm",
+        "min": 0,
+        "required": false,
+        "categories": [
+          "rc"
+        ]
+      },
+      {
+        "key": "area_modifier",
+        "label_vi": "Hệ số diện tích A",
+        "label_en": "Area modifier",
+        "unit": "—",
+        "min": 0,
+        "max": 1000,
+        "required": false
+      },
+      {
+        "key": "inertia_y_modifier",
+        "label_vi": "Hệ số độ cứng Iy",
+        "label_en": "Inertia Iy modifier",
+        "unit": "—",
+        "min": 0,
+        "max": 1000,
+        "required": false
+      },
+      {
+        "key": "inertia_z_modifier",
+        "label_vi": "Hệ số độ cứng Iz",
+        "label_en": "Inertia Iz modifier",
+        "unit": "—",
+        "min": 0,
+        "max": 1000,
+        "required": false
+      },
+      {
+        "key": "torsion_modifier",
+        "label_vi": "Hệ số độ cứng xoắn J",
+        "label_en": "Torsion modifier",
+        "unit": "—",
+        "min": 0,
+        "max": 1000,
+        "required": false
+      },
+      {
+        "key": "shear_area_y_modifier",
+        "label_vi": "Hệ số diện tích cắt Ay",
+        "label_en": "Shear area Ay modifier",
+        "unit": "—",
+        "min": 0,
+        "max": 1000,
+        "required": false
+      },
+      {
+        "key": "shear_area_z_modifier",
+        "label_vi": "Hệ số diện tích cắt Az",
+        "label_en": "Shear area Az modifier",
+        "unit": "—",
+        "min": 0,
+        "max": 1000,
+        "required": false
+      },
+      {
+        "key": "mass_modifier",
+        "label_vi": "Hệ số khối lượng",
+        "label_en": "Mass modifier",
+        "unit": "—",
+        "min": 0,
+        "max": 1000,
+        "required": false
+      },
+      {
+        "key": "weight_modifier",
+        "label_vi": "Hệ số trọng lượng",
+        "label_en": "Weight modifier",
+        "unit": "—",
+        "min": 0,
+        "max": 1000,
+        "required": false
+      }
+    ]
+  },
+  "property_basis_vi": "Đơn vị chuẩn: MPa, mm, kg/m³. Nhập đặc trưng tiết diện từ catalog hoặc nguồn đã kiểm chứng; chưa tự tính hoặc kiểm chứng đặc trưng hình học. Iy/Iz phải theo trục địa phương của nguồn dữ liệu.",
+  "property_basis_en": "Canonical units: MPa, mm, kg/m³. Enter section properties from a verified catalog/source; geometry properties are not automatically calculated or certified. Iy/Iz must follow the source local-axis convention."
+}

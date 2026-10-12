@@ -1,4 +1,5 @@
 const assert = require('node:assert/strict')
+const { signIn } = require('./browser-auth.cjs')
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright')
 
 ;(async () => {
@@ -13,9 +14,10 @@ const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright')
   const base = process.env.UI_BASE_URL || 'http://127.0.0.1:5173'
   try {
     await page.goto(base)
+    await signIn(page)
     await page.getByText('API đang hoạt động').first().waitFor()
     assert.equal(await page.locator('.module-card').count(), 6)
-    await page.getByRole('button', { name: /Steel Design/ }).click()
+    await page.getByRole('button', { name: /Thiết kế kết cấu thép|Steel design/i }).click()
     await page.getByRole('button', { name: 'Tạo dự án mới', exact: true }).first().click()
     assert.equal(await page.locator('select').count(), 5)
     assert.equal(await page.locator('select').nth(1).inputValue(), 'steel')
@@ -44,7 +46,7 @@ const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright')
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), 'Mobile viewport overflows horizontally')
     await page.setViewportSize({ width: 1440, height: 1100 })
     await page.route('**/api/**', route => route.abort())
-    await page.reload()
+    await page.getByRole('button', { name: 'Refresh list', exact: true }).click()
     await page.getByText('API unavailable').first().waitFor()
     await page.getByRole('button', { name: 'Projects', exact: true }).click()
     await page.getByText('Could not load projects. Please try again.').waitFor()

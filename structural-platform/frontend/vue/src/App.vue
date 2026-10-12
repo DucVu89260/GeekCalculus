@@ -1,103 +1,156 @@
 <script setup>
-import { nextTick, ref } from 'vue'
-import { useWorkspace } from './composables/useWorkspace'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { request, demoMode } from './api'
+import { copy } from './i18n'
+import LoginView from './components/LoginView.vue'
+import InterfaceChooser from './components/InterfaceChooser.vue'
+import WorkspaceView from './components/WorkspaceView.vue'
+import AdminConsole from './components/AdminConsole.vue'
 
-const { demoMode, locale, t, apiStatus, catalogError, projectError, createError, projectLoading, creating, projectName, projects, totalProjects, currentPage, lastPage, formErrorKey, selections, refresh, loadProjects, selectOptions, optionName, statusName, formatDate, createProject, changePage } = useWorkspace()
+const locale = ref(localStorage.getItem('geekcalculus-locale') === 'en' ? 'en' : 'vi')
+const user = ref(null)
+const surface = ref('chooser')
+const authLoading = ref(true)
+const signingIn = ref(false)
+const authErrorKey = ref('')
+const t = (key) => copy[locale.value]?.[key] ?? copy.en[key] ?? key
+const isAdmin = computed(() => user.value?.role === 'admin')
 
-const groups = [
-  { code: 'steel', title: 'Steel Design', description: 'steelDescription' },
-  { code: 'concrete', title: 'Concrete Design', description: 'concreteDescription' },
-  { code: 'analysis', title: 'Analysis Hub', description: 'analysisDescription' },
-  { code: 'loads', title: 'Load Generator', description: 'loadDescription' },
-  { code: 'library', title: 'Engineering Library', description: 'libraryDescription' },
-  { code: 'future', title: 'Future Labs', description: 'futureDescription' },
-]
-const selectedGroup = ref(null)
-const projectOpen = ref(false)
-
-async function showProjects() {
-  projectOpen.value = true
-  await nextTick()
-  document.getElementById('project-workspace')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+function readUser(payload) {
+  return payload?.data?.user ?? payload?.data ?? payload?.user ?? null
 }
 
-async function selectGroup(group) {
-  selectedGroup.value = group
-  const defaults = {
-    steel: { module: 'steel', standard: 'tcvn_5575_2024', material: 'steel_s235' },
-    concrete: { module: 'rc_beam', standard: 'tcvn_5574_2018', material: 'concrete_b25' },
-    loads: { module: 'wind', standard: 'tcvn_2737_2023' },
+function setSession(sessionUser) {
+  user.value = sessionUser
+  authErrorKey.value = ''
+  surface.value = sessionUser.role === 'admin' ? 'chooser' : 'usage'
+}
+
+function authErrorKeyFor(error) {
+  if (error?.message === 'Invalid email or password.') return 'authInvalidCredentials'
+  if (error?.status === 422) {
+    const fields = error.errors ?? {}
+    if (fields.email) return 'authInvalidEmail'
+    if (fields.password) return 'authInvalidPassword'
+    return 'authValidationError'
   }
-  if (defaults[group.code]) Object.assign(selections.value, defaults[group.code])
-  await nextTick()
-  document.getElementById('module-detail')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+  if (error?.status === 429) return 'authTooManyAttempts'
+  if (error?.status === 401 || error?.status === 403) return 'authInvalidCredentials'
+  if (error?.status >= 500) return 'authServerError'
+  return 'authInvalidCredentials'
 }
 
+async function restoreSession() {
+  try {
+    const payload = await request('/api/auth/me')
+    const sessionUser = readUser(payload)
+    if (sessionUser && typeof sessionUser === 'object' && sessionUser.role) setSession(sessionUser)
+    else user.value = null
+  } catch {
+    user.value = null
+  } finally {
+    authLoading.value = false
+  }
+}
+
+function handleSessionExpired() {
+  if (!user.value) return
+  user.value = null
+  surface.value = 'chooser'
+  authErrorKey.value = 'authSessionExpired'
+}
+
+async function signIn(credentials) {
+  authErrorKey.value = ''
+  signingIn.value = true
+  try {
+    const payload = await request('/api/auth/login', {
+      method: 'POST',
+      body: JSON.stringify(credentials),
+    })
+    let sessionUser = readUser(payload)
+    if (!sessionUser) sessionUser = readUser(await request('/api/auth/me'))
+    if (!sessionUser || !sessionUser.role) throw new Error('Missing authenticated user')
+    setSession(sessionUser)
+  } catch (error) {
+    authErrorKey.value = authErrorKeyFor(error)
+  } finally {
+    signingIn.value = false
+  }
+}
+
+async function signOut() {
+  try {
+    await request('/api/auth/logout', { method: 'POST' })
+  } catch (error) {
+    if (error?.status !== 401) { authErrorKey.value = 'authServerError'; return }
+  }
+  user.value = null
+  surface.value = 'chooser'
+  authErrorKey.value = ''
+}
+
+function selectInterface(selected) {
+  if (selected === 'admin' && !isAdmin.value) return
+  surface.value = selected
+}
+
+function changeLocale(nextLocale) {
+  if (nextLocale === 'vi' || nextLocale === 'en') locale.value = nextLocale
+}
+
+watch(locale, (nextLocale) => {
+  localStorage.setItem('geekcalculus-locale', nextLocale)
+  document.documentElement.lang = nextLocale
+  document.title = nextLocale === 'vi' ? 'GeekCalculus — Không gian kết cấu' : 'GeekCalculus — Structural workspace'
+})
+
+onMounted(() => {
+  window.addEventListener('geekcalculus-session-expired', handleSessionExpired)
+  document.documentElement.lang = locale.value
+  document.title = locale.value === 'vi' ? 'GeekCalculus — Không gian kết cấu' : 'GeekCalculus — Structural workspace'
+  restoreSession()
+})
+
+onUnmounted(() => window.removeEventListener('geekcalculus-session-expired', handleSessionExpired))
 </script>
 
 <template>
-  <main class="platform-page">
-    <header class="topbar">
-      <a class="wordmark" href="#home">GeekCalculus<span class="brand-dot">.</span></a>
-      <div class="topbar-actions">
-        <button class="quiet-button" type="button" @click="showProjects">{{ t('projects') }}</button>
-        <div class="language-switch" role="group" :aria-label="t('language')">
-          <button type="button" :aria-pressed="locale === 'vi'" @click="locale = 'vi'">VI</button>
-          <button type="button" :aria-pressed="locale === 'en'" @click="locale = 'en'">EN</button>
-        </div>
-      </div>
-    </header>
-
-    <section id="home" class="platform-card" :aria-label="t('modulesLabel')">
-      <div class="platform-heading">
-        <h1>GeekCalculus</h1>
-        <p>{{ t('platformSubtitle') }}</p>
-        <svg class="branch-icon" aria-hidden="true" viewBox="0 0 32 32"><path d="M10 7v16m0-6c10 0 12-3 12-10"/><circle cx="10" cy="24" r="3"/><circle cx="22" cy="7" r="3"/></svg>
-      </div>
-      <div class="module-grid">
-        <button v-for="group in groups" :key="group.code" type="button" class="module-card" :class="{ selected: selectedGroup?.code === group.code }" :aria-pressed="selectedGroup?.code === group.code" @click="selectGroup(group)">
-          <span class="module-copy"><strong>{{ group.title }}</strong><span>{{ t(group.description) }}</span></span>
-          <svg class="module-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14m-5-5 5 5-5 5"/></svg>
-        </button>
-      </div>
-    </section>
-
-    <section v-if="selectedGroup" id="module-detail" class="detail-panel">
-      <div class="section-heading"><div><h2>{{ selectedGroup.title }}</h2><p>{{ t(selectedGroup.description) }}</p></div><button type="button" class="quiet-button" @click="selectedGroup = null">{{ t('close') }}</button></div>
-      <template v-if="selectedGroup.code === 'library'">
-        <p>{{ t('libraryNote') }}</p>
-        <div class="library-grid"><div><h3>{{ t('standards') }}</h3><ul><li v-for="item in selectOptions('standards')" :key="item.value">{{ item.label }}</li></ul></div><div><h3>{{ t('material') }}</h3><ul><li v-for="item in selectOptions('materials')" :key="item.value">{{ item.label }}</li></ul></div></div>
-      </template>
-      <template v-else><p>{{ t('developmentNote') }}</p><button v-if="['steel', 'concrete', 'loads'].includes(selectedGroup.code)" type="button" class="primary-button" @click="showProjects">{{ t('newProject') }}</button></template>
-    </section>
-
-    <div class="platform-footer">
-      <p>{{ t('selectGroup') }}</p>
-      <button type="button" class="primary-button" @click="showProjects">{{ t('newProject') }}</button>
-    </div>
-    <p v-if="demoMode" class="demo-notice" role="note">{{ t('demoNotice') }}</p>
-    <p class="service-status" :class="apiStatus" role="status"><span class="status-dot"></span>{{ t(apiStatus === 'online' ? 'apiOnline' : apiStatus === 'offline' ? 'apiOffline' : 'apiChecking') }}</p>
-
-    <section v-if="projectOpen" id="project-workspace" class="project-workspace">
-      <div class="section-heading"><div><h2>{{ t('projectSetup') }}</h2><p>{{ t('setupText') }}</p></div><button type="button" class="quiet-button" @click="projectOpen = false">{{ t('close') }}</button></div>
-      <form class="project-form" @submit.prevent="createProject">
-        <label class="field full-field"><span>{{ t('projectName') }}</span><input v-model="projectName" name="name" type="text" maxlength="160" :placeholder="t('projectNamePlaceholder')" /></label>
-        <label class="field"><span>{{ t('projectType') }}</span><select v-model="selections.project_type"><option v-for="option in selectOptions('project_types')" :key="option.value" :value="option.value">{{ option.label }}</option></select></label>
-        <label class="field"><span>{{ t('module') }}</span><select v-model="selections.module"><option v-for="option in selectOptions('modules')" :key="option.value" :value="option.value">{{ option.label }}</option></select></label>
-        <label class="field"><span>{{ t('standard') }}</span><select v-model="selections.standard"><option v-for="option in selectOptions('standards')" :key="option.value" :value="option.value">{{ option.label }}</option></select></label>
-        <label class="field"><span>{{ t('material') }}</span><select v-model="selections.material"><option v-for="option in selectOptions('materials')" :key="option.value" :value="option.value">{{ option.label }}</option></select></label>
-        <label class="field"><span>{{ t('units') }}</span><select v-model="selections.unit"><option v-for="option in selectOptions('units')" :key="option.value" :value="option.value">{{ option.label }}</option></select></label>
-        <div class="form-actions full-field"><p>{{ t('projectHint') }}</p><button type="submit" class="primary-button" :disabled="creating">{{ creating ? t('creating') : t('create') }}</button></div>
-        <p v-if="formErrorKey" class="error-message full-field" role="alert">{{ t(formErrorKey) }}</p><p v-else-if="createError" class="error-message full-field" role="alert">{{ t('errorCreate') }}</p>
-      </form>
-      <div class="projects-heading section-heading"><h2>{{ t('recentProjects') }} <span class="count">{{ totalProjects }}</span></h2><button type="button" class="quiet-button" @click="refresh">{{ t('viewAll') }}</button></div>
-      <p v-if="projectLoading" class="empty-state">{{ t('loading') }}</p>
-      <div v-else-if="projectError" class="empty-state"><p class="error-message">{{ t('errorProjects') }}</p><button type="button" class="quiet-button" @click="loadProjects()">{{ t('retry') }}</button></div>
-      <div v-else-if="!projects.length" class="empty-state"><strong>{{ t('emptyProjects') }}</strong><p>{{ t('emptyProjectsHint') }}</p></div>
-      <div v-else class="project-list"><article v-for="project in projects" :key="project.id" class="project-row"><div><h3>{{ project.name }}</h3><p>{{ optionName('module', project.module) }} · {{ optionName('standard', project.standard) }}</p></div><div class="project-meta"><span>{{ statusName(project.status) }}</span><time>{{ formatDate(project.created_at) }}</time></div></article></div>
-      <div v-if="lastPage > 1" class="pagination"><button type="button" class="quiet-button" :disabled="currentPage <= 1 || projectLoading" @click="changePage(currentPage - 1)">{{ t('previousPage') }}</button><span>{{ t('page') }} {{ currentPage }} / {{ lastPage }}</span><button type="button" class="quiet-button" :disabled="currentPage >= lastPage || projectLoading" @click="changePage(currentPage + 1)">{{ t('nextPage') }}</button></div>
-      <p v-if="catalogError" class="error-message" role="alert">{{ t('errorCatalog') }}</p>
-    </section>
-    <footer class="page-footer">GeekCalculus · Engineering Platform</footer>
+  <p v-if="user && authErrorKey" class="auth-error" role="alert">{{ t(authErrorKey) }}</p>
+  <main v-if="authLoading" class="auth-loading" role="status" :aria-label="t('loading')">
+    <span class="auth-spinner"></span><span>{{ t('loading') }}</span>
   </main>
+  <LoginView
+    v-else-if="!user"
+    :locale="locale"
+    :demo-mode="demoMode"
+    :loading="signingIn"
+    :error-key="authErrorKey"
+    @change-locale="changeLocale"
+    @submit="signIn"
+  />
+  <InterfaceChooser
+    v-else-if="surface === 'chooser' && isAdmin"
+    :locale="locale"
+    :user="user"
+    @change-locale="changeLocale"
+    @select="selectInterface"
+    @sign-out="signOut"
+  />
+  <AdminConsole
+    v-else-if="surface === 'admin' && isAdmin"
+    v-model:locale="locale"
+    :user="user"
+    @usage="surface = 'usage'"
+    @choose-interface="surface = 'chooser'"
+    @sign-out="signOut"
+  />
+  <WorkspaceView
+    v-else
+    v-model:locale="locale"
+    :user="user"
+    :is-admin="isAdmin"
+    @open-admin="surface = 'admin'"
+    @sign-out="signOut"
+  />
 </template>

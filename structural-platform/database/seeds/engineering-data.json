@@ -1,0 +1,128 @@
+{
+  "materials": [
+    {
+      "code": "steel_s235",
+      "name_vi": "Thép S235",
+      "name_en": "S235 steel",
+      "category": "steel",
+      "properties": {
+        "elastic_modulus": 210000,
+        "poisson_ratio": 0.3,
+        "density": 7850,
+        "thermal_expansion": 1.2e-05,
+        "damping_ratio": 0.02,
+        "yield_strength": 235,
+        "ultimate_strength": 360
+      },
+      "source": "Illustrative seed — verify against the applicable standard/manufacturer before design"
+    },
+    {
+      "code": "concrete_b25",
+      "name_vi": "Bê tông B25",
+      "name_en": "B25 concrete",
+      "category": "concrete",
+      "properties": {
+        "elastic_modulus": 30000,
+        "poisson_ratio": 0.2,
+        "density": 2500,
+        "thermal_expansion": 1e-05,
+        "damping_ratio": 0.05,
+        "compressive_strength": 25,
+        "tensile_strength": 1.8,
+        "ultimate_strain": 0.0035
+      },
+      "source": "Illustrative seed — verify against the applicable standard/manufacturer before design"
+    },
+    {
+      "code": "steel_cb400",
+      "name_vi": "Thép cốt CB400",
+      "name_en": "CB400 rebar",
+      "category": "rebar",
+      "properties": {
+        "elastic_modulus": 200000,
+        "poisson_ratio": 0.3,
+        "density": 7850,
+        "thermal_expansion": 1.2e-05,
+        "damping_ratio": 0.02,
+        "yield_strength": 400,
+        "ultimate_strength": 570
+      },
+      "source": "Illustrative seed — verify against the applicable standard/manufacturer before design"
+    },
+    {
+      "code": "concrete_b30",
+      "name_vi": "Bê tông B30",
+      "name_en": "B30 concrete",
+      "category": "concrete",
+      "properties": {
+        "elastic_modulus": 32500,
+        "poisson_ratio": 0.2,
+        "density": 2500,
+        "thermal_expansion": 1e-05,
+        "damping_ratio": 0.05,
+        "compressive_strength": 30,
+        "tensile_strength": 2,
+        "ultimate_strain": 0.0035
+      },
+      "source": "Illustrative seed — verify against the applicable standard/manufacturer before design"
+    }
+  ],
+  "section_types": [
+    {
+      "code": "i",
+      "name_vi": "Chữ I / H",
+      "name_en": "I / H",
+      "category": "steel",
+      "shape": "i"
+    },
+    {
+      "code": "channel",
+      "name_vi": "Chữ U / C",
+      "name_en": "Channel",
+      "category": "steel",
+      "shape": "channel"
+    },
+    {
+      "code": "angle",
+      "name_vi": "Thép góc L",
+      "name_en": "Angle",
+      "category": "steel",
+      "shape": "angle"
+    },
+    {
+      "code": "tee",
+      "name_vi": "Chữ T",
+      "name_en": "Tee",
+      "category": "steel",
+      "shape": "tee"
+    },
+    {
+      "code": "rectangular_hollow",
+      "name_vi": "Hộp chữ nhật",
+      "name_en": "Rectangular hollow",
+      "category": "steel",
+      "shape": "rectangular_hollow"
+    },
+    {
+      "code": "circular_hollow",
+      "name_vi": "Ống tròn",
+      "name_en": "Circular hollow",
+      "category": "steel",
+      "shape": "circular_hollow"
+    },
+    {
+      "code": "rectangle",
+      "name_vi": "BTCT chữ nhật",
+      "name_en": "RC rectangle",
+      "category": "rc",
+      "shape": "rectangle"
+    },
+    {
+      "code": "circle",
+      "name_vi": "BTCT tròn",
+      "name_en": "RC circle",
+      "category": "rc",
+      "shape": "circle"
+    }
+  ]
+}

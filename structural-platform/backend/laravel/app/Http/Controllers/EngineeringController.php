@@ -19,6 +19,7 @@ class EngineeringController extends Controller
     public function health(): JsonResponse
     {
         DB::table('locales')->count();
+
         return response()->json(['status' => 'ok', 'database' => 'connected']);
     }
 
@@ -32,6 +33,7 @@ class EngineeringController extends Controller
                 ->where('o.kind', $kind)->where('t.locale', $locale)->orderBy('o.sort_order')
                 ->get(['o.code', 't.name']);
         }
+
         return response()->json($result);
     }
 
@@ -45,13 +47,19 @@ class EngineeringController extends Controller
             $row[$field.'_name'] = $labels[$row[$field]] ?? $row[$field];
         }
         $row['status_name'] = $locale === 'vi' ? 'Bản nháp' : 'Draft';
+
         return $row;
     }
 
     public function index(Request $request): JsonResponse
     {
         $locale = $this->locale($request);
-        $rows = DB::table('projects')->orderByDesc('id')->paginate(50);
+        $query = DB::table('projects');
+        if ($request->user()->role !== 'admin') {
+            $query->where('user_id', $request->user()->id);
+        }
+        $rows = $query->orderByDesc('id')->paginate(50);
+
         return response()->json([
             'data' => $rows->getCollection()->map(fn ($row) => $this->present($row, $locale)),
             'meta' => ['current_page' => $rows->currentPage(), 'last_page' => $rows->lastPage(), 'total' => $rows->total()],
@@ -67,7 +75,8 @@ class EngineeringController extends Controller
         }
         $data = $request->validate($rules);
         $data['name'] = trim($data['name']);
-        $id = DB::table('projects')->insertGetId($data + ['status' => 'draft', 'created_at' => now(), 'updated_at' => now()]);
+        $id = DB::table('projects')->insertGetId($data + ['user_id' => $request->user()->id, 'status' => 'draft', 'created_at' => now(), 'updated_at' => now()]);
+
         return response()->json(['data' => $this->present(DB::table('projects')->find($id), $locale)], 201);
     }
 }

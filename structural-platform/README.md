@@ -1,14 +1,12 @@
 # GeekCalculus · Structural Platform
 
-Khung website kỹ thuật kết cấu chạy local: **Laravel 12 + SQLite + Vue 3/Vite**.
-Trang chính dùng nền xanh dương nhạt và kiến trúc sáu nhóm: Steel Design, Concrete Design,
-Analysis Hub, Load Generator, Engineering Library và Future Labs.
-UI có nút **VI / EN**, danh mục đa ngôn ngữ và form tạo/lưu dự án mở khi cần.
+Laravel 12 + SQLite + Vue 3/Vite. Trang đăng nhập có ảnh nền kết cấu, nút VI/EN
+và phân quyền **admin/user**. Trang sử dụng gồm sáu nhóm chức năng trên nền xanh
+nhạt; trang quản trị có thư viện kỹ thuật và quản lý tài khoản.
 
-## Chạy local bằng Docker
+## Chạy local
 
-Cần Docker Engine/Desktop với Docker Compose v2 và Bash (Windows dùng WSL).
-Từ repository GeekCalculus:
+Cần Docker Engine/Desktop, Docker Compose v2 và Bash (Windows: WSL).
 
 ```sh
 cd structural-platform
@@ -16,18 +14,22 @@ bash scripts/setup.sh
 docker compose up -d --wait
 ```
 
-Mở trình duyệt trên máy local tại `http://localhost:5173`. API tại
-`http://localhost:8000/api/health`. Các cổng chỉ được bind vào loopback của máy.
-Onboarding cloud không cung cấp preview công khai; muốn chạy trên máy của bạn,
-hãy đưa mã nguồn về máy và chạy các lệnh trên.
+Giao diện: `http://localhost:5173`; health API: `http://localhost:8000/api/health`.
+Các cổng chỉ bind loopback. Có thể đổi cổng bằng `.env` ở thư mục này;
+cấu hình Laravel nằm riêng trong `backend/laravel/.env`.
 
-Dừng dịch vụ bằng `docker compose down`. Dự án được lưu trong
-`backend/laravel/database/database.sqlite`, không bị xóa khi dừng container.
-Script setup dùng lockfile, giữ `.env`/APP_KEY hiện có, và seed có thể chạy lại
-mà không xóa dự án. Database, `.env`, dependencies và build outputs không được
-lưu vào Git. Không dùng `migrate:fresh` trên database có dữ liệu cần giữ.
+Không tạo tài khoản hoặc mật khẩu backend mặc định. Tạo admin đầu tiên:
 
-Trên Linux/macOS nếu UID/GID khác 1000, chạy lệnh với:
+```sh
+docker compose exec backend php artisan app:create-user admin@example.com --role=admin --name="Administrator"
+```
+
+Nhập mật khẩu riêng tại prompt (ít nhất 12 ký tự, tối đa 72 byte UTF-8). Thay email bằng email của bạn.
+Sau khi đăng nhập, admin vào **Quản trị dữ liệu → Người dùng** để tạo/sửa/xóa
+tài khoản và gán vai trò. Có thể tạo user qua CLI bằng `--role=user`.
+Không đưa mật khẩu vào mã nguồn, lệnh command-line hoặc Git.
+
+Với UID/GID khác 1000 trên Linux/macOS:
 
 ```sh
 export LOCAL_UID=$(id -u)
@@ -36,124 +38,115 @@ bash scripts/setup.sh
 docker compose up -d --wait
 ```
 
-Có thể sao chép `.env.example` thành `.env` ở thư mục này để đổi cổng Compose.
-Cấu hình Laravel nằm riêng tại `backend/laravel/.env`.
+`docker compose down` dừng dịch vụ, không xóa SQLite tại
+`backend/laravel/database/database.sqlite`. Setup giữ `.env`/APP_KEY và dữ liệu
+hiện có. Seed thư viện ban đầu chỉ chạy một lần; dữ liệu sửa/xóa bằng CRUD
+không bị phục hồi khi restart hoặc chạy seed lại. Không chạy `migrate:fresh`
+trên database cần giữ. `.env`, SQLite, dependencies và build outputs local
+không được lưu vào Git.
 
-## Chạy không dùng Docker
+## Đăng nhập và phân quyền
 
-Cần PHP >= 8.3 (pdo_sqlite, mbstring, XML, curl), Composer 2 và Node 24.
-
-```sh
-cd backend/laravel
-composer install
-cp .env.example .env # chỉ khi chưa có .env
-php artisan key:generate # chỉ khi APP_KEY chưa có
-touch database/database.sqlite
-php artisan migrate --seed
-php artisan serve --host=127.0.0.1 --port=8000
-```
-
-Trong terminal khác, từ `structural-platform`:
-
-```sh
-cd frontend/vue
-npm ci
-npm run dev -- --host 127.0.0.1 --port 5173
-```
-
-Vite proxy `/api` đến Laravel; Compose tự đổi đích thành `http://backend:8000`.
-`BACKEND_PROXY_TARGET` cho phép đổi đích khi chạy frontend riêng.
-
-## Chức năng hiện có
-
-- Dashboard responsive, trạng thái API, danh sách dự án có phân trang.
-- Form tên dự án và dropdown: loại công trình, mô-đun kết cấu, tiêu chuẩn,
-  vật liệu và hệ đơn vị; tạo dự án thật qua API và lưu SQLite.
-- 6 mô-đun: dầm/cột/sàn BTCT, thép, móng, tải gió.
-- TCVN 5574:2018, 5575:2024, 2737:2023, Eurocode 2, ACI 318-19.
-- 4 lựa chọn vật liệu, 2 hệ đơn vị, 3 loại công trình.
-- Nút VI/EN đổi nhãn UI và danh mục, nhớ lựa chọn ở localStorage.
-
-Các lựa chọn là danh mục ban đầu, chưa áp dụng quy tắc tương thích giữa tiêu
-chuẩn/vật liệu/mô-đun và không chứa thông số thiết kế đã được kiểm chứng.
-Chưa có tính toán, báo cáo, sửa/xóa dự án, đăng nhập hoặc phân quyền;
-SAP2000/ETABS hiển thị trạng thái đang phát triển. Đây là bản phát triển local.
-
-## Database đa ngôn ngữ
-
-Một database, các bảng:
-
-- `locales`: `vi`, `en`.
-- `catalog_options`: mã ổn định, nhóm danh mục, thứ tự hiển thị.
-- `catalog_option_translations`: tên theo ngôn ngữ, khóa duy nhất `(option_code, locale)`.
-- `projects`: tên người dùng nhập, mã danh mục có khóa ngoại, trạng thái và thời gian.
-
-Dữ liệu seed: [`database/seeds/catalog.json`](database/seeds/catalog.json).
-Cập nhật danh mục/bản dịch ở đây rồi chạy `php artisan db:seed` trong backend
-(hoặc `docker compose exec backend php artisan db:seed`). Không tự động dịch tên
-người dùng nhập. Thêm ngôn ngữ mới cần bổ sung locale/seed, validation locale
-trong API và dictionary UI tương ứng.
-
-API:
-
-| Method | Đường dẫn | Công dụng |
+| Vai trò | Sau đăng nhập | Quyền |
 | --- | --- | --- |
-| GET | `/api/health` | Kiểm tra API và kết nối database |
-| GET | `/api/catalog?locale=vi` | Dropdown theo locale `vi` hoặc `en` |
-| GET | `/api/projects?locale=en&page=1` | Dự án, 50 mục/trang và metadata |
-| POST | `/api/projects?locale=vi` | Tạo dự án; trả lỗi 422 khi dữ liệu không hợp lệ |
+| Admin | Chọn giao diện quản trị hoặc sử dụng | CRUD thư viện/tài khoản, xem tất cả dự án; chuyển giao diện khi cần |
+| User | Vào thẳng giao diện sử dụng | Xem thư viện, tạo/xem dự án của mình |
+| Chưa đăng nhập | Màn hình đăng nhập | Không truy cập database/dự án/tài khoản |
 
-POST dùng JSON `{name, project_type, module, standard, material, unit}`; các
-lựa chọn phải là mã trong đúng nhóm. API dùng `Accept: application/json`.
+Backend dùng session cookie HttpOnly, CSRF cho thao tác ghi và giới hạn lượt
+đăng nhập. Password được hash bằng Laravel. Quyền được kiểm tra ở server,
+không dựa vào việc ẩn nút trên UI. Chặn tự xóa/hạ quyền tài khoản admin đang
+đăng nhập và bảo vệ admin cuối cùng. Dự án legacy không có chủ sở hữu chỉ admin
+nhìn thấy. Tên người dùng nhập không được tự dịch.
 
-## Kiểm tra
+## Database kỹ thuật và CRUD
 
-```sh
-docker compose run --rm --no-deps backend php artisan test --compact
-docker compose exec -T frontend npm run build
-curl --fail http://localhost:5173/api/health
-```
+Admin quản lý ba tab; user mở **Engineering Library / Thư viện kỹ thuật** để xem:
 
-Smoke test trình duyệt nằm tại `tests/ui-smoke.cjs`; dùng Playwright với Chromium
-đã cài, có thể truyền đường dẫn module và browser qua biến môi trường.
-Test tạo một dự án `UI smoke ...` để kiểm tra lưu dữ liệu, cần dọn bản ghi đó
-sau chạy nếu không muốn giữ trong database phát triển.
+- **Vật liệu**: thép kết cấu, bê tông, thép cốt; mã, tên VI/EN, nguồn và thông số.
+- **Loại tiết diện**: mẫu hình học I/H, U/C, L, T, hộp chữ nhật, ống tròn,
+  BTCT chữ nhật và BTCT tròn. Mỗi loại hiển thị các trường thông số tương ứng.
+- **Tiết diện cụ thể**: kích thước, vật liệu, loại tiết diện, nguồn dữ liệu và
+  đặc trưng tiết diện bằng số. Loại tiết diện định nghĩa mẫu; các giá trị A/I/J
+  thuộc từng tiết diện cụ thể, không gán một giá trị chung cho mọi kích thước.
 
-## Cấu trúc
+Mỗi tab có tạo/xem/sửa/xóa, tìm kiếm, bộ lọc, xác nhận xóa và lỗi có nhãn đơn vị.
+Vật liệu mới/sửa tên được đồng bộ với dropdown dự án. Không thể xóa vật liệu
+đang được tham chiếu bởi tiết diện hoặc dự án; không thể xóa loại đang dùng.
+Chặn đổi mã/hệ vật liệu/hình dạng nếu làm mất tính hợp lệ của tham chiếu.
 
-`backend/laravel` chứa API; `frontend/vue` chứa UI; `database/seeds` chứa danh mục.
-`engineering/api`, `engineering/structural_engine`, `csi-agent`, `docker` và
-`tests` giữ vị trí cho các thành phần tiếp theo. Laravel dùng image Composer
-có PHP/SQLite cho phát triển; chưa thiết lập image production.
+**Đơn vị chuẩn:** chiều dài mm, diện tích mm², quán tính/xoắn mm⁴, mô đun chống
+uốn mm³, vênh mm⁶, ứng suất MPa, khối lượng riêng kg/m³.
 
-## Tham khảo và giả định
+Thông số vật liệu: E, ν, ρ, giãn nở nhiệt α, tỷ số cản ξ; fy/fu với thép,
+fc/ft/εcu với bê tông; cường độ thiết kế bê tông tùy chọn. G được suy ra bằng
+`E / (2 × (1 + ν))` và hiển thị chỉ đọc.
 
-Tham khảo các nhóm công cụ kết cấu và danh mục chức năng của
-[tinhketcau.com](https://tinhketcau.com/); không sao chép thương hiệu hoặc tài sản
-của trang. Bản thiết kế UI và danh mục này dựa trên cấu trúc dự án trong ngữ cảnh
-hiện tại; chưa có nội dung chi tiết của cuộc trò chuyện GeekCalculus trước đó.
-Luna max hỗ trợ phần Vue; backend, tích hợp và kiểm thử được thực hiện trong task.
+Thông số tiết diện: h/b/D/t/tw/tf theo hình dạng; A, Iy, Iz, J, Wy, Wz, Ay, Az;
+tùy chọn Iw, Wpy/Wpz, tọa độ tâm cắt, hệ số hiệu chỉnh diện tích/quán tính/xoắn,
+khối lượng/trọng lượng. Với BTCT: lớp bảo vệ, diện tích cốt thép dọc, đường kính
+thanh/đai và bước đai tùy chọn. Bán kính quán tính ry/rz được suy ra từ I/A.
 
-Composer lock dùng endpoint archive chính thức `codeload.github.com` với commit
-được pin vì proxy cloud không cho tải qua GitHub API. Setup giữ kiểm tra TLS,
-và trong môi trường proxy sử dụng CA bundle của máy nếu có.
+Nhập các đặc trưng tiết diện theo catalog/nguồn đã kiểm chứng và thống nhất
+trục địa phương y/z của nguồn. Hiện chưa tự tính A/I/J từ hình học hoặc chứng
+nhận dữ liệu thiết kế; seed S235/B25/B30/CB400 là ví dụ có ghi nguồn minh họa.
+Các trường BTCT hiện mô tả tiết diện gross đàn hồi và thông tin cốt thép cơ bản;
+chưa có bố trí từng thanh, phân tích nứt/phi tuyến hoặc kiểm toán tiêu chuẩn.
 
-## Thử trên web với GitHub Pages
+Schema, giới hạn và đơn vị: `database/seeds/engineering-schema.json`.
+Seed ban đầu: `database/seeds/engineering-data.json`; cấu trúc DB nằm trong
+migrations Laravel. Baseline hiện có 4 vật liệu, 8 loại; không có tiết diện
+số mặc định vì đặc trưng cần được nhập từ nguồn phù hợp.
 
-Bản demo web đã được build và lưu trong `docs/` ở gốc repository. Bật tại
-GitHub repository **Settings → Pages → Build and deployment**:
+Các bảng chính: `users` (role), `materials` (properties JSON), `section_types`,
+`sections` (khóa ngoại vật liệu/loại), `projects` (user_id), `locales`,
+`catalog_options`, `catalog_option_translations`, `library_seed_state`.
+Nhãn vật liệu/tiết diện có `name_vi`/`name_en`; UI và schema đều song ngữ.
 
-1. **Source**: Deploy from a branch.
-2. **Branch**: `main`; **Folder**: `/docs`; bấm **Save**.
-3. Đợi GitHub triển khai xong rồi mở `https://ducvu89260.github.io/GeekCalculus/`.
+## API
 
-Bản demo có UI Anh–Việt, dropdown từ cùng danh mục seed, tạo/lưu dự án,
-phân trang và nhớ ngôn ngữ. Dự án chỉ lưu trong localStorage của trình duyệt
-đang dùng, không được gửi lên Laravel và không đồng bộ giữa thiết bị/người dùng.
-Xóa dữ liệu trình duyệt sẽ xóa dự án demo. Banner ở đầu trang phân biệt rõ
-bản demo với bản có API/database. Chưa có tính toán kết cấu hoặc CSI adapters.
+Các request dùng `Accept: application/json`. API ứng dụng cần session đăng nhập.
+Vite proxy `/api` tới Laravel; Compose đặt `BACKEND_PROXY_TARGET=http://backend:8000`.
+Client lấy CSRF token, gửi cookie và header `X-CSRF-TOKEN` cho thao tác ghi.
 
-Sau khi sửa UI/danh mục, chạy từ gốc repo (dependencies đã cài qua setup):
+| Method | Endpoint | Quyền |
+| --- | --- | --- |
+| GET | `/api/health`, `/api/auth/csrf`, `/api/auth/me` | Public; me trả null nếu chưa đăng nhập |
+| POST | `/api/auth/login`, `/api/auth/logout` | Session + CSRF |
+| GET | `/api/catalog?locale=vi`, `/api/projects?locale=en&page=1` | Đăng nhập; dự án phân trang 50 mục |
+| POST | `/api/projects` | Đăng nhập; dự án gắn với tài khoản hiện tại |
+| GET | `/api/library/schema`, `/api/materials`, `/api/section-types`, `/api/sections` | Đăng nhập |
+| POST/PATCH/DELETE | `/api/materials`, `/api/section-types`, `/api/sections` (PATCH/DELETE thêm `/{id}`) | Admin |
+| GET/POST/PATCH/DELETE | `/api/admin/users` (PATCH/DELETE thêm `/{id}`) | Admin |
+
+POST/PATCH thư viện gửi `code,name_vi,name_en` và:
+- materials: `category,source,properties`.
+- section-types: `category,shape`.
+- sections: `material_id,section_type_id,source,properties`.
+
+GET danh sách trả `{data:[...]}`; POST/PATCH `{data:record}`; DELETE `{data:null}`.
+Lỗi 401 chưa đăng nhập, 403 sai quyền, 409 tham chiếu/xung đột, 422 dữ liệu sai.
+PATCH thư viện gửi đầy đủ các trường của bản ghi; password tài khoản được bỏ
+qua khi để trống trong form sửa. Không tự đăng ký tài khoản công khai.
+
+## Thử trên web: GitHub Pages
+
+`docs/` ở gốc repo chứa build demo. Bật **Settings → Pages → Deploy from a branch
+→ main /docs → Save**. Sau khi GitHub deploy:
+`https://ducvu89260.github.io/GeekCalculus/`.
+
+Tại màn hình đăng nhập demo, có nút điền tài khoản:
+- Admin: `admin@demo.geekcalculus.test`
+- User: `user@demo.geekcalculus.test`
+- Mật khẩu demo cho cả hai: `demo`
+
+Đây chỉ là mô phỏng UI: dữ liệu nằm trong localStorage có thể sửa, đăng nhập
+được lưu trong sessionStorage của tab, không phải xác thực/ phân quyền server.
+Demo có thể thử CRUD và hai luồng giao diện, nhưng không bảo vệ dữ liệu thật,
+không đồng bộ giữa trình duyệt/người dùng. Không dùng thông tin đăng nhập thật
+trên demo. Laravel không chứa các tài khoản demo này.
+
+Build lại từ gốc repository sau khi sửa UI/schema:
 
 ```sh
 bash structural-platform/scripts/build-web-demo.sh
@@ -162,7 +155,37 @@ git commit -m "Update web demo"
 git push origin main
 ```
 
-`docs/` là output build của demo; không sửa thủ công các tệp trong đó.
-GitHub Pages chỉ phục vụ frontend tĩnh. Để dùng database chung trực tuyến,
-cần triển khai Laravel lên hosting hỗ trợ PHP cùng database và bổ sung
-xác thực/phân quyền trước khi chia sẻ dữ liệu thực.
+Để có database dùng chung trên web, cần hosting PHP/database cho Laravel,
+HTTPS, `APP_DEBUG=false`, secure session cookies và cấu hình domain phù hợp.
+GitHub Pages chỉ phục vụ frontend tĩnh; task này chưa deploy Laravel lên hosting.
+
+## Kiểm tra
+
+```sh
+docker compose run --rm --no-deps backend php artisan test --compact
+docker compose exec -T frontend npm run build
+```
+
+`tests/auth-library-smoke.cjs` kiểm tra đăng nhập, chọn chế độ admin, CRUD cả ba
+resource, người dùng chỉ xem, session/logout và mobile. Dùng Playwright với
+Chromium; `PLAYWRIGHT_MODULE`/`CHROMIUM_PATH` cho phép chỉ định đường dẫn.
+
+Với backend thật: truyền `AUTH_FIXTURES` trỏ tới tệp JSON riêng chứa tài khoản
+kiểm thử `{email,password,role}` cho admin và user. Không commit tệp đó.
+Với demo: `TEST_DEMO=1 AUTH_BASE_URL=<địa chỉ demo>`; không cần tài khoản backend.
+Các test tạo bản ghi `browser_fixture_*` và xóa sau khi chạy thành công; dọn
+chúng nếu test bị ngắt. `tests/ui-smoke.cjs` kiểm tra dự án; `tests/demo-smoke.cjs`
+kiểm tra lưu trữ demo riêng cho mỗi trình duyệt và không gọi server API.
+
+## Chạy native (không dùng Docker)
+
+Cần PHP >= 8.3 với pdo_sqlite, mbstring, XML, curl; Composer 2; Node 24.
+Trong `backend/laravel`: `composer install`, tạo `.env` từ `.env.example` nếu
+chưa có, tạo APP_KEY nếu trống, tạo SQLite nếu thiếu rồi `php artisan migrate
+--seed`. Tạo tài khoản bằng `php artisan app:create-user ...`; chạy `php artisan
+serve --host=127.0.0.1 --port=8000`. Trong terminal khác, ở `frontend/vue`,
+chạy `npm ci` và `npm run dev -- --host 127.0.0.1 --port 5173`.
+
+Các thư mục engineering/CSI vẫn là khung; chưa có tính toán, báo cáo hoặc
+kết nối SAP2000/ETABS. Composer lock dùng archive chính thức codeload GitHub
+với commit pin; setup giữ TLS verification và sử dụng CA bundle của máy.

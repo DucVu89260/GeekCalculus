@@ -1,0 +1,152 @@
+{
+  "project_types": [
+    {
+      "code": "building",
+      "translations": {
+        "vi": "Nhà dân dụng",
+        "en": "Residential building"
+      }
+    },
+    {
+      "code": "industrial",
+      "translations": {
+        "vi": "Nhà công nghiệp",
+        "en": "Industrial building"
+      }
+    },
+    {
+      "code": "infrastructure",
+      "translations": {
+        "vi": "Hạ tầng",
+        "en": "Infrastructure"
+      }
+    }
+  ],
+  "modules": [
+    {
+      "code": "rc_beam",
+      "translations": {
+        "vi": "Dầm bê tông cốt thép",
+        "en": "RC beam"
+      }
+    },
+    {
+      "code": "rc_column",
+      "translations": {
+        "vi": "Cột bê tông cốt thép",
+        "en": "RC column"
+      }
+    },
+    {
+      "code": "rc_slab",
+      "translations": {
+        "vi": "Sàn bê tông cốt thép",
+        "en": "RC slab"
+      }
+    },
+    {
+      "code": "steel",
+      "translations": {
+        "vi": "Kết cấu thép",
+        "en": "Steel structure"
+      }
+    },
+    {
+      "code": "foundation",
+      "translations": {
+        "vi": "Móng",
+        "en": "Foundation"
+      }
+    },
+    {
+      "code": "wind",
+      "translations": {
+        "vi": "Tải gió",
+        "en": "Wind loads"
+      }
+    }
+  ],
+  "standards": [
+    {
+      "code": "tcvn_5574_2018",
+      "translations": {
+        "vi": "TCVN 5574:2018 — BTCT",
+        "en": "TCVN 5574:2018 — Reinforced concrete"
+      }
+    },
+    {
+      "code": "tcvn_5575_2024",
+      "translations": {
+        "vi": "TCVN 5575:2024 — Thép",
+        "en": "TCVN 5575:2024 — Steel"
+      }
+    },
+    {
+      "code": "tcvn_2737_2023",
+      "translations": {
+        "vi": "TCVN 2737:2023 — Tải trọng",
+        "en": "TCVN 2737:2023 — Loads"
+      }
+    },
+    {
+      "code": "eurocode_2",
+      "translations": {
+        "vi": "Eurocode 2 — BTCT",
+        "en": "Eurocode 2 — Reinforced concrete"
+      }
+    },
+    {
+      "code": "aci_318_19",
+      "translations": {
+        "vi": "ACI 318-19 — BTCT",
+        "en": "ACI 318-19 — Reinforced concrete"
+      }
+    }
+  ],
+  "materials": [
+    {
+      "code": "concrete_b25",
+      "translations": {
+        "vi": "Bê tông B25",
+        "en": "Concrete B25"
+      }
+    },
+    {
+      "code": "concrete_b30",
+      "translations": {
+        "vi": "Bê tông B30",
+        "en": "Concrete B30"
+      }
+    },
+    {
+      "code": "steel_cb400",
+      "translations": {
+        "vi": "Thép cốt CB400",
+        "en": "Rebar CB400"
+      }
+    },
+    {
+      "code": "steel_s235",
+      "translations": {
+        "vi": "Thép kết cấu S235",
+        "en": "Structural steel S235"
+      }
+    }
+  ],
+  "units": [
+    {
+      "code": "kn_m",
+      "translations": {
+        "vi": "kN · m",
+        "en": "kN · m"
+      }
+    },
+    {
+      "code": "n_mm",
+      "translations": {
+        "vi": "N · mm",
+        "en": "N · mm"
+      }
+    }
+  ]
+}

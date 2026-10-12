@@ -1,0 +1,32 @@
+name: geekcalculus
+services:
+  backend:
+    image: composer:2@sha256:af98f42dfff7c68ba8d53c2164fd9fde1087b7d449514baa38c418b1f6bc4bac
+    user: "${LOCAL_UID:-1000}:${LOCAL_GID:-1000}"
+    working_dir: /app/backend/laravel
+    volumes:
+      - ./:/app
+    command: ["sh", "/app/scripts/backend-start.sh"]
+    ports:
+      - "127.0.0.1:${BACKEND_PORT:-8000}:8000"
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(@file_get_contents('http://127.0.0.1:8000/api/health') === false ? 1 : 0);"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
+  frontend:
+    image: node:24-alpine
+    user: "${LOCAL_UID:-1000}:${LOCAL_GID:-1000}"
+    working_dir: /app/frontend/vue
+    environment:
+      BACKEND_PROXY_TARGET: http://backend:8000
+      npm_config_cache: /tmp/npm-cache
+    volumes:
+      - ./:/app
+    command: ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "5173", "--strictPort"]
+    ports:
+      - "127.0.0.1:${FRONTEND_PORT:-5173}:5173"
+    depends_on:
+      backend:
+        condition: service_healthy

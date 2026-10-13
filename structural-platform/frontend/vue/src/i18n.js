@@ -78,7 +78,7 @@ export const copy = {
 Object.assign(copy.vi, {
   authVisualKicker: 'NỀN TẢNG KỸ THUẬT KẾT CẤU', authVisualTitle: 'Từ dữ liệu kỹ thuật đến quyết định thiết kế.',
   authVisualSubtitle: 'Không gian làm việc cho nhóm kết cấu: tiêu chuẩn, vật liệu và tiết diện trong cùng một thư viện.',
-  authVisualCaption: 'HÌNH MINH HỌA KHUNG KẾT CẤU · KHÔNG PHẢI MÔ HÌNH TÍNH TOÁN',
+  authVisualCaption: 'KỸ THUẬT KẾT CẤU · KẾT NỐI THIẾT KẾ VÀ DỮ LIỆU',
   authEyebrow: 'KHÔNG GIAN LÀM VIỆC CỦA BẠN', authTitle: 'Đăng nhập',
   authSubtitle: 'Đăng nhập bằng tài khoản GeekCalculus để tiếp tục.', authEmail: 'Email',
   authEmailPlaceholder: 'name@company.com', authPassword: 'Mật khẩu', authPasswordPlaceholder: 'Nhập mật khẩu',
@@ -144,7 +144,7 @@ Object.assign(copy.vi, {
 Object.assign(copy.en, {
   authVisualKicker: 'STRUCTURAL ENGINEERING PLATFORM', authVisualTitle: 'From engineering data to design decisions.',
   authVisualSubtitle: 'A workspace for structural teams: standards, materials, and sections in one shared library.',
-  authVisualCaption: 'STRUCTURAL FRAME ILLUSTRATION · NOT AN ANALYSIS MODEL',
+  authVisualCaption: 'STRUCTURAL ENGINEERING · CONNECTING DESIGN AND DATA',
   authEyebrow: 'YOUR ENGINEERING WORKSPACE', authTitle: 'Sign in',
   authSubtitle: 'Sign in to your GeekCalculus account to continue.', authEmail: 'Email',
   authEmailPlaceholder: 'name@company.com', authPassword: 'Password', authPasswordPlaceholder: 'Enter your password',

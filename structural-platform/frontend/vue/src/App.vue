@@ -1,15 +1,18 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
-import { request, demoMode } from './api'
+import { request, demoMode, clearSessionToken } from './api'
 import { copy } from './i18n'
 import LoginView from './components/LoginView.vue'
 import InterfaceChooser from './components/InterfaceChooser.vue'
 import WorkspaceView from './components/WorkspaceView.vue'
 import AdminConsole from './components/AdminConsole.vue'
+import ModuleHub from './components/ModuleHub.vue'
+import { moduleFromHash } from './modules'
 
 const locale = ref(localStorage.getItem('geekcalculus-locale') === 'en' ? 'en' : 'vi')
 const user = ref(null)
 const surface = ref('chooser')
+const moduleCode = ref(moduleFromHash())
 const authLoading = ref(true)
 const signingIn = ref(false)
 const authErrorKey = ref('')
@@ -21,9 +24,11 @@ function readUser(payload) {
 }
 
 function setSession(sessionUser) {
+  const sameAccount = user.value?.id === sessionUser.id
   user.value = sessionUser
   authErrorKey.value = ''
-  surface.value = sessionUser.role === 'admin' ? 'chooser' : 'usage'
+  if (moduleCode.value) surface.value = 'module'
+  else if (!sameAccount || (surface.value === 'admin' && sessionUser.role !== 'admin')) surface.value = sessionUser.role === 'admin' ? 'chooser' : 'usage'
 }
 
 function authErrorKeyFor(error) {
@@ -54,6 +59,7 @@ async function restoreSession() {
 }
 
 function handleSessionExpired() {
+  clearSessionToken()
   if (!user.value) return
   user.value = null
   surface.value = 'chooser'
@@ -72,6 +78,7 @@ async function signIn(credentials) {
     if (!sessionUser) sessionUser = readUser(await request('/api/auth/me'))
     if (!sessionUser || !sessionUser.role) throw new Error('Missing authenticated user')
     setSession(sessionUser)
+    localStorage.setItem('geekcalculus-login', String(Date.now()))
   } catch (error) {
     authErrorKey.value = authErrorKeyFor(error)
   } finally {
@@ -88,10 +95,26 @@ async function signOut() {
   user.value = null
   surface.value = 'chooser'
   authErrorKey.value = ''
+  localStorage.setItem('geekcalculus-logout', String(Date.now()))
+}
+
+function syncModuleRoute() {
+  moduleCode.value = moduleFromHash()
+  if (user.value) {
+    if (moduleCode.value) surface.value = 'module'
+    else if (surface.value === 'module') surface.value = 'usage'
+  }
+}
+
+function handleStorage(event) {
+  if (event.key === 'geekcalculus-logout') { clearSessionToken(); user.value = null; surface.value = 'chooser'; authErrorKey.value = '' }
+  else if (event.key === 'geekcalculus-login' || (demoMode && event.key === 'geekcalculus-demo-session-v1')) { clearSessionToken(); restoreSession() }
 }
 
 function selectInterface(selected) {
   if (selected === 'admin' && !isAdmin.value) return
+  window.location.hash = ''
+  moduleCode.value = null
   surface.value = selected
 }
 
@@ -107,12 +130,18 @@ watch(locale, (nextLocale) => {
 
 onMounted(() => {
   window.addEventListener('geekcalculus-session-expired', handleSessionExpired)
+  window.addEventListener('hashchange', syncModuleRoute)
+  window.addEventListener('storage', handleStorage)
   document.documentElement.lang = locale.value
   document.title = locale.value === 'vi' ? 'GeekCalculus — Không gian kết cấu' : 'GeekCalculus — Structural workspace'
   restoreSession()
 })
 
-onUnmounted(() => window.removeEventListener('geekcalculus-session-expired', handleSessionExpired))
+onUnmounted(() => {
+  window.removeEventListener('geekcalculus-session-expired', handleSessionExpired)
+  window.removeEventListener('hashchange', syncModuleRoute)
+  window.removeEventListener('storage', handleStorage)
+})
 </script>
 
 <template>
@@ -141,8 +170,18 @@ onUnmounted(() => window.removeEventListener('geekcalculus-session-expired', han
     v-else-if="surface === 'admin' && isAdmin"
     v-model:locale="locale"
     :user="user"
-    @usage="surface = 'usage'"
-    @choose-interface="surface = 'chooser'"
+    @usage="selectInterface('usage')"
+    @choose-interface="selectInterface('chooser')"
+    @sign-out="signOut"
+  />
+  <ModuleHub
+    v-else-if="surface === 'module' && moduleCode"
+    v-model:locale="locale"
+    :module-code="moduleCode"
+    :user="user"
+    :is-admin="isAdmin"
+    @home="selectInterface('usage')"
+    @open-admin="selectInterface('admin')"
     @sign-out="signOut"
   />
   <WorkspaceView
@@ -150,7 +189,7 @@ onUnmounted(() => window.removeEventListener('geekcalculus-session-expired', han
     v-model:locale="locale"
     :user="user"
     :is-admin="isAdmin"
-    @open-admin="surface = 'admin'"
+    @open-admin="selectInterface('admin')"
     @sign-out="signOut"
   />
 </template>

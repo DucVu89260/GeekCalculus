@@ -3,7 +3,8 @@ import schema from '../../../database/seeds/engineering-schema.json'
 import seed from '../../../database/seeds/engineering-data.json'
 const DB_KEY = 'geekcalculus-demo-library-v1'
 const PROJECT_KEY = 'geekcalculus-web-demo-projects-v1'
-const SESSION_KEY = 'geekcalculus-demo-user'
+const SESSION_KEY = 'geekcalculus-demo-session-v1'
+const LEGACY_SESSION_KEY = 'geekcalculus-demo-user'
 const fields = { project_type: 'project_types', module: 'modules', standard: 'standards', material: 'materials', unit: 'units' }
 function fail(status, message, errors = {}) { const error = new Error(message); error.status = status; error.errors = errors; throw error }
 async function hash(password, salt) { return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`${salt}:${password}`)))).map(v => v.toString(16).padStart(2, '0')).join('') }
@@ -56,14 +57,15 @@ function validate(resource, body, db, old) {
 // UI simulation only: localStorage can be edited. This is never server authorization.
 export async function demoRequest(path, options = {}) {
   const url = new URL(path, location.origin); const body = options.body ? JSON.parse(options.body) : {}; const method = options.method || 'GET'
-  const db = await database(); const user = db.users.find(row => row.id === sessionStorage.getItem(SESSION_KEY))
+  if (!localStorage.getItem(SESSION_KEY) && sessionStorage.getItem(LEGACY_SESSION_KEY)) { localStorage.setItem(SESSION_KEY, sessionStorage.getItem(LEGACY_SESSION_KEY)); sessionStorage.removeItem(LEGACY_SESSION_KEY) }
+  const db = await database(); const user = db.users.find(row => row.id === localStorage.getItem(SESSION_KEY))
   if (url.pathname === '/api/auth/me') return { data: publicUser(user) }
   if (url.pathname === '/api/auth/login') {
     const account = db.users.find(row => row.email.toLowerCase() === String(body.email).toLowerCase())
     if (!account || account.passwordHash !== await hash(String(body.password), account.salt)) fail(422, 'Invalid email or password.', { email: ['Invalid email or password.'] })
-    sessionStorage.setItem(SESSION_KEY, account.id); return { data: publicUser(account) }
+    localStorage.setItem(SESSION_KEY, account.id); return { data: publicUser(account) }
   }
-  if (url.pathname === '/api/auth/logout') { sessionStorage.removeItem(SESSION_KEY); return { data: null } }
+  if (url.pathname === '/api/auth/logout') { localStorage.removeItem(SESSION_KEY); sessionStorage.removeItem(LEGACY_SESSION_KEY); return { data: null } }
   if (url.pathname === '/api/health') return { status: 'ok', storage: 'browser-demo' }
   if (!user) fail(401, 'Please sign in.')
   const locale = url.searchParams.get('locale') || body.locale || 'vi'

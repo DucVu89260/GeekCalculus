@@ -140,8 +140,8 @@ Tại màn hình đăng nhập demo, có nút điền tài khoản:
 - User: `user@demo.geekcalculus.test`
 - Mật khẩu demo cho cả hai: `demo`
 
-Đây chỉ là mô phỏng UI: dữ liệu nằm trong localStorage có thể sửa, đăng nhập
-được lưu trong sessionStorage của tab, không phải xác thực/ phân quyền server.
+Đây chỉ là mô phỏng UI: dữ liệu nằm trong localStorage có thể sửa, đăng nhập demo
+được chia sẻ giữa các tab bằng localStorage, không phải xác thực/ phân quyền server.
 Demo có thể thử CRUD và hai luồng giao diện, nhưng không bảo vệ dữ liệu thật,
 không đồng bộ giữa trình duyệt/người dùng. Không dùng thông tin đăng nhập thật
 trên demo. Laravel không chứa các tài khoản demo này.
@@ -189,3 +189,30 @@ chạy `npm ci` và `npm run dev -- --host 127.0.0.1 --port 5173`.
 Các thư mục engineering/CSI vẫn là khung; chưa có tính toán, báo cáo hoặc
 kết nối SAP2000/ETABS. Composer lock dùng archive chính thức codeload GitHub
 với commit pin; setup giữ TLS verification và sử dụng CA bundle của máy.
+
+## Các trang chức năng và Steel Design
+
+Sáu thẻ chức năng trên trang chính mở **tab trình duyệt mới**. Các trang dùng
+hash URL `#/modules/steel`, `concrete`, `analysis`, `loads`, `library`, `future`
+để chạy được trên GitHub Pages mà không cần server routing. Tab mới có thanh
+điều hướng đủ sáu nhóm; các liên kết trên thanh này chuyển trang trong cùng tab.
+Đăng nhập được chia sẻ giữa các tab; đăng xuất/đổi tài khoản đồng bộ các tab.
+Với Laravel, session vẫn là cookie HttpOnly; không lưu token đăng nhập thật vào
+localStorage. Demo chỉ chia sẻ ID tài khoản mô phỏng trong browser.
+
+Steel Design gồm **Component** và **Connection**:
+- Component: dầm/cột/giằng, tiêu chuẩn, vật liệu và tiết diện thép từ database.
+  Tiết diện lọc theo vật liệu đang chọn; hiển thị thông số và đơn vị đã lưu.
+- Connection: dầm–cột/nối cấu kiện/bản đế/bản mã; bu lông/hàn/hỗn hợp,
+  cấp bền 4.6/8.8/10.9 và hàn góc/giáp mối.
+
+Các lựa chọn tiêu chuẩn và liên kết là sơ bộ, chưa có tính toán/kiểm tra thiết
+kế. Những nhóm chưa triển khai có dropdown để chuẩn bị chức năng. Engineering
+Library tiếp tục cho người dùng xem database; sửa dữ liệu trong giao diện admin.
+Hover các tab và thẻ điều hướng dùng nền `#23395d`, chữ trắng ở cả hai giao diện.
+
+Ảnh nền đăng nhập là ảnh cầu do người dùng cung cấp. Tệp tải lên có tên `.svg`
+nhưng dữ liệu thực là JPEG; lưu nguyên byte với đuôi `.jpg` để đúng MIME.
+`tests/modules-smoke.cjs` kiểm tra ảnh, hover, mở tab, navigation, dropdown,
+VI/EN, mobile và đăng xuất giữa các tab. Dùng `TEST_DEMO=1` với
+`MODULE_BASE_URL` cho demo, hoặc `AUTH_FIXTURES` riêng cho backend thật.

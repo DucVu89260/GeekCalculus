@@ -1,6 +1,7 @@
 import { demoRequest } from './demo-api'
 export const demoMode = import.meta.env.VITE_DEMO_MODE === 'true'
 let csrfToken = null
+export function clearSessionToken() { csrfToken = null }
 export async function request(path, options = {}) {
   if (demoMode) {
     try { return await demoRequest(path, options) } catch (error) {

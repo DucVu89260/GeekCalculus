@@ -71,7 +71,7 @@ input::placeholder { color: #93a6ba; }
 .auth-spinner { display: inline-block; flex: 0 0 auto; width: 17px; height: 17px; border: 2px solid #bbd2e8; border-right-color: #477eaf; border-radius: 50%; animation: auth-spin .75s linear infinite; }
 @keyframes auth-spin { to { transform: rotate(360deg); } }
 .auth-page { display: grid; grid-template-columns: minmax(0, 1.02fr) minmax(480px, .98fr); min-height: 100vh; color: #29435e; background: #f9fbfe; }
-.login-visual { position: relative; display: flex; min-height: 100vh; overflow: hidden; background-color: #123754; background-image: linear-gradient(140deg, #102d4bcc 0%, #163e60a8 48%, #164d77b3 100%), url('/structural-hero.svg'); background-position: center; background-size: cover; }
+.login-visual { position: relative; display: flex; min-height: 100vh; overflow: hidden; background-color: #123754; background-image: linear-gradient(140deg, #102d4b88 0%, #163e6045 48%, #164d7766 100%), url('/structural-hero.jpg'); background-position: center; background-size: cover; }
 .login-visual::after { position: absolute; inset: 0; border-right: 1px solid #d7e8f21a; background: linear-gradient(0deg, #0c263c55, transparent 40%); content: ''; pointer-events: none; }
 .visual-grid { position: absolute; inset: 0; opacity: .45; background-image: linear-gradient(#c8e8ff0b 1px, transparent 1px), linear-gradient(90deg, #c8e8ff0b 1px, transparent 1px); background-size: 40px 40px; mask-image: linear-gradient(135deg, #000 0%, transparent 74%); }
 .visual-content { position: relative; z-index: 1; display: flex; width: 100%; min-height: 100vh; flex-direction: column; padding: clamp(30px, 5vw, 72px); color: #f5faff; }
@@ -286,3 +286,18 @@ input::placeholder { color: #93a6ba; }
   .platform-page .topbar-actions .signed-in-label { display: none; }
   .platform-page .topbar-actions .quiet-button { white-space: nowrap; padding: 7px; font-size: 12px; }
 }
+
+/* Consistent navigation interaction in admin and usage interfaces. */
+.module-card { text-decoration: none; }
+:where(.admin-tabs, .library-tabs, .language-switch, .module-navigation) :is(button, a):hover:not(:disabled),
+button[role="tab"]:hover:not(:disabled),
+.module-card:hover, .interface-option:hover, .quiet-button:hover:not(:disabled),
+.module-card:focus-visible, .module-navigation a:focus-visible {
+  background: #23395d; border-color: #23395d; color: #fff;
+}
+.module-card:hover .module-copy :is(strong, span), .module-card:focus-visible .module-copy :is(strong, span),
+.interface-option:hover :is(strong, small, .interface-arrow), .module-navigation a:hover { color: #fff; }
+.module-card:hover .module-arrow, .module-card:focus-visible .module-arrow { stroke: #fff; }
+.interface-option:hover .interface-icon { background: #ffffff1f; color: white; }
+
+button[role="tab"]:hover:not(:disabled) :is(strong, small, span) { color: #fff; }

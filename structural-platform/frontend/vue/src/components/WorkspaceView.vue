@@ -1,22 +1,13 @@
 <script setup>
 import { nextTick, ref } from 'vue'
 import { useWorkspace } from '../composables/useWorkspace'
-import LibraryBrowser from './LibraryBrowser.vue'
+import { moduleGroups as groups, moduleHref } from '../modules'
 
 defineProps({ user: { type: Object, required: true }, isAdmin: { type: Boolean, default: false } })
 const emit = defineEmits(['sign-out', 'open-admin'])
 const locale = defineModel('locale', { type: String, required: true })
 const { demoMode, t, apiStatus, catalogError, projectError, createError, projectLoading, creating, projectName, projects, totalProjects, currentPage, lastPage, formErrorKey, selections, refresh, loadCatalog, loadProjects, selectOptions, optionName, statusName, formatDate, createProject, changePage } = useWorkspace(locale)
 
-const groups = [
-  { code: 'steel', title: 'groupSteel', description: 'steelDescription' },
-  { code: 'concrete', title: 'groupConcrete', description: 'concreteDescription' },
-  { code: 'analysis', title: 'groupAnalysis', description: 'analysisDescription' },
-  { code: 'loads', title: 'groupLoads', description: 'loadDescription' },
-  { code: 'library', title: 'groupLibrary', description: 'libraryDescription' },
-  { code: 'future', title: 'groupFuture', description: 'futureDescription' },
-]
-const selectedGroup = ref(null)
 const projectOpen = ref(false)
 
 async function showProjects() {
@@ -24,18 +15,6 @@ async function showProjects() {
   await loadCatalog()
   await nextTick()
   document.getElementById('project-workspace')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-}
-
-async function selectGroup(group) {
-  selectedGroup.value = group
-  const defaults = {
-    steel: { module: 'steel', standard: 'tcvn_5575_2024', material: 'steel_s235' },
-    concrete: { module: 'rc_beam', standard: 'tcvn_5574_2018', material: 'concrete_b25' },
-    loads: { module: 'wind', standard: 'tcvn_2737_2023' },
-  }
-  if (defaults[group.code]) Object.assign(selections.value, defaults[group.code])
-  await nextTick()
-  document.getElementById('module-detail')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
 }
 
 </script>
@@ -63,20 +42,11 @@ async function selectGroup(group) {
         <svg class="branch-icon" aria-hidden="true" viewBox="0 0 32 32"><path d="M10 7v16m0-6c10 0 12-3 12-10"/><circle cx="10" cy="24" r="3"/><circle cx="22" cy="7" r="3"/></svg>
       </div>
       <div class="module-grid">
-        <button v-for="group in groups" :key="group.code" type="button" class="module-card" :class="{ selected: selectedGroup?.code === group.code }" :aria-pressed="selectedGroup?.code === group.code" @click="selectGroup(group)">
+        <a v-for="group in groups" :key="group.code" class="module-card" :href="moduleHref(group.code)" target="_blank" rel="noopener noreferrer">
           <span class="module-copy"><strong>{{ t(group.title) }}</strong><span>{{ t(group.description) }}</span></span>
           <svg class="module-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14m-5-5 5 5-5 5"/></svg>
-        </button>
+        </a>
       </div>
-    </section>
-
-    <section v-if="selectedGroup" id="module-detail" class="detail-panel">
-      <div class="section-heading"><div><h2>{{ t(selectedGroup.title) }}</h2><p>{{ t(selectedGroup.description) }}</p></div><button type="button" class="quiet-button" @click="selectedGroup = null">{{ t('close') }}</button></div>
-      <template v-if="selectedGroup.code === 'library'">
-        <p>{{ t('libraryNote') }}</p>
-        <LibraryBrowser :locale="locale" :can-edit="false" />
-      </template>
-      <template v-else><p>{{ t('developmentNote') }}</p><button v-if="['steel', 'concrete', 'loads'].includes(selectedGroup.code)" type="button" class="primary-button" @click="showProjects">{{ t('newProject') }}</button></template>
     </section>
 
     <div class="platform-footer">

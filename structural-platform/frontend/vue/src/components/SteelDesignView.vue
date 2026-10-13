@@ -250,7 +250,7 @@ onMounted(loadLibrary)
   <section class="steel-design" :aria-label="t('title')">
     <header class="steel-design-header">
       <div class="steel-design-heading">
-        <span class="steel-design-eyebrow">{{ t('status') }}</span>
+        <span v-if="activeTab !== 'section-properties'" class="steel-design-eyebrow">{{ t('status') }}</span>
         <h2>{{ t('title') }}</h2>
         <p>{{ t('subtitle') }}</p>
       </div>

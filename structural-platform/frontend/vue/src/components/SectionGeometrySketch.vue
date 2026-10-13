@@ -170,7 +170,7 @@ const drawing = computed(() => {
 .section-geometry-sketch { min-width: 0; }
 .section-geometry-sketch svg { display: block; width: 100%; min-height: 180px; max-height: 220px; }
 .section-geometry-outline { fill: #dce9f4; stroke: #375f83; stroke-width: 1.6; }
-.section-geometry-hole { fill: #fff; stroke: #375f83; stroke-width: 1.2; }
+.section-geometry-hole { fill: var(--soft-bg); stroke: #375f83; stroke-width: 1.2; }
 .section-geometry-dimension { stroke: #6b86a0; stroke-width: 1; }
 .section-geometry-extension { stroke: #b4c3d0; stroke-width: .8; stroke-dasharray: 2 2; }
 .section-geometry-dimension-label { fill: #536f89; font-size: 9px; font-weight: 650; }

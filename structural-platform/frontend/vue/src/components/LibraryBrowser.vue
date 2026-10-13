@@ -2,6 +2,8 @@
 import { computed, onMounted, reactive, ref, useId, watch } from 'vue'
 import { request, demoMode } from '../api'
 import { copy } from '../i18n'
+import DesignCodeIcon from './DesignCodeIcon.vue'
+import DesignCodeSelect from './DesignCodeSelect.vue'
 
 const props = defineProps({ locale: { type: String, required: true }, canEdit: { type: Boolean, default: false } })
 const t = (key) => copy[props.locale]?.[key] ?? copy.en[key] ?? key
@@ -726,7 +728,7 @@ onMounted(async () => {
       <label class="library-search"><span class="sr-only">{{ t('search') }}</span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 4 4"/></svg><input v-model="search" type="search" :placeholder="t('searchPlaceholder')" /></label>
       <label class="filter-select"><span>{{ t('category') }}</span><select v-model="categoryFilter"><option value="">{{ t('allCategories') }}</option><option v-for="item in categories" :key="item.code" :value="item.code">{{ localizedSchemaName(item) }}</option></select></label>
       <label v-if="activeResource !== 'materials'" class="filter-select"><span>{{ t('shape') }}</span><select v-model="shapeFilter"><option value="">{{ t('allShapes') }}</option><option v-for="item in visibleShapes" :key="item.code" :value="item.code">{{ localizedSchemaName(item) }}</option></select></label>
-      <label class="filter-select"><span>{{ metaT('designCode') }}</span><select v-model="designCodeFilter"><option value="">{{ metaT('allDesignCodes') }}</option><option v-for="item in designCodeOptions" :key="item.code" :value="item.code">{{ localizedSchemaName(item) }}</option></select></label>
+      <label class="filter-select"><span>{{ metaT('designCode') }}</span><DesignCodeSelect v-model="designCodeFilter" :options="designCodeOptions" :locale="locale" :placeholder="metaT('allDesignCodes')" /></label>
       <label v-if="activeResource !== 'materials'" class="filter-select"><span>{{ metaT('regionType') }}</span><select v-model="regionTypeFilter"><option value="">{{ metaT('allRegionTypes') }}</option><option v-for="item in regionTypeOptions" :key="item.code" :value="item.code">{{ localizedSchemaName(item) }}</option></select></label>
     </div>
 
@@ -748,7 +750,7 @@ onMounted(async () => {
             <td>{{ record.name_vi }}</td>
             <td>{{ record.name_en }}</td>
             <td v-if="activeResource === 'materials'">{{ categoryName(record.category) }}</td>
-            <td v-if="activeResource === 'materials' || activeResource === 'section_types'">{{ designCodeName(record.design_code) }}</td>
+            <td v-if="activeResource === 'materials' || activeResource === 'section_types'"><span class="library-design-code-cell"><DesignCodeIcon v-if="record.design_code" :code="record.design_code" aria-hidden="true" /><span>{{ designCodeName(record.design_code) }}</span></span></td>
             <td v-if="activeResource === 'section_types'">{{ regionTypeName(record.region_type) }}</td>
             <td v-if="activeResource === 'section_types'">{{ categoryName(record.category) }}</td>
             <td v-if="activeResource !== 'materials'">{{ shapeName(record.shape ?? records.section_types.find((item) => String(item.id) === String(record.section_type_id))?.shape) }}</td>
@@ -778,13 +780,13 @@ onMounted(async () => {
 
           <template v-if="editorResource === 'materials'">
             <label class="field"><span>{{ t('materialCategory') }}<b>*</b></span><select v-model="editForm.category" required><option v-for="item in schema?.categories?.materials ?? []" :key="item.code" :value="item.code">{{ localizedSchemaName(item) }}</option></select></label>
-            <label class="field"><span>{{ metaT('designCode') }}</span><select v-model="editForm.design_code"><option value="">{{ metaT('unclassified') }}</option><option v-for="item in designCodeOptions" :key="item.code" :value="item.code">{{ localizedSchemaName(item) }}</option></select></label>
+            <label class="field"><span>{{ metaT('designCode') }}</span><DesignCodeSelect v-model="editForm.design_code" :options="designCodeOptions" :locale="locale" :placeholder="metaT('unclassified')" /></label>
             <label class="field full-field"><span>{{ t('source') }}</span><input v-model.trim="editForm.source" maxlength="500" :placeholder="t('sourcePlaceholder')" /><small class="field-hint">{{ t('sourceHelp') }}</small></label>
           </template>
           <template v-else-if="editorResource === 'section_types'">
             <label class="field"><span>{{ t('sectionCategory') }}<b>*</b></span><select v-model="editForm.category" required @change="updateEditorCategory"><option v-for="item in schema?.categories?.section_types ?? []" :key="item.code" :value="item.code">{{ localizedSchemaName(item) }}</option></select></label>
             <label class="field"><span>{{ t('shape') }}<b>*</b></span><select v-model="editForm.shape" required><option v-for="item in editorShapes" :key="item.code" :value="item.code">{{ localizedSchemaName(item) }}</option></select></label>
-            <label class="field"><span>{{ metaT('designCode') }}</span><select v-model="editForm.design_code"><option value="">{{ metaT('unclassified') }}</option><option v-for="item in designCodeOptions" :key="item.code" :value="item.code">{{ localizedSchemaName(item) }}</option></select></label>
+            <label class="field"><span>{{ metaT('designCode') }}</span><DesignCodeSelect v-model="editForm.design_code" :options="designCodeOptions" :locale="locale" :placeholder="metaT('unclassified')" /></label>
             <label class="field"><span>{{ metaT('regionType') }}</span><input v-model.trim="editForm.region_type" maxlength="64" :list="regionDatalistId" autocomplete="off" /><datalist :id="regionDatalistId"><option v-for="value in regionSuggestions" :key="value" :value="value" /></datalist><small class="field-hint">{{ metaT('regionTypeHint') }}</small></label>
           </template>
           <template v-else>
@@ -817,6 +819,7 @@ onMounted(async () => {
 .library-browser .library-filters { flex-wrap: wrap; }
 .library-browser .library-search { flex: 2 1 230px; }
 .library-browser .filter-select { flex: 1 1 138px; }
+.library-design-code-cell { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
 .library-transfer { margin: 14px 0 18px; padding: 16px; border: 1px solid #d7e5f1; border-radius: 11px; background: linear-gradient(145deg, #fbfdff, #f5f9fd); }
 .library-transfer-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
 .library-transfer-header h3 { margin: 0; color: #294968; font-size: 13px; font-weight: 700; }

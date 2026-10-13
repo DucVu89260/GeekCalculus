@@ -1,6 +1,8 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
 import { request } from '../api'
+import DesignCodeIcon from './DesignCodeIcon.vue'
+import DesignCodeSelect from './DesignCodeSelect.vue'
 
 const props = defineProps({ locale: { type: String, required: true } })
 const emit = defineEmits(['open-library'])
@@ -277,10 +279,7 @@ onMounted(loadLibrary)
         </label>
         <label class="steel-design-field">
           <span>{{ t('catalogDesignCode') }}</span>
-          <select v-model="marketFilter" class="steel-design-select">
-            <option value="all">{{ t('allDesignCodes') }}</option>
-            <option v-for="item in designCodeOptions" :key="item.code" :value="item.code">{{ localizedName(item) }}</option>
-          </select>
+          <DesignCodeSelect v-model="marketFilter" :options="designCodeOptions" :locale="locale" :placeholder="t('allDesignCodes')" placeholder-value="all" />
         </label>
         <label class="steel-design-field">
           <span>{{ t('regionType') }}</span>
@@ -323,14 +322,14 @@ onMounted(loadLibrary)
 
         <div v-if="selectedMaterial || selectedSection" class="steel-design-record-grid">
           <article v-if="selectedMaterial" class="steel-design-record-card">
-            <header><div><span class="steel-design-card-kicker">{{ t('materialProperties') }}</span><h3>{{ localizedName(selectedMaterial) }}</h3><p>{{ selectedMaterial.code }} · {{ t('catalogDesignCode') }}: {{ designCodeName(selectedMaterial.design_code) }}</p></div><span class="steel-design-chip">{{ t('material') }}</span></header>
+            <header><div><span class="steel-design-card-kicker">{{ t('materialProperties') }}</span><h3>{{ localizedName(selectedMaterial) }}</h3><p>{{ selectedMaterial.code }} · <span class="steel-design-classification"><DesignCodeIcon v-if="selectedMaterial.design_code" :code="selectedMaterial.design_code" aria-hidden="true" />{{ t('catalogDesignCode') }}: {{ designCodeName(selectedMaterial.design_code) }}</span></p></div><span class="steel-design-chip">{{ t('material') }}</span></header>
             <dl v-if="materialFields.length" class="steel-design-property-list">
               <div v-for="field in materialFields" :key="field.key"><dt>{{ localizedField(field) }}<small v-if="field.unit">{{ field.unit }}</small></dt><dd>{{ formatValue(selectedMaterial.properties?.[field.key]) }}</dd></div>
             </dl>
             <p v-else class="steel-design-no-properties">{{ t('emptyProperties') }}</p>
           </article>
           <article v-if="selectedSection" class="steel-design-record-card">
-            <header><div><span class="steel-design-card-kicker">{{ t('sectionProperties') }}</span><h3>{{ localizedName(selectedSection) }}</h3><p>{{ selectedSection.code }}<span v-if="selectedSectionType"> · {{ selectedSectionType.code }} · {{ sectionTypeName(selectedSection.section_type_id) }} · {{ sectionTypeClassification(selectedSectionType) }}</span></p></div><span class="steel-design-chip">{{ t('section') }}</span></header>
+            <header><div><span class="steel-design-card-kicker">{{ t('sectionProperties') }}</span><h3>{{ localizedName(selectedSection) }}</h3><p>{{ selectedSection.code }}<span v-if="selectedSectionType"> · {{ selectedSectionType.code }} · {{ sectionTypeName(selectedSection.section_type_id) }} · <span class="steel-design-classification"><DesignCodeIcon v-if="selectedSectionType.design_code" :code="selectedSectionType.design_code" aria-hidden="true" />{{ sectionTypeClassification(selectedSectionType) }}</span></span></p></div><span class="steel-design-chip">{{ t('section') }}</span></header>
             <dl v-if="sectionFields.length" class="steel-design-property-list">
               <div v-for="field in sectionFields" :key="field.key"><dt>{{ localizedField(field) }}<small v-if="field.unit">{{ field.unit }}</small></dt><dd>{{ formatValue(selectedSection.properties?.[field.key]) }}</dd></div>
             </dl>
@@ -424,6 +423,7 @@ onMounted(loadLibrary)
 .steel-design-card-kicker { color: #7190ac; font-size: 9px; font-weight: 750; letter-spacing: .07em; text-transform: uppercase; }
 .steel-design-record-card h3 { overflow-wrap: anywhere; margin: 5px 0 3px; color: #294661; font-size: 14px; }
 .steel-design-record-card header p { margin: 0; color: #8a9bad; font-size: 10px; }
+.steel-design-classification { display: inline-flex; align-items: center; gap: 5px; }
 .steel-design-chip { flex: 0 0 auto; padding: 5px 7px; border-radius: 6px; background: #edf4fa; color: #5d7893; font-size: 9px; font-weight: 650; }
 .steel-design-property-list { display: grid; gap: 0; margin: 0; }
 .steel-design-property-list > div { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; padding: 8px 0; border-bottom: 1px solid #edf2f6; }

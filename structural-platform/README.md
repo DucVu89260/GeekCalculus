@@ -76,6 +76,15 @@ Phân loại của bản ghi cũ và seed được giữ nguyên để người 
 Metadata không tự chọn tiêu chuẩn tính toán, chứng nhận sự phù hợp của vật
 liệu hoặc đổi đơn vị.
 
+Dropdown Design Code hiển thị cờ SVG: **EN → EU**, **AISC/ACI → Mỹ**,
+**AS → Úc**, **VN → Việt Nam**. Icon xuất hiện trong từng lựa chọn, giá trị
+đã chọn và cột Design Code; hoạt động trên Windows không phụ thuộc emoji.
+Có thể chọn bằng chuột hoặc Arrow Up/Down, Home/End, Enter/Space; Escape
+hủy lựa chọn đang trỏ, Tab hoặc click bên ngoài đóng danh sách.
+**Chưa phân loại** là giá trị đang lưu, không phải danh sách bị thiếu VN:
+mở dropdown → chọn VN → lưu thay đổi để gán cho bản ghi. Nếu trang vẫn
+hiển thị giao diện cũ sau GitHub Pages deploy, dùng Ctrl+F5 để tải lại.
+
 **Region type:** cột nhóm catalog nhỏ hơn trên loại tiết diện, ví dụ W, H,
 IPE, HEA, UB, UC. Form cho nhập nhãn riêng (tối đa 64 ký tự) và có gợi ý theo
 Design Code/hình dạng. Các nhãn là gợi ý phân loại, chưa có catalog kích thước

@@ -4,6 +4,7 @@ import { copy } from '../i18n'
 import { moduleGroups, moduleHref } from '../modules'
 import { demoMode } from '../api'
 import SteelDesignView from './SteelDesignView.vue'
+import GeometryWorkbench from './GeometryWorkbench.vue'
 import LibraryBrowser from './LibraryBrowser.vue'
 
 const homeHref = import.meta.env.BASE_URL
@@ -37,6 +38,7 @@ function navigate(code) { window.location.hash = `/modules/${code}` }
     </nav>
     <header class="module-heading"><h1>{{ t(currentGroup.title) }}</h1><p>{{ t(currentGroup.description) }}</p></header>
     <SteelDesignView v-if="moduleCode === 'steel'" :locale="locale" @open-library="navigate('library')" />
+    <GeometryWorkbench v-else-if="moduleCode === 'analysis'" :locale="locale" />
     <section v-else-if="moduleCode === 'library'" class="module-panel"><LibraryBrowser :locale="locale" :can-edit="false" /></section>
     <section v-else class="module-panel pending-panel">
       <label class="pending-selector"><span>{{ t('tool') }}</span><select v-model="selectedTools[moduleCode]"><option value="">{{ t('choose') }}</option><option v-for="tool in tools[moduleCode]" :key="tool" :value="tool">{{ t(tool) }}</option></select></label>

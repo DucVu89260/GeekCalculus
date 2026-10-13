@@ -126,10 +126,39 @@ khối lượng/trọng lượng. Với BTCT: lớp bảo vệ, diện tích c�
 thanh/đai và bước đai tùy chọn. Bán kính quán tính ry/rz được suy ra từ I/A.
 
 Nhập các đặc trưng tiết diện theo catalog/nguồn đã kiểm chứng và thống nhất
-trục địa phương y/z của nguồn. Hiện chưa tự tính A/I/J từ hình học hoặc chứng
-nhận dữ liệu thiết kế; seed S235/B25/B30/CB400 là ví dụ có ghi nguồn minh họa.
+trục địa phương y/z của nguồn. Thư viện lưu các số liệu tiết diện người dùng
+nhập; seed S235/B25/B30/CB400 là ví dụ có ghi nguồn minh họa.
 Các trường BTCT hiện mô tả tiết diện gross đàn hồi và thông tin cốt thép cơ bản;
 chưa có bố trí từng thanh, phân tích nứt/phi tuyến hoặc kiểm toán tiêu chuẩn.
+
+### Geometry Models / Analytical Engine
+
+Mô hình kiểm thử hình học nằm trong **Analysis / Phân tích**. Package 01 định
+nghĩa input schema phiên bản 1 và `GeometryDefinition`; Package 02 tính A, chu vi,
+trọng tâm, Ix/Iy/Ixy, mô đun chống uốn đàn hồi Sx/Sy theo phía dương/âm, mô đun
+dẻo Zx/Zy, rx/ry, trục trung hòa dẻo và mô men/trục quán tính chính.
+Entrypoint public của hai package là `frontend/vue/src/geometry-models.js` và
+`frontend/vue/src/analytical-engine.js`.
+
+Input nhận hình chữ nhật đặc (b, h), hình tròn đặc (D), và I/H đối xứng với góc
+vuông (b, h, tw, tf). Tất cả kích thước trong một định nghĩa dùng chung một đơn
+vị chiều dài: mm, cm, m hoặc in. Kết quả giữ đơn vị đó với số mũ tương ứng cho
+diện tích, quán tính và mô đun. Bộ kiểm tra từ chối kích thước không hữu hạn,
+không dương, bụng I/H rộng bằng/rộng hơn cánh hoặc cánh giao nhau; engine báo lỗi
+khi kết quả vượt phạm vi số máy có thể biểu diễn.
+
+Quy ước trục của engine: gốc tại góc dưới trái hộp bao, +x sang phải theo bề
+rộng, +y hướng lên theo chiều cao. Ix là mô men quanh trục ngang x và Iy quanh
+trục đứng y. Góc trục quán tính chính lớn đo ngược chiều kim đồng hồ từ +x,
+theo modulo 180°. Hình tròn và hình vuông có hai mô men chính bằng nhau nên
+hướng trục chính không xác định. Nếu nguồn dùng trục y theo chiều cao và z theo
+bề rộng thì Ix tương ứng Iz nguồn, Iy tương ứng Iy nguồn; cần kiểm tra quy ước
+trục của từng catalog trước khi sao chép số liệu vào thư viện.
+
+Các kết quả này là đặc trưng tiết diện nguyên đồng nhất; chưa xét bán kính lượn,
+lỗ, tiết diện bất đối xứng, cốt thép, mô hình vật liệu, hoặc kiểm tra theo tiêu
+chuẩn. Workbench không ghi kết quả vào thư viện. Benchmark thuần Node nằm tại
+`frontend/vue/tests/geometry/` và chạy bằng `npm test` trong `frontend/vue/`.
 
 Schema, giới hạn và đơn vị: `database/seeds/engineering-schema.json`.
 Seed ban đầu: `database/seeds/engineering-data.json`; cấu trúc DB nằm trong

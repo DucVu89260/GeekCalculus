@@ -101,6 +101,14 @@ Các ảnh SAP2000 người dùng đưa là tham khảo cấu trúc dữ liệu;
 các trị số trong ảnh, vốn có thể dùng hệ đơn vị/trục khác schema của ứng dụng.
 
 Mỗi tab có tạo/xem/sửa/xóa, tìm kiếm, bộ lọc, xác nhận xóa và lỗi có nhãn đơn vị.
+Admin có nút **Sao chép / Copy** trên từng bản ghi của cả ba tab. Nút mở form
+**Tạo mới từ bản sao** với tên VI/EN, nguồn, Design Code, Region type,
+thông số cơ lý và liên kết vật liệu/loại tiết diện của bản gốc. Không sao chép
+ID hoặc ghi đè bản gốc. Mã mới được gợi ý dạng `ma_copy`, `ma_copy_2`…;
+có thể đổi mã và các giá trị trước khi nhấn **Tạo mục / Create record**.
+Chọn Copy chưa ghi dữ liệu; hủy form giữ nguyên thư viện. Mã trùng bị từ chối.
+G và bán kính quán tính được suy ra lại từ thông số của bản mới. User chỉ
+xem không có nút Copy; sao chép dùng cùng API tạo mới và quyền admin hiện có.
 Vật liệu mới/sửa tên được đồng bộ với dropdown dự án. Không thể xóa vật liệu
 đang được tham chiếu bởi tiết diện hoặc dự án; không thể xóa loại đang dùng.
 Chặn đổi mã/hệ vật liệu/hình dạng nếu làm mất tính hợp lệ của tham chiếu.

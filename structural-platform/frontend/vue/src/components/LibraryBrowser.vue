@@ -47,6 +47,7 @@ const regionTypeFilter = ref('')
 const editorOpen = ref(false)
 const editorMode = ref('create')
 const editorResource = ref('materials')
+const copySourceCode = ref('')
 const saving = ref(false)
 const deletingId = ref(null)
 const fileInput = ref(null)
@@ -545,17 +546,30 @@ function setResource(resource) {
   resetFilters()
 }
 
-function openEditor(record = null) {
+function nextCopyCode(code) {
+  const codes = new Set(records.value[activeResource.value].map((row) => row.code))
+  for (let index = 1; ; index++) {
+    const suffix = index === 1 ? '_copy' : `_copy_${index}`
+    const candidate = `${code.slice(0, 64 - suffix.length)}${suffix}`
+    if (!codes.has(candidate)) return candidate
+  }
+}
+
+function openEditor(record = null, mode = record ? 'edit' : 'create') {
   if (!props.canEdit) return
+  errorKey.value = ''
+  validationFieldKeys.value = []
+  messageKey.value = ''
   editorResource.value = activeResource.value
-  editorMode.value = record ? 'edit' : 'create'
+  editorMode.value = mode
+  copySourceCode.value = mode === 'copy' ? record.code : ''
   const firstCategory = schema.value?.categories?.[activeResource.value]?.[0]?.code ?? ''
   const category = record?.category ?? firstCategory
   const shapesForCategory = (schema.value?.shapes ?? []).filter((shape) => shape.category === category)
   const shape = record?.shape ?? shapesForCategory[0]?.code ?? ''
   Object.assign(editForm, {
-    id: record?.id ?? null,
-    code: record?.code ?? '',
+    id: mode === 'edit' ? record?.id ?? null : null,
+    code: mode === 'copy' ? nextCopyCode(record.code) : record?.code ?? '',
     name_vi: record?.name_vi ?? '',
     name_en: record?.name_en ?? '',
     category,
@@ -764,24 +778,25 @@ onMounted(async () => {
               </details>
               <span v-else>—</span>
             </td>
-            <td v-if="canEdit" class="library-actions"><button type="button" class="quiet-button" @click="openEditor(record)">{{ t('editRecord') }}</button><button type="button" class="quiet-button danger-button" :disabled="deletingId === record.id" @click="deleteRecord(record)">{{ t('deleteRecord') }}</button></td>
+            <td v-if="canEdit" class="library-actions"><button type="button" class="quiet-button" @click="openEditor(record)">{{ t('editRecord') }}</button><button type="button" class="quiet-button" :disabled="schemaLoading || schemaError || deletingId === record.id" @click="openEditor(record, 'copy')">{{ t('copyRecord') }}</button><button type="button" class="quiet-button danger-button" :disabled="deletingId === record.id" @click="deleteRecord(record)">{{ t('deleteRecord') }}</button></td>
           </tr>
         </tbody>
       </table>
     </div>
 
     <div v-if="editorOpen" class="editor-backdrop" @click.self="editorOpen = false">
-      <section class="library-editor" role="dialog" aria-modal="true" :aria-label="t(editorMode === 'edit' ? 'editRecord' : resourceDefinitions[editorResource].addKey)">
-        <header class="editor-heading"><div><span class="auth-eyebrow">{{ t('databaseTitle') }}</span><h2>{{ t(editorMode === 'edit' ? 'editRecord' : resourceDefinitions[editorResource].addKey) }}</h2></div><button type="button" class="quiet-button editor-close" :aria-label="t('cancel')" @click="editorOpen = false">×</button></header>
+      <section class="library-editor" role="dialog" aria-modal="true" :aria-label="t(editorMode === 'copy' ? 'copyRecordTitle' : editorMode === 'edit' ? 'editRecord' : resourceDefinitions[editorResource].addKey)">
+        <header class="editor-heading"><div><span class="auth-eyebrow">{{ t('databaseTitle') }}</span><h2>{{ t(editorMode === 'copy' ? 'copyRecordTitle' : editorMode === 'edit' ? 'editRecord' : resourceDefinitions[editorResource].addKey) }}</h2></div><button type="button" class="quiet-button editor-close" :aria-label="t('cancel')" @click="editorOpen = false">×</button></header>
+        <p v-if="editorMode === 'copy'" class="library-copy-hint">{{ t('copyFrom') }} <strong>{{ copySourceCode }}</strong>. {{ t('copyRecordHint') }}</p>
         <form class="editor-form" @submit.prevent="saveRecord">
           <label class="field"><span>{{ t('code') }}<b>*</b></span><input v-model.trim="editForm.code" required maxlength="64" autocomplete="off" /></label>
-          <label class="field"><span>{{ t('nameVi') }}<b>*</b></span><input v-model.trim="editForm.name_vi" required maxlength="160" /></label>
-          <label class="field"><span>{{ t('nameEn') }}<b>*</b></span><input v-model.trim="editForm.name_en" required maxlength="160" /></label>
+          <label class="field"><span>{{ t('nameVi') }}<b>*</b></span><input v-model.trim="editForm.name_vi" required maxlength="255" /></label>
+          <label class="field"><span>{{ t('nameEn') }}<b>*</b></span><input v-model.trim="editForm.name_en" required maxlength="255" /></label>
 
           <template v-if="editorResource === 'materials'">
             <label class="field"><span>{{ t('materialCategory') }}<b>*</b></span><select v-model="editForm.category" required><option v-for="item in schema?.categories?.materials ?? []" :key="item.code" :value="item.code">{{ localizedSchemaName(item) }}</option></select></label>
             <label class="field"><span>{{ metaT('designCode') }}</span><DesignCodeSelect v-model="editForm.design_code" :options="designCodeOptions" :locale="locale" :placeholder="metaT('unclassified')" /></label>
-            <label class="field full-field"><span>{{ t('source') }}</span><input v-model.trim="editForm.source" maxlength="500" :placeholder="t('sourcePlaceholder')" /><small class="field-hint">{{ t('sourceHelp') }}</small></label>
+            <label class="field full-field"><span>{{ t('source') }}</span><input v-model.trim="editForm.source" maxlength="2000" :placeholder="t('sourcePlaceholder')" /><small class="field-hint">{{ t('sourceHelp') }}</small></label>
           </template>
           <template v-else-if="editorResource === 'section_types'">
             <label class="field"><span>{{ t('sectionCategory') }}<b>*</b></span><select v-model="editForm.category" required @change="updateEditorCategory"><option v-for="item in schema?.categories?.section_types ?? []" :key="item.code" :value="item.code">{{ localizedSchemaName(item) }}</option></select></label>
@@ -792,7 +807,7 @@ onMounted(async () => {
           <template v-else>
             <label class="field"><span>{{ t('sectionType') }}<b>*</b></span><select v-model="editForm.section_type_id" required><option value="">{{ t('selectOption') }}</option><option v-for="item in records.section_types" :key="item.id" :value="item.id">{{ sectionTypeSelectionLabel(item) }}</option></select></label>
             <label class="field"><span>{{ t('material') }}<b>*</b></span><select v-model="editForm.material_id" required><option value="">{{ t('selectOption') }}</option><option v-for="item in compatibleMaterials" :key="item.id" :value="item.id">{{ item.code }} · {{ localizedName(item) }}</option></select></label>
-            <label class="field full-field"><span>{{ t('source') }}</span><input v-model.trim="editForm.source" maxlength="500" :placeholder="t('sourcePlaceholder')" /><small class="field-hint">{{ t('sourceHelp') }}</small></label>
+            <label class="field full-field"><span>{{ t('source') }}</span><input v-model.trim="editForm.source" maxlength="2000" :placeholder="t('sourcePlaceholder')" /><small class="field-hint">{{ t('sourceHelp') }}</small></label>
           </template>
 
           <div v-if="editorResource !== 'section_types'" class="property-editor full-field">
@@ -820,6 +835,7 @@ onMounted(async () => {
 .library-browser .library-search { flex: 2 1 230px; }
 .library-browser .filter-select { flex: 1 1 138px; }
 .library-design-code-cell { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
+.library-copy-hint { margin: 12px 0 0; padding: 10px 12px; border: 1px solid var(--surface-border); border-radius: 7px; background: var(--soft-bg); color: var(--muted-ink); font-size: 11px; line-height: 1.6; overflow-wrap: anywhere; }
 .library-transfer { margin: 14px 0 18px; padding: 16px; border: 1px solid var(--surface-border); border-radius: 11px; background: linear-gradient(145deg, var(--surface-bg), var(--soft-bg)); }
 .library-transfer-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
 .library-transfer-header h3 { margin: 0; color: #294968; font-size: 13px; font-weight: 700; }

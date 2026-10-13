@@ -185,7 +185,7 @@ calculate()
 </template>
 
 <style scoped>
-.geometry-workbench { display: grid; gap: 18px; }
+.geometry-workbench { display: grid; gap: 18px; background: var(--surface-bg); border: 1px solid var(--surface-border); padding: 24px; border-radius: 12px; }
 .geometry-heading h2 { margin: 0; color: #254d78; font-size: 19px; }
 .geometry-heading p, .geometry-coordinate-note, .geometry-scope p { color: var(--muted-ink); font-size: 13px; line-height: 1.65; margin: 5px 0 0; }
 .geometry-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px; align-items: end; }
@@ -210,5 +210,5 @@ calculate()
 .geometry-result-card dd { text-align: right; }
 .geometry-scope { padding-top: 12px; border-top: 1px solid var(--surface-border); }
 .geometry-scope p + p { margin-top: 8px; }
-@media (max-width: 620px) { .geometry-form, .geometry-result-grid { grid-template-columns: 1fr; }.geometry-summary { grid-template-columns: 1fr; }.geometry-result-card dl > div { align-items: flex-start; flex-direction: column; gap: 1px; }.geometry-result-card dd { text-align: left; } }
+@media (max-width: 620px) { .geometry-workbench { padding: 16px 12px; }.geometry-form, .geometry-result-grid { grid-template-columns: 1fr; }.geometry-summary { grid-template-columns: 1fr; }.geometry-result-card dl > div { align-items: flex-start; flex-direction: column; gap: 1px; }.geometry-result-card dd { text-align: left; } }
 </style>

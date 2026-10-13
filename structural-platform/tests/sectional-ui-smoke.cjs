@@ -140,6 +140,7 @@ async function fillCatalogProperties(dialog, shape) {
     await page.getByRole('tab', { name: /^Component/ }).click()
     const steelSection = page.locator('.section-properties').last()
     await page.getByRole('tab', { name: /^Section properties/ }).click()
+    await page.getByText('Asymmetric I/H and advanced properties', { exact: true }).click()
     await steelSection.getByRole('heading', { name: 'Section properties', exact: true }).waitFor()
 
     const rectangle = await verifyPreset(page, steelSection, 'rectangle', 'TC-001 · Rectangle 200 × 400', 'rectangle')
@@ -169,6 +170,7 @@ async function fillCatalogProperties(dialog, shape) {
     await page.locator('.module-navigation a[href$="/modules/concrete"]').click()
     const concreteSection = page.locator('.concrete-section-properties .section-properties')
     await page.getByRole('tab', { name: 'Section properties', exact: true }).click()
+    await page.getByText('Asymmetric I/H and advanced properties', { exact: true }).click()
     await concreteSection.getByRole('heading', { name: 'Section properties', exact: true }).waitFor()
     const concreteRectangle = await verifyPreset(page, concreteSection, 'concrete-rectangle', 'TC-001 · Rectangle 200 × 400', 'rectangle')
     close(concreteRectangle.result.properties.geometric.area, 80000, 'concrete section rectangle parity')

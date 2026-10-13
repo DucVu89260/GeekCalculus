@@ -134,6 +134,11 @@ chưa có bố trí từng thanh, phân tích nứt/phi tuyến hoặc kiểm to
 ### Geometry Models / Analytical Engine
 
 Mô hình kiểm thử hình học nằm trong **Section Properties / Đặc trưng tiết diện**.
+Tab **Section properties** trong **Steel design** và **RC design** dùng chung
+component với trang này: cùng 5 mô hình hình học, kiểm tra kích thước, hình
+minh họa và đổi đơn vị kết quả mm/cm/m. Chuyển tab thiết kế giữ kết quả trong
+phiên hiện tại. Mục mở rộng **I/H bất đối xứng và đặc trưng nâng cao** giữ bộ
+tính dùng chung Python/demo với tính xoắn và xuất JSON.
 Package 01 định nghĩa input schema phiên bản 1 và `GeometryDefinition`; Package 02 tính A, chu vi,
 trọng tâm, Ix/Iy/Ixy, mô đun chống uốn đàn hồi Sx/Sy theo phía dương/âm, mô đun
 dẻo Zx/Zy, rx/ry, trục trung hòa dẻo và mô men/trục quán tính chính.

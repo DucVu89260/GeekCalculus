@@ -3,7 +3,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { request } from '../api'
 import DesignCodeIcon from './DesignCodeIcon.vue'
 import DesignCodeSelect from './DesignCodeSelect.vue'
-import SectionPropertiesView from './SectionPropertiesView.vue'
+import SectionPropertiesPanel from './SectionPropertiesPanel.vue'
 
 const props = defineProps({ locale: { type: String, required: true } })
 const emit = defineEmits(['open-library'])
@@ -386,7 +386,7 @@ onMounted(loadLibrary)
     </section>
 
     <div v-show="activeTab === 'section-properties'" class="steel-design-properties-panel" role="tabpanel">
-      <SectionPropertiesView :locale="locale" />
+      <SectionPropertiesPanel :locale="locale" />
     </div>
   </section>
 </template>

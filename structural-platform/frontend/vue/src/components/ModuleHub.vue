@@ -4,9 +4,8 @@ import { copy } from '../i18n'
 import { moduleGroups, moduleHref } from '../modules'
 import { demoMode } from '../api'
 import SteelDesignView from './SteelDesignView.vue'
-import GeometryWorkbench from './GeometryWorkbench.vue'
+import SectionPropertiesPanel from './SectionPropertiesPanel.vue'
 import LibraryBrowser from './LibraryBrowser.vue'
-import SectionPropertiesView from './SectionPropertiesView.vue'
 
 const homeHref = import.meta.env.BASE_URL
 const props = defineProps({ moduleCode: { type: String, required: true }, user: { type: Object, required: true }, isAdmin: Boolean })
@@ -40,7 +39,7 @@ function navigate(code) { window.location.hash = `/modules/${code}` }
     </nav>
     <header class="module-heading"><h1>{{ t(currentGroup.title) }}</h1><p>{{ t(currentGroup.description) }}</p></header>
     <SteelDesignView v-if="moduleCode === 'steel'" :locale="locale" @open-library="navigate('library')" />
-    <GeometryWorkbench v-else-if="moduleCode === 'analysis'" :locale="locale" />
+    <SectionPropertiesPanel v-else-if="moduleCode === 'analysis'" :locale="locale" />
     <section v-else-if="moduleCode === 'library'" class="module-panel"><LibraryBrowser :locale="locale" :can-edit="false" /></section>
     <section v-else-if="moduleCode === 'concrete'" class="module-panel concrete-module-panel">
       <div class="concrete-module-tabs" role="tablist" :aria-label="t('groupConcrete')">
@@ -52,7 +51,7 @@ function navigate(code) { window.location.hash = `/modules/${code}` }
         <p class="pending-note" role="status">{{ t('pending') }}</p>
       </div>
       <div v-show="concreteView === 'section-properties'" class="concrete-section-properties" role="tabpanel">
-        <SectionPropertiesView :locale="locale" />
+        <SectionPropertiesPanel :locale="locale" />
       </div>
     </section>
     <section v-else class="module-panel pending-panel">

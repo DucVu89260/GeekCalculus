@@ -355,7 +355,8 @@ VI/EN, mobile và đăng xuất giữa các tab. Dùng `TEST_DEMO=1` với
 
 ## Màu nền dịu mắt
 
-Nền trang dùng xanh xám `#c2ced9`, panel/bảng/hộp chỉnh sửa `#dce4eb`,
-trường nhập `#e3e9ee`; giảm các mảng trắng sáng ở cả admin và giao diện sử dụng.
-Navy `#23395d` vẫn dùng cho tab đang chọn và hover. Chữ phụ `#40566b`
-giữ tương phản trên nền mới; ảnh cover do người dùng cung cấp được giữ nguyên.
+Nền trang dùng xám pha beige `#ded8cf`, panel/bảng/hộp chỉnh sửa `#eae5dd`,
+trường nhập `#f1ede6`; nền ấm và dịu ở cả admin và giao diện sử dụng.
+Vùng phụ và hàng xen kẽ dùng `#e3ddd4`, đường viền `#c2b9ad`.
+Navy `#23395d` với chữ trắng vẫn dùng cho hover; các tab đang chọn giữ màu navy.
+Chữ phụ `#4d5966` giữ tương phản trên nền mới. Ảnh cover được giữ nguyên.

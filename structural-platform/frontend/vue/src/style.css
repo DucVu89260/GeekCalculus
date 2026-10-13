@@ -1,11 +1,11 @@
 :root
   {
-    --page-bg: #c2ced9;
-    --surface-bg: #dce4eb;
-    --soft-bg: #cfdce6;
-    --field-bg: #e3e9ee;
-    --surface-border: #aebfcd;
-    --muted-ink: #40566b;
+    --page-bg: #ded8cf;
+    --surface-bg: #eae5dd;
+    --soft-bg: #e3ddd4;
+    --field-bg: #f1ede6;
+    --surface-border: #c2b9ad;
+    --muted-ink: #4d5966;
     font-family: Calibri, "Segoe UI", Arial, sans-serif;
     font-size: 16px;
     font-weight: 400;
@@ -319,12 +319,12 @@ button[role="tab"]:hover:not(:disabled),
 
 button[role="tab"]:hover:not(:disabled) :is(strong, small, span) { color: #fff; }
 
-/* Muted blue surfaces reduce glare across both workspaces and dialogs. */
+/* Warm gray-beige surfaces reduce glare across both workspaces and dialogs. */
 .platform-card, .project-workspace, .chooser-card, .admin-panel, .library-editor, .library-table-wrap { border-color: var(--surface-border); }
 :is(.platform-heading, .section-heading, .login-heading, .admin-heading, .user-admin-heading) p,
 .demo-notice, .service-status, .chooser-subtitle, .signed-in-label, .field, .auth-field,
 .library-caveat, .read-only-hint, .field-hint, .library-table th, .library-related small,
 .property-details dt, .property-source, .property-placeholder, .source-help { color: var(--muted-ink); }
-.library-table tbody tr:nth-child(even) { background: #d6e1e9; }
+.library-table tbody tr:nth-child(even) { background: var(--soft-bg); }
 .library-table td { border-bottom-color: var(--surface-border); }
 input::placeholder { color: var(--muted-ink); }

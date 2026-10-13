@@ -4,6 +4,7 @@ import { request } from '../api'
 import DesignCodeIcon from './DesignCodeIcon.vue'
 import DesignCodeSelect from './DesignCodeSelect.vue'
 import SectionPropertiesPanel from './SectionPropertiesPanel.vue'
+import HIDoublySymmetricView from './HIDoublySymmetricView.vue'
 
 const props = defineProps({ locale: { type: String, required: true } })
 const emit = defineEmits(['open-library'])
@@ -55,6 +56,7 @@ const text = {
 
 const t = (key) => text[props.locale]?.[key] ?? text.en[key] ?? key
 const activeTab = ref('component')
+const activeComponentTool = ref('setup')
 const memberType = ref('beam')
 const componentStandard = ref('tcvn_5575_2024')
 const connectionType = ref('beam_column')
@@ -270,6 +272,12 @@ onMounted(loadLibrary)
     </div>
 
     <section v-if="activeTab === 'component'" class="steel-design-panel" role="tabpanel">
+      <div class="steel-design-subtools" role="group" aria-label="Component tools">
+        <button type="button" :class="{ selected: activeComponentTool === 'setup' }" @click="activeComponentTool = 'setup'">{{ t('member') }} · Setup</button>
+        <button type="button" :class="{ selected: activeComponentTool === 'hi_doubly_symmetric' }" @click="activeComponentTool = 'hi_doubly_symmetric'">H/I Doubly Symmetric</button>
+      </div>
+      <HIDoublySymmetricView v-if="activeComponentTool === 'hi_doubly_symmetric'" :locale="locale" />
+      <template v-else>
       <div class="steel-design-form-grid">
         <label class="steel-design-field">
           <span>{{ t('memberType') }}</span>
@@ -349,6 +357,7 @@ onMounted(loadLibrary)
       </template>
 
       <p class="steel-design-footnote">{{ t('dataOnly') }}</p>
+      </template>
     </section>
 
     <section v-else-if="activeTab === 'connection'" class="steel-design-panel" role="tabpanel">
@@ -392,6 +401,10 @@ onMounted(loadLibrary)
 </template>
 
 <style scoped>
+.steel-design-subtools {display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--surface-border)}
+.steel-design-subtools button{border:1px solid var(--surface-border);border-radius:8px;padding:8px 12px;background:var(--soft-bg);color:#355777;font-size:12px;font-weight:650}
+.steel-design-subtools button.selected{background:#23395d;border-color:#23395d;color:#fff}
+
 .steel-design { color: #233850; }
 .steel-design-header { display: flex; justify-content: space-between; align-items: center; gap: 24px; padding: 4px 2px 20px; }
 .steel-design-eyebrow { display: inline-flex; align-items: center; gap: 7px; color: #4977a4; font-size: 10px; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }

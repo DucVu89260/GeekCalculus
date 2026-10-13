@@ -472,6 +472,7 @@ const svgGeometry = computed(() => {
 .section-properties-field { display: flex; min-width: 0; flex-direction: column; gap: 6px; color: #5d7690; font-size: 11px; font-weight: 700; }
 .section-properties-field small { color: #8495a7; font-size: 11px; font-weight: 550; }
 .section-properties-control { width: 100%; min-height: 39px; padding: 8px 10px; border: 1px solid var(--surface-border); border-radius: 7px; background: var(--surface-bg); color: #233850; font: inherit; font-size: 12px; }
+select.section-properties-control { background: var(--workspace-bg); }
 .section-properties-control:focus-visible { outline: 3px solid #b7d5ed; outline-offset: 1px; border-color: #6d9bc5; }
 .section-properties-presets, .section-properties-dimensions { min-width: 0; margin: 15px 0 0; padding: 0; border: 0; }
 .section-properties-presets legend, .section-properties-dimensions legend { padding: 0; color: #4e6a85; font-size: 11px; font-weight: 750; }

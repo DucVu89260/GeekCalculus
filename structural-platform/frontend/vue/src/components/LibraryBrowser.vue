@@ -1128,7 +1128,7 @@ onMounted(async () => {
 .library-transfer-file-control small { flex: 1 1 100%; color: var(--muted-ink); font-size: 9px; line-height: 1.45; }
 .library-transfer-filename { min-width: 0; overflow: hidden; color: #557692; font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
 .library-transfer-mode { display: flex; flex-direction: column; gap: 6px; min-width: 0; color: #5a738b; font-size: 10px; font-weight: 650; }
-.library-transfer-mode select { width: 100%; min-height: 35px; padding: 7px 9px; border: 1px solid var(--surface-border); border-radius: 7px; background: var(--surface-bg); color: #304b65; font-size: 10px; }
+.library-transfer-mode select { width: 100%; min-height: 35px; padding: 7px 9px; border: 1px solid var(--surface-border); border-radius: 7px; background: var(--workspace-bg); color: #304b65; font-size: 10px; }
 .library-transfer-mode select:focus-visible, .library-transfer button:focus-visible { outline: 3px solid #a8c7e2; outline-offset: 2px; }
 .library-transfer-mode-help, .library-transfer-backup-note, .library-transfer-download-note, .library-transfer-demo { margin: 9px 0 0; color: var(--muted-ink); font-size: 9px; line-height: 1.55; }
 .library-transfer-backup-note { padding: 8px 10px; border-radius: 7px; background: var(--soft-bg); color: #5c7791; }

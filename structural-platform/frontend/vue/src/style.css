@@ -67,6 +67,7 @@ h3 { color: #375b80; font-size: 15px; font-weight: 600; margin: 0; }
 .field { display: flex; flex-direction: column; gap: 8px; min-width: 0; font-size: 13px; color: #5b7692; }
 .full-field { grid-column: 1 / -1; }
 input, select { width: 100%; min-width: 0; padding: 12px; background: var(--field-bg); border: 1px solid var(--surface-border); color: #2e4f72; border-radius: 7px; font-size: 14px; }
+select, select option { background: var(--workspace-bg); }
 input:focus, select:focus { outline: 2px solid #b0d3f5; border-color: #74a7da; }
 input::placeholder { color: var(--muted-ink); }
 .form-actions { display: flex; align-items: center; justify-content: space-between; gap: 24px; }

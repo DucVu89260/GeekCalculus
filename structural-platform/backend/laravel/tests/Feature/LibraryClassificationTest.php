@@ -25,10 +25,10 @@ class LibraryClassificationTest extends TestCase
         return Material::where('code', 'steel_s235')->first()->only(['code', 'name_vi', 'name_en', 'category', 'source', 'properties']);
     }
 
-    public function test_material_design_code_has_three_choices_and_full_crud(): void
+    public function test_material_design_code_has_four_choices_and_full_crud(): void
     {
-        $this->getJson('/api/library/schema')->assertOk()->assertJsonPath('design_codes.0.code', 'EN')->assertJsonPath('design_codes.1.code', 'AISC/ACI')->assertJsonPath('design_codes.2.code', 'AS');
-        foreach (['EN', 'AISC/ACI', 'AS'] as $index => $code) {
+        $this->getJson('/api/library/schema')->assertOk()->assertJsonPath('design_codes.0.code', 'EN')->assertJsonPath('design_codes.1.code', 'AISC/ACI')->assertJsonPath('design_codes.2.code', 'AS')->assertJsonPath('design_codes.3.code', 'VN');
+        foreach (['EN', 'AISC/ACI', 'AS', 'VN'] as $index => $code) {
             $data = $this->material() + ['design_code' => $code];
             $data['code'] = 'classified-'.$index;
             $id = $this->postJson('/api/materials', $data)->assertCreated()->assertJsonPath('data.design_code', $code)->json('data.id');
@@ -73,10 +73,10 @@ class LibraryClassificationTest extends TestCase
 
     public function test_archive_round_trip_keeps_classification_and_old_archives_preserve_new_metadata(): void
     {
-        Material::where('code', 'steel_s235')->update(['design_code' => 'EN']);
+        Material::where('code', 'steel_s235')->update(['design_code' => 'VN']);
         SectionType::where('code', 'i')->update(['design_code' => 'AISC/ACI', 'region_type' => 'W']);
         $archive = $this->getJson('/api/library/export')->assertOk()->json('data');
-        $this->assertSame('EN', collect($archive['materials'])->firstWhere('code', 'steel_s235')['design_code']);
+        $this->assertSame('VN', collect($archive['materials'])->firstWhere('code', 'steel_s235')['design_code']);
         $this->assertSame('W', collect($archive['section_types'])->firstWhere('code', 'i')['region_type']);
         $oldArchive = $archive;
         foreach ($oldArchive['materials'] as &$row) {
@@ -88,12 +88,12 @@ class LibraryClassificationTest extends TestCase
         }
         unset($row);
         $this->postJson('/api/library/import', ['mode' => 'overwrite', 'archive' => $oldArchive])->assertOk();
-        $this->assertDatabaseHas('materials', ['code' => 'steel_s235', 'design_code' => 'EN']);
+        $this->assertDatabaseHas('materials', ['code' => 'steel_s235', 'design_code' => 'VN']);
         $this->assertDatabaseHas('section_types', ['code' => 'i', 'design_code' => 'AISC/ACI', 'region_type' => 'W']);
         Material::query()->update(['design_code' => null]);
         SectionType::query()->update(['design_code' => null, 'region_type' => null]);
         $this->postJson('/api/library/import', ['mode' => 'overwrite', 'archive' => $archive])->assertOk();
-        $this->assertDatabaseHas('materials', ['code' => 'steel_s235', 'design_code' => 'EN']);
+        $this->assertDatabaseHas('materials', ['code' => 'steel_s235', 'design_code' => 'VN']);
         $this->assertDatabaseHas('section_types', ['code' => 'i', 'design_code' => 'AISC/ACI', 'region_type' => 'W']);
     }
 

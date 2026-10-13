@@ -35,7 +35,7 @@ function validate(resource, body, db, old) {
   if (db[resource].some(row => row.code === body.code && row.id !== old?.id)) add('code', 'Code is already in use.')
   if (resource !== 'sections' && Object.hasOwn(body, 'design_code')) {
     const designCode = optionalText(body.design_code)
-    if (designCode !== null && !schema.design_codes.some(option => option.code === designCode)) add('design_code', 'Choose EN, AISC/ACI or AS, or leave unclassified.')
+    if (designCode !== null && !schema.design_codes.some(option => option.code === designCode)) add('design_code', 'Choose EN, AISC/ACI, AS or VN, or leave unclassified.')
   }
   if (resource === 'section_types' && Object.hasOwn(body, 'region_type')) {
     const regionType = optionalText(body.region_type)

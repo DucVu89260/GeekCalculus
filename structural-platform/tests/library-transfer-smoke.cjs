@@ -15,8 +15,8 @@ const localBase = process.env.TRANSFER_LOCAL_URL || 'http://127.0.0.1:5173'
   const nonce = Date.now().toString(), materialCode = `browser_transfer_m_${nonce}`, typeCode = `browser_transfer_t_${nonce}`, sectionCode = `browser_transfer_s_${nonce}`, driftCode = `browser_transfer_drift_${nonce}`, rejectedCode = `browser_transfer_bad_${nonce}`
   const fixture = {
     format: 'geekcalculus-engineering-library', version: 1, exported_at: new Date().toISOString(),
-    materials: [{ ...seed.materials[0], code: materialCode, design_code: 'EN', name_vi: 'Thép thư viện đã xác minh', name_en: 'Verified library steel', source: 'Browser test fixture; not design values' }],
-    section_types: [{ ...seed.section_types[0], code: typeCode, design_code: 'EN', region_type: 'IPE', name_vi: 'Tiết diện I thử', name_en: 'Test I type' }],
+    materials: [{ ...seed.materials[0], code: materialCode, design_code: 'VN', name_vi: 'Thép thư viện đã xác minh', name_en: 'Verified library steel', source: 'Browser test fixture; not design values' }],
+    section_types: [{ ...seed.section_types[0], code: typeCode, design_code: 'VN', region_type: 'IPE', name_vi: 'Tiết diện I thử', name_en: 'Test I type' }],
     sections: [{ code: sectionCode, name_vi: 'I400 thử', name_en: 'Test I400', source: 'Test fixture', material_code: materialCode, section_type_code: typeCode, properties: { depth: 400, width: 200, web_thickness: 8, flange_thickness: 13, area: 9000, inertia_y: 2e8, inertia_z: 2e7, torsion_constant: 350000, elastic_modulus_y: 1e6, elastic_modulus_z: 2e5, shear_area_y: 5000, shear_area_z: 4500, warping_constant: 1e12 } }],
   }
   let localPage

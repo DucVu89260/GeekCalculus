@@ -594,6 +594,11 @@
       "code": "AS",
       "name_vi": "AS",
       "name_en": "AS"
+    },
+    {
+      "code": "VN",
+      "name_vi": "VN",
+      "name_en": "VN"
     }
   ],
   "region_types": [

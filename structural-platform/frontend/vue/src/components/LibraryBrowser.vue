@@ -113,7 +113,7 @@ const visibleShapes = computed(() => (schema.value?.shapes ?? []).filter((shape)
 const editorShapes = computed(() => (schema.value?.shapes ?? []).filter((shape) => shape.category === editForm.category))
 const designCodeOptions = computed(() => {
   const options = schema.value?.design_codes
-  return Array.isArray(options) && options.length ? options : ['EN', 'AISC/ACI', 'AS'].map((code) => ({ code, name_vi: code, name_en: code }))
+  return Array.isArray(options) && options.length ? options : ['EN', 'AISC/ACI', 'AS', 'VN'].map((code) => ({ code, name_vi: code, name_en: code }))
 })
 const regionTypeOptions = computed(() => {
   const candidates = new Map()

@@ -73,7 +73,7 @@ let requestSequence = 0
 const allSteelTypes = computed(() => sectionTypes.value.filter((item) => item.category === 'steel'))
 const designCodeOptions = computed(() => {
   const options = schema.value?.design_codes
-  return Array.isArray(options) && options.length ? options : ['EN', 'AISC/ACI', 'AS'].map((code) => ({ code, name_vi: code, name_en: code }))
+  return Array.isArray(options) && options.length ? options : ['EN', 'AISC/ACI', 'AS', 'VN'].map((code) => ({ code, name_vi: code, name_en: code }))
 })
 const steelTypes = computed(() => allSteelTypes.value.filter((item) => {
   if (marketFilter.value !== 'all' && item.design_code !== marketFilter.value) return false

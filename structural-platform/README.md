@@ -71,10 +71,10 @@ Admin quản lý ba tab; user mở **Engineering Library / Thư viện kỹ thu�
   thuộc từng tiết diện cụ thể, không gán một giá trị chung cho mọi kích thước.
 
 **Design Code:** cột thị trường của vật liệu và loại tiết diện, dropdown
-`EN`, `AISC/ACI`, `AS`. Có thể để **Chưa phân loại**; database lưu `null`.
-Không tự gán thị trường cho bản ghi cũ hoặc seed, vì các mẫu bê tông B25/B30
-không đại diện cho các thị trường này. Metadata không tự chọn tiêu chuẩn
-tính toán, chứng nhận sự phù hợp của vật liệu hoặc đổi đơn vị.
+`EN`, `AISC/ACI`, `AS`, `VN`. Có thể để **Chưa phân loại**; database lưu `null`.
+Phân loại của bản ghi cũ và seed được giữ nguyên để người dùng tự lựa chọn.
+Metadata không tự chọn tiêu chuẩn tính toán, chứng nhận sự phù hợp của vật
+liệu hoặc đổi đơn vị.
 
 **Region type:** cột nhóm catalog nhỏ hơn trên loại tiết diện, ví dụ W, H,
 IPE, HEA, UB, UC. Form cho nhập nhãn riêng (tối đa 64 ký tự) và có gợi ý theo

@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import GeometryWorkbench from './GeometryWorkbench.vue'
 import SectionPropertiesView from './SectionPropertiesView.vue'
 
-defineProps({ locale: { type: String, required: true } })
+defineProps({ locale: { type: String, required: true }, asymmetricOnly: { type: Boolean, default: false } })
 const advancedOpen = ref(false)
 </script>
 
@@ -12,7 +12,7 @@ const advancedOpen = ref(false)
     <GeometryWorkbench :locale="locale" />
     <details class="section-properties-advanced" @toggle="advancedOpen = $event.target.open">
       <summary>{{ locale === 'vi' ? 'I/H bất đối xứng và đặc trưng nâng cao' : 'Asymmetric I/H and advanced properties' }}</summary>
-      <SectionPropertiesView v-if="advancedOpen" :locale="locale" />
+      <SectionPropertiesView v-if="advancedOpen" :locale="locale" :asymmetric-only="asymmetricOnly" />
     </details>
   </div>
 </template>

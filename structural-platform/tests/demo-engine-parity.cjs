@@ -22,8 +22,23 @@ function successfulCases() {
     `fixture ${name}`,
     JSON.parse(fs.readFileSync(path.join(fixtureDirectory, `${name}.json`), 'utf8')),
   ])
+  const iDimensions = {
+    depth: 400, top_flange_width: 200, bottom_flange_width: 250, web_thickness: 8,
+    top_flange_thickness: 12, bottom_flange_thickness: 16,
+  }
+  const scaledIDimensions = (scale) => Object.fromEntries(Object.entries(iDimensions).map(([key, value]) => [key, value * scale]))
   return [
     ...fixtures,
+    ['I/H mirrored advanced properties', request('i_section', 'sharp_corner', {
+      depth: 400, top_flange_width: 250, bottom_flange_width: 200, web_thickness: 8,
+      top_flange_thickness: 16, bottom_flange_thickness: 12,
+    }, { include_advanced: true })],
+    ['I/H advanced scale base', request('i_section', 'sharp_corner', iDimensions, { include_advanced: true })],
+    ['I/H advanced scale triple', request('i_section', 'sharp_corner', scaledIDimensions(3), { include_advanced: true })],
+    ['I/H optional Cw overflow', request('i_section', 'sharp_corner', scaledIDimensions(1e52), { include_advanced: true })],
+    ['I/H optional Cw underflow', request('i_section', 'sharp_corner', scaledIDimensions(1e-60), { include_advanced: true })],
+    ['required warping constant only', request('i_section', 'sharp_corner', iDimensions, { required_properties: ['warping_constant_cw'] })],
+    ['required shear center only', request('i_section', 'sharp_corner', iDimensions, { required_properties: ['shear_center'] })],
     ['bottom-flange PNA', request('i_section', 'sharp_corner', {
       depth: 100, top_flange_width: 40, bottom_flange_width: 100, web_thickness: 4,
       top_flange_thickness: 4, bottom_flange_thickness: 40,
@@ -57,6 +72,14 @@ function errorCases() {
       top_flange_thickness: 12, bottom_flange_thickness: 12,
     }), 'INVALID_GEOMETRY'],
     ['unsupported required property', request('rectangle', 'solid', { width: 20, height: 10 }, { required_properties: ['shear_center'] }), 'UNSUPPORTED_PROPERTY'],
+    ['I/H required unsupported torsion', request('i_section', 'sharp_corner', {
+      depth: 400, top_flange_width: 200, bottom_flange_width: 250, web_thickness: 8,
+      top_flange_thickness: 12, bottom_flange_thickness: 16,
+    }, { required_properties: ['torsion_constant_j'] }), 'UNSUPPORTED_PROPERTY'],
+    ['I/H required Cw numerical range', request('i_section', 'sharp_corner', {
+      depth: 400e52, top_flange_width: 200e52, bottom_flange_width: 250e52, web_thickness: 8e52,
+      top_flange_thickness: 12e52, bottom_flange_thickness: 16e52,
+    }, { required_properties: ['warping_constant_cw'] }), 'CALCULATION_ERROR'],
     ['required torsion non-convergence', request('rectangle', 'solid', { width: 10, height: 10 }, { required_properties: ['torsion_constant_j'], rectangle_j_max_terms: 1 }), 'CALCULATION_ERROR'],
   ]
 }
@@ -129,6 +152,19 @@ function assertScale(base, triple) {
   }
 }
 
+function assertIAdvancedScale(base, triple) {
+  const ratio = (property) => {
+    const allowed = absoluteTolerance + relativeTolerance * Math.max(Math.abs(property.actual), Math.abs(property.expected))
+    assert.ok(Math.abs(property.actual - property.expected) <= allowed, `${property.name} scaling: expected ${property.expected}, got ${property.actual}`)
+  }
+  ratio({ name: 'I/H warping constant', actual: triple.advanced.warping_constant_cw.value / base.advanced.warping_constant_cw.value, expected: 3 ** 6 })
+  ratio({ name: 'I/H shear center x', actual: triple.advanced.shear_center.value.x / base.advanced.shear_center.value.x, expected: 3 })
+  ratio({ name: 'I/H shear center y', actual: triple.advanced.shear_center.value.y / base.advanced.shear_center.value.y, expected: 3 })
+  ratio({ name: 'I/H shear center y offset', actual: triple.advanced.shear_center.value.offset_y / base.advanced.shear_center.value.offset_y, expected: 3 })
+  ratio({ name: 'I/H effective area x', actual: triple.advanced.effective_shear_area.value.x / base.advanced.effective_shear_area.value.x, expected: 3 ** 2 })
+  ratio({ name: 'I/H effective area y', actual: triple.advanced.effective_shear_area.value.y / base.advanced.effective_shear_area.value.y, expected: 3 ** 2 })
+}
+
 async function main() {
   const tempDirectory = fs.mkdtempSync(path.join(os.tmpdir(), 'geekcalculus-demo-engine-'))
   const bundlePath = path.join(tempDirectory, 'demo-calculator.cjs')
@@ -152,6 +188,7 @@ async function main() {
       outputs.set(name, browser)
     }
     assertScale(outputs.get('symmetric scale base'), outputs.get('symmetric scale triple'))
+    assertIAdvancedScale(outputs.get('I/H advanced scale base'), outputs.get('I/H advanced scale triple'))
     assert.equal(outputs.get('square rectangle torsion').advanced.torsion_constant_j.status, 'computed')
     const squareJ = outputs.get('square rectangle torsion')
     const squareJError = Math.abs(squareJ.advanced.torsion_constant_j.value - 0.1405770149551536)
@@ -161,6 +198,16 @@ async function main() {
     assert.equal(outputs.get('bottom-flange PNA').properties.plastic.pna_y, 21.92)
     assert.equal(outputs.get('top-flange PNA').properties.plastic.pna_y, 78.08)
     assert.ok(outputs.get('thin web with nearly balanced flange areas').diagnostics.plastic.relative_area_imbalance <= 1e-10)
+    assert.equal(outputs.get('required warping constant only').advanced.warping_constant_cw.status, 'computed')
+    assert.equal(outputs.get('required warping constant only').advanced.shear_center.reason, 'not_requested')
+    assert.equal(outputs.get('required shear center only').advanced.warping_constant_cw.reason, 'not_requested')
+    for (const name of ['I/H optional Cw overflow', 'I/H optional Cw underflow']) {
+      const ranged = outputs.get(name)
+      assert.equal(ranged.advanced.warping_constant_cw.reason, 'numerical_range')
+      assert.equal(ranged.advanced.shear_center.status, 'computed')
+      assert.equal(ranged.advanced.effective_shear_area.status, 'computed')
+      assert.ok(ranged.properties.elastic.ix > 0 && ranged.properties.elastic.iy > 0)
+    }
 
     for (const [name, input, expectedCode] of errorCases()) {
       const python = runPython(input)

@@ -138,7 +138,12 @@ Tab **Section properties** trong **Steel design** và **RC design** dùng chung
 component với trang này: cùng 5 mô hình hình học, kiểm tra kích thước, hình
 minh họa và đổi đơn vị kết quả mm/cm/m. Chuyển tab thiết kế giữ kết quả trong
 phiên hiện tại. Mục mở rộng **I/H bất đối xứng và đặc trưng nâng cao** giữ bộ
-tính dùng chung Python/demo với tính xoắn và xuất JSON.
+tính dùng chung Python/demo với tính xoắn và xuất JSON. Trong Steel/RC, mục
+nâng cao chỉ chọn I/H không đối xứng (cánh trên/dưới nhập độc lập). Có bộ chọn
+**Result unit** mm/cm/m cho toàn bộ kết quả, gồm Cw (L⁶), tọa độ/độ lệch tâm
+cắt (L) và diện tích cắt hữu hiệu Ax/Ay (L²). Ba thuộc tính I/H nâng cao dùng
+xấp xỉ thành mỏng được ghi rõ trên UI và trong metadata. JSON xuất giữ đơn
+vị gốc mm, kèm `display_unit` để xác định đơn vị hiển thị.
 Package 01 định nghĩa input schema phiên bản 1 và `GeometryDefinition`; Package 02 tính A, chu vi,
 trọng tâm, Ix/Iy/Ixy, mô đun chống uốn đàn hồi Sx/Sy theo phía dương/âm, mô đun
 dẻo Zx/Zy, rx/ry, trục trung hòa dẻo và mô men/trục quán tính chính.

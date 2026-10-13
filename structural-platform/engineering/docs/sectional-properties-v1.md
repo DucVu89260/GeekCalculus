@@ -2,7 +2,7 @@
 
 Nguồn yêu cầu: nội dung người dùng gửi lại từ cuộc trò chuyện
 “Định hướng nền tảng kết cấu”. Các quyết định dưới đây được cố định cho
-schema 1.0, geometry model 1.0.0 và analytical solver 1.0.0.
+schema 1.0, geometry model 1.0.0 và analytical solver 1.1.0.
 
 ## Geometry → validation → analytical result
 
@@ -66,11 +66,68 @@ underflow của absolute error tạo báo cáo convergence giả.
 Kahan summation, ước lượng roundoff riêng và ulp(base) được xét;
 đây là error estimate float64 cộng tail bound giải tích, không phải
 interval-arithmetic certificate. Không trả estimate chưa hội tụ dưới nhãn
-computed. Không thay J bằng polar moment; v1 I/H không tính J/Cw.
+computed. Không thay J bằng polar moment; I/H chưa tính J; Cw dùng xấp xỉ Vlasov thành mỏng như mô tả dưới đây.
 
 Nguồn phương pháp: lời giải thanh chữ nhật của Saint-Venant/Prandtl trong
 S. P. Timoshenko & J. N. Goodier, *Theory of Elasticity*, 3rd edition.
 Không nhập số catalogue có fillet rồi coi là benchmark sharp-corner.
+
+### I/H: Cw, tâm cắt và diện tích cắt hữu hiệu thành mỏng
+
+Ba thuộc tính này dùng **mô hình đường trung bình thành mỏng**, với cánh nằm
+trên hai đường ngang và bụng trên trục đối xứng đứng. Đây là xấp xỉ hình học
+cho I/H hở; không phải lời giải đàn hồi 2D thành dày. Không xét fillet, độ
+cứng vật liệu/composite, biến dạng méo tiết diện hoặc hiệu chỉnh Poisson.
+Các đặc trưng tiết diện nguyên A/I/S/Z vẫn tính bằng ba hình chữ nhật không
+chồng lấn; centroid của mô hình thành mỏng được lưu riêng trong diagnostics.
+
+Đặt `yb=tb/2`, `yt=h-tt/2`, `h0=yt-yb`, `Ib=tb*bb³/12`, `It=tt*bt³/12`.
+Với `B=max(bt,bb)`, tâm cắt và hằng số vênh là:
+
+```text
+xs = B/2
+ys = (Ib*yb + It*yt)/(Ib+It)
+Cw = h0²*Ib*It/(Ib+It)
+Δx = xs-xc_gross, Δy = ys-yc_gross
+```
+
+Đây là cực Vlasov thỏa `∫ω*x*dA=0`; `ω=(yf-ys)*x` trên cánh và bằng 0
+trên bụng. Tích phân `∫ω²*dA` cho Cw. I/H đối xứng có `ys=h/2` và
+`Cw=h0²*(Ib+It)/4`. Góc/trục tọa độ theo quy ước XY của engine.
+
+Diện tích cắt hiệu dụng được định nghĩa từ năng lượng với lực cắt đơn vị:
+`As=1/∫(q/V)²/t ds`, không phải diện tích hình học của bụng/cánh.
+Với cắt ngang Vx:
+
+```text
+Ax = (Ib+It)² / (tb*bb⁵/120 + tt*bt⁵/120)
+```
+
+Với cắt đứng Vy, đặt `Ab=bb*tb`, `At=bt*tt`, `Aw=tw*h0`,
+`ym=(yb+yt)/2` và centroid của mô hình đường trung bình
+`c=(Ab*yb+Aw*ym+At*yt)/(Ab+Aw+At)`:
+
+```text
+Ix_line = Ab*(yb-c)² + At*(yt-c)² + tw*(h0³/12+h0*(ym-c)²)
+Q(y) = At*(yt-c) + tw/2*((yt-c)²-(y-c)²)
+Ey = integral(yb..yt, Q(y)²/tw dy) + Ib*(yb-c)² + It*(yt-c)²
+Ay = Ix_line² / Ey
+```
+
+Solver dùng Decimal80 và Gauss–Legendre 3 điểm cho tích phân đa thức bậc 4;
+benchmark độc lập dùng quadrature mpmath 70 chữ số. Các kiểm tra gồm đối xứng,
+đảo cánh, tỷ lệ kích thước (Cw: L⁶, tâm cắt: L, As: L²), tải yêu cầu bắt buộc
+và trạng thái số vượt phạm vi.
+
+Ví dụ TC-003: Cw≈861248554913.2948 mm⁶; `(xs,ys)=(125,115.098265896)` mm;
+`Δy≈−53.283986664` mm; `Ax≈5125.267574279`, `Ay≈2949.784859511` mm².
+Phương pháp trả qua `method=vlasov_thin_wall_i_section` hoặc
+`method=thin_wall_shear_energy_i_section`, kèm giả thiết trong diagnostics.
+
+Cơ sở phương pháp: V. Z. Vlasov, *Thin-Walled Elastic Beams* (1961),
+sectorial coordinates/warping pole; A. Gjelsvik, *The Theory of Thin Walled
+Bars* (1981), shear-flow energy. Benchmark ở đây kiểm chứng mô hình đã công
+bố, không thay cho kiểm chứng FEM/elasticity của tiết diện thành dày.
 
 ## Fixtures và kiểm chứng độc lập
 
@@ -111,7 +168,8 @@ Output nhóm geometric, elastic, plastic, principal, advanced; kèm units,
 normalized_input, schema/solver/geometry_model versions, hashes và diagnostics.
 Unsupported advanced properties: status=not_computed, value=null,
 reason=solver_not_implemented. Optional J không được yêu cầu: not_requested;
-required unsupported: UNSUPPORTED_PROPERTY. Required J không hội tụ:
+required unsupported: UNSUPPORTED_PROPERTY. I/H Cw/center/area tùy chọn ngoài
+dải số: numerical_range; nếu bắt buộc: CALCULATION_ERROR. Required J không hội tụ:
 CALCULATION_ERROR/ConvergenceError. Domain errors không gắn với HTTP layer.
 
 - [x] Geometry input/schema và validation.

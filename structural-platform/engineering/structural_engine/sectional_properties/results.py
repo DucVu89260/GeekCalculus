@@ -53,8 +53,9 @@ class Properties(ResultModel):
 
 class AdvancedProperty(ResultModel):
     status: Literal["computed", "not_computed"]
-    value: FiniteFloat | None
+    value: PositiveResult | None
     reason: str | None = None
+    method: str | None = None
 
     @model_validator(mode="after")
     def validate_availability(self):
@@ -65,11 +66,50 @@ class AdvancedProperty(ResultModel):
         return self
 
 
+class ShearCenterValue(ResultModel):
+    """Global coordinates and offsets from the gross centroid, in mm."""
+
+    x: PositiveResult
+    y: PositiveResult
+    offset_x: FiniteFloat
+    offset_y: FiniteFloat
+
+
+class EffectiveShearAreaValue(ResultModel):
+    """Effective shear areas for global x- and y-direction shear, in mm²."""
+
+    x: PositiveResult
+    y: PositiveResult
+
+
+class AdvancedVectorProperty(ResultModel):
+    status: Literal["computed", "not_computed"]
+    value: ShearCenterValue | EffectiveShearAreaValue | None
+    reason: str | None = None
+    method: str | None = None
+
+    @model_validator(mode="after")
+    def validate_availability(self):
+        if self.status == "computed" and (self.value is None or self.reason is not None):
+            raise ValueError("computed properties need a value and no unavailable reason")
+        if self.status == "not_computed" and (self.value is not None or not self.reason):
+            raise ValueError("unavailable properties need a reason and a null value")
+        return self
+
+
+class ShearCenterProperty(AdvancedVectorProperty):
+    value: ShearCenterValue | None
+
+
+class EffectiveShearAreaProperty(AdvancedVectorProperty):
+    value: EffectiveShearAreaValue | None
+
+
 class AdvancedProperties(ResultModel):
     torsion_constant_j: AdvancedProperty
     warping_constant_cw: AdvancedProperty
-    shear_center: AdvancedProperty
-    effective_shear_area: AdvancedProperty
+    shear_center: ShearCenterProperty
+    effective_shear_area: EffectiveShearAreaProperty
 
 
 class SolverIdentity(ResultModel):
@@ -85,6 +125,8 @@ class ResultUnits(ResultModel):
     second_moment: Literal["mm4"] = "mm4"
     torsion_constant: Literal["mm4"] = "mm4"
     warping_constant: Literal["mm6"] = "mm6"
+    shear_center: Literal["mm"] = "mm"
+    effective_shear_area: Literal["mm2"] = "mm2"
     angle: Literal["deg"] = "deg"
 
 

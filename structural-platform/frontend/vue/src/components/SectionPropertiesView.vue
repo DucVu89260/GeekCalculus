@@ -20,7 +20,9 @@ type SectionPropertiesRequest = {
     rectangle_j_max_terms: number
   }
 }
-type AdvancedProperty = { status: 'computed' | 'not_computed'; value: number | null; reason: string | null }
+type ShearCenterValue = { x: number; y: number; offset_x: number; offset_y: number }
+type EffectiveShearAreaValue = { x: number; y: number }
+type AdvancedProperty<T = number> = { status: 'computed' | 'not_computed'; value: T | null; reason: string | null; method?: string | null }
 type CalculationResult = {
   schema_version: string
   geometry_model_version: string
@@ -38,19 +40,19 @@ type CalculationResult = {
   advanced: {
     torsion_constant_j: AdvancedProperty
     warping_constant_cw: AdvancedProperty
-    shear_center: AdvancedProperty
-    effective_shear_area: AdvancedProperty
+    shear_center: AdvancedProperty<ShearCenterValue>
+    effective_shear_area: AdvancedProperty<EffectiveShearAreaValue>
   }
   diagnostics: { bounding_box?: { x_min: number; y_min: number; x_max: number; y_max: number }; [key: string]: unknown }
   status: string
 }
 
-const props = defineProps({ locale: { type: String, required: true } })
+const props = defineProps({ locale: { type: String, required: true }, asymmetricOnly: { type: Boolean, default: false } })
 
 const copy = {
   vi: {
     title: 'Đặc trưng tiết diện', subtitle: 'Máy tính hình học phân tích · kết quả chỉ hiển thị trong phiên này.', analytical: 'Phân tích', pythonEngine: 'Bộ máy Python', demoEngine: 'Demo trình duyệt · đối chiếu Python', solverLabel: 'Bộ giải',
-    type: 'Hình học tiết diện', rectangle: 'Chữ nhật đặc', circle: 'Tròn đặc', i_section: 'Chữ I / H',
+    type: 'Hình học tiết diện', resultUnit: 'Đơn vị kết quả', asymmetricI: 'I/H không đối xứng', thinWall: 'Xấp xỉ thành mỏng', thinWallNote: 'Cw, tâm cắt và diện tích cắt hữu hiệu dùng mô hình đường trung bình thành mỏng. Tâm cắt tính từ gốc hộp bao; độ lệch Δ tính từ trọng tâm tiết diện nguyên. Ax/Ay ứng với lực cắt Vx/Vy. Không phải nghiệm đàn hồi 2D cho tiết diện thành dày.', exportUnits: 'Tệp JSON giữ số liệu gốc theo mm; đơn vị hiển thị được ghi riêng.', offset: 'Độ lệch', rectangle: 'Chữ nhật đặc', circle: 'Tròn đặc', i_section: 'Chữ I / H',
     presets: 'Ví dụ kiểm tra', presetHint: 'Chọn ví dụ để điền kích thước; nhấn Tính toán để chạy.', tc001: 'TC-001 · Chữ nhật 200 × 400', tc002: 'TC-002 · Tròn D200', tc003: 'TC-003 · I/H không đối xứng',
     dimensions: 'Kích thước (mm)', width: 'Bề rộng b', height: 'Chiều cao h', diameter: 'Đường kính D', depth: 'Chiều cao h', top_flange_width: 'Bề rộng cánh trên bt', bottom_flange_width: 'Bề rộng cánh dưới bb', web_thickness: 'Bề dày bụng tw', top_flange_thickness: 'Bề dày cánh trên tt', bottom_flange_thickness: 'Bề dày cánh dưới tb',
     calculate: 'Tính toán', calculating: 'Đang tính…', reset: 'Xóa kích thước', retry: 'Thử lại', export: 'Tải kết quả JSON',
@@ -58,14 +60,14 @@ const copy = {
     resultTitle: 'Kết quả tính toán', geometry: 'Sơ đồ hình học', geometric: 'Hình học', elastic: 'Đàn hồi', plastic: 'Dẻo', principal: 'Trục chính', advanced: 'Đặc trưng nâng cao',
     area: 'Diện tích A', perimeter: 'Chu vi P', centroid: 'Trọng tâm', inertias: 'Mô men quán tính', sectionModuli: 'Mô đun chống uốn', radii: 'Bán kính quán tính', majorInertia: 'Mô men chính lớn Imax', minorInertia: 'Mô men chính nhỏ Imin', angle: 'Góc trục chính', orientation: 'Trạng thái phương', determinate: 'Xác định', indeterminate: 'Không xác định',
     pna: 'Trục trung hòa dẻo PNA', pnaX: 'Tọa độ PNA x', pnaY: 'Tọa độ PNA y', plasticModuli: 'Mô đun dẻo',
-    torsion: 'Hằng số xoắn Saint-Venant J', warping: 'Hằng số vênh Cw', shearCenter: 'Tâm cắt', effectiveShear: 'Diện tích chịu cắt hữu hiệu', computed: 'Đã tính', unavailable: 'Chưa có giá trị', reason_not_requested: 'Chưa yêu cầu', reason_solver_not_implemented: 'Chưa triển khai', reason_convergence_not_achieved: 'Chưa đạt độ chính xác yêu cầu', reason_numerical_precision_limit: 'Giới hạn độ chính xác số', reason_default: 'Không thể tính với cấu hình hiện tại',
+    torsion: 'Hằng số xoắn Saint-Venant J', warping: 'Hằng số vênh Cw', shearCenter: 'Tâm cắt', effectiveShear: 'Diện tích chịu cắt hữu hiệu', computed: 'Đã tính', unavailable: 'Chưa có giá trị', reason_not_requested: 'Chưa yêu cầu', reason_solver_not_implemented: 'Chưa triển khai', reason_convergence_not_achieved: 'Chưa đạt độ chính xác yêu cầu', reason_numerical_precision_limit: 'Giới hạn độ chính xác số', reason_numerical_range: 'Ngoài phạm vi số', reason_default: 'Không thể tính với cấu hình hiện tại',
     svgDescription: 'Sơ đồ tiết diện theo tỷ lệ; gốc tọa độ ở góc dưới trái, X hướng sang phải và Y hướng lên trên.', centroidMark: 'Trọng tâm', pnaMark: 'PNA',
     errorTitle: 'Không thể tính đặc trưng tiết diện.', errorGeneric: 'Máy chủ không thể hoàn tất yêu cầu. Kiểm tra kích thước rồi thử lại.', errorInvalidGeometry: 'Hình học không hợp lệ. Kiểm tra các kích thước và quan hệ giữa chúng.', errorUnsupported: 'Thuộc tính được yêu cầu chưa được hỗ trợ.', errorCalculation: 'Không thể tính kết quả hữu hạn với kích thước hiện tại.', errorNetwork: 'Không kết nối được dịch vụ tính toán. Kiểm tra máy chủ rồi thử lại.', errorFields: 'Trường cần kiểm tra', errorCode: 'Mã lỗi', errorStatus: 'Trạng thái HTTP',
     downloaded: 'Đã tạo tệp kết quả.', resetDone: 'Đã xóa kích thước và kết quả.',
   },
   en: {
     title: 'Section properties', subtitle: 'Analytical geometry calculator · results remain in this session only.', analytical: 'Analytical', pythonEngine: 'Python engine', demoEngine: 'Browser demo · Python parity', solverLabel: 'Solver',
-    type: 'Section geometry', rectangle: 'Solid rectangle', circle: 'Solid circle', i_section: 'I / H section',
+    type: 'Section geometry', resultUnit: 'Result unit', asymmetricI: 'Asymmetric I/H section', thinWall: 'Thin-wall approximation', thinWallNote: 'Cw, shear center, and effective shear areas use a thin-wall centerline model. Shear-center coordinates use the bounding-box origin; offsets Δ are relative to the gross centroid. Ax/Ay correspond to shear forces Vx/Vy. These are not full 2D elasticity results for thick-walled sections.', exportUnits: 'JSON retains canonical values in mm; the display unit is recorded separately.', offset: 'Offset', rectangle: 'Solid rectangle', circle: 'Solid circle', i_section: 'I / H section',
     presets: 'Reference examples', presetHint: 'Choose an example to fill the dimensions, then calculate.', tc001: 'TC-001 · Rectangle 200 × 400', tc002: 'TC-002 · Circle D200', tc003: 'TC-003 · Asymmetric I/H',
     dimensions: 'Dimensions (mm)', width: 'Width b', height: 'Height h', diameter: 'Diameter D', depth: 'Depth h', top_flange_width: 'Top flange width bt', bottom_flange_width: 'Bottom flange width bb', web_thickness: 'Web thickness tw', top_flange_thickness: 'Top flange thickness tt', bottom_flange_thickness: 'Bottom flange thickness tb',
     calculate: 'Calculate', calculating: 'Calculating…', reset: 'Clear dimensions', retry: 'Retry', export: 'Download result JSON',
@@ -73,7 +75,7 @@ const copy = {
     resultTitle: 'Calculation result', geometry: 'Geometry diagram', geometric: 'Geometric', elastic: 'Elastic', plastic: 'Plastic', principal: 'Principal axes', advanced: 'Advanced properties',
     area: 'Area A', perimeter: 'Perimeter P', centroid: 'Centroid', inertias: 'Second moments of area', sectionModuli: 'Elastic section moduli', radii: 'Radii of gyration', majorInertia: 'Major principal inertia Imax', minorInertia: 'Minor principal inertia Imin', angle: 'Major-axis angle', orientation: 'Orientation status', determinate: 'Determinate', indeterminate: 'Indeterminate',
     pna: 'Plastic neutral axis PNA', pnaX: 'PNA coordinate x', pnaY: 'PNA coordinate y', plasticModuli: 'Plastic section moduli',
-    torsion: 'Saint-Venant torsion constant J', warping: 'Warping constant Cw', shearCenter: 'Shear center', effectiveShear: 'Effective shear area', computed: 'Computed', unavailable: 'No value available', reason_not_requested: 'Not requested', reason_solver_not_implemented: 'Not implemented', reason_convergence_not_achieved: 'Requested tolerance was not met', reason_numerical_precision_limit: 'Numerical precision limit', reason_default: 'Cannot calculate with the current settings',
+    torsion: 'Saint-Venant torsion constant J', warping: 'Warping constant Cw', shearCenter: 'Shear center', effectiveShear: 'Effective shear area', computed: 'Computed', unavailable: 'No value available', reason_not_requested: 'Not requested', reason_solver_not_implemented: 'Not implemented', reason_convergence_not_achieved: 'Requested tolerance was not met', reason_numerical_precision_limit: 'Numerical precision limit', reason_numerical_range: 'Outside numeric range', reason_default: 'Cannot calculate with the current settings',
     svgDescription: 'Section diagram to scale; origin at the lower-left corner, X points right, and Y points up.', centroidMark: 'Centroid', pnaMark: 'PNA',
     errorTitle: 'Section properties could not be calculated.', errorGeneric: 'The service could not complete the request. Check the dimensions and try again.', errorInvalidGeometry: 'The geometry is invalid. Check the dimensions and their proportions.', errorUnsupported: 'A requested property is not supported.', errorCalculation: 'The current dimensions cannot produce finite results.', errorNetwork: 'Could not connect to the calculation service. Check the server and retry.', errorFields: 'Fields to review', errorCode: 'Error code', errorStatus: 'HTTP status',
     downloaded: 'The result file was created.', resetDone: 'Dimensions and results were cleared.',
@@ -81,7 +83,9 @@ const copy = {
 }
 
 const t = (key: string) => (copy[props.locale as 'vi' | 'en'] ?? copy.en)[key as keyof typeof copy.en] ?? copy.en[key as keyof typeof copy.en] ?? key
-const geometryType = ref<GeometryType>('rectangle')
+const geometryType = ref<GeometryType>(props.asymmetricOnly ? 'i_section' : 'rectangle')
+const resultUnit = ref<'mm' | 'cm' | 'm'>('mm')
+const resultScale = computed(() => ({ mm: 1, cm: 0.1, m: 0.001 })[resultUnit.value])
 const forms = reactive({
   rectangle: { width: null as number | null, height: null as number | null },
   circle: { diameter: null as number | null },
@@ -124,6 +128,7 @@ function clearResult() {
 }
 
 watch(currentFingerprint, clearResult)
+watch(() => props.asymmetricOnly, restricted => { if (restricted) geometryType.value = 'i_section' })
 
 function setExample(example: 'tc001' | 'tc002' | 'tc003') {
   clearResult()
@@ -242,6 +247,22 @@ function format(value: number | null | undefined, maximumSignificantDigits = 8):
   return new Intl.NumberFormat(props.locale === 'vi' ? 'vi-VN' : 'en-US', { maximumSignificantDigits }).format(value)
 }
 
+function formatDim(value: number | null | undefined, power = 1): string {
+  if (typeof value !== 'number') return '—'
+  const converted = value * resultScale.value ** power
+  if (!Number.isFinite(converted) || (value !== 0 && converted === 0)) return '—'
+  return format(converted)
+}
+function unitLabel(power = 1): string {
+  return resultUnit.value + ({ 1: '', 2: '²', 3: '³', 4: '⁴', 6: '⁶' } as Record<number, string>)[power]
+}
+function isShearCenter(value: unknown): value is ShearCenterValue {
+  return !!value && typeof value === 'object' && 'offset_x' in value && 'offset_y' in value
+}
+function isShearArea(value: unknown): value is EffectiveShearAreaValue {
+  return !!value && typeof value === 'object' && 'x' in value && 'y' in value && !('offset_x' in value)
+}
+
 function advancedLabel(key: string): string {
   const labels: Record<string, string> = { torsion_constant_j: 'torsion', warping_constant_cw: 'warping', shear_center: 'shearCenter', effective_shear_area: 'effectiveShear' }
   return t(labels[key] ?? key)
@@ -254,7 +275,7 @@ function advancedReason(reason: string | null): string {
 
 function downloadResult() {
   if (!readyResult.value) return
-  const payload = { request: lastRequest.value, result: readyResult.value }
+  const payload = { request: lastRequest.value, result: readyResult.value, display_unit: resultUnit.value }
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
   const url = URL.createObjectURL(blob)
   const link = document.createElement('a')
@@ -300,11 +321,13 @@ const svgGeometry = computed(() => {
       })()
   const centroid = readyResult.value?.properties.geometric
   const plastic = readyResult.value?.properties.plastic
+  const shearCenter = readyResult.value?.advanced.shear_center.value
   return {
     width, height, left, right: left + drawWidth, top, bottom: top + drawHeight, x, y, outline,
     circleX: x(width / 2), circleY: y(height / 2), circleRadius: Math.min(drawWidth, drawHeight) / 2,
     centroid: centroid ? { x: x(centroid.centroid_x), y: y(centroid.centroid_y) } : null,
     pnaY: plastic ? y(plastic.pna_y) : null,
+    shearCenter: shearCenter ? { x: x(shearCenter.x), y: y(shearCenter.y) } : null,
   }
 })
 </script>
@@ -325,9 +348,9 @@ const svgGeometry = computed(() => {
         <div class="section-properties-field">
           <label for="section-geometry-type">{{ t('type') }}</label>
           <select id="section-geometry-type" v-model="geometryType" class="section-properties-control">
-            <option value="rectangle">{{ t('rectangle') }}</option>
-            <option value="circle">{{ t('circle') }}</option>
-            <option value="i_section">{{ t('i_section') }}</option>
+            <option v-if="!asymmetricOnly" value="rectangle">{{ t('rectangle') }}</option>
+            <option v-if="!asymmetricOnly" value="circle">{{ t('circle') }}</option>
+            <option value="i_section">{{ asymmetricOnly ? t('asymmetricI') : t('i_section') }}</option>
           </select>
         </div>
 
@@ -335,8 +358,8 @@ const svgGeometry = computed(() => {
           <legend>{{ t('presets') }}</legend>
           <p>{{ t('presetHint') }}</p>
           <div class="section-properties-preset-buttons">
-            <button type="button" @click="setExample('tc001')">{{ t('tc001') }}</button>
-            <button type="button" @click="setExample('tc002')">{{ t('tc002') }}</button>
+            <button v-if="!asymmetricOnly" type="button" @click="setExample('tc001')">{{ t('tc001') }}</button>
+            <button v-if="!asymmetricOnly" type="button" @click="setExample('tc002')">{{ t('tc002') }}</button>
             <button type="button" @click="setExample('tc003')">{{ t('tc003') }}</button>
           </div>
         </fieldset>
@@ -357,6 +380,12 @@ const svgGeometry = computed(() => {
           </button>
           <button class="section-properties-secondary" type="button" :disabled="loading" @click="resetForm">{{ t('reset') }}</button>
         </div>
+        <label class="section-properties-field section-properties-result-unit">
+          <span>{{ t('resultUnit') }}</span>
+          <select v-model="resultUnit" :aria-label="t('resultUnit')" class="section-properties-control">
+            <option value="mm">mm</option><option value="cm">cm</option><option value="m">m</option>
+          </select>
+        </label>
         <p class="section-properties-caveat">{{ t('calculationNote') }}</p>
       </form>
 
@@ -375,6 +404,7 @@ const svgGeometry = computed(() => {
             <button type="button" class="section-properties-export" @click="downloadResult">{{ t('export') }}</button>
           </header>
 
+          <p class="section-properties-caveat">{{ t('exportUnits') }}</p>
           <div class="section-properties-result-top">
             <article class="section-properties-diagram-card">
               <h4>{{ t('geometry') }}</h4>
@@ -385,19 +415,20 @@ const svgGeometry = computed(() => {
                 <circle v-else :cx="svgGeometry.circleX" :cy="svgGeometry.circleY" :r="svgGeometry.circleRadius" fill="#dce9f4" stroke="#375f83" stroke-width="1.5" />
                 <line v-if="readyResult.properties.plastic" :x1="svgGeometry.left" :x2="svgGeometry.right" :y1="svgGeometry.pnaY ?? 0" :y2="svgGeometry.pnaY ?? 0" stroke="#ba7650" stroke-width="1.5" stroke-dasharray="5 4" />
                 <circle v-if="svgGeometry.centroid" :cx="svgGeometry.centroid.x" :cy="svgGeometry.centroid.y" r="4" fill="#b94f4f" stroke="#fff" stroke-width="1.5" />
+                <circle v-if="svgGeometry.shearCenter" :cx="svgGeometry.shearCenter.x" :cy="svgGeometry.shearCenter.y" r="4" fill="#654b8c" stroke="#fff" stroke-width="1.5" class="section-properties-shear-marker" />
                 <line :x1="svgGeometry.left" :y1="svgGeometry.bottom" :x2="svgGeometry.left + 34" :y2="svgGeometry.bottom" stroke="#65809a" stroke-width="1.2" :marker-end="`url(#${axisMarkerId})`" />
                 <line :x1="svgGeometry.left" :y1="svgGeometry.bottom" :x2="svgGeometry.left" :y2="svgGeometry.bottom - 34" stroke="#65809a" stroke-width="1.2" :marker-end="`url(#${axisMarkerId})`" />
                 <text :x="svgGeometry.left + 39" :y="svgGeometry.bottom + 4" fill="#65809a" font-size="10">X</text><text :x="svgGeometry.left - 3" :y="svgGeometry.bottom - 39" fill="#65809a" font-size="10">Y</text><text :x="svgGeometry.left - 13" :y="svgGeometry.bottom + 13" fill="#65809a" font-size="8">O</text>
               </svg>
-              <div class="section-properties-legend"><span><i class="section-properties-legend-centroid"></i>{{ t('centroidMark') }}</span><span v-if="readyResult.properties.plastic"><i class="section-properties-legend-pna"></i>{{ t('pnaMark') }} · y={{ format(readyResult.properties.plastic.pna_y) }} mm</span></div>
+              <div class="section-properties-legend"><span v-if="svgGeometry.shearCenter"><i class="section-properties-legend-shear"></i>{{ t('shearCenter') }}</span><span><i class="section-properties-legend-centroid"></i>{{ t('centroidMark') }}</span><span v-if="readyResult.properties.plastic"><i class="section-properties-legend-pna"></i>{{ t('pnaMark') }} · y={{ formatDim(readyResult.properties.plastic.pna_y, 1) }} {{ unitLabel() }}</span></div>
             </article>
             <article class="section-properties-summary-card">
               <h4>{{ t('geometric') }}</h4>
               <dl class="section-properties-values">
-                <div><dt>{{ t('area') }}</dt><dd>{{ format(readyResult.properties.geometric.area) }} <small>mm²</small></dd></div>
-                <div><dt>{{ t('perimeter') }}</dt><dd>{{ format(readyResult.properties.geometric.perimeter) }} <small>mm</small></dd></div>
-                <div><dt>{{ t('centroid') }} x</dt><dd>{{ format(readyResult.properties.geometric.centroid_x) }} <small>mm</small></dd></div>
-                <div><dt>{{ t('centroid') }} y</dt><dd>{{ format(readyResult.properties.geometric.centroid_y) }} <small>mm</small></dd></div>
+                <div><dt>{{ t('area') }}</dt><dd>{{ formatDim(readyResult.properties.geometric.area, 2) }} <small>{{ unitLabel(2) }}</small></dd></div>
+                <div><dt>{{ t('perimeter') }}</dt><dd>{{ formatDim(readyResult.properties.geometric.perimeter, 1) }} <small>{{ unitLabel(1) }}</small></dd></div>
+                <div><dt>{{ t('centroid') }} x</dt><dd>{{ formatDim(readyResult.properties.geometric.centroid_x, 1) }} <small>{{ unitLabel(1) }}</small></dd></div>
+                <div><dt>{{ t('centroid') }} y</dt><dd>{{ formatDim(readyResult.properties.geometric.centroid_y, 1) }} <small>{{ unitLabel(1) }}</small></dd></div>
               </dl>
             </article>
           </div>
@@ -406,22 +437,22 @@ const svgGeometry = computed(() => {
             <article class="section-properties-result-card">
               <h4>{{ t('elastic') }}</h4>
               <dl class="section-properties-values">
-                <div><dt>Ix</dt><dd>{{ format(readyResult.properties.elastic.ix) }} <small>mm⁴</small></dd></div>
-                <div><dt>Iy</dt><dd>{{ format(readyResult.properties.elastic.iy) }} <small>mm⁴</small></dd></div>
-                <div><dt>Ixy</dt><dd>{{ format(readyResult.properties.elastic.ixy) }} <small>mm⁴</small></dd></div>
-                <div><dt>{{ t('sectionModuli') }} Sx+</dt><dd>{{ format(readyResult.properties.elastic.sx_positive) }} <small>mm³</small></dd></div>
-                <div><dt>{{ t('sectionModuli') }} Sx−</dt><dd>{{ format(readyResult.properties.elastic.sx_negative) }} <small>mm³</small></dd></div>
-                <div><dt>{{ t('sectionModuli') }} Sy+</dt><dd>{{ format(readyResult.properties.elastic.sy_positive) }} <small>mm³</small></dd></div>
-                <div><dt>{{ t('sectionModuli') }} Sy−</dt><dd>{{ format(readyResult.properties.elastic.sy_negative) }} <small>mm³</small></dd></div>
-                <div><dt>{{ t('radii') }} rx</dt><dd>{{ format(readyResult.properties.elastic.rx) }} <small>mm</small></dd></div>
-                <div><dt>{{ t('radii') }} ry</dt><dd>{{ format(readyResult.properties.elastic.ry) }} <small>mm</small></dd></div>
+                <div><dt>Ix</dt><dd>{{ formatDim(readyResult.properties.elastic.ix, 4) }} <small>{{ unitLabel(4) }}</small></dd></div>
+                <div><dt>Iy</dt><dd>{{ formatDim(readyResult.properties.elastic.iy, 4) }} <small>{{ unitLabel(4) }}</small></dd></div>
+                <div><dt>Ixy</dt><dd>{{ formatDim(readyResult.properties.elastic.ixy, 4) }} <small>{{ unitLabel(4) }}</small></dd></div>
+                <div><dt>{{ t('sectionModuli') }} Sx+</dt><dd>{{ formatDim(readyResult.properties.elastic.sx_positive, 3) }} <small>{{ unitLabel(3) }}</small></dd></div>
+                <div><dt>{{ t('sectionModuli') }} Sx−</dt><dd>{{ formatDim(readyResult.properties.elastic.sx_negative, 3) }} <small>{{ unitLabel(3) }}</small></dd></div>
+                <div><dt>{{ t('sectionModuli') }} Sy+</dt><dd>{{ formatDim(readyResult.properties.elastic.sy_positive, 3) }} <small>{{ unitLabel(3) }}</small></dd></div>
+                <div><dt>{{ t('sectionModuli') }} Sy−</dt><dd>{{ formatDim(readyResult.properties.elastic.sy_negative, 3) }} <small>{{ unitLabel(3) }}</small></dd></div>
+                <div><dt>{{ t('radii') }} rx</dt><dd>{{ formatDim(readyResult.properties.elastic.rx, 1) }} <small>{{ unitLabel(1) }}</small></dd></div>
+                <div><dt>{{ t('radii') }} ry</dt><dd>{{ formatDim(readyResult.properties.elastic.ry, 1) }} <small>{{ unitLabel(1) }}</small></dd></div>
               </dl>
             </article>
             <article class="section-properties-result-card">
               <h4>{{ t('principal') }}</h4>
               <dl class="section-properties-values">
-                <div><dt>{{ t('majorInertia') }}</dt><dd>{{ format(readyResult.properties.principal.i_major) }} <small>mm⁴</small></dd></div>
-                <div><dt>{{ t('minorInertia') }}</dt><dd>{{ format(readyResult.properties.principal.i_minor) }} <small>mm⁴</small></dd></div>
+                <div><dt>{{ t('majorInertia') }}</dt><dd>{{ formatDim(readyResult.properties.principal.i_major, 4) }} <small>{{ unitLabel(4) }}</small></dd></div>
+                <div><dt>{{ t('minorInertia') }}</dt><dd>{{ formatDim(readyResult.properties.principal.i_minor, 4) }} <small>{{ unitLabel(4) }}</small></dd></div>
                 <div><dt>{{ t('angle') }}</dt><dd>{{ readyResult.properties.principal.major_axis_angle_degrees === null ? '—' : `${format(readyResult.properties.principal.major_axis_angle_degrees)}°` }}</dd></div>
                 <div><dt>{{ t('orientation') }}</dt><dd>{{ t(readyResult.properties.principal.orientation_status) }}</dd></div>
               </dl>
@@ -429,18 +460,27 @@ const svgGeometry = computed(() => {
             <article v-if="readyResult.properties.plastic" class="section-properties-result-card">
               <h4>{{ t('plastic') }}</h4>
               <dl class="section-properties-values">
-                <div><dt>{{ t('pnaX') }}</dt><dd>{{ format(readyResult.properties.plastic.pna_x) }} <small>mm</small></dd></div>
-                <div><dt>{{ t('pnaY') }}</dt><dd>{{ format(readyResult.properties.plastic.pna_y) }} <small>mm</small></dd></div>
-                <div><dt>{{ t('plasticModuli') }} Zx</dt><dd>{{ format(readyResult.properties.plastic.zx) }} <small>mm³</small></dd></div>
-                <div><dt>{{ t('plasticModuli') }} Zy</dt><dd>{{ format(readyResult.properties.plastic.zy) }} <small>mm³</small></dd></div>
+                <div><dt>{{ t('pnaX') }}</dt><dd>{{ formatDim(readyResult.properties.plastic.pna_x, 1) }} <small>{{ unitLabel(1) }}</small></dd></div>
+                <div><dt>{{ t('pnaY') }}</dt><dd>{{ formatDim(readyResult.properties.plastic.pna_y, 1) }} <small>{{ unitLabel(1) }}</small></dd></div>
+                <div><dt>{{ t('plasticModuli') }} Zx</dt><dd>{{ formatDim(readyResult.properties.plastic.zx, 3) }} <small>{{ unitLabel(3) }}</small></dd></div>
+                <div><dt>{{ t('plasticModuli') }} Zy</dt><dd>{{ formatDim(readyResult.properties.plastic.zy, 3) }} <small>{{ unitLabel(3) }}</small></dd></div>
               </dl>
             </article>
             <article class="section-properties-result-card section-properties-advanced-card">
               <h4>{{ t('advanced') }}</h4>
+              <p v-if="readyResult.geometry_type === 'i_section'" class="section-properties-caveat">{{ t('thinWallNote') }}</p>
               <dl class="section-properties-values">
                 <div v-for="(property, key) in readyResult.advanced" :key="key">
-                  <dt>{{ advancedLabel(String(key)) }}</dt>
-                  <dd v-if="property.status === 'computed' && property.value !== null">{{ format(property.value) }} <small>{{ key === 'warping_constant_cw' ? 'mm⁶' : key === 'effective_shear_area' ? 'mm²' : key === 'shear_center' ? 'mm' : 'mm⁴' }}</small></dd>
+                  <dt>{{ advancedLabel(String(key)) }}<small v-if="property.method" class="section-properties-method">{{ t('thinWall') }}</small></dt>
+                  <dd v-if="property.status === 'computed' && typeof property.value === 'number'">{{ formatDim(property.value, key === 'warping_constant_cw' ? 6 : 4) }} <small>{{ unitLabel(key === 'warping_constant_cw' ? 6 : 4) }}</small></dd>
+                  <dd v-else-if="property.status === 'computed' && isShearCenter(property.value)" class="section-properties-vector">
+                    <span>x = {{ formatDim(property.value.x) }}, y = {{ formatDim(property.value.y) }} <small>{{ unitLabel() }}</small></span>
+                    <span>{{ t('offset') }} Δx = {{ formatDim(property.value.offset_x) }}, Δy = {{ formatDim(property.value.offset_y) }} <small>{{ unitLabel() }}</small></span>
+                  </dd>
+                  <dd v-else-if="property.status === 'computed' && isShearArea(property.value)" class="section-properties-vector">
+                    <span>Ax (Vx) = {{ formatDim(property.value.x, 2) }} <small>{{ unitLabel(2) }}</small></span>
+                    <span>Ay (Vy) = {{ formatDim(property.value.y, 2) }} <small>{{ unitLabel(2) }}</small></span>
+                  </dd>
                   <dd v-else><span class="section-properties-unavailable">{{ advancedReason(property.reason) }}</span></dd>
                 </div>
               </dl>
@@ -491,6 +531,10 @@ const svgGeometry = computed(() => {
 .section-properties-primary:focus-visible, .section-properties-secondary:focus-visible, .section-properties-export:focus-visible { outline: 3px solid #9bc3e2; outline-offset: 2px; }
 .section-properties-spinner { width: 13px; height: 13px; border: 2px solid #b7cada; border-top-color: currentColor; border-radius: 50%; animation: section-spin .8s linear infinite; }
 @keyframes section-spin { to { transform: rotate(360deg); } }
+.section-properties-result-unit { margin-top: 16px; }
+.section-properties-method { display: block; margin-top: 3px; font-size: 10px; font-weight: 500; }
+.section-properties-vector { display: grid; gap: 5px; }
+.section-properties-legend .section-properties-legend-shear { background: #654b8c; }
 .section-properties-caveat { margin: 13px 0 0; color: #788b9e; font-size: 10px; line-height: 1.6; }
 .section-properties-output { min-height: 290px; }
 .section-properties-output-state { display: flex; min-height: 250px; flex-direction: column; align-items: center; justify-content: center; gap: 11px; color: #73879b; font-size: 12px; text-align: center; }

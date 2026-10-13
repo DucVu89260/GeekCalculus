@@ -51,7 +51,7 @@ function navigate(code) { window.location.hash = `/modules/${code}` }
         <p class="pending-note" role="status">{{ t('pending') }}</p>
       </div>
       <div v-show="concreteView === 'section-properties'" class="concrete-section-properties" role="tabpanel">
-        <SectionPropertiesPanel :locale="locale" />
+        <SectionPropertiesPanel :locale="locale" asymmetric-only />
       </div>
     </section>
     <section v-else class="module-panel pending-panel">

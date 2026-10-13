@@ -1,7 +1,7 @@
 import Decimal from 'decimal.js'
 import type { CalculationRequest, CalculationResult, GeometryDefinition } from './types'
 
-const SOLVER_VERSION = '1.0.0'
+const SOLVER_VERSION = '1.1.0'
 const GEOMETRY_MODEL_VERSION = '1.0.0'
 const Decimal80 = Decimal.clone({ precision: 80, rounding: Decimal.ROUND_HALF_EVEN })
 const REQUIRED_PROPERTIES = new Set([
@@ -479,7 +479,135 @@ function rectangleTorsion(width: number, height: number, tolerance: number, maxT
 // the Python engine's floating-point-range error boundary.
 class ArithmeticError extends Error {}
 
-function unavailable(reason: string) { return { status: 'not_computed' as const, value: null, reason } }
+function unavailable(reason: string) { return { status: 'not_computed' as const, value: null, reason, method: null } }
+
+function iSectionAdvanced(
+  d: Record<string, number>,
+  centroidY: number,
+): {
+  warpingConstant: CalculationResult['advanced']['warping_constant_cw']
+  shearCenter: CalculationResult['advanced']['shear_center']
+  effectiveShearArea: CalculationResult['advanced']['effective_shear_area']
+  diagnostics: Record<string, unknown>
+} {
+  const dec = (value: number) => new Decimal80(String(value))
+  const h = dec(d.depth), bt = dec(d.top_flange_width), bb = dec(d.bottom_flange_width)
+  const tw = dec(d.web_thickness), tt = dec(d.top_flange_thickness), tb = dec(d.bottom_flange_thickness)
+  const yb = tb.div(2), yt = h.minus(tt.div(2)), h0 = yt.minus(yb)
+  const iyb = tb.times(bb.pow(3)).div(12), iyt = tt.times(bt.pow(3)).div(12)
+  const flangeI = iyb.plus(iyt)
+  const lowI = Decimal80.min(iyb, iyt), highI = Decimal80.max(iyb, iyt)
+  const cw = h0.pow(2).times(lowI.div(new Decimal80(1).plus(lowI.div(highI))))
+  const shearCenterY = iyb.times(yb).plus(iyt.times(yt)).div(flangeI)
+  const width = Decimal80.max(bt, bb)
+  const shearCenterX = width.div(2)
+  const shearOffsetY = shearCenterY.minus(dec(centroidY))
+
+  const axDenominator = tb.times(bb.pow(5)).div(120).plus(tt.times(bt.pow(5)).div(120))
+  const effectiveAx = flangeI.pow(2).div(axDenominator)
+
+  const areaBottom = bb.times(tb), areaWeb = tw.times(h0), areaTop = bt.times(tt)
+  const yWeb = yb.plus(yt).div(2)
+  const lineArea = areaBottom.plus(areaWeb).plus(areaTop)
+  const cyLine = areaBottom.times(yb).plus(areaWeb.times(yWeb)).plus(areaTop.times(yt)).div(lineArea)
+  const ixLine = areaBottom.times(yb.minus(cyLine).pow(2))
+    .plus(tw.times(h0.pow(3).div(12).plus(h0.times(yWeb.minus(cyLine).pow(2)))))
+    .plus(areaTop.times(yt.minus(cyLine).pow(2)))
+
+  // Factor the difference of squares in Q(y); Decimal80 avoids range loss in
+  // high powers while keeping the Python and browser analytical paths aligned.
+  const webFirstMoment = (y: Decimal) => areaTop.times(yt.minus(cyLine)).plus(
+    tw.div(2).times(yt.minus(y)).times(yt.plus(y).minus(cyLine.times(2))),
+  )
+  const halfDepth = h0.div(2), mid = yb.plus(yt).div(2)
+  const gaussOffset = halfDepth.times(new Decimal80(3).div(5).sqrt())
+  const qLower = webFirstMoment(mid.minus(gaussOffset))
+  const qMid = webFirstMoment(mid)
+  const qUpper = webFirstMoment(mid.plus(gaussOffset))
+  const webEnergy = halfDepth.div(tw).times(
+    new Decimal80(5).div(9).times(qLower.pow(2).plus(qUpper.pow(2)))
+      .plus(new Decimal80(8).div(9).times(qMid.pow(2))),
+  )
+  const flangeEnergy = iyb.times(yb.minus(cyLine).pow(2)).plus(iyt.times(yt.minus(cyLine).pow(2)))
+  const ayDenominator = webEnergy.plus(flangeEnergy)
+  const effectiveAy = ixLine.pow(2).div(ayDenominator)
+
+  const finiteValue = (value: Decimal, positive = true): number | null => {
+    const converted = value.toNumber()
+    if (!Number.isFinite(converted) || (positive && converted <= 0) || (!value.isZero() && converted === 0)) return null
+    return converted
+  }
+  const diagnosticValue = (value: Decimal): number | null => finiteValue(value, false)
+  const cwNumber = finiteValue(cw)
+  const centerValues = [finiteValue(shearCenterX), finiteValue(shearCenterY), finiteValue(new Decimal80(0), false), finiteValue(shearOffsetY, false)]
+  const axNumber = finiteValue(effectiveAx), ayNumber = finiteValue(effectiveAy)
+  const rangeFailures: string[] = []
+  const warpingConstant = cwNumber === null
+    ? (rangeFailures.push('warping_constant_cw'), unavailable('numerical_range'))
+    : { status: 'computed' as const, value: cwNumber, reason: null, method: 'vlasov_thin_wall_i_section' }
+  let shearCenter: CalculationResult['advanced']['shear_center']
+  if (centerValues.some((value) => value === null)) {
+    rangeFailures.push('shear_center')
+    shearCenter = unavailable('numerical_range')
+  } else {
+    shearCenter = {
+      status: 'computed',
+      value: { x: centerValues[0]!, y: centerValues[1]!, offset_x: centerValues[2]!, offset_y: centerValues[3]! },
+      reason: null,
+      method: 'vlasov_thin_wall_i_section',
+    }
+  }
+  let effectiveShearArea: CalculationResult['advanced']['effective_shear_area']
+  if (axNumber === null || ayNumber === null) {
+    rangeFailures.push('effective_shear_area')
+    effectiveShearArea = unavailable('numerical_range')
+  } else {
+    effectiveShearArea = {
+      status: 'computed', value: { x: axNumber, y: ayNumber }, reason: null,
+      method: 'thin_wall_shear_energy_i_section',
+    }
+  }
+  const diagnosticsValues = {
+    centerline_depth: diagnosticValue(h0),
+    iy_bottom_flange: diagnosticValue(iyb),
+    iy_top_flange: diagnosticValue(iyt),
+    line_area_centroid_y: diagnosticValue(cyLine),
+    line_area_second_moment_ix: diagnosticValue(ixLine),
+    effective_shear_area_x_denominator: diagnosticValue(axDenominator),
+    effective_shear_area_y_web_denominator: diagnosticValue(webEnergy),
+    effective_shear_area_y_flange_denominator: diagnosticValue(flangeEnergy),
+    effective_shear_area_y_total_denominator: diagnosticValue(ayDenominator),
+  }
+  return {
+    warpingConstant,
+    shearCenter,
+    effectiveShearArea,
+    diagnostics: {
+      status: rangeFailures.length ? 'partial' : 'computed',
+      model: 'sharp_corner_centerline_thin_wall',
+      assumptions: [
+        'uniform_homogeneous_material',
+        'flanges_reduced_to_centerlines_for_warping_and_shear_flow',
+        'web_retains_uniform_thickness_over_centerline_depth',
+        'no_fillets_or_local_thick_wall_elasticity',
+        'shear_center_offsets_from_gross_geometric_centroid',
+        'effective_shear_area_is_an_energy_equivalent_thin_wall_estimate',
+      ],
+      range_failures: rangeFailures,
+      centerline_depth: diagnosticsValues.centerline_depth,
+      flange_centroidal_inertias_about_y: { bottom: diagnosticsValues.iy_bottom_flange, top: diagnosticsValues.iy_top_flange },
+      line_area_centroid_y: diagnosticsValues.line_area_centroid_y,
+      line_area_second_moment_ix: diagnosticsValues.line_area_second_moment_ix,
+      effective_shear_area_energy: {
+        x_flange_denominator: diagnosticsValues.effective_shear_area_x_denominator,
+        y_web_denominator: diagnosticsValues.effective_shear_area_y_web_denominator,
+        y_flange_denominator: diagnosticsValues.effective_shear_area_y_flange_denominator,
+        y_total_denominator: diagnosticsValues.effective_shear_area_y_total_denominator,
+        web_quadrature: 'three_point_gauss_legendre_exact_for_quartic',
+      },
+    },
+  }
+}
 
 function assertFiniteTree(value: unknown): boolean {
   if (typeof value === 'number') return Number.isFinite(value)
@@ -491,7 +619,13 @@ function assertFiniteTree(value: unknown): boolean {
 /** Calculate a sectional-properties result entirely in the browser. */
 export async function calculateDemoSection(request: CalculationRequest): Promise<CalculationResult> {
   const { geometry, options } = validateRequest(request)
-  const unsupported = Array.from(new Set(options.required_properties.filter((name) => name !== 'torsion_constant_j'))).sort()
+  const supported = new Set(['torsion_constant_j'])
+  if (geometry.type === 'i_section') {
+    supported.add('warping_constant_cw')
+    supported.add('shear_center')
+    supported.add('effective_shear_area')
+  }
+  const unsupported = Array.from(new Set(options.required_properties.filter((name) => !supported.has(name)))).sort()
   if (geometry.type === 'i_section' && options.required_properties.includes('torsion_constant_j') && !unsupported.includes('torsion_constant_j')) unsupported.push('torsion_constant_j')
   if (unsupported.length) {
     throw new DemoCalculationError('UNSUPPORTED_PROPERTY', 'A required advanced property has no v1 solver.', { properties: unsupported.sort(), reason: 'solver_not_implemented' })
@@ -571,17 +705,43 @@ export async function calculateDemoSection(request: CalculationRequest): Promise
     if (geometry.type === 'i_section') {
       torsionConstantJ = unavailable('solver_not_implemented')
     } else if (wantJ && geometry.type === 'circle') {
-      torsionConstantJ = { status: 'computed', value: Math.PI * geometry.dimensions.diameter ** 4 / 32, reason: null }
+      torsionConstantJ = { status: 'computed', value: Math.PI * geometry.dimensions.diameter ** 4 / 32, reason: null, method: null }
       diagnostics.torsion = { method: 'solid_circle_closed_form' }
     } else if (wantJ) {
       const torsion = rectangleTorsion(width, height, options.rectangle_j_relative_tolerance, options.rectangle_j_max_terms)
       diagnostics.torsion = torsion.diagnostics
       if (torsion.converged) {
-        torsionConstantJ = { status: 'computed', value: torsion.value, reason: null }
+        torsionConstantJ = { status: 'computed', value: torsion.value, reason: null, method: null }
       } else if (options.required_properties.includes('torsion_constant_j')) {
         throw calculationError('Required rectangle torsion did not meet the requested tolerance.', { property: 'torsion_constant_j', reason: torsion.reason, ...torsion.diagnostics })
       } else {
         torsionConstantJ = unavailable(torsion.reason || 'convergence_not_achieved')
+      }
+    }
+    let warpingConstantCw: CalculationResult['advanced']['warping_constant_cw'] = unavailable('solver_not_implemented')
+    let shearCenter: CalculationResult['advanced']['shear_center'] = unavailable('solver_not_implemented')
+    let effectiveShearArea: CalculationResult['advanced']['effective_shear_area'] = unavailable('solver_not_implemented')
+    if (geometry.type === 'i_section') {
+      const wantsCw = options.include_advanced || options.required_properties.includes('warping_constant_cw')
+      const wantsShearCenter = options.include_advanced || options.required_properties.includes('shear_center')
+      const wantsEffectiveShear = options.include_advanced || options.required_properties.includes('effective_shear_area')
+      if (wantsCw || wantsShearCenter || wantsEffectiveShear) {
+        const thinWall = iSectionAdvanced(d, centroidY)
+        diagnostics.i_section_advanced = thinWall.diagnostics
+        for (const name of options.required_properties) {
+          if (name === 'warping_constant_cw' && thinWall.warpingConstant.status !== 'computed'
+            || name === 'shear_center' && thinWall.shearCenter.status !== 'computed'
+            || name === 'effective_shear_area' && thinWall.effectiveShearArea.status !== 'computed') {
+            throw calculationError('A required advanced property is outside the numerical range.', { property: name, reason: 'numerical_range' })
+          }
+        }
+        warpingConstantCw = wantsCw ? thinWall.warpingConstant : unavailable('not_requested')
+        shearCenter = wantsShearCenter ? thinWall.shearCenter : unavailable('not_requested')
+        effectiveShearArea = wantsEffectiveShear ? thinWall.effectiveShearArea : unavailable('not_requested')
+      } else {
+        warpingConstantCw = unavailable('not_requested')
+        shearCenter = unavailable('not_requested')
+        effectiveShearArea = unavailable('not_requested')
       }
     }
     const result: CalculationResult = {
@@ -590,7 +750,7 @@ export async function calculateDemoSection(request: CalculationRequest): Promise
       geometry_type: geometry.type,
       geometry_hash: geometryHash(geometry),
       solver: { method: 'analytical', version: SOLVER_VERSION, config_hash: configHash(options) },
-      units: { length: 'mm', area: 'mm2', section_modulus: 'mm3', second_moment: 'mm4', torsion_constant: 'mm4', warping_constant: 'mm6', angle: 'deg' },
+      units: { length: 'mm', area: 'mm2', section_modulus: 'mm3', second_moment: 'mm4', torsion_constant: 'mm4', warping_constant: 'mm6', shear_center: 'mm', effective_shear_area: 'mm2', angle: 'deg' },
       normalized_input: { geometry, units: 'mm', options },
       properties: {
         geometric: { area, perimeter, centroid_x: centroidX, centroid_y: centroidY },
@@ -600,9 +760,9 @@ export async function calculateDemoSection(request: CalculationRequest): Promise
       },
       advanced: {
         torsion_constant_j: torsionConstantJ,
-        warping_constant_cw: unavailable('solver_not_implemented'),
-        shear_center: unavailable('solver_not_implemented'),
-        effective_shear_area: unavailable('solver_not_implemented'),
+        warping_constant_cw: warpingConstantCw,
+        shear_center: shearCenter,
+        effective_shear_area: effectiveShearArea,
       },
       diagnostics: {
         ...diagnostics,

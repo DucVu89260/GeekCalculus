@@ -87,11 +87,59 @@ async function verifyPreset(page, section, name, buttonName, type, extra = {}) {
   await assertDisplayNumber(output, 'Elastic section moduli Sx+', result.properties.elastic.sx_positive, 'mm³')
   await assertDisplayNumber(output, 'Elastic section moduli Sx−', result.properties.elastic.sx_negative, 'mm³')
   assert.ok(await output.locator('.section-properties-advanced-card').isVisible())
-  assert.equal(result.advanced.warping_constant_cw.status, 'not_computed')
-  assert.equal(result.advanced.warping_constant_cw.value, null)
-  assert.equal(result.advanced.shear_center.status, 'not_computed')
-  assert.equal(result.advanced.effective_shear_area.value, null)
+  if (type === 'i_section') {
+    for (const key of ['warping_constant_cw', 'shear_center', 'effective_shear_area']) {
+      assert.equal(result.advanced[key].status, 'computed', `${key} must be computed for I/H`)
+      assert.equal(result.advanced[key].reason, null)
+      assert.ok(result.advanced[key].method, `${key} must identify its thin-wall method`)
+    }
+    assert.ok(result.advanced.warping_constant_cw.value > 0)
+    assert.ok(result.advanced.effective_shear_area.value.x > 0)
+    assert.ok(result.advanced.effective_shear_area.value.y > 0)
+    await output.locator('.section-properties-shear-marker').waitFor()
+  } else {
+    assert.equal(result.advanced.warping_constant_cw.status, 'not_computed')
+    assert.equal(result.advanced.warping_constant_cw.value, null)
+    assert.equal(result.advanced.shear_center.status, 'not_computed')
+    assert.equal(result.advanced.effective_shear_area.value, null)
+  }
   return { output, result }
+}
+
+async function verifyAdvancedUnits(page, section, result, name) {
+  const output = section.locator('.section-properties-result')
+  const advanced = output.locator('.section-properties-advanced-card')
+  const row = label => advanced.locator('dt').filter({ hasText: new RegExp(`^${label}`) }).locator('..').locator('dd')
+  for (const [unit, ratio] of [['mm', 1], ['cm', 0.1], ['m', 0.001]]) {
+    await section.getByLabel('Result unit', { exact: true }).selectOption(unit)
+    await assertDisplayNumber(output, 'Area A', result.properties.geometric.area * ratio ** 2, `${unit}²`)
+    await assertDisplayNumber(output, 'Ix', result.properties.elastic.ix * ratio ** 4, `${unit}⁴`)
+    await assertDisplayNumber(output, 'Elastic section moduli Sx+', result.properties.elastic.sx_positive * ratio ** 3, `${unit}³`)
+    await assertDisplayNumber(output, 'PNA coordinate y', result.properties.plastic.pna_y * ratio, unit)
+    const cw = await row('Warping constant Cw').innerText()
+    close(numberFromText(cw), result.advanced.warping_constant_cw.value * ratio ** 6, `${name} Cw ${unit}`, 1e-7)
+    assert.ok(cw.includes(`${unit}⁶`))
+    const centerLines = row('Shear center').locator('span')
+    const center = (await centerLines.nth(0).innerText()).match(/x = ([0-9.,-]+), y = ([0-9.,-]+)/)
+    const offsets = (await centerLines.nth(1).innerText()).match(/Δx = ([0-9.,-]+), Δy = ([0-9.,-]+)/)
+    assert.ok(center && offsets)
+    close(numberFromText(center[1]), result.advanced.shear_center.value.x * ratio, `${name} center x ${unit}`, 1e-7)
+    close(numberFromText(center[2]), result.advanced.shear_center.value.y * ratio, `${name} center y ${unit}`, 1e-7)
+    close(numberFromText(offsets[1]), result.advanced.shear_center.value.offset_x * ratio, `${name} offset x ${unit}`, 1e-7)
+    close(numberFromText(offsets[2]), result.advanced.shear_center.value.offset_y * ratio, `${name} offset y ${unit}`, 1e-7)
+    const shearLines = row('Effective shear area').locator('span')
+    for (const [index, axis] of [[0, 'x'], [1, 'y']]) {
+      const line = await shearLines.nth(index).innerText()
+      close(numberFromText(line.split('=')[1]), result.advanced.effective_shear_area.value[axis] * ratio ** 2, `${name} shear ${axis} ${unit}`, 1e-7)
+      assert.ok(line.includes(`${unit}²`))
+    }
+  }
+  const exported = await exportResult(page, section, `${name}-metres`)
+  assert.equal(exported.display_unit, 'm')
+  assert.equal(exported.result.units.length, 'mm')
+  assert.deepEqual(exported.result, result, 'Changing display units must not change canonical engine values')
+  assert.equal(await section.locator('.section-properties-input-grid input').first().inputValue(), '400')
+  await section.getByLabel('Result unit', { exact: true }).selectOption('mm')
 }
 
 async function fillCatalogProperties(dialog, shape) {
@@ -143,42 +191,51 @@ async function fillCatalogProperties(dialog, shape) {
     await page.getByText('Asymmetric I/H and advanced properties', { exact: true }).click()
     await steelSection.getByRole('heading', { name: 'Section properties', exact: true }).waitFor()
 
-    const rectangle = await verifyPreset(page, steelSection, 'rectangle', 'TC-001 · Rectangle 200 × 400', 'rectangle')
-    const width = steelSection.locator('.section-properties-input-grid input').nth(0)
+    assert.deepEqual(await steelSection.locator('#section-geometry-type option').evaluateAll(options => options.map(option => option.value)), ['i_section'])
+    assert.equal(await steelSection.getByRole('button', { name: /TC-00[12]/ }).count(), 0)
+    const steelI = await verifyPreset(page, steelSection, 'steel-i', 'TC-003 · Asymmetric I/H', 'i_section')
+    await verifyAdvancedUnits(page, steelSection, steelI.result, 'steel-i')
+    await page.screenshot({ path: '/tmp/geekcalculus-steel-advanced-i.png', fullPage: true })
+
+    // Rectangle/circle and their torsion calculations remain available in the standalone page.
+    await page.locator('.module-navigation a[href$="/modules/analysis"]').click()
+    await page.getByText('Asymmetric I/H and advanced properties', { exact: true }).click()
+    const standaloneSection = page.locator('.section-properties').last()
+    const rectangle = await verifyPreset(page, standaloneSection, 'rectangle', 'TC-001 · Rectangle 200 × 400', 'rectangle')
+    const width = standaloneSection.locator('.section-properties-input-grid input').nth(0)
     await width.fill('201')
     await rectangle.output.waitFor({ state: 'detached' })
-    await steelSection.getByRole('button', { name: 'TC-001 · Rectangle 200 × 400', exact: true }).click()
-    await steelSection.getByRole('button', { name: 'Calculate', exact: true }).click()
-    await steelSection.locator('.section-properties-result').waitFor()
-    const repeatedRectangle = await exportResult(page, steelSection, 'rectangle-repeat')
+    await standaloneSection.getByRole('button', { name: 'TC-001 · Rectangle 200 × 400', exact: true }).click()
+    await standaloneSection.getByRole('button', { name: 'Calculate', exact: true }).click()
+    await standaloneSection.locator('.section-properties-result').waitFor()
+    const repeatedRectangle = await exportResult(page, standaloneSection, 'rectangle-repeat')
     assert.equal(repeatedRectangle.result.advanced.torsion_constant_j.status, 'computed')
     assert.ok(repeatedRectangle.result.advanced.torsion_constant_j.value > 0)
     await page.screenshot({ path: '/tmp/geekcalculus-section-properties-rectangle.png', fullPage: true })
 
-    const circle = await verifyPreset(page, steelSection, 'circle', 'TC-002 · Circle D200', 'circle')
+    const circle = await verifyPreset(page, standaloneSection, 'circle', 'TC-002 · Circle D200', 'circle')
     assert.equal(circle.result.advanced.torsion_constant_j.status, 'computed')
     close(circle.result.advanced.torsion_constant_j.value, Math.PI * 200 ** 4 / 32, 'circle torsion J')
-
-    const iSection = await verifyPreset(page, steelSection, 'i-section', 'TC-003 · Asymmetric I/H', 'i_section')
-    for (const [name, property] of Object.entries(iSection.result.advanced)) {
-      assert.equal(property.status, 'not_computed', `${name} should be marked not computed for an I-section`)
-      assert.equal(property.value, null, `${name} should not report a numeric I-section value`)
-    }
-    assert.match(await iSection.output.innerText(), /Warping constant Cw[\s\S]*Not implemented/)
-    await page.screenshot({ path: '/tmp/geekcalculus-section-properties-i.png', fullPage: true })
+    const iSection = await verifyPreset(page, standaloneSection, 'i-section', 'TC-003 · Asymmetric I/H', 'i_section')
+    await verifyAdvancedUnits(page, standaloneSection, iSection.result, 'standalone-i')
 
     await page.locator('.module-navigation a[href$="/modules/concrete"]').click()
     const concreteSection = page.locator('.concrete-section-properties .section-properties')
     await page.getByRole('tab', { name: 'Section properties', exact: true }).click()
     await page.getByText('Asymmetric I/H and advanced properties', { exact: true }).click()
     await concreteSection.getByRole('heading', { name: 'Section properties', exact: true }).waitFor()
-    const concreteRectangle = await verifyPreset(page, concreteSection, 'concrete-rectangle', 'TC-001 · Rectangle 200 × 400', 'rectangle')
-    close(concreteRectangle.result.properties.geometric.area, 80000, 'concrete section rectangle parity')
-    await page.screenshot({ path: '/tmp/geekcalculus-concrete-section-properties.png', fullPage: true })
+    assert.deepEqual(await concreteSection.locator('#section-geometry-type option').evaluateAll(options => options.map(option => option.value)), ['i_section'])
+    assert.equal(await concreteSection.getByRole('button', { name: /TC-00[12]/ }).count(), 0)
+    const concreteI = await verifyPreset(page, concreteSection, 'concrete-i', 'TC-003 · Asymmetric I/H', 'i_section')
+    close(concreteI.result.advanced.warping_constant_cw.value, steelI.result.advanced.warping_constant_cw.value, 'Steel/Concrete Cw parity')
+    await verifyAdvancedUnits(page, concreteSection, concreteI.result, 'concrete-i')
+    await page.screenshot({ path: '/tmp/geekcalculus-concrete-advanced-i.png', fullPage: true })
 
     await page.getByRole('button', { name: 'VI', exact: true }).click()
     await page.getByRole('heading', { name: 'Đặc trưng tiết diện', exact: true }).waitFor()
     assert.equal(await page.locator('html').getAttribute('lang'), 'vi')
+    await concreteSection.getByLabel('Đơn vị kết quả', { exact: true }).selectOption('cm')
+    await concreteSection.getByText('Xấp xỉ thành mỏng', { exact: true }).first().waitFor()
     await page.setViewportSize({ width: 390, height: 844 })
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'Vietnamese sectional UI overflows the 390px viewport')
     await page.screenshot({ path: '/tmp/geekcalculus-section-properties-mobile-vi.png', fullPage: true })
@@ -261,7 +318,7 @@ async function fillCatalogProperties(dialog, shape) {
 
     if (demo) assert.equal(calculationRequests.length, 0, 'Browser demo should calculate locally without network requests')
     assert.equal(errors.length, 0, errors.join('\n'))
-    console.log(`${demo ? 'Demo' : 'Laravel'} sectional UI checks passed: three numeric fixtures, exported engine values, SVG and formatted units, plastic/advanced states, rectangle J rerun, editor read-only properties, supported/unsupported catalog sketches, VI mobile layout, and no catalog writes.`)
+    console.log(`${demo ? 'Demo' : 'Laravel'} sectional UI checks passed: asymmetric-only Steel/Concrete, Cw/shear center/effective areas and mm/cm/m conversion, canonical JSON exports, three numeric fixtures, SVG and method assumptions, rectangle J rerun, editor read-only properties, supported/unsupported catalog sketches, VI mobile layout, and no catalog writes.`)
   } finally {
     await browser.close()
   }

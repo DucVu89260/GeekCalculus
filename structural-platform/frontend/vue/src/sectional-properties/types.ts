@@ -14,7 +14,15 @@ export interface CalculationOptions {
   required_properties?: string[]
 }
 export interface CalculationRequest { geometry: GeometryDefinition; units: 'mm'; options?: CalculationOptions }
-export interface AdvancedProperty { status: 'computed' | 'not_computed'; value: number | null; reason: string | null }
+export interface AdvancedProperty<T = number> { status: 'computed' | 'not_computed'; value: T | null; reason: string | null; method: string | null }
+export interface ShearCenterValue { x: number; y: number; offset_x: number; offset_y: number }
+export interface EffectiveShearAreaValue { x: number; y: number }
+export interface AdvancedProperties {
+  torsion_constant_j: AdvancedProperty
+  warping_constant_cw: AdvancedProperty
+  shear_center: AdvancedProperty<ShearCenterValue>
+  effective_shear_area: AdvancedProperty<EffectiveShearAreaValue>
+}
 export interface CalculationResult {
   status: 'success'
   schema_version: '1.0'
@@ -30,6 +38,6 @@ export interface CalculationResult {
     plastic: { pna_x: number; pna_y: number; zx: number; zy: number } | null
     principal: { i_major: number; i_minor: number; major_axis_angle_degrees: number | null; orientation_status: 'determinate' | 'indeterminate' }
   }
-  advanced: { torsion_constant_j: AdvancedProperty; warping_constant_cw: AdvancedProperty; shear_center: AdvancedProperty; effective_shear_area: AdvancedProperty }
-  diagnostics: { bounding_box: { x_min: number; y_min: number; x_max: number; y_max: number }; intermediate: Record<string, number>; plastic: Record<string, unknown>; torsion?: Record<string, unknown>; assumptions: string[] }
+  advanced: AdvancedProperties
+  diagnostics: { bounding_box: { x_min: number; y_min: number; x_max: number; y_max: number }; intermediate: Record<string, number>; plastic: Record<string, unknown>; torsion?: Record<string, unknown>; i_section_advanced?: Record<string, unknown>; assumptions: string[] }
 }

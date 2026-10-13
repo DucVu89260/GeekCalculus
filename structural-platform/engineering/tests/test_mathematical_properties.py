@@ -4,7 +4,7 @@ from hypothesis import given, settings, strategies as st
 import pytest
 
 from structural_engine.sectional_properties import CalculationOptions, CircleGeometry, ISectionGeometry, RectangleGeometry, calculate, validate_geometry
-from references import independent_i_reference
+from references import independent_i_reference, independent_i_sectorial_pole_reference, independent_i_thin_wall_reference
 
 dimension = st.floats(min_value=0.5, max_value=5000, allow_nan=False, allow_infinity=False)
 
@@ -81,6 +81,53 @@ def test_i_matches_independent_raw_coordinate_integrals_and_area_inversion(geome
         assert getattr(result.properties.elastic, field) == pytest.approx(reference[field], rel=1e-10)
     assert result.properties.plastic.pna_y == pytest.approx(reference["pna_y"], rel=1e-10)
     assert result.properties.plastic.zx == pytest.approx(reference["zx"], rel=1e-10)
+
+
+@settings(max_examples=35, deadline=None, derandomize=True)
+@given(i_geometries())
+def test_i_advanced_matches_independent_high_precision_energy_integral(geometry):
+    result = calculate(geometry, CalculationOptions(include_advanced=True))
+    reference = independent_i_thin_wall_reference(geometry.model_dump())
+    assert result.advanced.warping_constant_cw.value == pytest.approx(reference["warping_constant_cw"], rel=1e-11)
+    assert result.advanced.shear_center.value.y == pytest.approx(reference["shear_center_y"], rel=1e-11)
+    assert result.advanced.effective_shear_area.value.x == pytest.approx(reference["effective_shear_area_x"], rel=1e-11)
+    assert result.advanced.effective_shear_area.value.y == pytest.approx(reference["effective_shear_area_y"], rel=1e-10)
+    pole = independent_i_sectorial_pole_reference(geometry.model_dump())
+    assert result.advanced.shear_center.value.y == pytest.approx(pole["shear_center_y"], rel=1e-11)
+    assert abs(pole["omega_x_first_moment"]) <= 1e-50 * geometry.depth**5
+    assert result.advanced.warping_constant_cw.value == pytest.approx(pole["warping_constant_cw"], rel=1e-11)
+
+
+@settings(max_examples=35, deadline=None, derandomize=True)
+@given(i_geometries(), st.floats(min_value=0.1, max_value=10, allow_nan=False, allow_infinity=False))
+def test_i_advanced_mirroring_and_scaling(geometry, scale):
+    options = CalculationOptions(include_advanced=True)
+    base = calculate(geometry, options)
+    dimensions = geometry.model_dump()
+    dimensions.update(
+        top_flange_width=geometry.bottom_flange_width,
+        bottom_flange_width=geometry.top_flange_width,
+        top_flange_thickness=geometry.bottom_flange_thickness,
+        bottom_flange_thickness=geometry.top_flange_thickness,
+    )
+    mirrored = calculate(validate_geometry(dimensions), options)
+    assert mirrored.advanced.warping_constant_cw.value == pytest.approx(base.advanced.warping_constant_cw.value, rel=1e-10)
+    assert mirrored.advanced.shear_center.value.x == pytest.approx(base.advanced.shear_center.value.x, rel=1e-10)
+    assert mirrored.advanced.shear_center.value.y == pytest.approx(geometry.depth - base.advanced.shear_center.value.y, rel=1e-10)
+    assert mirrored.advanced.shear_center.value.offset_y == pytest.approx(-base.advanced.shear_center.value.offset_y, abs=1e-9)
+    for axis in ("x", "y"):
+        assert getattr(mirrored.advanced.effective_shear_area.value, axis) == pytest.approx(getattr(base.advanced.effective_shear_area.value, axis), rel=1e-10)
+
+    scaled_dimensions = geometry.model_dump()
+    for key, value in scaled_dimensions.items():
+        if isinstance(value, float):
+            scaled_dimensions[key] = value * scale
+    scaled = calculate(validate_geometry(scaled_dimensions), options)
+    assert scaled.advanced.warping_constant_cw.value == pytest.approx(base.advanced.warping_constant_cw.value * scale**6, rel=1e-9)
+    for field in ("x", "y", "offset_x", "offset_y"):
+        assert getattr(scaled.advanced.shear_center.value, field) == pytest.approx(getattr(base.advanced.shear_center.value, field) * scale, rel=1e-9, abs=1e-11)
+    for axis in ("x", "y"):
+        assert getattr(scaled.advanced.effective_shear_area.value, axis) == pytest.approx(getattr(base.advanced.effective_shear_area.value, axis) * scale**2, rel=1e-9)
 
 
 @deterministic

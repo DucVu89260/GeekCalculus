@@ -60,3 +60,67 @@ def independent_square_j_from_prandtl_pde(terms: int = 160) -> float:
     import math
     series = math.fsum(1 / (m*m*n*n*(m*m+n*n)) for m in range(1, 2 * terms, 2) for n in range(1, 2 * terms, 2))
     return 256 * series / math.pi**6
+
+
+def independent_i_thin_wall_reference(dimensions: dict) -> dict:
+    """High-precision Vlasov/energy reference, integrating web energy directly.
+
+    This is an independent benchmark of the explicitly idealized centerline
+    model, not a claim of exact thick-wall elasticity for an I-section.
+    ``mp.quad`` integrates the quartic web shear-flow energy rather than using
+    the production solver's three-point Gauss rule.
+    """
+    with mp.workdps(70):
+        h, bt, bb, tw, tt, tb = [mp.mpf(str(dimensions[key])) for key in (
+            "depth", "top_flange_width", "bottom_flange_width", "web_thickness",
+            "top_flange_thickness", "bottom_flange_thickness",
+        )]
+        yb, yt = tb / 2, h - tt / 2
+        h0 = yt - yb
+        ib, it = tb * bb**3 / 12, tt * bt**3 / 12
+        shear_y = (ib * yb + it * yt) / (ib + it)
+        cw = h0**2 * ib * it / (ib + it)
+        ax = (ib + it)**2 / (tb * bb**5 / 120 + tt * bt**5 / 120)
+
+        area_bottom, area_web, area_top = bb * tb, tw * h0, bt * tt
+        y_web = (yb + yt) / 2
+        cy_line = (area_bottom * yb + area_web * y_web + area_top * yt) / (area_bottom + area_web + area_top)
+        ix_line = (
+            area_bottom * (yb - cy_line)**2
+            + tw * (h0**3 / 12 + h0 * (y_web - cy_line)**2)
+            + area_top * (yt - cy_line)**2
+        )
+        q = lambda y: area_top * (yt - cy_line) + tw / 2 * ((yt - cy_line)**2 - (y - cy_line)**2)
+        web_energy = mp.quad(lambda y: q(y)**2 / tw, [yb, yt])
+        flange_energy = ib * (yb - cy_line)**2 + it * (yt - cy_line)**2
+        ay = ix_line**2 / (web_energy + flange_energy)
+        return {
+            "warping_constant_cw": float(cw),
+            "shear_center_y": float(shear_y),
+            "line_area_centroid_y": float(cy_line),
+            "effective_shear_area_x": float(ax),
+            "effective_shear_area_y": float(ay),
+            "web_energy": float(web_energy),
+            "flange_energy": float(flange_energy),
+        }
+
+
+def independent_i_sectorial_pole_reference(dimensions: dict) -> dict:
+    """Check the warping pole using direct flange-sectorial integrals.
+
+    Set sectorial coordinate omega=0 on the web. On a flange at y_f, moving
+    horizontally from the web gives omega(x)=(y_s-y_f)*x, so its integrals use
+    ∫x²dA=t_f*b_f³/12. The shear-center pole makes ∫omega*x dA vanish, and
+    integrating omega² gives Cw.
+    """
+    with mp.workdps(70):
+        h, bt, bb, tt, tb = [mp.mpf(str(dimensions[key])) for key in (
+            "depth", "top_flange_width", "bottom_flange_width",
+            "top_flange_thickness", "bottom_flange_thickness",
+        )]
+        yb, yt = tb / 2, h - tt / 2
+        ib, it = tb * bb**3 / 12, tt * bt**3 / 12
+        ys = (ib * yb + it * yt) / (ib + it)
+        omega_x_first_moment = ib * (ys - yb) + it * (ys - yt)
+        cw = ib * (ys - yb)**2 + it * (ys - yt)**2
+        return {"shear_center_y": float(ys), "omega_x_first_moment": float(omega_x_first_moment), "warping_constant_cw": float(cw)}

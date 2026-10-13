@@ -10,10 +10,10 @@ from pydantic import ValidationError
 
 from .errors import CalculationError, ConvergenceError, UnsupportedPropertyError
 from .models import CalculationOptions, CircleGeometry, Geometry, ISectionGeometry, RectangleGeometry, geometry_definition, geometry_hash, validate_geometry
-from .results import AdvancedProperties, AdvancedProperty, CalculationResult, ElasticProperties, GeometricProperties, PlasticProperties, PrincipalProperties, Properties, SolverIdentity
+from .results import AdvancedProperties, AdvancedProperty, CalculationResult, EffectiveShearAreaProperty, EffectiveShearAreaValue, ElasticProperties, GeometricProperties, PlasticProperties, PrincipalProperties, Properties, ShearCenterProperty, ShearCenterValue, SolverIdentity
 from .torsion import rectangle_torsion
 
-SOLVER_VERSION = "1.0.0"
+SOLVER_VERSION = "1.1.0"
 
 
 @dataclass(frozen=True)
@@ -108,6 +108,150 @@ def _unavailable(reason: str) -> AdvancedProperty:
     return AdvancedProperty(status="not_computed", value=None, reason=reason)
 
 
+def _unavailable_shear_center(reason: str) -> ShearCenterProperty:
+    return ShearCenterProperty(status="not_computed", value=None, reason=reason)
+
+
+def _unavailable_effective_shear_area(reason: str) -> EffectiveShearAreaProperty:
+    return EffectiveShearAreaProperty(status="not_computed", value=None, reason=reason)
+
+
+def _i_section_advanced(geometry: ISectionGeometry, centroid_y: float) -> tuple[dict[str, object], dict[str, object]]:
+    """Evaluate Vlasov/centerline thin-wall estimates for a sharp-corner I/H.
+
+    Effective shear areas use the same idealized centerline section. The web
+    shear-flow squared is quartic, so three-point Gauss-Legendre integration is
+    exact for its energy integral. These estimates do not model thick-wall
+    elasticity, fillets, restraint, or warping boundary conditions.
+    """
+    with localcontext() as context:
+        context.prec = 80
+        dec = lambda value: Decimal(str(value))
+        h = dec(geometry.depth)
+        bt, bb = dec(geometry.top_flange_width), dec(geometry.bottom_flange_width)
+        tt, tb, tw = dec(geometry.top_flange_thickness), dec(geometry.bottom_flange_thickness), dec(geometry.web_thickness)
+        yb, yt = tb / 2, h - tt / 2
+        h0 = yt - yb
+        iyb, iyt = tb * bb**3 / 12, tt * bt**3 / 12
+        flange_i = iyb + iyt
+
+        # The harmonic product is algebraically Ib*It/(Ib+It), with less
+        # intermediate growth than multiplying both flange inertias first.
+        low_i, high_i = min(iyb, iyt), max(iyb, iyt)
+        cw = h0**2 * (low_i / (1 + low_i / high_i))
+        shear_center_y = (iyb * yb + iyt * yt) / flange_i
+        width = max(bt, bb)
+        shear_center_x = width / 2
+        shear_offset_y = shear_center_y - dec(centroid_y)
+
+        # Thin-wall shear-energy estimate for horizontal (x) shear.
+        ax_denominator = tb * bb**5 / 120 + tt * bt**5 / 120
+        effective_ax = flange_i**2 / ax_denominator
+
+        # For vertical shear, use the idealized line-area centroid and Ix,
+        # web flow Q/Ix, and flange branch energy Iyf*(yf-cy)^2.
+        area_bottom, area_web, area_top = bb * tb, tw * h0, bt * tt
+        y_web = (yb + yt) / 2
+        cy_line = (area_bottom * yb + area_web * y_web + area_top * yt) / (area_bottom + area_web + area_top)
+        ix_line = (
+            area_bottom * (yb - cy_line)**2
+            + tw * (h0**3 / 12 + h0 * (y_web - cy_line)**2)
+            + area_top * (yt - cy_line)**2
+        )
+
+        # Q(y) = At*(yt-cy) + tw/2*((yt-cy)^2-(y-cy)^2). Three-point
+        # Gauss-Legendre integrates Q²/tw (a quartic) exactly.
+        def web_first_moment(y: Decimal) -> Decimal:
+            return area_top * (yt - cy_line) + tw / 2 * (yt - y) * (yt + y - 2 * cy_line)
+
+        half_depth = h0 / 2
+        mid = (yb + yt) / 2
+        gauss_offset = half_depth * (Decimal(3) / 5).sqrt()
+        q_lower = web_first_moment(mid - gauss_offset)
+        q_mid = web_first_moment(mid)
+        q_upper = web_first_moment(mid + gauss_offset)
+        web_energy = half_depth / tw * (Decimal(5) / 9 * (q_lower**2 + q_upper**2) + Decimal(8) / 9 * q_mid**2)
+        flange_energy = iyb * (yb - cy_line)**2 + iyt * (yt - cy_line)**2
+        ay_denominator = web_energy + flange_energy
+        effective_ay = ix_line**2 / ay_denominator
+
+        def finite_value(value: Decimal, *, positive: bool = True) -> float | None:
+            converted = float(value)
+            if not math.isfinite(converted) or (positive and converted <= 0) or (value != 0 and converted == 0):
+                return None
+            return converted
+
+        def diagnostic_value(value: Decimal) -> float | None:
+            return finite_value(value, positive=False)
+
+        cw_float = finite_value(cw)
+        center_values = (
+            finite_value(shear_center_x), finite_value(shear_center_y),
+            finite_value(Decimal(0), positive=False), finite_value(shear_offset_y, positive=False),
+        )
+        ax_float, ay_float = finite_value(effective_ax), finite_value(effective_ay)
+        props: dict[str, object] = {}
+        range_failures: list[str] = []
+        if cw_float is None:
+            props["warping_constant_cw"] = _unavailable("numerical_range")
+            range_failures.append("warping_constant_cw")
+        else:
+            props["warping_constant_cw"] = AdvancedProperty(status="computed", value=cw_float, method="vlasov_thin_wall_i_section")
+        if any(value is None for value in center_values):
+            props["shear_center"] = _unavailable_shear_center("numerical_range")
+            range_failures.append("shear_center")
+        else:
+            props["shear_center"] = ShearCenterProperty(
+                status="computed",
+                value=ShearCenterValue(x=center_values[0], y=center_values[1], offset_x=center_values[2], offset_y=center_values[3]),
+                method="vlasov_thin_wall_i_section",
+            )
+        if ax_float is None or ay_float is None:
+            props["effective_shear_area"] = _unavailable_effective_shear_area("numerical_range")
+            range_failures.append("effective_shear_area")
+        else:
+            props["effective_shear_area"] = EffectiveShearAreaProperty(
+                status="computed", value=EffectiveShearAreaValue(x=ax_float, y=ay_float),
+                method="thin_wall_shear_energy_i_section",
+            )
+        d = {key: diagnostic_value(value) for key, value in {
+            "centerline_depth": h0,
+            "iy_bottom_flange": iyb,
+            "iy_top_flange": iyt,
+            "line_area_centroid_y": cy_line,
+            "line_area_second_moment_ix": ix_line,
+            "effective_shear_area_x_denominator": ax_denominator,
+            "effective_shear_area_y_web_denominator": web_energy,
+            "effective_shear_area_y_flange_denominator": flange_energy,
+            "effective_shear_area_y_total_denominator": ay_denominator,
+        }.items()}
+    diagnostics: dict[str, object] = {
+        "status": "partial" if range_failures else "computed",
+        "model": "sharp_corner_centerline_thin_wall",
+        "assumptions": [
+            "uniform_homogeneous_material",
+            "flanges_reduced_to_centerlines_for_warping_and_shear_flow",
+            "web_retains_uniform_thickness_over_centerline_depth",
+            "no_fillets_or_local_thick_wall_elasticity",
+            "shear_center_offsets_from_gross_geometric_centroid",
+            "effective_shear_area_is_an_energy_equivalent_thin_wall_estimate",
+        ],
+        "range_failures": range_failures,
+        "centerline_depth": d["centerline_depth"],
+        "flange_centroidal_inertias_about_y": {"bottom": d["iy_bottom_flange"], "top": d["iy_top_flange"]},
+        "line_area_centroid_y": d["line_area_centroid_y"],
+        "line_area_second_moment_ix": d["line_area_second_moment_ix"],
+        "effective_shear_area_energy": {
+            "x_flange_denominator": d["effective_shear_area_x_denominator"],
+            "y_web_denominator": d["effective_shear_area_y_web_denominator"],
+            "y_flange_denominator": d["effective_shear_area_y_flange_denominator"],
+            "y_total_denominator": d["effective_shear_area_y_total_denominator"],
+            "web_quadrature": "three_point_gauss_legendre_exact_for_quartic",
+        },
+    }
+    return props, diagnostics
+
+
 def calculate(geometry: Geometry, options: CalculationOptions | None = None) -> CalculationResult:
     """Compute from a validated geometry model, rechecking invariants at entry.
 
@@ -118,9 +262,8 @@ def calculate(geometry: Geometry, options: CalculationOptions | None = None) -> 
         raise TypeError("calculate requires a validated geometry model, not raw JSON")
     geometry = validate_geometry(geometry.model_dump())
     options = CalculationOptions() if options is None else CalculationOptions.model_validate(options)
-    unsupported = set(options.required_properties) - {"torsion_constant_j"}
-    if isinstance(geometry, ISectionGeometry) and "torsion_constant_j" in options.required_properties:
-        unsupported.add("torsion_constant_j")
+    supported = {"warping_constant_cw", "shear_center", "effective_shear_area"} if isinstance(geometry, ISectionGeometry) else {"torsion_constant_j"}
+    unsupported = set(options.required_properties) - supported
     if unsupported:
         raise UnsupportedPropertyError("A required advanced property has no v1 solver.", details={"properties": sorted(unsupported), "reason": "solver_not_implemented"})
     try:
@@ -195,7 +338,29 @@ def _calculate_validated(geometry: Geometry, options: CalculationOptions) -> Cal
             if "torsion_constant_j" in options.required_properties:
                 raise ConvergenceError("Required rectangle torsion did not meet the requested tolerance.", details={"property": "torsion_constant_j", "reason": torsion.reason, **torsion.diagnostics})
             j = _unavailable(torsion.reason)
-    advanced = AdvancedProperties(torsion_constant_j=j, warping_constant_cw=_unavailable("solver_not_implemented"), shear_center=_unavailable("solver_not_implemented"), effective_shear_area=_unavailable("solver_not_implemented"))
+    if isinstance(geometry, ISectionGeometry):
+        wants_cw = options.include_advanced or "warping_constant_cw" in options.required_properties
+        wants_shear_center = options.include_advanced or "shear_center" in options.required_properties
+        wants_effective_shear = options.include_advanced or "effective_shear_area" in options.required_properties
+        if wants_cw or wants_shear_center or wants_effective_shear:
+            thin_wall_properties, thin_wall_diagnostics = _i_section_advanced(geometry, centroid_y)
+            diagnostics["i_section_advanced"] = thin_wall_diagnostics
+            for name in options.required_properties:
+                if name in thin_wall_properties and thin_wall_properties[name].status != "computed":
+                    raise CalculationError(
+                        "A required advanced property is outside the numerical range.",
+                        details={"property": name, "reason": "numerical_range"},
+                    )
+        else:
+            thin_wall_properties = {}
+        cw = thin_wall_properties.get("warping_constant_cw", _unavailable("not_requested")) if wants_cw else _unavailable("not_requested")
+        shear_center = thin_wall_properties.get("shear_center", _unavailable_shear_center("not_requested")) if wants_shear_center else _unavailable_shear_center("not_requested")
+        effective_shear = thin_wall_properties.get("effective_shear_area", _unavailable_effective_shear_area("not_requested")) if wants_effective_shear else _unavailable_effective_shear_area("not_requested")
+    else:
+        cw = _unavailable("solver_not_implemented")
+        shear_center = _unavailable_shear_center("solver_not_implemented")
+        effective_shear = _unavailable_effective_shear_area("solver_not_implemented")
+    advanced = AdvancedProperties(torsion_constant_j=j, warping_constant_cw=cw, shear_center=shear_center, effective_shear_area=effective_shear)
     diagnostics["intermediate"] = intermediates
     diagnostics["bounding_box"] = {"x_min": 0.0, "y_min": 0.0, "x_max": width, "y_max": height}
     diagnostics["assumptions"] = ["dimensions_in_mm", "xy_plane_x_right_y_up", "bbox_origin_bottom_left", "centroidal_unrotated_inertias", "positive_coordinate_product_ixy", "sharp_corners", "homogeneous_geometric_plastic_properties"]

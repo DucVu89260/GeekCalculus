@@ -35,15 +35,15 @@ CLI không tạo/sửa dữ liệu thư viện trên website. Khóa kích thư�
 Từ `structural-platform`, build image dành cho nghiệm thu lõi:
 
 ```sh
-docker build -t geekcalculus-sectional-properties:1.0.0 engineering
-docker run --rm geekcalculus-sectional-properties:1.0.0 python -m pytest -q
-docker run --rm -i geekcalculus-sectional-properties:1.0.0 < engineering/examples/i-asymmetric.json
+docker build -t geekcalculus-sectional-properties:1.1.0 engineering
+docker run --rm geekcalculus-sectional-properties:1.1.0 python -m pytest -q
+docker run --rm -i geekcalculus-sectional-properties:1.1.0 < engineering/examples/i-asymmetric.json
 ```
 
 Trên PowerShell, thay dòng cuối bằng:
 
 ```powershell
-Get-Content -Raw engineering/examples/i-asymmetric.json | docker run --rm -i geekcalculus-sectional-properties:1.0.0
+Get-Content -Raw engineering/examples/i-asymmetric.json | docker run --rm -i geekcalculus-sectional-properties:1.1.0
 ```
 
 Image có CLI/test và FastAPI adapter; Compose khởi động API nội bộ ở port 8001.
@@ -84,7 +84,7 @@ options được kiểm tra lại khi vào engine, kể cả model được dự
 | Sx+/Sx−/Sy+/Sy−, rx/ry | Có | Có | Có |
 | PNA X/Y, Zx/Zy, principal inertias | Có | Có | Có |
 | Saint-Venant J | Chuỗi có kiểm soát hội tụ | Công thức giải tích | `not_computed` |
-| Cw, shear center, effective shear areas | `not_computed` | `not_computed` | `not_computed` |
+| Cw, shear center, effective shear areas | `not_computed` | `not_computed` | Có · xấp xỉ thành mỏng |
 
 Quy ước: mặt phẳng XY, X sang phải, Y lên trên, gốc O ở góc dưới trái
 bounding box; moment quán tính quanh trục qua trọng tâm. Không đồng nhất
@@ -98,9 +98,20 @@ ngược chiều kim đồng hồ: 0° hoặc 90° trong v1. Nếu Ix = Iy, góc
 nên trả `null` và `orientation_status=indeterminate`.
 
 Mặc định tính plastic, không tính advanced. Bật `include_advanced=true` để
-tính J Rectangle/Circle; hoặc yêu cầu `required_properties=["torsion_constant_j"]`.
+tính J Rectangle/Circle và Cw/tâm cắt/diện tích cắt hữu hiệu I/H; hoặc yêu cầu
+các đại lượng qua `required_properties`. J của I/H vẫn chưa có solver.
 `include_plastic=false` trả `properties.plastic=null`, có lý do `not_requested`
-trong diagnostics. Đại lượng nâng cao luôn có `status,value,reason`.
+trong diagnostics. Đại lượng nâng cao có `status,value,reason,method`.
+Cw là số với đơn vị mm⁶; tâm cắt là `{x,y,offset_x,offset_y}` theo mm,
+diện tích cắt hữu hiệu là `{x,y}` theo mm². Ax ứng với Vx, Ay ứng với Vy.
+Tọa độ tâm cắt dùng gốc hộp bao; offset tính từ trọng tâm tiết diện nguyên.
+Các thuộc tính I/H mới là xấp xỉ theo đường trung bình thành mỏng Vlasov và
+năng lượng cắt, không phải nghiệm đàn hồi 2D của tiết diện thành dày.
+Phương pháp/giả thiết nằm trong `diagnostics.i_section_advanced`; xem công
+thức và benchmark tại [đặc tả](docs/sectional-properties-v1.md).
+Nếu riêng kết quả nâng cao tùy chọn vượt dải số, trả `not_computed` với
+`reason=numerical_range` và giữ các đặc trưng tiết diện nguyên hợp lệ. Nếu
+đại lượng đó được yêu cầu bắt buộc, trả `CALCULATION_ERROR`.
 Không dùng J/Cw = 0 để biểu diễn thiếu solver. Nếu yêu cầu đại lượng bắt buộc
 chưa hỗ trợ, engine ném `UnsupportedPropertyError` với code
 `UNSUPPORTED_PROPERTY`; kết quả tùy chọn không hội tụ có value `null`.

@@ -89,9 +89,12 @@ class LibraryController extends Controller
             }
         } else {
             $rules['category'] = ['required', Rule::in(array_column($schema['categories'][$resource === 'section-types' ? 'section_types' : 'materials'], 'code'))];
+            // Optional for old archives/clients: omission preserves existing metadata.
+            $rules['design_code'] = ['sometimes', 'nullable', 'string', Rule::in(array_column($schema['design_codes'], 'code'))];
         }
         if ($resource === 'section-types') {
             $rules['shape'] = ['required', Rule::in(array_column(array_filter($schema['shapes'], fn ($s) => $s['category'] === $category), 'code'))];
+            $rules['region_type'] = 'sometimes|nullable|string|max:64|regex:/\S/u';
         } else {
             $rules['source'] = 'nullable|string|max:2000';
             $fields = array_filter($schema['fields'][$resource], fn ($f) => (! isset($f['categories']) || in_array($category, $f['categories'])) && (! isset($f['shapes']) || in_array($shape, $f['shapes'])));

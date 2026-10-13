@@ -6,6 +6,21 @@ import { copy } from '../i18n'
 const props = defineProps({ locale: { type: String, required: true }, canEdit: { type: Boolean, default: false } })
 const t = (key) => copy[props.locale]?.[key] ?? copy.en[key] ?? key
 const transferId = useId()
+const regionDatalistId = useId()
+
+const metadataCopy = {
+  vi: {
+    designCode: 'Thị trường (Design Code)', regionType: 'Nhóm catalog (Region type)', unclassified: 'Chưa phân loại',
+    allDesignCodes: 'Tất cả thị trường', allRegionTypes: 'Tất cả nhóm catalog',
+    regionTypeHint: 'Tùy chọn; gợi ý phụ thuộc thị trường và hình dạng.',
+  },
+  en: {
+    designCode: 'Design Code', regionType: 'Region type', unclassified: 'Unclassified',
+    allDesignCodes: 'All design codes', allRegionTypes: 'All section families',
+    regionTypeHint: 'Optional; suggestions depend on design code and shape.',
+  },
+}
+const metaT = (key) => metadataCopy[props.locale]?.[key] ?? metadataCopy.en[key] ?? key
 
 const resourceDefinitions = {
   materials: { endpoint: '/api/materials', schemaKey: 'materials', addKey: 'addMaterial' },
@@ -25,6 +40,8 @@ const messageKey = ref('')
 const search = ref('')
 const categoryFilter = ref('')
 const shapeFilter = ref('')
+const designCodeFilter = ref('')
+const regionTypeFilter = ref('')
 const editorOpen = ref(false)
 const editorMode = ref('create')
 const editorResource = ref('materials')
@@ -86,7 +103,7 @@ const transferCopy = {
 const transferT = (key) => transferCopy[props.locale]?.[key] ?? transferCopy.en[key] ?? key
 
 const editForm = reactive({
-  id: null, code: '', name_vi: '', name_en: '', category: '', shape: '', source: '',
+  id: null, code: '', name_vi: '', name_en: '', category: '', shape: '', design_code: '', region_type: '', source: '',
   section_type_id: '', material_id: '', properties: {},
 })
 
@@ -94,6 +111,38 @@ const activeRecords = computed(() => records.value[activeResource.value] ?? [])
 const categories = computed(() => schema.value?.categories?.[activeResource.value === 'sections' ? 'section_types' : activeResource.value] ?? [])
 const visibleShapes = computed(() => (schema.value?.shapes ?? []).filter((shape) => !categoryFilter.value || shape.category === categoryFilter.value))
 const editorShapes = computed(() => (schema.value?.shapes ?? []).filter((shape) => shape.category === editForm.category))
+const designCodeOptions = computed(() => {
+  const options = schema.value?.design_codes
+  return Array.isArray(options) && options.length ? options : ['EN', 'AISC/ACI', 'AS'].map((code) => ({ code, name_vi: code, name_en: code }))
+})
+const regionTypeOptions = computed(() => {
+  const candidates = new Map()
+  for (const option of schema.value?.region_types ?? []) {
+    if (designCodeFilter.value && option.design_code !== designCodeFilter.value) continue
+    if (shapeFilter.value && option.shape !== shapeFilter.value) continue
+    if (option.code) candidates.set(option.code, option)
+  }
+  const types = activeResource.value === 'section_types'
+    ? records.value.section_types
+    : activeResource.value === 'sections'
+      ? records.value.section_types.filter((type) => records.value.sections.some((section) => String(section.section_type_id) === String(type.id)))
+      : []
+  for (const type of types) {
+    if (!type.region_type) continue
+    if (designCodeFilter.value && type.design_code !== designCodeFilter.value) continue
+    if (shapeFilter.value && type.shape !== shapeFilter.value) continue
+    if (!candidates.has(type.region_type)) candidates.set(type.region_type, { code: type.region_type, name_vi: type.region_type, name_en: type.region_type })
+  }
+  return [...candidates.values()].sort((a, b) => String(a.code).localeCompare(String(b.code)))
+})
+const regionSuggestions = computed(() => {
+  const known = (schema.value?.region_types ?? []).filter((item) => {
+    if (editForm.design_code && item.design_code !== editForm.design_code) return false
+    if (editForm.shape && item.shape !== editForm.shape) return false
+    return Boolean(item.code)
+  }).map((item) => item.code)
+  return [...new Set(known)]
+})
 const selectedSectionType = computed(() => records.value.section_types.find((row) => String(row.id) === String(editForm.section_type_id)) ?? null)
 const compatibleMaterials = computed(() => {
   if (!selectedSectionType.value) return []
@@ -117,11 +166,15 @@ const filteredRecords = computed(() => {
     const sectionType = records.value.section_types.find((item) => String(item.id) === String(record.section_type_id))
     const category = record.category ?? sectionType?.category ?? ''
     const shape = record.shape ?? sectionType?.shape ?? ''
+    const designCode = activeResource.value === 'sections' ? sectionType?.design_code ?? '' : record.design_code ?? ''
+    const regionType = activeResource.value === 'section_types' ? record.region_type ?? '' : activeResource.value === 'sections' ? sectionType?.region_type ?? '' : ''
     if (categoryFilter.value && category !== categoryFilter.value) return false
     if (shapeFilter.value && shape !== shapeFilter.value) return false
+    if (designCodeFilter.value && designCode !== designCodeFilter.value) return false
+    if (regionTypeFilter.value && regionType !== regionTypeFilter.value) return false
     if (!query) return true
     const material = records.value.materials.find((item) => String(item.id) === String(record.material_id))
-    const haystack = [record.code, record.name_vi, record.name_en, record.source, shape, category, sectionType?.name_vi, sectionType?.name_en, material?.name_vi, material?.name_en]
+    const haystack = [record.code, record.name_vi, record.name_en, record.source, shape, category, record.design_code, record.region_type, designCode, regionType, designCodeName(designCode), regionTypeName(regionType), sectionType?.code, sectionType?.name_vi, sectionType?.name_en, material?.name_vi, material?.name_en]
       .filter(Boolean).join(' ').toLocaleLowerCase()
     return haystack.includes(query)
   })
@@ -137,6 +190,8 @@ const validationFieldLabels = computed(() => {
     const key = String(path).replace(/\[(.*?)\]/g, '.$1').split('.').filter(Boolean).at(-1) ?? ''
     const descriptor = fields.find((field) => field.key === key)
     if (descriptor) return `${propertyLabel(descriptor)}${descriptor.unit ? ` (${descriptor.unit})` : ''}`
+    if (key === 'design_code') return metaT('designCode')
+    if (key === 'region_type') return metaT('regionType')
     return aliases[key] ? t(aliases[key]) : t('otherField')
   })
 })
@@ -148,6 +203,28 @@ function localizedName(record) {
 function localizedSchemaName(record) {
   const key = props.locale === 'vi' ? 'name_vi' : 'name_en'
   return record?.[key] || record?.name_en || record?.name_vi || record?.code || ''
+}
+
+function designCodeName(code) {
+  if (!code) return metaT('unclassified')
+  const option = designCodeOptions.value.find((item) => item.code === code)
+  return option ? localizedSchemaName(option) : code
+}
+
+function regionTypeName(code) {
+  if (!code) return metaT('unclassified')
+  const option = (schema.value?.region_types ?? []).find((item) => item.code === code)
+  return option ? localizedSchemaName(option) : code
+}
+
+function sectionTypeClassification(type) {
+  if (!type) return metaT('unclassified')
+  const parts = [type.design_code ? designCodeName(type.design_code) : '', type.region_type ? regionTypeName(type.region_type) : ''].filter(Boolean)
+  return parts.join(' · ') || metaT('unclassified')
+}
+
+function sectionTypeSelectionLabel(type) {
+  return `${type.code} · ${localizedName(type)} · ${sectionTypeClassification(type)}`
 }
 
 function categoryName(code) {
@@ -222,6 +299,8 @@ function resetFilters() {
   search.value = ''
   categoryFilter.value = ''
   shapeFilter.value = ''
+  designCodeFilter.value = ''
+  regionTypeFilter.value = ''
 }
 
 async function loadSchema() {
@@ -479,6 +558,8 @@ function openEditor(record = null) {
     name_en: record?.name_en ?? '',
     category,
     shape,
+    design_code: record?.design_code ?? '',
+    region_type: record?.region_type ?? '',
     source: record?.source ?? '',
     section_type_id: record?.section_type_id ?? '',
     material_id: record?.material_id ?? '',
@@ -496,10 +577,13 @@ function makePayload() {
   const payload = { code: editForm.code.trim(), name_vi: editForm.name_vi.trim(), name_en: editForm.name_en.trim() }
   if (editorResource.value === 'materials') {
     payload.category = editForm.category
+    payload.design_code = editForm.design_code || null
     payload.source = editForm.source.trim()
   } else if (editorResource.value === 'section_types') {
     payload.category = editForm.category
     payload.shape = editForm.shape
+    payload.design_code = editForm.design_code || null
+    payload.region_type = editForm.region_type.trim() || null
   } else {
     payload.section_type_id = editForm.section_type_id
     payload.material_id = editForm.material_id
@@ -567,6 +651,10 @@ watch(selectedSectionType, (type) => {
   const selectedMaterial = records.value.materials.find((item) => String(item.id) === String(editForm.material_id))
   const requiredCategory = type.category === 'rc' ? 'concrete' : 'steel'
   if (selectedMaterial && selectedMaterial.category !== requiredCategory) editForm.material_id = ''
+})
+
+watch([designCodeFilter, shapeFilter], () => {
+  if (regionTypeFilter.value && !regionTypeOptions.value.some((item) => item.code === regionTypeFilter.value)) regionTypeFilter.value = ''
 })
 
 watch(activeResource, () => loadRecords())
@@ -638,6 +726,8 @@ onMounted(async () => {
       <label class="library-search"><span class="sr-only">{{ t('search') }}</span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 4 4"/></svg><input v-model="search" type="search" :placeholder="t('searchPlaceholder')" /></label>
       <label class="filter-select"><span>{{ t('category') }}</span><select v-model="categoryFilter"><option value="">{{ t('allCategories') }}</option><option v-for="item in categories" :key="item.code" :value="item.code">{{ localizedSchemaName(item) }}</option></select></label>
       <label v-if="activeResource !== 'materials'" class="filter-select"><span>{{ t('shape') }}</span><select v-model="shapeFilter"><option value="">{{ t('allShapes') }}</option><option v-for="item in visibleShapes" :key="item.code" :value="item.code">{{ localizedSchemaName(item) }}</option></select></label>
+      <label class="filter-select"><span>{{ metaT('designCode') }}</span><select v-model="designCodeFilter"><option value="">{{ metaT('allDesignCodes') }}</option><option v-for="item in designCodeOptions" :key="item.code" :value="item.code">{{ localizedSchemaName(item) }}</option></select></label>
+      <label v-if="activeResource !== 'materials'" class="filter-select"><span>{{ metaT('regionType') }}</span><select v-model="regionTypeFilter"><option value="">{{ metaT('allRegionTypes') }}</option><option v-for="item in regionTypeOptions" :key="item.code" :value="item.code">{{ localizedSchemaName(item) }}</option></select></label>
     </div>
 
     <div v-if="basisText" class="library-basis"><span>i</span>{{ basisText }}</div>
@@ -651,16 +741,18 @@ onMounted(async () => {
     <div v-else-if="!filteredRecords.length" class="library-empty"><strong>{{ t('noRecords') }}</strong></div>
     <div v-else class="library-table-wrap">
       <table class="library-table">
-        <thead><tr><th>{{ t('code') }}</th><th>{{ t('nameVi') }}</th><th>{{ t('nameEn') }}</th><th v-if="activeResource === 'materials'">{{ t('category') }}</th><th v-if="activeResource === 'section_types'">{{ t('category') }}</th><th v-if="activeResource !== 'materials'">{{ t('shape') }}</th><th v-if="activeResource === 'sections'">{{ t('sectionType') }} / {{ t('material') }}</th><th>{{ t('properties') }}</th><th v-if="canEdit">{{ t('actions') }}</th></tr></thead>
+        <thead><tr><th>{{ t('code') }}</th><th>{{ t('nameVi') }}</th><th>{{ t('nameEn') }}</th><th v-if="activeResource === 'materials'">{{ t('category') }}</th><th v-if="activeResource === 'materials' || activeResource === 'section_types'">{{ metaT('designCode') }}</th><th v-if="activeResource === 'section_types'">{{ metaT('regionType') }}</th><th v-if="activeResource === 'section_types'">{{ t('category') }}</th><th v-if="activeResource !== 'materials'">{{ t('shape') }}</th><th v-if="activeResource === 'sections'">{{ t('sectionType') }} / {{ t('material') }}</th><th>{{ t('properties') }}</th><th v-if="canEdit">{{ t('actions') }}</th></tr></thead>
         <tbody>
           <tr v-for="record in filteredRecords" :key="record.id">
             <td class="library-code">{{ record.code }}</td>
             <td>{{ record.name_vi }}</td>
             <td>{{ record.name_en }}</td>
             <td v-if="activeResource === 'materials'">{{ categoryName(record.category) }}</td>
+            <td v-if="activeResource === 'materials' || activeResource === 'section_types'">{{ designCodeName(record.design_code) }}</td>
+            <td v-if="activeResource === 'section_types'">{{ regionTypeName(record.region_type) }}</td>
             <td v-if="activeResource === 'section_types'">{{ categoryName(record.category) }}</td>
             <td v-if="activeResource !== 'materials'">{{ shapeName(record.shape ?? records.section_types.find((item) => String(item.id) === String(record.section_type_id))?.shape) }}</td>
-            <td v-if="activeResource === 'sections'" class="library-related">{{ sectionTypeName(record.section_type_id) }}<small>{{ materialName(record.material_id) }}</small></td>
+            <td v-if="activeResource === 'sections'" class="library-related">{{ sectionTypeName(record.section_type_id) }}<small>{{ sectionTypeClassification(records.section_types.find((item) => String(item.id) === String(record.section_type_id))) }}</small><small>{{ materialName(record.material_id) }}</small></td>
             <td>
               <details v-if="recordPropertyFields(record).length || computedEntries(record).length" class="property-details">
                 <summary>{{ t('properties') }} · {{ recordPropertyFields(record).length + computedEntries(record).length }}</summary>
@@ -686,14 +778,17 @@ onMounted(async () => {
 
           <template v-if="editorResource === 'materials'">
             <label class="field"><span>{{ t('materialCategory') }}<b>*</b></span><select v-model="editForm.category" required><option v-for="item in schema?.categories?.materials ?? []" :key="item.code" :value="item.code">{{ localizedSchemaName(item) }}</option></select></label>
+            <label class="field"><span>{{ metaT('designCode') }}</span><select v-model="editForm.design_code"><option value="">{{ metaT('unclassified') }}</option><option v-for="item in designCodeOptions" :key="item.code" :value="item.code">{{ localizedSchemaName(item) }}</option></select></label>
             <label class="field full-field"><span>{{ t('source') }}</span><input v-model.trim="editForm.source" maxlength="500" :placeholder="t('sourcePlaceholder')" /><small class="field-hint">{{ t('sourceHelp') }}</small></label>
           </template>
           <template v-else-if="editorResource === 'section_types'">
             <label class="field"><span>{{ t('sectionCategory') }}<b>*</b></span><select v-model="editForm.category" required @change="updateEditorCategory"><option v-for="item in schema?.categories?.section_types ?? []" :key="item.code" :value="item.code">{{ localizedSchemaName(item) }}</option></select></label>
             <label class="field"><span>{{ t('shape') }}<b>*</b></span><select v-model="editForm.shape" required><option v-for="item in editorShapes" :key="item.code" :value="item.code">{{ localizedSchemaName(item) }}</option></select></label>
+            <label class="field"><span>{{ metaT('designCode') }}</span><select v-model="editForm.design_code"><option value="">{{ metaT('unclassified') }}</option><option v-for="item in designCodeOptions" :key="item.code" :value="item.code">{{ localizedSchemaName(item) }}</option></select></label>
+            <label class="field"><span>{{ metaT('regionType') }}</span><input v-model.trim="editForm.region_type" maxlength="64" :list="regionDatalistId" autocomplete="off" /><datalist :id="regionDatalistId"><option v-for="value in regionSuggestions" :key="value" :value="value" /></datalist><small class="field-hint">{{ metaT('regionTypeHint') }}</small></label>
           </template>
           <template v-else>
-            <label class="field"><span>{{ t('sectionType') }}<b>*</b></span><select v-model="editForm.section_type_id" required><option value="">{{ t('selectOption') }}</option><option v-for="item in records.section_types" :key="item.id" :value="item.id">{{ item.code }} · {{ localizedName(item) }}</option></select></label>
+            <label class="field"><span>{{ t('sectionType') }}<b>*</b></span><select v-model="editForm.section_type_id" required><option value="">{{ t('selectOption') }}</option><option v-for="item in records.section_types" :key="item.id" :value="item.id">{{ sectionTypeSelectionLabel(item) }}</option></select></label>
             <label class="field"><span>{{ t('material') }}<b>*</b></span><select v-model="editForm.material_id" required><option value="">{{ t('selectOption') }}</option><option v-for="item in compatibleMaterials" :key="item.id" :value="item.id">{{ item.code }} · {{ localizedName(item) }}</option></select></label>
             <label class="field full-field"><span>{{ t('source') }}</span><input v-model.trim="editForm.source" maxlength="500" :placeholder="t('sourcePlaceholder')" /><small class="field-hint">{{ t('sourceHelp') }}</small></label>
           </template>
@@ -719,6 +814,9 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+.library-browser .library-filters { flex-wrap: wrap; }
+.library-browser .library-search { flex: 2 1 230px; }
+.library-browser .filter-select { flex: 1 1 138px; }
 .library-transfer { margin: 14px 0 18px; padding: 16px; border: 1px solid #d7e5f1; border-radius: 11px; background: linear-gradient(145deg, #fbfdff, #f5f9fd); }
 .library-transfer-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
 .library-transfer-header h3 { margin: 0; color: #294968; font-size: 13px; font-weight: 700; }
@@ -756,4 +854,5 @@ onMounted(async () => {
 .library-transfer-result dd { margin: 0; color: #366b4b; font-size: 10px; font-weight: 750; font-variant-numeric: tabular-nums; }
 @media (max-width: 760px) { .library-transfer-controls { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }.library-transfer-import { grid-column: 1 / -1; }.library-transfer-export { align-self: flex-start; } }
 @media (max-width: 520px) { .library-transfer { padding: 12px; }.library-transfer-header { flex-direction: column; }.library-transfer-controls { grid-template-columns: 1fr; }.library-transfer-import { grid-column: auto; }.library-transfer-export { width: 100%; }.library-transfer-choose { flex: 1; } }
+@media (max-width: 760px) { .library-browser .library-filters { align-items: stretch; flex-direction: column; }.library-browser .library-search, .library-browser .filter-select { width: 100%; flex: initial; } }
 </style>

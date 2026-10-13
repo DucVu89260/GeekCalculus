@@ -11,6 +11,7 @@ const text = {
     status: 'Sơ bộ · Chưa sẵn sàng tính toán', componentSubtitle: 'Cấu kiện · Thiết lập sơ bộ', connectionSubtitle: 'Liên kết · Thiết lập sơ bộ',
     member: 'Cấu kiện', memberType: 'Loại cấu kiện', beam: 'Dầm', column: 'Cột', brace: 'Thanh giằng',
     standard: 'Tiêu chuẩn thiết kế', material: 'Vật liệu thép', section: 'Tiết diện thép',
+    catalogDesignCode: 'Thị trường thư viện (Design Code)', allDesignCodes: 'Tất cả thị trường', regionType: 'Nhóm catalog (Region type)', allRegionTypes: 'Tất cả nhóm catalog', unclassified: 'Chưa phân loại',
     choose: 'Chọn một mục', noMaterials: 'Chưa có vật liệu thép trong thư viện.', noSections: 'Chưa có tiết diện thép dùng vật liệu đã chọn.',
     openLibrary: 'Mở thư viện kỹ thuật', loading: 'Đang tải dữ liệu thư viện…', loadError: 'Không tải được vật liệu hoặc tiết diện thép.', retry: 'Thử lại',
     materialProperties: 'Đặc trưng cơ học vật liệu', sectionProperties: 'Đặc trưng tiết diện', computedProperties: 'Thông số có sẵn',
@@ -30,6 +31,7 @@ const text = {
     status: 'Preliminary · Calculation is not ready', componentSubtitle: 'Member · Preliminary setup', connectionSubtitle: 'Connection · Preliminary setup',
     member: 'Member', memberType: 'Member type', beam: 'Beam', column: 'Column', brace: 'Brace',
     standard: 'Design standard', material: 'Steel material', section: 'Steel section',
+    catalogDesignCode: 'Library Design Code', allDesignCodes: 'All design codes', regionType: 'Region type', allRegionTypes: 'All section families', unclassified: 'Unclassified',
     choose: 'Select an item', noMaterials: 'No steel materials are available in the library.', noSections: 'No steel sections use the selected material.',
     openLibrary: 'Open engineering library', loading: 'Loading library data…', loadError: 'Could not load steel materials or sections.', retry: 'Retry',
     materialProperties: 'Material mechanical properties', sectionProperties: 'Section properties', computedProperties: 'Available derived values',
@@ -55,6 +57,8 @@ const fastener = ref('bolted')
 const boltGrade = ref('8.8')
 const weldType = ref('fillet')
 const connectionStandard = ref('tcvn_5575_2024')
+const marketFilter = ref('all')
+const regionTypeFilter = ref('all')
 
 const loading = ref(true)
 const loadError = ref(false)
@@ -66,13 +70,39 @@ const selectedMaterialId = ref('')
 const selectedSectionId = ref('')
 let requestSequence = 0
 
-const steelTypes = computed(() => sectionTypes.value.filter((item) => item.category === 'steel'))
+const allSteelTypes = computed(() => sectionTypes.value.filter((item) => item.category === 'steel'))
+const designCodeOptions = computed(() => {
+  const options = schema.value?.design_codes
+  return Array.isArray(options) && options.length ? options : ['EN', 'AISC/ACI', 'AS'].map((code) => ({ code, name_vi: code, name_en: code }))
+})
+const steelTypes = computed(() => allSteelTypes.value.filter((item) => {
+  if (marketFilter.value !== 'all' && item.design_code !== marketFilter.value) return false
+  if (regionTypeFilter.value === '__unclassified__' && item.region_type) return false
+  if (regionTypeFilter.value !== 'all' && regionTypeFilter.value !== '__unclassified__' && item.region_type !== regionTypeFilter.value) return false
+  return true
+}))
 const steelTypeIds = computed(() => new Set(steelTypes.value.map((item) => String(item.id))))
-const steelMaterials = computed(() => materials.value.filter((item) => item.category === 'steel'))
+const steelMaterials = computed(() => materials.value.filter((item) => item.category === 'steel' && (marketFilter.value === 'all' || item.design_code === marketFilter.value)))
 const steelSections = computed(() => sections.value.filter((item) => steelTypeIds.value.has(String(item.section_type_id)) && String(item.material_id) === String(selectedMaterialId.value)))
 const selectedMaterial = computed(() => steelMaterials.value.find((item) => String(item.id) === String(selectedMaterialId.value)) ?? null)
 const selectedSection = computed(() => steelSections.value.find((item) => String(item.id) === String(selectedSectionId.value)) ?? null)
 const selectedSectionType = computed(() => steelTypes.value.find((item) => String(item.id) === String(selectedSection.value?.section_type_id)) ?? null)
+const regionTypeOptions = computed(() => {
+  const options = new Map()
+  for (const item of schema.value?.region_types ?? []) {
+    if (marketFilter.value !== 'all' && item.design_code !== marketFilter.value) continue
+    if (item.code) options.set(item.code, item)
+  }
+  let includesUnclassified = false
+  for (const type of allSteelTypes.value) {
+    if (marketFilter.value !== 'all' && type.design_code !== marketFilter.value) continue
+    if (!type.region_type) includesUnclassified = true
+    else if (!options.has(type.region_type)) options.set(type.region_type, { code: type.region_type, name_vi: type.region_type, name_en: type.region_type })
+  }
+  const result = [...options.values()].sort((a, b) => String(a.code).localeCompare(String(b.code)))
+  if (includesUnclassified) result.push({ code: '__unclassified__', name_vi: t('unclassified'), name_en: t('unclassified') })
+  return result
+})
 
 const standards = [
   { value: 'tcvn_5575_2024', label: 'TCVN 5575:2024' },
@@ -112,6 +142,30 @@ function localizedName(record) {
   return props.locale === 'vi'
     ? record.name_vi || record.name_en || record.code
     : record.name_en || record.name_vi || record.code
+}
+
+function designCodeName(code) {
+  if (!code) return t('unclassified')
+  const option = designCodeOptions.value.find((item) => item.code === code)
+  return option ? localizedName(option) : code
+}
+
+function regionTypeName(code) {
+  if (!code) return t('unclassified')
+  const option = (schema.value?.region_types ?? []).find((item) => item.code === code)
+  return option ? localizedName(option) : code
+}
+
+function sectionTypeClassification(type) {
+  if (!type) return t('unclassified')
+  return [type.design_code ? designCodeName(type.design_code) : '', type.region_type ? regionTypeName(type.region_type) : ''].filter(Boolean).join(' · ') || t('unclassified')
+}
+
+function sectionLabel(section) {
+  const type = sectionTypes.value.find((item) => String(item.id) === String(section.section_type_id))
+  const typeCode = type?.code ? ` · ${type.code}` : ''
+  const classification = sectionTypeClassification(type)
+  return `${section.code} · ${localizedName(section)}${typeCode} · ${classification}`
 }
 
 function localizedField(field) {
@@ -178,6 +232,12 @@ async function loadLibrary() {
 watch(steelSections, (available) => {
   if (!available.some(item => String(item.id) === String(selectedSectionId.value))) selectedSectionId.value = String(available[0]?.id ?? '')
 })
+watch(steelMaterials, (available) => {
+  if (!available.some(item => String(item.id) === String(selectedMaterialId.value))) selectedMaterialId.value = String(available[0]?.id ?? '')
+})
+watch([marketFilter, regionTypeOptions], () => {
+  if (regionTypeFilter.value !== 'all' && !regionTypeOptions.value.some((item) => item.code === regionTypeFilter.value)) regionTypeFilter.value = 'all'
+})
 onMounted(loadLibrary)
 </script>
 
@@ -216,17 +276,31 @@ onMounted(loadLibrary)
           </select>
         </label>
         <label class="steel-design-field">
+          <span>{{ t('catalogDesignCode') }}</span>
+          <select v-model="marketFilter" class="steel-design-select">
+            <option value="all">{{ t('allDesignCodes') }}</option>
+            <option v-for="item in designCodeOptions" :key="item.code" :value="item.code">{{ localizedName(item) }}</option>
+          </select>
+        </label>
+        <label class="steel-design-field">
+          <span>{{ t('regionType') }}</span>
+          <select v-model="regionTypeFilter" class="steel-design-select">
+            <option value="all">{{ t('allRegionTypes') }}</option>
+            <option v-for="item in regionTypeOptions" :key="item.code" :value="item.code">{{ item.code === '__unclassified__' ? t('unclassified') : localizedName(item) }}</option>
+          </select>
+        </label>
+        <label class="steel-design-field">
           <span>{{ t('material') }}</span>
           <select v-model="selectedMaterialId" class="steel-design-select" :disabled="loading || loadError || !steelMaterials.length">
             <option value="" disabled>{{ t('choose') }}</option>
-            <option v-for="item in steelMaterials" :key="item.id" :value="String(item.id)">{{ item.code }} · {{ localizedName(item) }}</option>
+            <option v-for="item in steelMaterials" :key="item.id" :value="String(item.id)">{{ item.code }} · {{ localizedName(item) }} · {{ designCodeName(item.design_code) }}</option>
           </select>
         </label>
         <label class="steel-design-field">
           <span>{{ t('section') }}</span>
           <select v-model="selectedSectionId" class="steel-design-select" :disabled="loading || loadError || !steelSections.length">
             <option value="" disabled>{{ t('choose') }}</option>
-            <option v-for="item in steelSections" :key="item.id" :value="String(item.id)">{{ item.code }} · {{ localizedName(item) }}</option>
+            <option v-for="item in steelSections" :key="item.id" :value="String(item.id)">{{ sectionLabel(item) }}</option>
           </select>
         </label>
       </div>
@@ -249,14 +323,14 @@ onMounted(loadLibrary)
 
         <div v-if="selectedMaterial || selectedSection" class="steel-design-record-grid">
           <article v-if="selectedMaterial" class="steel-design-record-card">
-            <header><div><span class="steel-design-card-kicker">{{ t('materialProperties') }}</span><h3>{{ localizedName(selectedMaterial) }}</h3><p>{{ selectedMaterial.code }}</p></div><span class="steel-design-chip">{{ t('material') }}</span></header>
+            <header><div><span class="steel-design-card-kicker">{{ t('materialProperties') }}</span><h3>{{ localizedName(selectedMaterial) }}</h3><p>{{ selectedMaterial.code }} · {{ t('catalogDesignCode') }}: {{ designCodeName(selectedMaterial.design_code) }}</p></div><span class="steel-design-chip">{{ t('material') }}</span></header>
             <dl v-if="materialFields.length" class="steel-design-property-list">
               <div v-for="field in materialFields" :key="field.key"><dt>{{ localizedField(field) }}<small v-if="field.unit">{{ field.unit }}</small></dt><dd>{{ formatValue(selectedMaterial.properties?.[field.key]) }}</dd></div>
             </dl>
             <p v-else class="steel-design-no-properties">{{ t('emptyProperties') }}</p>
           </article>
           <article v-if="selectedSection" class="steel-design-record-card">
-            <header><div><span class="steel-design-card-kicker">{{ t('sectionProperties') }}</span><h3>{{ localizedName(selectedSection) }}</h3><p>{{ selectedSection.code }}<span v-if="sectionTypeName(selectedSection.section_type_id)"> · {{ sectionTypeName(selectedSection.section_type_id) }}</span></p></div><span class="steel-design-chip">{{ t('section') }}</span></header>
+            <header><div><span class="steel-design-card-kicker">{{ t('sectionProperties') }}</span><h3>{{ localizedName(selectedSection) }}</h3><p>{{ selectedSection.code }}<span v-if="selectedSectionType"> · {{ selectedSectionType.code }} · {{ sectionTypeName(selectedSection.section_type_id) }} · {{ sectionTypeClassification(selectedSectionType) }}</span></p></div><span class="steel-design-chip">{{ t('section') }}</span></header>
             <dl v-if="sectionFields.length" class="steel-design-property-list">
               <div v-for="field in sectionFields" :key="field.key"><dt>{{ localizedField(field) }}<small v-if="field.unit">{{ field.unit }}</small></dt><dd>{{ formatValue(selectedSection.properties?.[field.key]) }}</dd></div>
             </dl>

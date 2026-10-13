@@ -578,5 +578,234 @@
     ]
   },
   "property_basis_vi": "Đơn vị chuẩn: MPa, mm, kg/m³. Nhập đặc trưng tiết diện từ catalog hoặc nguồn đã kiểm chứng; chưa tự tính hoặc kiểm chứng đặc trưng hình học. Iy/Iz phải theo trục địa phương của nguồn dữ liệu.",
-  "property_basis_en": "Canonical units: MPa, mm, kg/m³. Enter section properties from a verified catalog/source; geometry properties are not automatically calculated or certified. Iy/Iz must follow the source local-axis convention."
+  "property_basis_en": "Canonical units: MPa, mm, kg/m³. Enter section properties from a verified catalog/source; geometry properties are not automatically calculated or certified. Iy/Iz must follow the source local-axis convention.",
+  "design_codes": [
+    {
+      "code": "EN",
+      "name_vi": "EN",
+      "name_en": "EN"
+    },
+    {
+      "code": "AISC/ACI",
+      "name_vi": "AISC/ACI",
+      "name_en": "AISC/ACI"
+    },
+    {
+      "code": "AS",
+      "name_vi": "AS",
+      "name_en": "AS"
+    }
+  ],
+  "region_types": [
+    {
+      "code": "IPE",
+      "design_code": "EN",
+      "shape": "i",
+      "name_vi": "IPE",
+      "name_en": "IPE"
+    },
+    {
+      "code": "HEA",
+      "design_code": "EN",
+      "shape": "i",
+      "name_vi": "HEA",
+      "name_en": "HEA"
+    },
+    {
+      "code": "HEB",
+      "design_code": "EN",
+      "shape": "i",
+      "name_vi": "HEB",
+      "name_en": "HEB"
+    },
+    {
+      "code": "HEM",
+      "design_code": "EN",
+      "shape": "i",
+      "name_vi": "HEM",
+      "name_en": "HEM"
+    },
+    {
+      "code": "H",
+      "design_code": "EN",
+      "shape": "i",
+      "name_vi": "H",
+      "name_en": "H"
+    },
+    {
+      "code": "UPN",
+      "design_code": "EN",
+      "shape": "channel",
+      "name_vi": "UPN",
+      "name_en": "UPN"
+    },
+    {
+      "code": "UPE",
+      "design_code": "EN",
+      "shape": "channel",
+      "name_vi": "UPE",
+      "name_en": "UPE"
+    },
+    {
+      "code": "L",
+      "design_code": "EN",
+      "shape": "angle",
+      "name_vi": "L",
+      "name_en": "L"
+    },
+    {
+      "code": "T",
+      "design_code": "EN",
+      "shape": "tee",
+      "name_vi": "T",
+      "name_en": "T"
+    },
+    {
+      "code": "RHS",
+      "design_code": "EN",
+      "shape": "rectangular_hollow",
+      "name_vi": "RHS",
+      "name_en": "RHS"
+    },
+    {
+      "code": "SHS",
+      "design_code": "EN",
+      "shape": "rectangular_hollow",
+      "name_vi": "SHS",
+      "name_en": "SHS"
+    },
+    {
+      "code": "CHS",
+      "design_code": "EN",
+      "shape": "circular_hollow",
+      "name_vi": "CHS",
+      "name_en": "CHS"
+    },
+    {
+      "code": "W",
+      "design_code": "AISC/ACI",
+      "shape": "i",
+      "name_vi": "W",
+      "name_en": "W"
+    },
+    {
+      "code": "S",
+      "design_code": "AISC/ACI",
+      "shape": "i",
+      "name_vi": "S",
+      "name_en": "S"
+    },
+    {
+      "code": "HP",
+      "design_code": "AISC/ACI",
+      "shape": "i",
+      "name_vi": "HP",
+      "name_en": "HP"
+    },
+    {
+      "code": "C",
+      "design_code": "AISC/ACI",
+      "shape": "channel",
+      "name_vi": "C",
+      "name_en": "C"
+    },
+    {
+      "code": "MC",
+      "design_code": "AISC/ACI",
+      "shape": "channel",
+      "name_vi": "MC",
+      "name_en": "MC"
+    },
+    {
+      "code": "L",
+      "design_code": "AISC/ACI",
+      "shape": "angle",
+      "name_vi": "L",
+      "name_en": "L"
+    },
+    {
+      "code": "WT",
+      "design_code": "AISC/ACI",
+      "shape": "tee",
+      "name_vi": "WT",
+      "name_en": "WT"
+    },
+    {
+      "code": "ST",
+      "design_code": "AISC/ACI",
+      "shape": "tee",
+      "name_vi": "ST",
+      "name_en": "ST"
+    },
+    {
+      "code": "HSS",
+      "design_code": "AISC/ACI",
+      "shape": "rectangular_hollow",
+      "name_vi": "HSS",
+      "name_en": "HSS"
+    },
+    {
+      "code": "HSS",
+      "design_code": "AISC/ACI",
+      "shape": "circular_hollow",
+      "name_vi": "HSS",
+      "name_en": "HSS"
+    },
+    {
+      "code": "UB",
+      "design_code": "AS",
+      "shape": "i",
+      "name_vi": "UB",
+      "name_en": "UB"
+    },
+    {
+      "code": "UC",
+      "design_code": "AS",
+      "shape": "i",
+      "name_vi": "UC",
+      "name_en": "UC"
+    },
+    {
+      "code": "PFC",
+      "design_code": "AS",
+      "shape": "channel",
+      "name_vi": "PFC",
+      "name_en": "PFC"
+    },
+    {
+      "code": "EA",
+      "design_code": "AS",
+      "shape": "angle",
+      "name_vi": "EA",
+      "name_en": "EA"
+    },
+    {
+      "code": "UA",
+      "design_code": "AS",
+      "shape": "angle",
+      "name_vi": "UA",
+      "name_en": "UA"
+    },
+    {
+      "code": "RHS",
+      "design_code": "AS",
+      "shape": "rectangular_hollow",
+      "name_vi": "RHS",
+      "name_en": "RHS"
+    },
+    {
+      "code": "SHS",
+      "design_code": "AS",
+      "shape": "rectangular_hollow",
+      "name_vi": "SHS",
+      "name_en": "SHS"
+    },
+    {
+      "code": "CHS",
+      "design_code": "AS",
+      "shape": "circular_hollow",
+      "name_vi": "CHS",
+      "name_en": "CHS"
+    }
+  ]
 }

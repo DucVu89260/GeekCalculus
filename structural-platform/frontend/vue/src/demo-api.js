@@ -10,12 +10,19 @@ function fail(status, message, errors = {}) { const error = new Error(message); 
 async function hash(password, salt) { return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`${salt}:${password}`)))).map(v => v.toString(16).padStart(2, '0')).join('') }
 async function database() {
   const saved = localStorage.getItem(DB_KEY)
-  if (saved) return JSON.parse(saved)
+  if (saved) {
+    const db = JSON.parse(saved)
+    // Keep the same storage key and all existing IDs, properties and users.
+    for (const resource of ['materials', 'section_types']) db[resource] = db[resource].map(row => withClassification(resource, row))
+    return db
+  }
   const users = []
   for (const role of ['admin', 'user']) { const salt = crypto.randomUUID(); users.push({ id: role, name: role === 'admin' ? 'Demo Admin' : 'Demo User', email: `${role}@demo.geekcalculus.test`, role, salt, passwordHash: await hash('demo', salt) }) }
-  const db = { users, materials: seed.materials.map((row, i) => ({ ...row, id: i + 1 })), section_types: seed.section_types.map((row, i) => ({ ...row, id: i + 1 })), sections: [] }
+  const db = { users, materials: seed.materials.map((row, i) => withClassification('materials', { ...row, id: i + 1 })), section_types: seed.section_types.map((row, i) => withClassification('section_types', { ...row, id: i + 1 })), sections: [] }
   localStorage.setItem(DB_KEY, JSON.stringify(db)); return db
 }
+function withClassification(resource, row) { return { ...row, design_code: row.design_code ?? null, ...(resource === 'section_types' ? { region_type: row.region_type ?? null } : {}) } }
+function optionalText(value) { return typeof value === 'string' ? value.trim() || null : value }
 function save(db) { localStorage.setItem(DB_KEY, JSON.stringify(db)) }
 function publicUser(user) { if (!user) return null; const { salt, passwordHash, ...data } = user; return data }
 function present(resource, row) { if (resource === 'materials') return { ...row, computed: { shear_modulus: row.properties.elastic_modulus / (2 * (1 + row.properties.poisson_ratio)) } }; if (resource === 'sections') return { ...row, computed: { radius_y: Math.sqrt(row.properties.inertia_y / row.properties.area), radius_z: Math.sqrt(row.properties.inertia_z / row.properties.area) } }; return row }
@@ -26,6 +33,14 @@ function validate(resource, body, db, old) {
   if (body.source != null && (typeof body.source !== 'string' || body.source.length > 2000)) add('source', 'Source must be text up to 2000 characters.')
   if (!/^[A-Za-z0-9_-]{1,64}$/.test(body.code)) add('code', 'Use a unique code containing letters, numbers, hyphens or underscores.')
   if (db[resource].some(row => row.code === body.code && row.id !== old?.id)) add('code', 'Code is already in use.')
+  if (resource !== 'sections' && Object.hasOwn(body, 'design_code')) {
+    const designCode = optionalText(body.design_code)
+    if (designCode !== null && !schema.design_codes.some(option => option.code === designCode)) add('design_code', 'Choose EN, AISC/ACI or AS, or leave unclassified.')
+  }
+  if (resource === 'section_types' && Object.hasOwn(body, 'region_type')) {
+    const regionType = optionalText(body.region_type)
+    if (regionType !== null && (typeof regionType !== 'string' || regionType.length > 64)) add('region_type', 'Region type must be text up to 64 characters.')
+  }
   let category = body.category, shape
   if (resource === 'sections') {
     const type = db.section_types.find(row => row.id === Number(body.section_type_id)); const material = db.materials.find(row => row.id === Number(body.material_id))
@@ -63,7 +78,8 @@ function validate(resource, body, db, old) {
 const libraryResources = ['materials', 'section_types', 'sections']
 function libraryRecord(resource, body, db, old) {
   const record = { id: old?.id || Math.max(0, ...db[resource].map(row => row.id)) + 1, code: body.code, name_vi: body.name_vi, name_en: body.name_en }
-  if (resource === 'section_types') Object.assign(record, { category: body.category, shape: body.shape })
+  if (resource !== 'sections') record.design_code = Object.hasOwn(body, 'design_code') ? optionalText(body.design_code) : old?.design_code ?? null
+  if (resource === 'section_types') Object.assign(record, { category: body.category, shape: body.shape, region_type: Object.hasOwn(body, 'region_type') ? optionalText(body.region_type) : old?.region_type ?? null })
   else Object.assign(record, { ...(resource === 'materials' ? { category: body.category } : { material_id: Number(body.material_id), section_type_id: Number(body.section_type_id) }), source: body.source || '', properties: Object.fromEntries(Object.entries(body.properties).map(([key, value]) => [key, Number(value)])) })
   return record
 }
@@ -87,7 +103,7 @@ function importLibrary(db, body) {
   for (const resource of libraryResources) {
     if (!Array.isArray(a[resource]) || a[resource].length > 20000) fail(422, 'Each library collection must be an array of up to 20000 records.', { [`archive.${resource}`]: ['Invalid collection.'] })
     const codes = new Set()
-    const allowedKeys = ['code', 'name_vi', 'name_en', ...(resource === 'section_types' ? ['category', 'shape'] : resource === 'materials' ? ['category', 'source', 'properties'] : ['material_code', 'section_type_code', 'source', 'properties'])]
+    const allowedKeys = ['code', 'name_vi', 'name_en', ...(resource === 'section_types' ? ['category', 'shape', 'design_code', 'region_type'] : resource === 'materials' ? ['category', 'design_code', 'source', 'properties'] : ['material_code', 'section_type_code', 'source', 'properties'])]
     a[resource].forEach((row, index) => {
       if (!row || typeof row !== 'object' || Array.isArray(row) || !/^[A-Za-z0-9_-]{1,64}$/.test(row.code) || typeof row.code !== 'string' || codes.has(row.code) || Object.keys(row).some(key => !allowedKeys.includes(key)) || ['name_vi', 'name_en'].some(key => typeof row[key] !== 'string' || !row[key].trim() || row[key].length > 255)) fail(422, 'Invalid record or duplicate code in archive.', { [`archive.${resource}.${index}`]: ['Invalid record or duplicate code in archive.'] })
       codes.add(row.code)

@@ -15,8 +15,8 @@ const localBase = process.env.TRANSFER_LOCAL_URL || 'http://127.0.0.1:5173'
   const nonce = Date.now().toString(), materialCode = `browser_transfer_m_${nonce}`, typeCode = `browser_transfer_t_${nonce}`, sectionCode = `browser_transfer_s_${nonce}`, driftCode = `browser_transfer_drift_${nonce}`, rejectedCode = `browser_transfer_bad_${nonce}`
   const fixture = {
     format: 'geekcalculus-engineering-library', version: 1, exported_at: new Date().toISOString(),
-    materials: [{ ...seed.materials[0], code: materialCode, name_vi: 'Thép thư viện đã xác minh', name_en: 'Verified library steel', source: 'Browser test fixture; not design values' }],
-    section_types: [{ ...seed.section_types[0], code: typeCode, name_vi: 'Tiết diện I thử', name_en: 'Test I type' }],
+    materials: [{ ...seed.materials[0], code: materialCode, design_code: 'EN', name_vi: 'Thép thư viện đã xác minh', name_en: 'Verified library steel', source: 'Browser test fixture; not design values' }],
+    section_types: [{ ...seed.section_types[0], code: typeCode, design_code: 'EN', region_type: 'IPE', name_vi: 'Tiết diện I thử', name_en: 'Test I type' }],
     sections: [{ code: sectionCode, name_vi: 'I400 thử', name_en: 'Test I400', source: 'Test fixture', material_code: materialCode, section_type_code: typeCode, properties: { depth: 400, width: 200, web_thickness: 8, flange_thickness: 13, area: 9000, inertia_y: 2e8, inertia_z: 2e7, torsion_constant: 350000, elastic_modulus_y: 1e6, elastic_modulus_z: 2e5, shear_area_y: 5000, shear_area_z: 4500, warping_constant: 1e12 } }],
   }
   let localPage
@@ -77,6 +77,21 @@ const localBase = process.env.TRANSFER_LOCAL_URL || 'http://127.0.0.1:5173'
   }
   try {
     const source = await open(demoBase, true)
+    const legacyRecords = await source.evaluate(() => {
+      const key = 'geekcalculus-demo-library-v1', db = JSON.parse(localStorage.getItem(key))
+      for (const resource of ['materials', 'section_types']) for (const row of db[resource]) { delete row.design_code; delete row.region_type }
+      db.materials[0].name_en = 'User edit before classification migration'
+      localStorage.setItem(key, JSON.stringify(db))
+      return { materials: db.materials, section_types: db.section_types, sections: db.sections }
+    })
+    const upgraded = await exportArchive(source)
+    assert.equal(upgraded.materials.find(row => row.code === legacyRecords.materials[0].code).name_en, 'User edit before classification migration')
+    assert.ok(upgraded.materials.every(row => row.design_code === null))
+    assert.ok(upgraded.section_types.every(row => row.design_code === null && row.region_type === null))
+    assert.deepEqual(await source.evaluate(() => {
+      const db = JSON.parse(localStorage.getItem('geekcalculus-demo-library-v1'))
+      return { materials: db.materials, section_types: db.section_types, sections: db.sections }
+    }), legacyRecords, 'Reading legacy data must not overwrite the stored library')
     assert.equal(await source.getByLabel(/^When codes match/).inputValue(), 'skip')
     await preview(source, fixture)
     assert.equal((await exportArchive(source)).materials.some(row => row.code === materialCode), false, 'File selection must not mutate data')
@@ -104,6 +119,11 @@ const localBase = process.env.TRANSFER_LOCAL_URL || 'http://127.0.0.1:5173'
     assert.deepEqual(customRecords(await exportArchive(restored)), customRecords(exported), 'Skip must preserve matching records')
     await importArchive(restored, changed, { mode: 'overwrite', expected: [0, 3, 0] })
     assert.deepEqual(customRecords(await exportArchive(restored)), { materials: changed.materials, section_types: changed.section_types, sections: changed.sections })
+    const legacyArchive = structuredClone(changed)
+    for (const row of legacyArchive.materials) delete row.design_code
+    for (const row of legacyArchive.section_types) { delete row.design_code; delete row.region_type }
+    await importArchive(restored, legacyArchive, { mode: 'overwrite', expected: [0, 3, 0] })
+    assert.deepEqual(customRecords(await exportArchive(restored)), { materials: changed.materials, section_types: changed.section_types, sections: changed.sections }, 'Old archives must preserve newer classification when omitted')
     const bad = structuredClone(changed); bad.materials[0].name_en = 'Must roll back'; bad.materials.push({ ...bad.materials[0], code: rejectedCode }); bad.sections[0].properties.shear_area_y = 9001
     const beforeFailure = await importArchive(restored, bad, { mode: 'overwrite', failure: true })
     await restored.getByText('archive.sections.0.properties', { exact: true }).waitFor()
@@ -145,7 +165,7 @@ const localBase = process.env.TRANSFER_LOCAL_URL || 'http://127.0.0.1:5173'
     await localPage.unroute('**/api/library/export')
     localPage.off('request', countImports)
     assert.equal(errors.length, 0, errors.join('\n'))
-    console.log('Library transfer passed: demo → another browser → Laravel, JSON values/references, backup downloads before import, skip/overwrite, unrelated records, atomic rollback, invalid JSON, backup failure blocks import, VI/EN, reload, mobile.')
+    console.log('Library transfer passed: demo → another browser → Laravel, JSON classification/values/references, legacy browser/archive preservation, backup downloads before import, skip/overwrite, unrelated records, atomic rollback, invalid JSON, backup failure blocks import, VI/EN, reload, mobile.')
   } finally {
     if (localPage) {
       await localPage.unroute('**/api/library/export').catch(() => {})

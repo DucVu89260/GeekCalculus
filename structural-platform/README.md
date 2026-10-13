@@ -70,6 +70,27 @@ Admin quản lý ba tab; user mở **Engineering Library / Thư viện kỹ thu�
   đặc trưng tiết diện bằng số. Loại tiết diện định nghĩa mẫu; các giá trị A/I/J
   thuộc từng tiết diện cụ thể, không gán một giá trị chung cho mọi kích thước.
 
+**Design Code:** cột thị trường của vật liệu và loại tiết diện, dropdown
+`EN`, `AISC/ACI`, `AS`. Có thể để **Chưa phân loại**; database lưu `null`.
+Không tự gán thị trường cho bản ghi cũ hoặc seed, vì các mẫu bê tông B25/B30
+không đại diện cho các thị trường này. Metadata không tự chọn tiêu chuẩn
+tính toán, chứng nhận sự phù hợp của vật liệu hoặc đổi đơn vị.
+
+**Region type:** cột nhóm catalog nhỏ hơn trên loại tiết diện, ví dụ W, H,
+IPE, HEA, UB, UC. Form cho nhập nhãn riêng (tối đa 64 ký tự) và có gợi ý theo
+Design Code/hình dạng. Các nhãn là gợi ý phân loại, chưa có catalog kích thước
+chuẩn hoặc tiết diện số được nạp tự động. Ví dụ: tạo loại mã `aisc_w`, hệ
+**Thép**, hình dạng **I/H**, Design Code **AISC/ACI**, Region type **W**;
+sau đó thêm các tiết diện cụ thể và số liệu đã kiểm chứng thuộc loại đó.
+BTCT vẫn có thể điền Region type riêng, không bị ép dùng nhóm tiết diện thép.
+
+Tiết diện cụ thể lấy Design Code/Region type từ loại tiết diện đang tham chiếu,
+không lưu thêm bản sao dễ lệch dữ liệu. Bảng thư viện có cột/bộ lọc phân loại,
+Steel Design có lọc thị trường/nhóm catalog; mặc định xem tất cả để dữ liệu
+cũ chưa phân loại vẫn hiện. Phân loại không thay đổi hình học hoặc thông số.
+Các ảnh SAP2000 người dùng đưa là tham khảo cấu trúc dữ liệu; không tự nạp
+các trị số trong ảnh, vốn có thể dùng hệ đơn vị/trục khác schema của ứng dụng.
+
 Mỗi tab có tạo/xem/sửa/xóa, tìm kiếm, bộ lọc, xác nhận xóa và lỗi có nhãn đơn vị.
 Vật liệu mới/sửa tên được đồng bộ với dropdown dự án. Không thể xóa vật liệu
 đang được tham chiếu bởi tiết diện hoặc dự án; không thể xóa loại đang dùng.
@@ -110,6 +131,11 @@ admin có thể **Xuất JSON** và **Nhập thư viện** trên cả demo web l
 Xuất toàn bộ vật liệu, loại tiết diện, tiết diện cụ thể, thông số, nguồn và
 tên VI/EN. Tệp không chứa tài khoản, mật khẩu, dự án hoặc kết quả tính toán.
 Đơn vị giữ nguyên theo schema; không chuyển đổi đơn vị tự động.
+Tệp phiên bản 1 nay mang thêm `materials.design_code`,
+`section_types.design_code` và `section_types.region_type`. Tệp cũ thiếu các
+trường này vẫn nhập được; khi cập nhật mã đã có, trường bị thiếu không xóa
+phân loại hiện tại. Truyền `null` rõ ràng để xóa phân loại. Demo giữ nguyên
+khóa localStorage và các dữ liệu trước khi bổ sung cột.
 
 1. Sau mỗi buổi nhập/sửa thư viện, **Xuất JSON**, kiểm tra tệp đã tải xuống và
    lưu thêm một bản ngoài trình duyệt (ví dụ thư mục sao lưu hoặc ổ đĩa khác).
@@ -161,8 +187,8 @@ Client lấy CSRF token, gửi cookie và header `X-CSRF-TOKEN` cho thao tác gh
 | GET/POST/PATCH/DELETE | `/api/admin/users` (PATCH/DELETE thêm `/{id}`) | Admin |
 
 POST/PATCH thư viện gửi `code,name_vi,name_en` và:
-- materials: `category,source,properties`.
-- section-types: `category,shape`.
+- materials: `category,source,properties`, tùy chọn `design_code`.
+- section-types: `category,shape`, tùy chọn `design_code,region_type`.
 - sections: `material_id,section_type_id,source,properties`.
 
 GET danh sách trả `{data:[...]}`; POST/PATCH `{data:record}`; DELETE `{data:null}`.

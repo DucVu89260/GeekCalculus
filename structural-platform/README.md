@@ -368,8 +368,10 @@ VI/EN, mobile và đăng xuất giữa các tab. Dùng `TEST_DEMO=1` với
 Nền trang dùng xám pha beige `#ded8cf`, panel/bảng/hộp chỉnh sửa `#eae5dd`,
 trường nhập `#f1ede6`; nền ấm và dịu ở cả admin và giao diện sử dụng.
 Vùng phụ và hàng xen kẽ dùng `#e3ddd4`, đường viền `#c2b9ad`.
-Khung nội dung các trang module dùng nền trắng xám ấm `#faf9f6`, bo góc
-và có khoảng cách với nền beige bên ngoài để tăng tương phản.
+Vùng nội dung chính của tất cả các trang dùng nền trắng xám ấm `#faf9f6`:
+đăng nhập, chọn giao diện, trang chủ/dự án, Admin, các module và hộp chỉnh sửa.
+Khung trang chủ, Admin và module có bo góc và khoảng cách với nền beige
+bên ngoài để tăng tương phản; các panel bên trong vẫn giữ nền beige dịu.
 Khung rộng tối đa 1280 px; dropdown (cả menu Design Code) và thẻ thông số
 vật liệu/tiết diện trong Steel Design dùng cùng nền `#faf9f6`.
 Navy `#23395d` với chữ trắng vẫn dùng cho hover; các tab đang chọn giữ màu navy.

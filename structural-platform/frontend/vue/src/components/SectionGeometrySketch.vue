@@ -173,11 +173,11 @@ const drawing = computed(() => {
 .section-geometry-hole { fill: var(--soft-bg); stroke: #375f83; stroke-width: 1.2; }
 .section-geometry-dimension { stroke: #6b86a0; stroke-width: 1; }
 .section-geometry-extension { stroke: #b4c3d0; stroke-width: .8; stroke-dasharray: 2 2; }
-.section-geometry-dimension-label { fill: #536f89; font-size: 9px; font-weight: 650; }
+.section-geometry-dimension-label { fill: #536f89; font-size: 11px; font-weight: 650; }
 .section-geometry-horizontal-label { text-anchor: middle; }
 .section-geometry-vertical-label { text-anchor: middle; dominant-baseline: middle; transform: rotate(-90deg); transform-box: fill-box; transform-origin: center; }
-.section-geometry-feature-label { fill: #52718e; font-size: 8px; font-weight: 700; }
+.section-geometry-feature-label { fill: #52718e; font-size: 10px; font-weight: 700; }
 .section-geometry-axis { stroke: #65809a; stroke-width: 1.1; }
-.section-geometry-axis-label { fill: #65809a; font-size: 9px; font-weight: 700; }
-.section-geometry-sketch-note { margin: 0; color: #8495a5; font-size: 9px; line-height: 1.5; }
+.section-geometry-axis-label { fill: #65809a; font-size: 11px; font-weight: 700; }
+.section-geometry-sketch-note { margin: 0; color: #8495a5; font-size: 11px; line-height: 1.5; }
 </style>

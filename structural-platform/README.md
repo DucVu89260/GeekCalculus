@@ -374,3 +374,6 @@ Khung rộng tối đa 1280 px; dropdown (cả menu Design Code) và thẻ thôn
 vật liệu/tiết diện trong Steel Design dùng cùng nền `#f5f3ef`.
 Navy `#23395d` với chữ trắng vẫn dùng cho hover; các tab đang chọn giữ màu navy.
 Chữ phụ `#4d5966` giữ tương phản trên nền mới. Ảnh cover được giữ nguyên.
+
+Cỡ chữ giao diện tăng nhẹ 1 px; các chữ nhỏ từ 10 px trở xuống tăng 2 px
+để dễ đọc hơn. Font Calibri, màu nền và hover navy giữ nguyên.

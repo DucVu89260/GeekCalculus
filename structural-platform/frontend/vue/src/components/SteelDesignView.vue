@@ -411,7 +411,7 @@ onMounted(loadLibrary)
 .steel-design-properties-panel { margin-top: 14px; }
 .steel-design-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .steel-design-field { display: flex; flex-direction: column; gap: 7px; min-width: 0; color: #5d7690; font-size: 12px; font-weight: 650; }
-.steel-design-select { width: 100%; min-height: 42px; padding: 9px 36px 9px 12px; border: 1px solid var(--surface-border); border-radius: 8px; background: var(--surface-bg); color: #233850; font: inherit; font-size: 13px; }
+.steel-design-select { width: 100%; min-height: 42px; padding: 9px 36px 9px 12px; border: 1px solid var(--surface-border); border-radius: 8px; background: var(--workspace-bg); color: #233850; font: inherit; font-size: 13px; }
 .steel-design-select:focus { border-color: #6d9bc5; box-shadow: 0 0 0 3px #d9e9f7; outline: none; }
 .steel-design-select:disabled { cursor: not-allowed; opacity: .65; }
 .steel-design-select option:hover, .steel-design-select option:checked { background: #23395d; color: white; }
@@ -429,7 +429,7 @@ onMounted(loadLibrary)
 .steel-design-link:hover { color: #23395d; text-decoration: underline; }
 .steel-design-link span { margin-left: 4px; }
 .steel-design-record-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 16px; }
-.steel-design-record-card { min-width: 0; padding: 16px; border: 1px solid var(--surface-border); border-radius: 10px; background: var(--surface-bg); }
+.steel-design-record-card { min-width: 0; padding: 16px; border: 1px solid var(--surface-border); border-radius: 10px; background: var(--workspace-bg); }
 .steel-design-record-card header { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; padding-bottom: 12px; border-bottom: 1px solid var(--surface-border); }
 .steel-design-card-kicker { color: var(--muted-ink); font-size: 9px; font-weight: 750; letter-spacing: .07em; text-transform: uppercase; }
 .steel-design-record-card h3 { overflow-wrap: anywhere; margin: 5px 0 3px; color: #294661; font-size: 14px; }

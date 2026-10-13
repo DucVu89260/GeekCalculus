@@ -63,7 +63,7 @@ function navigate(code) { window.location.hash = `/modules/${code}` }
 </template>
 
 <style scoped>
-.module-page { width: calc(100% - 32px); max-width: 1180px; min-height: calc(100vh - 40px); padding: 0 28px 40px; margin: 16px auto 24px; border: 1px solid var(--surface-border); border-radius: 16px; background: var(--workspace-bg); box-shadow: 0 8px 24px #243b570a; }
+.module-page { width: calc(100% - 32px); max-width: 1280px; min-height: calc(100vh - 40px); padding: 0 28px 40px; margin: 16px auto 24px; border: 1px solid var(--surface-border); border-radius: 16px; background: var(--workspace-bg); box-shadow: 0 8px 24px #243b570a; }
 .module-topbar { min-height: 84px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
 .module-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .module-navigation { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 5px; padding: 6px; border: 1px solid var(--surface-border); background: var(--surface-bg); border-radius: 10px; }

@@ -222,8 +222,8 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .design-code-select { position: relative; width: 100%; min-width: 0; }
-.design-code-select-trigger { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; min-height: 36px; padding: 7px 10px; border: 1px solid var(--surface-border); border-radius: 7px; background: var(--surface-bg); color: #2e4964; font: inherit; font-size: 11px; text-align: left; cursor: pointer; }
-.design-code-select-trigger:hover:not(:disabled) { border-color: #8eaecb; background: var(--surface-bg); }
+.design-code-select-trigger { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; min-height: 36px; padding: 7px 10px; border: 1px solid var(--surface-border); border-radius: 7px; background: var(--workspace-bg); color: #2e4964; font: inherit; font-size: 11px; text-align: left; cursor: pointer; }
+.design-code-select-trigger:hover:not(:disabled) { border-color: #8eaecb; background: var(--workspace-bg); }
 .design-code-select-trigger:focus-visible { outline: 3px solid #a8c7e2; outline-offset: 2px; }
 .design-code-select-trigger:disabled { cursor: not-allowed; opacity: .6; }
 .design-code-select-value { display: flex; align-items: center; gap: 8px; min-width: 0; overflow: hidden; }
@@ -232,7 +232,7 @@ onBeforeUnmount(() => {
 .design-code-select-label { overflow: hidden; color: inherit; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
 .design-code-select-detail { overflow: hidden; color: var(--muted-ink); font-size: 9px; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
 .design-code-select-chevron { flex: 0 0 auto; color: var(--muted-ink); font-size: 15px; line-height: 1; }
-.design-code-select-listbox { position: fixed; z-index: 1000; padding: 5px; overflow-y: auto; border: 1px solid var(--surface-border); border-radius: 9px; background: var(--surface-bg); box-shadow: 0 12px 32px #1d395425; overscroll-behavior: contain; }
+.design-code-select-listbox { position: fixed; z-index: 1000; padding: 5px; overflow-y: auto; border: 1px solid var(--surface-border); border-radius: 9px; background: var(--workspace-bg); box-shadow: 0 12px 32px #1d395425; overscroll-behavior: contain; }
 .design-code-select-option { display: flex; align-items: center; gap: 9px; min-height: 37px; padding: 8px 9px; border-radius: 6px; color: #2e4964; font-size: 11px; cursor: pointer; }
 .design-code-select-option:hover, .design-code-select-option.active { background: #23395d; color: #fff; }
 .design-code-select-option.selected { font-weight: 700; }

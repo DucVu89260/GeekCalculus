@@ -186,8 +186,8 @@ calculate()
 
 <style scoped>
 .geometry-workbench { display: grid; gap: 18px; background: var(--surface-bg); border: 1px solid var(--surface-border); padding: 24px; border-radius: 12px; }
-.geometry-heading h2 { margin: 0; color: #254d78; font-size: 20px; }
-.geometry-heading p, .geometry-coordinate-note, .geometry-scope p { color: var(--muted-ink); font-size: 14px; line-height: 1.65; margin: 5px 0 0; }
+.geometry-heading h2 { margin: 0; color: #254d78; font-size: 22px; }
+.geometry-heading p, .geometry-coordinate-note, .geometry-scope p { color: var(--muted-ink); font-size: 16px; line-height: 1.65; margin: 5px 0 0; }
 .geometry-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px; align-items: end; }
 .geometry-number { display: flex; align-items: center; gap: 8px; }
 .geometry-number input { flex: 1; }
@@ -199,11 +199,11 @@ calculate()
 .geometry-summary, .geometry-result-card dl { margin: 0; }
 .geometry-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
 .geometry-summary > div, .geometry-result-card { min-width: 0; padding: 13px; border: 1px solid var(--surface-border); border-radius: 8px; background: var(--soft-bg); }
-.geometry-summary dt, .geometry-result-card dt { color: var(--muted-ink); font-size: 13px; }
-.geometry-summary dd, .geometry-result-card dd { margin: 3px 0 0; color: #254d78; font-size: 15px; font-weight: 650; overflow-wrap: anywhere; }
+.geometry-summary dt, .geometry-result-card dt { color: var(--muted-ink); font-size: 15px; }
+.geometry-summary dd, .geometry-result-card dd { margin: 3px 0 0; color: #254d78; font-size: 17px; font-weight: 650; overflow-wrap: anywhere; }
 .geometry-result-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; margin-top: 9px; }
 .geometry-result-card { background: var(--surface-bg); }
-.geometry-result-card h4 { margin: 0 0 8px; color: #375b80; font-size: 14px; }
+.geometry-result-card h4 { margin: 0 0 8px; color: #375b80; font-size: 16px; }
 .geometry-result-card dl { display: grid; gap: 7px; }
 .geometry-result-card dl > div { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
 .geometry-result-card dt { min-width: 0; }

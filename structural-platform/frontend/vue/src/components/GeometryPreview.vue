@@ -68,9 +68,9 @@ const drawing = computed(() => {
 .geometry-preview svg { display: block; width: min(100%, 350px); margin: auto; }
 .section-outline { fill: #b3c5d7; stroke: #23395d; stroke-width: 1.5; }
 .coordinate-axes { fill: #23395d; stroke: #23395d; stroke-width: 1.3; }
-.coordinate-axes text { stroke: none; font-size: 14px; }
+.coordinate-axes text { stroke: none; font-size: 16px; }
 .neutral-axes { stroke: #a44c14; stroke-width: 1.3; stroke-dasharray: 5 4; }
 .centroid-point { fill: #a44c14; }
-figcaption { font-size: 13px; color: var(--muted-ink); line-height: 1.6; }
+figcaption { font-size: 15px; color: var(--muted-ink); line-height: 1.6; }
 .centroid-key, .pna-key { color: #a44c14; }
 </style>

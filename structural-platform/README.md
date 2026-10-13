@@ -367,7 +367,7 @@ VI/EN, mobile và đăng xuất giữa các tab. Dùng `TEST_DEMO=1` với
 
 Nền ngoài của mọi trang dùng navy nhạt `#cbd5e1`, panel/bảng dùng `#eae5dd`,
 trường nhập `#f1ede6`; nền ấm và dịu ở cả admin và giao diện sử dụng.
-Vùng phụ và hàng xen kẽ dùng `#e3ddd4`, đường viền `#c2b9ad`.
+Vùng phụ và hàng xen kẽ dùng `#e3ddd4`, đường viền sáng `#e1e7ef`.
 Vùng nội dung chính của tất cả các trang dùng nền trắng xám ấm `#faf9f6`:
 đăng nhập, chọn giao diện, trang chủ/dự án, Admin, các module và hộp chỉnh sửa.
 Khung trang chủ, Admin và module có bo góc và khoảng cách với nền navy nhạt
@@ -378,5 +378,6 @@ vật liệu/tiết diện trong Steel Design dùng cùng nền `#faf9f6`.
 Navy `#23395d` với chữ trắng vẫn dùng cho hover; các tab đang chọn giữ màu navy.
 Chữ phụ `#4d5966` giữ tương phản trên nền mới. Ảnh cover được giữ nguyên.
 
-Cỡ chữ giao diện tăng nhẹ 1 px; các chữ nhỏ từ 10 px trở xuống tăng 2 px
-để dễ đọc hơn. Font Calibri, màu nền và hover navy giữ nguyên.
+Toàn bộ cỡ chữ được tăng thêm 2 px, gồm các nhãn và chú thích sơ đồ.
+Button có hover và dropdown có viền navy `#23395d`, kể cả menu Design Code.
+Font Calibri, nền sáng bên trong/navy nhạt bên ngoài và hover navy giữ nguyên.

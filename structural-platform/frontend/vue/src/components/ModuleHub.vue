@@ -67,19 +67,19 @@ function navigate(code) { window.location.hash = `/modules/${code}` }
 .module-topbar { min-height: 84px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
 .module-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .module-navigation { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 5px; padding: 6px; border: 1px solid var(--surface-border); background: var(--surface-bg); border-radius: 10px; }
-.module-navigation a { text-align: center; display: flex; justify-content: center; align-items: center; padding: 13px 9px; border-radius: 6px; color: #547491; font-size: 14px; line-height: 1.5; text-decoration: none; transition: background .15s, color .15s; }
+.module-navigation a { text-align: center; display: flex; justify-content: center; align-items: center; padding: 13px 9px; border-radius: 6px; color: #547491; font-size: 16px; line-height: 1.5; text-decoration: none; transition: background .15s, color .15s; }
 .module-navigation a[aria-current="page"], .module-navigation a:hover, .module-navigation a:focus-visible { color: white; background: #23395d; }
-.module-heading { padding: 32px 0 22px; }.module-heading h1 { font-size: 27px; }.module-heading p { font-size: 15px; margin: 10px 0 0; color: var(--muted-ink); }
+.module-heading { padding: 32px 0 22px; }.module-heading h1 { font-size: 29px; }.module-heading p { font-size: 17px; margin: 10px 0 0; color: var(--muted-ink); }
 .module-panel { background: var(--surface-bg); border: 1px solid var(--surface-border); padding: 24px; border-radius: 12px; }
 .concrete-module-panel { padding: 16px; }
 .concrete-module-tabs { display: flex; gap: 6px; padding: 4px; border: 1px solid var(--surface-border); border-radius: 9px; background: var(--soft-bg); }
-.concrete-module-tabs button { flex: 1 1 0; min-height: 38px; padding: 8px 12px; border: 1px solid transparent; border-radius: 6px; background: transparent; color: #54718d; cursor: pointer; font: inherit; font-size: 13px; font-weight: 700; transition: background .15s, color .15s, border-color .15s; }
+.concrete-module-tabs button { flex: 1 1 0; min-height: 38px; padding: 8px 12px; border: 1px solid transparent; border-radius: 6px; background: transparent; color: #54718d; cursor: pointer; font: inherit; font-size: 15px; font-weight: 700; transition: background .15s, color .15s, border-color .15s; }
 .concrete-module-tabs button:hover, .concrete-module-tabs button.active, .concrete-module-tabs button:focus-visible { border-color: #23395d; background: #23395d; color: white; }
 .concrete-module-tabs button:focus-visible { outline: 3px solid #8bb6df; outline-offset: 2px; }
 .concrete-design-setup { padding-top: 20px; }
 .concrete-section-properties { padding-top: 18px; }
-.pending-selector { display: flex; flex-direction: column; gap: 10px; max-width: 400px; font-size: 15px; color: #4b6a88; }
-.pending-note { font-size: 15px; line-height: 1.8; color: var(--muted-ink); margin: 24px 0 0; }
+.pending-selector { display: flex; flex-direction: column; gap: 10px; max-width: 400px; font-size: 17px; color: #4b6a88; }
+.pending-note { font-size: 17px; line-height: 1.8; color: var(--muted-ink); margin: 24px 0 0; }
 @media (max-width: 900px) { .module-navigation { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-@media (max-width: 600px) { .module-page { width: calc(100% - 16px); min-height: calc(100vh - 20px); padding: 0 16px 30px; margin: 8px auto 12px; border-radius: 12px; }.module-topbar { align-items: flex-start; flex-direction: column; padding: 20px 0; gap: 12px; }.module-actions { width: 100%; justify-content: space-between; gap: 4px; }.module-actions .quiet-button { padding: 7px 4px; font-size: 13px; }.module-navigation { grid-template-columns: repeat(2, minmax(0, 1fr)); }.module-heading h1 { font-size: 24px; }.module-panel { padding: 16px 12px; }.concrete-module-panel { padding: 12px 9px; }.concrete-module-tabs button { padding: 8px 4px; font-size: 12px; } }
+@media (max-width: 600px) { .module-page { width: calc(100% - 16px); min-height: calc(100vh - 20px); padding: 0 16px 30px; margin: 8px auto 12px; border-radius: 12px; }.module-topbar { align-items: flex-start; flex-direction: column; padding: 20px 0; gap: 12px; }.module-actions { width: 100%; justify-content: space-between; gap: 4px; }.module-actions .quiet-button { padding: 7px 4px; font-size: 15px; }.module-navigation { grid-template-columns: repeat(2, minmax(0, 1fr)); }.module-heading h1 { font-size: 26px; }.module-panel { padding: 16px 12px; }.concrete-module-panel { padding: 12px 9px; }.concrete-module-tabs button { padding: 8px 4px; font-size: 14px; } }
 </style>

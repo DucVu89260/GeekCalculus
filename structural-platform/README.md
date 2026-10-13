@@ -368,10 +368,10 @@ VI/EN, mobile và đăng xuất giữa các tab. Dùng `TEST_DEMO=1` với
 Nền trang dùng xám pha beige `#ded8cf`, panel/bảng/hộp chỉnh sửa `#eae5dd`,
 trường nhập `#f1ede6`; nền ấm và dịu ở cả admin và giao diện sử dụng.
 Vùng phụ và hàng xen kẽ dùng `#e3ddd4`, đường viền `#c2b9ad`.
-Khung nội dung các trang module dùng nền trắng xám ấm `#f5f3ef`, bo góc
+Khung nội dung các trang module dùng nền trắng xám ấm `#faf9f6`, bo góc
 và có khoảng cách với nền beige bên ngoài để tăng tương phản.
 Khung rộng tối đa 1280 px; dropdown (cả menu Design Code) và thẻ thông số
-vật liệu/tiết diện trong Steel Design dùng cùng nền `#f5f3ef`.
+vật liệu/tiết diện trong Steel Design dùng cùng nền `#faf9f6`.
 Navy `#23395d` với chữ trắng vẫn dùng cho hover; các tab đang chọn giữ màu navy.
 Chữ phụ `#4d5966` giữ tương phản trên nền mới. Ảnh cover được giữ nguyên.
 

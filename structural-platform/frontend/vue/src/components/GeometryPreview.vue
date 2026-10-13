@@ -10,8 +10,9 @@ const words = computed(() => props.locale === 'vi'
 const drawing = computed(() => {
   if (!validateGeometryDefinition(props.input).valid) return null
   const d = props.input.dimensions
-  const width = props.input.shape === 'circle' ? d.D : d.b
-  const height = props.input.shape === 'circle' ? d.D : d.h
+  const round = ['circle', 'circular-tube'].includes(props.input.shape)
+  const width = round ? d.D : d.b
+  const height = round ? d.D : d.h
   const largest = Math.max(width, height)
   const w = width / largest * 220, h = height / largest * 220
   const left = 65 + (220 - w) / 2, top = 30 + (220 - h) / 2
@@ -22,7 +23,19 @@ const drawing = computed(() => {
     const a = (w - tw) / 2, b = (w + tw) / 2
     points = [[0, 0], [w, 0], [w, tf], [b, tf], [b, h - tf], [w, h - tf], [w, h], [0, h], [0, h - tf], [a, h - tf], [a, tf], [0, tf]]
   }
-  return { w, h, left, top, bottom: top + h, cx: left + w / 2, cy: top + h / 2,
+  const cx = left + w / 2, cy = top + h / 2
+  let hollowPath = null
+  if (props.input.shape === 'circular-tube') {
+    const outer = w / 2, inner = (d.D - 2 * d.t) / largest * 110
+    const ring = r => `M ${cx - r} ${cy} a ${r} ${r} 0 1 0 ${2 * r} 0 a ${r} ${r} 0 1 0 ${-2 * r} 0 Z`
+    hollowPath = `${ring(outer)} ${ring(inner)}`
+  }
+  if (props.input.shape === 'rectangular-tube') {
+    const t = d.t / largest * 220
+    const box = (x, y, b, h) => `M ${x} ${y} h ${b} v ${h} h ${-b} Z`
+    hollowPath = `${box(left, top, w, h)} ${box(left + t, top + t, w - 2 * t, h - 2 * t)}`
+  }
+  return { w, h, left, top, bottom: top + h, cx, cy, hollowPath,
     polygon: points.map(([x, y]) => `${left + x},${top + h - y}`).join(' ') }
 })
 </script>
@@ -31,6 +44,7 @@ const drawing = computed(() => {
   <figure v-if="drawing" class="geometry-preview">
     <svg viewBox="0 0 350 310" role="img" :aria-label="words.title">
       <circle v-if="input.shape === 'circle'" :cx="drawing.cx" :cy="drawing.cy" :r="drawing.w / 2" class="section-outline" />
+      <path v-else-if="drawing.hollowPath" :d="drawing.hollowPath" fill-rule="evenodd" class="section-outline hollow-section" />
       <polygon v-else :points="drawing.polygon" class="section-outline" />
       <g v-if="properties" class="neutral-axes">
         <line :x1="drawing.left - 12" :y1="drawing.cy" :x2="drawing.left + drawing.w + 12" :y2="drawing.cy" />

@@ -54,6 +54,29 @@ export function validateGeometryDefinition(input) {
     if (h <= 2 * tf) errors.push(issue('dimensions.tf', 'flanges_overlap', 'I/H depth h must be greater than twice flange thickness tf.'))
   }
 
+  const unitFactor = LENGTH_UNITS[input.unit]?.millimetres
+  const validLength = value => typeof value === 'number' && Number.isFinite(value) && value > 0
+  const checkHollowWall = (outer, thickness, path, description) => {
+    if (!validLength(outer) || !validLength(thickness)) return
+    if (outer <= 2 * thickness) {
+      errors.push(issue(path, 'wall_too_thick', `${description} must be less than half the outer dimension.`))
+      return
+    }
+    if (!unitFactor) return
+    const outerMm = outer * unitFactor
+    const thicknessMm = thickness * unitFactor
+    if (!Number.isFinite(outerMm) || !Number.isFinite(thicknessMm) || outerMm <= 0 || thicknessMm <= 0) return
+    const innerMm = outerMm - 2 * thicknessMm
+    if (innerMm <= 0) errors.push(issue(path, 'wall_too_thick', `${description} must be less than half the outer dimension after conversion to millimetres.`))
+    else if (innerMm >= outerMm) errors.push(issue(path, 'thickness_not_representable', `${description} is too small to represent at the outer dimension in millimetres.`))
+  }
+
+  if (input.shape === 'circular-tube') checkHollowWall(input.dimensions.D, input.dimensions.t, 'dimensions.t', 'Circular-tube wall thickness t')
+  if (input.shape === 'rectangular-tube') {
+    checkHollowWall(input.dimensions.b, input.dimensions.t, 'dimensions.t', 'Rectangular-tube wall thickness t')
+    checkHollowWall(input.dimensions.h, input.dimensions.t, 'dimensions.t', 'Rectangular-tube wall thickness t')
+  }
+
   return { valid: errors.length === 0, errors }
 }
 
@@ -75,7 +98,7 @@ export class GeometryDefinition {
     this.shape = input.shape
     this.unit = input.unit
     this.dimensions = Object.freeze({ ...input.dimensions })
-    this.boundingBox = Object.freeze(this.shape === 'circle'
+    this.boundingBox = Object.freeze(this.shape === 'circle' || this.shape === 'circular-tube'
       ? { width: input.dimensions.D, height: input.dimensions.D }
       : { width: input.dimensions.b, height: input.dimensions.h })
     Object.freeze(this)

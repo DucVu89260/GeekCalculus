@@ -139,7 +139,7 @@ Object.assign(copy.vi, {
   schemaError: 'Không tải được định nghĩa trường kỹ thuật.', sourceHelp: 'Hãy ghi lại catalog, tiêu chuẩn hoặc tài liệu đã dùng để xác minh các đặc trưng.',
   passwordTooShort: 'Mật khẩu mới cần ít nhất 12 ký tự.',
   signedInAccount: 'Đang đăng nhập', groupSteel: 'Thiết kế kết cấu thép', groupConcrete: 'Thiết kế bê tông cốt thép',
-  groupAnalysis: 'Trung tâm phân tích', groupLoads: 'Tạo tải trọng', groupLibrary: 'Thư viện kỹ thuật', groupFuture: 'Phòng thí nghiệm tương lai',
+  groupAnalysis: 'Đặc trưng tiết diện', groupLoads: 'Tạo tải trọng', groupLibrary: 'Thư viện kỹ thuật', groupFuture: 'Phòng thí nghiệm tương lai',
   footerBrand: 'GeekCalculus · Nền tảng kỹ thuật kết cấu',
 })
 
@@ -207,6 +207,6 @@ Object.assign(copy.en, {
   schemaError: 'Could not load the engineering field definitions.', sourceHelp: 'Record the catalog, standard, or document used to verify these properties.',
   passwordTooShort: 'New passwords must have at least 12 characters.',
   signedInAccount: 'Signed in', groupSteel: 'Steel design', groupConcrete: 'Reinforced concrete design',
-  groupAnalysis: 'Analysis hub', groupLoads: 'Load generator', groupLibrary: 'Engineering library', groupFuture: 'Future labs',
+  groupAnalysis: 'Section Properties', groupLoads: 'Load generator', groupLibrary: 'Engineering library', groupFuture: 'Future labs',
   footerBrand: 'GeekCalculus · Structural engineering platform',
 })

@@ -37,12 +37,17 @@ function close(actual, expected, tolerance = 1e-10) {
   assert.ok(Math.abs(actual - expected) <= tolerance * Math.abs(expected), `${actual} != ${expected}`)
 }
 
-function compare(input, polygon, tolerance) {
+function addIntegrals(a, b) {
+  return Object.fromEntries(Object.keys(a).map(key => [key, a[key] + b[key]]))
+}
+
+function compare(input, polygon, tolerance, hole = null) {
   const actual = calculateSectionProperties(input)
-  const ref = integrate(polygon)
+  const ref = hole ? addIntegrals(integrate(polygon), integrate(hole)) : integrate(polygon)
   const cx = ref.mx / ref.area, cy = ref.my / ref.area
   const ix = ref.ix - ref.area * cy ** 2, iy = ref.iy - ref.area * cx ** 2
-  const top = upperHalf(polygon, 1, cy), right = upperHalf(polygon, 0, cx)
+  const top = hole ? addIntegrals(upperHalf(polygon, 1, cy), upperHalf(hole, 1, cy)) : upperHalf(polygon, 1, cy)
+  const right = hole ? addIntegrals(upperHalf(polygon, 0, cx), upperHalf(hole, 0, cx)) : upperHalf(polygon, 0, cx)
   close(actual.A, ref.area, tolerance)
   close(actual.perimeter, ref.perimeter, tolerance)
   close(actual.centroid.x, cx, tolerance)
@@ -84,4 +89,23 @@ test('circle properties agree with converged 8192-edge boundary integration', ()
     return [radius + radius * Math.cos(theta), radius + radius * Math.sin(theta)]
   })
   compare({ shape: 'circle', unit: 'mm', dimensions: { D: 100 } }, polygon, 3e-7)
+})
+
+test('SHS/RHS properties agree with signed boundary integrals including the inner opening', () => {
+  for (const [b, h, t] of [[100, 100, 5], [200, 100, 10], [120, 300, 2]]) {
+    const outer = [[0, 0], [b, 0], [b, h], [0, h]]
+    // Inner ring has clockwise orientation: negative area/inertia, positive perimeter.
+    const hole = [[t, t], [t, h - t], [b - t, h - t], [b - t, t]]
+    compare({ shape: 'rectangular-tube', unit: 'mm', dimensions: { b, h, t } }, outer, 1e-10, hole)
+  }
+})
+
+test('CHS properties agree with independent outer and inner circular boundary integration', () => {
+  for (const t of [5, 20, 49]) {
+    const ring = radius => Array.from({ length: 8192 }, (_, i) => {
+      const theta = 2 * Math.PI * i / 8192
+      return [50 + radius * Math.cos(theta), 50 + radius * Math.sin(theta)]
+    })
+    compare({ shape: 'circular-tube', unit: 'mm', dimensions: { D: 100, t } }, ring(50), 3e-7, ring(50 - t).reverse())
+  }
 })

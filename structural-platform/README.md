@@ -133,18 +133,27 @@ chưa có bố trí từng thanh, phân tích nứt/phi tuyến hoặc kiểm to
 
 ### Geometry Models / Analytical Engine
 
-Mô hình kiểm thử hình học nằm trong **Analysis / Phân tích**. Package 01 định
-nghĩa input schema phiên bản 1 và `GeometryDefinition`; Package 02 tính A, chu vi,
+Mô hình kiểm thử hình học nằm trong **Section Properties / Đặc trưng tiết diện**.
+Package 01 định nghĩa input schema phiên bản 1 và `GeometryDefinition`; Package 02 tính A, chu vi,
 trọng tâm, Ix/Iy/Ixy, mô đun chống uốn đàn hồi Sx/Sy theo phía dương/âm, mô đun
 dẻo Zx/Zy, rx/ry, trục trung hòa dẻo và mô men/trục quán tính chính.
 Entrypoint public của hai package là `frontend/vue/src/geometry-models.js` và
 `frontend/vue/src/analytical-engine.js`.
 
-Input nhận hình chữ nhật đặc (b, h), hình tròn đặc (D), và I/H đối xứng với góc
-vuông (b, h, tw, tf). Tất cả kích thước trong một định nghĩa dùng chung một đơn
-vị chiều dài: mm, cm, m hoặc in. Kết quả giữ đơn vị đó với số mũ tương ứng cho
-diện tích, quán tính và mô đun. Bộ kiểm tra từ chối kích thước không hữu hạn,
-không dương, bụng I/H rộng bằng/rộng hơn cánh hoặc cánh giao nhau; engine báo lỗi
+Input nhận hình chữ nhật đặc (b, h), hình tròn đặc (D), I/H đối xứng góc
+vuông (b, h, tw, tf), CHS — ống tròn (D, t), và SHS/RHS — hộp vuông/chữ nhật
+(b, h, t). D/b/h là kích thước ngoài; t là bề dày thành đồng đều. SHS là trường
+hợp b = h của mô hình hộp. Góc hộp hiện là góc vuông, chưa xét bán kính lượn.
+Tất cả kích thước trong một định nghĩa dùng chung một đơn vị chiều dài: mm, cm,
+m hoặc in. Kết quả giữ đơn vị đó với số mũ tương ứng cho
+diện tích, quán tính và mô đun. Bộ chọn **Đơn vị kết quả / Result unit** đổi
+mm/cm/m ngay sau tính, không đổi kích thước/đơn vị input và không cần tính lại.
+API `convertSectionProperties(properties, targetUnit)` chuyển toàn bộ kết quả
+với số mũ đúng (chiều dài 1, diện tích 2, S/Z 3, I 4), giữ nguyên góc trục
+và không sửa đối tượng gốc. Chu vi tiết diện rỗng là tổng biên ngoài và biên
+trong. Bộ kiểm tra từ chối kích thước không hữu hạn,
+không dương, bụng I/H rộng bằng/rộng hơn cánh, cánh giao nhau, hoặc 2t lớn
+bằng/lớn hơn D (ống tròn) hay min(b, h) (hộp); engine báo lỗi
 khi kết quả vượt phạm vi số máy có thể biểu diễn.
 
 Quy ước trục của engine: gốc tại góc dưới trái hộp bao, +x sang phải theo bề
@@ -156,8 +165,9 @@ bề rộng thì Ix tương ứng Iz nguồn, Iy tương ứng Iy nguồn; cần
 trục của từng catalog trước khi sao chép số liệu vào thư viện.
 
 Các kết quả này là đặc trưng tiết diện nguyên đồng nhất; chưa xét bán kính lượn,
-lỗ, tiết diện bất đối xứng, cốt thép, mô hình vật liệu, hoặc kiểm tra theo tiêu
-chuẩn. Workbench không ghi kết quả vào thư viện. Benchmark thuần Node nằm tại
+lỗ bổ sung ngoài lòng rỗng CHS/SHS/RHS, tiết diện bất đối xứng, cốt thép,
+mô hình vật liệu, hoặc kiểm tra theo tiêu chuẩn. Workbench không ghi kết quả
+vào thư viện. Benchmark thuần Node nằm tại
 `frontend/vue/tests/geometry/` và chạy bằng `npm test` trong `frontend/vue/`.
 
 Schema, giới hạn và đơn vị: `database/seeds/engineering-schema.json`.

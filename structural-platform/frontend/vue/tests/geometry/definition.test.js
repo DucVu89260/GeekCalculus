@@ -12,9 +12,9 @@ test('geometry schema declares the supported shapes, units, and dimension varian
   assert.equal(GEOMETRY_SCHEMA_VERSION, 1)
   assert.deepEqual(geometryInputSchema.required, ['shape', 'unit', 'dimensions'])
   assert.deepEqual(geometryInputSchema.properties.schemaVersion, { const: 1 })
-  assert.deepEqual(geometryInputSchema.properties.shape.enum, ['rectangle', 'circle', 'i-h'])
+  assert.deepEqual(geometryInputSchema.properties.shape.enum, ['rectangle', 'circle', 'circular-tube', 'rectangular-tube', 'i-h'])
   assert.deepEqual(geometryInputSchema.properties.unit.enum, ['mm', 'cm', 'm', 'in'])
-  assert.equal(geometryInputSchema.allOf.length, 3)
+  assert.equal(geometryInputSchema.allOf.length, 5)
 })
 
 test('GeometryDefinition freezes a valid input and reports a serializable bounding box', () => {
@@ -25,6 +25,10 @@ test('GeometryDefinition freezes a valid input and reports a serializable boundi
   assert.equal(Object.isFrozen(geometry), true)
   assert.equal(Object.isFrozen(geometry.dimensions), true)
   assert.deepEqual(new GeometryDefinition(geometry.toJSON()).toJSON(), geometry.toJSON())
+  const chs = new GeometryDefinition({ shape: 'circular-tube', unit: 'mm', dimensions: { D: 100, t: 5 } })
+  assert.deepEqual(chs.boundingBox, { width: 100, height: 100 })
+  const rhs = new GeometryDefinition({ shape: 'rectangular-tube', unit: 'mm', dimensions: { b: 100, h: 200, t: 5 } })
+  assert.deepEqual(rhs.boundingBox, { width: 100, height: 200 })
 })
 
 test('validation rejects missing, unknown, nonfinite, and geometrically impossible dimensions', () => {
@@ -56,4 +60,19 @@ test('validation rejects missing, unknown, nonfinite, and geometrically impossib
     () => new GeometryDefinition({ schemaVersion: 2, shape: 'circle', unit: 'mm', dimensions: { D: 20 } }),
     /Schema version must be 1/,
   )
+})
+
+test('hollow-section validation requires a positive inner opening and representable wall thickness', () => {
+  const impossibleCircle = validateGeometryDefinition({ shape: 'circular-tube', unit: 'mm', dimensions: { D: 100, t: 50 } })
+  assert.ok(impossibleCircle.errors.some(({ code }) => code === 'wall_too_thick'))
+  const impossibleBox = validateGeometryDefinition({ shape: 'rectangular-tube', unit: 'mm', dimensions: { b: 100, h: 200, t: 50 } })
+  assert.ok(impossibleBox.errors.some(({ code }) => code === 'wall_too_thick'))
+
+  for (const [shape, dimensions] of [
+    ['circular-tube', { D: 1e16, t: 0.1 }],
+    ['rectangular-tube', { b: 1e16, h: 1e16, t: 0.1 }],
+  ]) {
+    const result = validateGeometryDefinition({ shape, unit: 'mm', dimensions })
+    assert.ok(result.errors.some(({ code }) => code === 'thickness_not_representable'))
+  }
 })

@@ -21,6 +21,23 @@ export const SHAPE_DEFINITIONS = Object.freeze({
       Object.freeze({ key: 'D', symbol: 'D', label: 'Diameter' }),
     ]),
   }),
+  'circular-tube': Object.freeze({
+    label: 'Circular hollow section (CHS)',
+    dimensions: Object.freeze([
+      Object.freeze({ key: 'D', symbol: 'D', label: 'Outer diameter' }),
+      Object.freeze({ key: 't', symbol: 't', label: 'Wall thickness' }),
+    ]),
+    constraints: Object.freeze(['D > 2 * t']),
+  }),
+  'rectangular-tube': Object.freeze({
+    label: 'Rectangular hollow section (SHS/RHS)',
+    dimensions: Object.freeze([
+      Object.freeze({ key: 'b', symbol: 'b', label: 'Outer width' }),
+      Object.freeze({ key: 'h', symbol: 'h', label: 'Outer height' }),
+      Object.freeze({ key: 't', symbol: 't', label: 'Uniform wall thickness' }),
+    ]),
+    constraints: Object.freeze(['b > 2 * t', 'h > 2 * t']),
+  }),
   'i-h': Object.freeze({
     label: 'Symmetric I/H section',
     dimensions: Object.freeze([
@@ -57,6 +74,8 @@ export const geometryInputSchema = Object.freeze({
   allOf: [
     { if: { properties: { shape: { const: 'rectangle' } }, required: ['shape'] }, then: { properties: { dimensions: dimensionSchema(['b', 'h']) } } },
     { if: { properties: { shape: { const: 'circle' } }, required: ['shape'] }, then: { properties: { dimensions: dimensionSchema(['D']) } } },
+    { if: { properties: { shape: { const: 'circular-tube' } }, required: ['shape'] }, then: { properties: { dimensions: dimensionSchema(['D', 't']) } } },
+    { if: { properties: { shape: { const: 'rectangular-tube' } }, required: ['shape'] }, then: { properties: { dimensions: dimensionSchema(['b', 'h', 't']) } } },
     { if: { properties: { shape: { const: 'i-h' } }, required: ['shape'] }, then: { properties: { dimensions: dimensionSchema(['b', 'h', 'tw', 'tf']) } } },
   ],
 })

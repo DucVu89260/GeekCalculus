@@ -1,1 +1,1 @@
-export { calculateSectionProperties, GeometryCalculationError } from './geometry/analytical-engine.js'
+export { calculateSectionProperties, convertSectionProperties, GeometryCalculationError } from './geometry/analytical-engine.js'

@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
-import { calculateSectionProperties } from '../analytical-engine.js'
+import { calculateSectionProperties, convertSectionProperties } from '../analytical-engine.js'
 import { SHAPE_DEFINITIONS, validateGeometryDefinition } from '../geometry-models.js'
 import GeometryPreview from './GeometryPreview.vue'
 
@@ -9,7 +9,7 @@ const props = defineProps({ locale: { type: String, required: true } })
 const words = {
   en: {
     title: 'Geometry Models / Analytical Engine', subtitle: 'Package 01 · Geometry Models  /  Package 02 · Analytical Engine',
-    shape: 'Geometry model', unit: 'Length unit', calculate: 'Calculate properties',
+    shape: 'Geometry model', unit: 'Input length unit', resultUnit: 'Result unit', calculate: 'Calculate properties',
     coordinate: 'Coordinates: origin at the lower-left of the bounding box; +x points right across width and +y points up across depth. Ix is about horizontal x, Iy about vertical y, and Ixy = ∫(x−x̄)(y−ȳ)dA.',
     localAxes: 'Axis names here are geometric x/y. Existing library Iy/Iz values retain the source catalog’s local-axis convention. If source local y follows depth and local z follows width, engine Iy maps to source Iy and engine Ix maps to source Iz; confirm each source before transferring values.',
     result: 'Gross section properties', area: 'Area A', perimeter: 'Perimeter P', centroid: 'Centroid (x̄, ȳ)',
@@ -19,14 +19,19 @@ const words = {
     positive: 'positive', negative: 'negative', top: 'top (+y)', bottom: 'bottom (−y)', right: 'right (+x)', left: 'left (−x)',
     principal: 'Principal inertia', major: 'Major I₁', minor: 'Minor I₂', angle: 'Major-axis angle from +x',
     indeterminate: 'Indeterminate: the two principal inertias are equal.',
-    invalid: 'Check the dimensions:', scope: 'Scope: solid rectangle, solid circle, and symmetric sharp-corner I/H sections. Properties are homogeneous gross-section values; fillets, holes, reinforcement, and code checks are not included.',
+    invalid: 'Check the dimensions:', scope: 'Scope: solid rectangle/circle, symmetric I/H, CHS, and SHS/RHS with uniform wall thickness. Box and I/H corners are sharp. Properties describe homogeneous gross sections; fillets, additional openings, reinforcement, and code checks are not included.',
     rangeError: 'These dimensions exceed the supported numeric range. Use a smaller or larger length unit.',
-    b: 'Width b', h: 'Height / depth h', D: 'Diameter D', tw: 'Web thickness tw', tf: 'Flange thickness tf',
+    b: 'Width b', h: 'Height / depth h', D: 'Diameter D', tw: 'Web thickness tw', tf: 'Flange thickness tf', t: 'Wall thickness t',
     rectangle: 'Rectangle', circle: 'Circle', 'i-h': 'Symmetric I/H section',
+    'circular-tube': 'CHS — Circular hollow section', 'rectangular-tube': 'SHS/RHS — Square / rectangular hollow section',
+    perimeterNote: 'For hollow sections, P is the total outer and inner boundary length.',
+    conversionError: 'The result cannot be represented in this unit. Choose another result unit.',
+    wallError: 'Twice the wall thickness t must be less than every outer dimension.',
+    wallPrecisionError: 'The wall thickness is too small to represent for these outer dimensions.',
   },
   vi: {
     title: 'Geometry Models / Analytical Engine', subtitle: 'Gói 01 · Mô hình hình học  /  Gói 02 · Bộ máy giải tích',
-    shape: 'Mô hình hình học', unit: 'Đơn vị chiều dài', calculate: 'Tính đặc trưng',
+    shape: 'Mô hình hình học', unit: 'Đơn vị kích thước đầu vào', resultUnit: 'Đơn vị kết quả', calculate: 'Tính đặc trưng',
     coordinate: 'Tọa độ: gốc tại góc dưới trái của hộp bao; +x hướng sang phải theo bề rộng, +y hướng lên theo chiều cao. Ix quanh trục ngang x, Iy quanh trục đứng y và Ixy = ∫(x−x̄)(y−ȳ)dA.',
     localAxes: 'Trục ở đây là x/y hình học. Iy/Iz hiện có trong thư viện giữ quy ước trục địa phương của catalog nguồn. Nếu trục y của nguồn theo chiều cao và trục z theo bề rộng, Iy của engine tương ứng Iy nguồn, Ix của engine tương ứng Iz nguồn; cần xác nhận quy ước của từng nguồn trước khi chuyển số liệu.',
     result: 'Đặc trưng tiết diện nguyên', area: 'Diện tích A', perimeter: 'Chu vi P', centroid: 'Trọng tâm (x̄, ȳ)',
@@ -36,18 +41,28 @@ const words = {
     positive: 'phía dương', negative: 'phía âm', top: 'trên (+y)', bottom: 'dưới (−y)', right: 'phải (+x)', left: 'trái (−x)',
     principal: 'Mô men quán tính chính', major: 'Lớn I₁', minor: 'Nhỏ I₂', angle: 'Góc trục chính lớn từ +x',
     indeterminate: 'Không xác định: hai mô men quán tính chính bằng nhau.',
-    invalid: 'Kiểm tra kích thước:', scope: 'Phạm vi: chữ nhật đặc, tròn đặc và tiết diện I/H đối xứng góc vuông. Đặc trưng của tiết diện nguyên đồng nhất; chưa xét bán kính lượn, lỗ, cốt thép hoặc kiểm tra tiêu chuẩn.',
+    invalid: 'Kiểm tra kích thước:', scope: 'Phạm vi: chữ nhật/tròn đặc, I/H đối xứng, CHS và SHS/RHS có bề dày thành đồng đều. Góc hộp và I/H là góc vuông. Đặc trưng tiết diện nguyên đồng nhất; chưa xét bán kính lượn, lỗ bổ sung, cốt thép hoặc kiểm tra tiêu chuẩn.',
     rangeError: 'Kích thước vượt quá phạm vi số được hỗ trợ. Hãy chọn đơn vị chiều dài phù hợp hơn.',
-    b: 'Bề rộng b', h: 'Chiều cao h', D: 'Đường kính D', tw: 'Bề dày bụng tw', tf: 'Bề dày cánh tf',
+    b: 'Bề rộng b', h: 'Chiều cao h', D: 'Đường kính D', tw: 'Bề dày bụng tw', tf: 'Bề dày cánh tf', t: 'Bề dày thành t',
     rectangle: 'Chữ nhật', circle: 'Hình tròn', 'i-h': 'Tiết diện I/H đối xứng',
+    'circular-tube': 'CHS — Ống tròn', 'rectangular-tube': 'SHS/RHS — Hộp vuông / chữ nhật',
+    perimeterNote: 'Với tiết diện rỗng, P là tổng chiều dài biên ngoài và biên trong.',
+    conversionError: 'Kết quả không biểu diễn được bằng đơn vị này. Hãy chọn đơn vị kết quả khác.',
+    wallError: 'Hai lần bề dày thành t phải nhỏ hơn mọi kích thước ngoài.',
+    wallPrecisionError: 'Bề dày thành quá nhỏ để biểu diễn với kích thước ngoài này.',
   },
 }
 
 const t = key => words[props.locale]?.[key] ?? words.en[key] ?? key
 const shape = ref('rectangle')
 const unit = ref('mm')
-const dimensions = ref({ b: 300, h: 500, D: 400, tw: 12, tf: 20 })
-const properties = ref(null)
+const resultUnit = ref('mm')
+const dimensions = ref({ b: 300, h: 500, D: 400, tw: 12, tf: 20, t: 10 })
+const calculatedProperties = ref(null)
+const properties = computed(() => {
+  if (!calculatedProperties.value) return null
+  try { return convertSectionProperties(calculatedProperties.value, resultUnit.value) } catch { return null }
+})
 const errors = ref([])
 const currentShape = computed(() => SHAPE_DEFINITIONS[shape.value])
 const validationInput = computed(() => ({
@@ -57,17 +72,17 @@ const validationInput = computed(() => ({
 }))
 
 watch([shape, unit, dimensions], () => {
-  properties.value = null
+  calculatedProperties.value = null
   errors.value = []
 }, { deep: true })
 
 function calculate() {
   const checked = validateGeometryDefinition(validationInput.value)
   errors.value = checked.errors
-  properties.value = null
+  calculatedProperties.value = null
   if (!checked.valid) return
   try {
-    properties.value = calculateSectionProperties(validationInput.value)
+    calculatedProperties.value = calculateSectionProperties(validationInput.value)
   } catch (error) {
     errors.value = [{ code: error.code ?? 'numerical_range' }]
   }
@@ -79,6 +94,10 @@ const errorText = error => {
   if (error.code === 'numerical_range') return t('rangeError')
   if (error.code === 'web_too_wide') return props.locale === 'vi' ? 'Bề dày bụng tw phải nhỏ hơn bề rộng cánh b.' : 'Web thickness tw must be less than flange width b.'
   if (error.code === 'flanges_overlap') return props.locale === 'vi' ? 'Chiều cao h phải lớn hơn hai lần bề dày cánh tf.' : 'Depth h must be greater than twice flange thickness tf.'
+  if (error.code === 'wall_too_thick') return t('wallError')
+  if (error.code === 'thickness_not_representable') return t('wallPrecisionError')
+  if (error.code === 'positive_number_required') return props.locale === 'vi' ? `${error.path.split('.').at(-1)} phải lớn hơn 0.` : error.message
+  if (error.code === 'finite_number_required') return props.locale === 'vi' ? `${error.path.split('.').at(-1)} phải là số hữu hạn.` : error.message
   return error.message
 }
 
@@ -115,9 +134,18 @@ calculate()
     <GeometryPreview :input="validationInput" :properties="properties" :locale="locale" />
     <p v-if="errors.length" class="error-message" role="alert">{{ t('invalid') }} {{ errors.map(errorText).join(' ') }}</p>
 
+    <p v-if="calculatedProperties && !properties" role="alert" class="error-message">{{ t('conversionError') }}</p>
+    <label v-if="calculatedProperties" class="field result-unit-selector">
+      <span>{{ t('resultUnit') }}</span>
+      <select v-model="resultUnit" :aria-label="t('resultUnit')">
+        <option value="mm">mm</option><option value="cm">cm</option><option value="m">m</option>
+      </select>
+    </label>
+
     <template v-if="properties">
       <section class="geometry-results" aria-live="polite" aria-labelledby="geometry-results-title">
         <h3 id="geometry-results-title">{{ t('result') }}</h3>
+        <p v-if="shape === 'circular-tube' || shape === 'rectangular-tube'" class="geometry-coordinate-note">{{ t('perimeterNote') }}</p>
         <dl class="geometry-summary">
           <div><dt>{{ t('area') }}</dt><dd>{{ number(properties.A) }} {{ properties.units.area }}</dd></div>
           <div><dt>{{ t('perimeter') }}</dt><dd>{{ number(properties.perimeter) }} {{ properties.units.length }}</dd></div>
@@ -164,6 +192,7 @@ calculate()
 .geometry-number { display: flex; align-items: center; gap: 8px; }
 .geometry-number input { flex: 1; }
 .geometry-number small { min-width: 25px; color: var(--muted-ink); }
+.result-unit-selector { max-width: 260px; }
 .geometry-submit { min-height: 44px; }
 .geometry-results { border-top: 1px solid var(--surface-border); padding-top: 18px; }
 .geometry-results > h3 { margin: 0 0 12px; color: #254d78; }

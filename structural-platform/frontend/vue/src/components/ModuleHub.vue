@@ -50,13 +50,13 @@ function navigate(code) { window.location.hash = `/modules/${code}` }
 .module-page { max-width: 1180px; padding: 0 28px 40px; margin: auto; }
 .module-topbar { min-height: 84px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
 .module-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.module-navigation { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 5px; padding: 6px; border: 1px solid #cddff1; background: #f9fcff; border-radius: 10px; }
+.module-navigation { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 5px; padding: 6px; border: 1px solid var(--surface-border); background: var(--surface-bg); border-radius: 10px; }
 .module-navigation a { text-align: center; display: flex; justify-content: center; align-items: center; padding: 13px 9px; border-radius: 6px; color: #547491; font-size: 13px; line-height: 1.5; text-decoration: none; transition: background .15s, color .15s; }
 .module-navigation a[aria-current="page"], .module-navigation a:hover, .module-navigation a:focus-visible { color: white; background: #23395d; }
-.module-heading { padding: 32px 0 22px; }.module-heading h1 { font-size: 26px; }.module-heading p { font-size: 14px; margin: 10px 0 0; color: #6b849f; }
-.module-panel { background: #f9fcff; border: 1px solid #cddff1; padding: 24px; border-radius: 12px; }
+.module-heading { padding: 32px 0 22px; }.module-heading h1 { font-size: 26px; }.module-heading p { font-size: 14px; margin: 10px 0 0; color: var(--muted-ink); }
+.module-panel { background: var(--surface-bg); border: 1px solid var(--surface-border); padding: 24px; border-radius: 12px; }
 .pending-selector { display: flex; flex-direction: column; gap: 10px; max-width: 400px; font-size: 14px; color: #4b6a88; }
-.pending-note { font-size: 14px; line-height: 1.8; color: #7890a7; margin: 24px 0 0; }
+.pending-note { font-size: 14px; line-height: 1.8; color: var(--muted-ink); margin: 24px 0 0; }
 @media (max-width: 900px) { .module-navigation { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (max-width: 600px) { .module-page { padding: 0 16px 30px; }.module-topbar { align-items: flex-start; flex-direction: column; padding: 20px 0; gap: 12px; }.module-actions { width: 100%; justify-content: space-between; gap: 4px; }.module-actions .quiet-button { padding: 7px 4px; font-size: 12px; }.module-navigation { grid-template-columns: repeat(2, minmax(0, 1fr)); }.module-heading h1 { font-size: 23px; }.module-panel { padding: 16px 12px; } }
 </style>

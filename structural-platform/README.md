@@ -2,7 +2,7 @@
 
 Laravel 12 + SQLite + Vue 3/Vite. Trang đăng nhập có ảnh nền kết cấu, nút VI/EN
 và phân quyền **admin/user**. Trang sử dụng gồm sáu nhóm chức năng trên nền xanh
-nhạt; trang quản trị có thư viện kỹ thuật và quản lý tài khoản.
+xám dịu; trang quản trị có thư viện kỹ thuật và quản lý tài khoản.
 
 ## Chạy local
 
@@ -297,3 +297,10 @@ nhưng dữ liệu thực là JPEG; lưu nguyên byte với đuôi `.jpg` để 
 `tests/modules-smoke.cjs` kiểm tra ảnh, hover, mở tab, navigation, dropdown,
 VI/EN, mobile và đăng xuất giữa các tab. Dùng `TEST_DEMO=1` với
 `MODULE_BASE_URL` cho demo, hoặc `AUTH_FIXTURES` riêng cho backend thật.
+
+## Màu nền dịu mắt
+
+Nền trang dùng xanh xám `#c2ced9`, panel/bảng/hộp chỉnh sửa `#dce4eb`,
+trường nhập `#e3e9ee`; giảm các mảng trắng sáng ở cả admin và giao diện sử dụng.
+Navy `#23395d` vẫn dùng cho tab đang chọn và hover. Chữ phụ `#40566b`
+giữ tương phản trên nền mới; ảnh cover do người dùng cung cấp được giữ nguyên.

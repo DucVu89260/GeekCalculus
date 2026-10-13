@@ -4,6 +4,7 @@ import { request, demoMode } from '../api'
 import { copy } from '../i18n'
 import DesignCodeIcon from './DesignCodeIcon.vue'
 import DesignCodeSelect from './DesignCodeSelect.vue'
+import SectionGeometrySketch from './SectionGeometrySketch.vue'
 
 const props = defineProps({ locale: { type: String, required: true }, canEdit: { type: Boolean, default: false } })
 const t = (key) => copy[props.locale]?.[key] ?? copy.en[key] ?? key
@@ -110,6 +111,40 @@ const editForm = reactive({
   section_type_id: '', material_id: '', properties: {},
 })
 
+const sectionEditorCopy = {
+  vi: {
+    geometry: 'Hình học tiết diện', geometryHint: 'Sơ đồ dùng kích thước tiết diện theo mm; khi thiếu kích thước, sơ đồ hiển thị theo tỷ lệ minh họa.', geometryTypeHint: 'Sơ đồ minh họa theo loại tiết diện. Nhập kích thước chính xác khi tạo tiết diện.', dimensionsHeader: 'Kích thước hình học', manualProperties: 'Thông số catalog (nhập thủ công)',
+    engine: 'Kết quả bộ máy phân tích', engineAxes: 'Trục XY · mm', calculate: 'Tính đặc trưng XY', calculating: 'Đang tính…',
+    engineNote: 'Kết quả chỉ đọc theo trục XY của bộ máy. Iy/Iz trong catalog vẫn theo trục cục bộ CSI đã nhập tay và không bị thay đổi.',
+    enterDimensions: 'Nhập đủ kích thước hình học trong phần thông số catalog để tính.', unsupported: 'Bản v1 hỗ trợ tính chữ nhật đặc, hình tròn đặc và tiết diện I. Hình dạng này có sơ đồ minh họa nhưng chưa được bộ máy hỗ trợ.',
+    result: 'Đặc trưng đã tính', geometric: 'Hình học', elastic: 'Đàn hồi', plastic: 'Dẻo', principal: 'Trục chính', advanced: 'Đặc trưng nâng cao',
+    area: 'Diện tích A', perimeter: 'Chu vi P', centroid: 'Trọng tâm', sx: 'Mô đun đàn hồi Sx', sy: 'Mô đun đàn hồi Sy', radii: 'Bán kính quán tính',
+    angle: 'Góc trục chính', orientation: 'Trạng thái phương', determinate: 'Xác định', indeterminate: 'Không xác định',
+    pnaX: 'Tọa độ PNA x', pnaY: 'Tọa độ PNA y', zx: 'Mô đun dẻo Zx', zy: 'Mô đun dẻo Zy',
+    torsion: 'Hằng số xoắn J', warping: 'Hằng số vênh Cw', shearCenter: 'Tâm cắt', effectiveShear: 'Diện tích chịu cắt hữu hiệu',
+    computed: 'Đã tính', unavailable: 'Chưa tính', failed: 'Không thể tính đặc trưng với kích thước hiện tại.', status: 'Trạng thái HTTP', errorCode: 'Mã lỗi', errorFields: 'Trường kích thước cần kiểm tra',
+    reason_not_requested: 'Chưa yêu cầu', reason_solver_not_implemented: 'Chưa triển khai', reason_convergence_not_achieved: 'Chưa đạt độ chính xác yêu cầu', reason_numerical_precision_limit: 'Giới hạn độ chính xác số', reason_default: 'Không có giá trị với cấu hình hiện tại',
+  },
+  en: {
+    geometry: 'Section geometry', geometryHint: 'The sketch uses section dimensions in mm. Missing dimensions use schematic proportions.', geometryTypeHint: 'Schematic for this section type. Enter exact dimensions when creating a section record.', dimensionsHeader: 'Geometry dimensions', manualProperties: 'Catalog properties (manual entry)',
+    engine: 'Analytical engine results', engineAxes: 'XY axes · mm', calculate: 'Calculate XY properties', calculating: 'Calculating…',
+    engineNote: 'Read-only results use the engine XY convention. Catalog Iy/Iz remain manually entered in their CSI local convention and are never changed.',
+    enterDimensions: 'Fill the required dimensions in the catalog property fields to calculate.', unsupported: 'V1 calculations support solid rectangles, solid circles, and I-sections. This shape has a schematic illustration but is not supported by the engine.',
+    result: 'Calculated properties', geometric: 'Geometric', elastic: 'Elastic', plastic: 'Plastic', principal: 'Principal axes', advanced: 'Advanced properties',
+    area: 'Area A', perimeter: 'Perimeter P', centroid: 'Centroid', sx: 'Elastic modulus Sx', sy: 'Elastic modulus Sy', radii: 'Radii of gyration',
+    angle: 'Major-axis angle', orientation: 'Orientation status', determinate: 'Determinate', indeterminate: 'Indeterminate',
+    pnaX: 'PNA coordinate x', pnaY: 'PNA coordinate y', zx: 'Plastic modulus Zx', zy: 'Plastic modulus Zy',
+    torsion: 'Torsion constant J', warping: 'Warping constant Cw', shearCenter: 'Shear center', effectiveShear: 'Effective shear area',
+    computed: 'Computed', unavailable: 'Not computed', failed: 'Could not calculate properties for these dimensions.', status: 'HTTP status', errorCode: 'Error code', errorFields: 'Dimension fields to review',
+    reason_not_requested: 'Not requested', reason_solver_not_implemented: 'Not implemented', reason_convergence_not_achieved: 'Requested tolerance was not met', reason_numerical_precision_limit: 'Numerical precision limit', reason_default: 'No value is available for the current configuration',
+  },
+}
+const sectionEditorT = (key) => sectionEditorCopy[props.locale]?.[key] ?? sectionEditorCopy.en[key] ?? key
+const sectionEngineResult = ref(null)
+const sectionEngineError = ref(null)
+const sectionEngineLoading = ref(false)
+let sectionEngineSequence = 0
+
 const activeRecords = computed(() => records.value[activeResource.value] ?? [])
 const categories = computed(() => schema.value?.categories?.[activeResource.value === 'sections' ? 'section_types' : activeResource.value] ?? [])
 const visibleShapes = computed(() => (schema.value?.shapes ?? []).filter((shape) => !categoryFilter.value || shape.category === categoryFilter.value))
@@ -163,6 +198,144 @@ const propertyFields = computed(() => {
     return true
   })
 })
+const editorSectionShape = computed(() => editorResource.value === 'section_types' ? editForm.shape : selectedSectionType.value?.shape ?? '')
+const editorSectionDimensions = computed(() => editorResource.value === 'sections' ? editForm.properties : {})
+const sectionDimensionKeys = computed(() => ({
+  i: ['depth', 'width', 'web_thickness', 'flange_thickness'],
+  channel: ['depth', 'width', 'web_thickness', 'flange_thickness'],
+  angle: ['depth', 'width', 'thickness'],
+  tee: ['depth', 'width', 'web_thickness', 'flange_thickness'],
+  rectangular_hollow: ['depth', 'width', 'thickness'],
+  circular_hollow: ['diameter', 'thickness'],
+  rectangle: ['depth', 'width'],
+  circle: ['diameter'],
+}[editorSectionShape.value] ?? []))
+const sectionDimensionFields = computed(() => propertyFields.value.filter((field) => sectionDimensionKeys.value.includes(field.key)))
+const sectionManualPropertyFields = computed(() => propertyFields.value.filter((field) => !sectionDimensionKeys.value.includes(field.key)))
+const sectionDimensionFingerprint = computed(() => JSON.stringify({
+  shape: editorSectionShape.value,
+  dimensions: Object.fromEntries(sectionDimensionKeys.value.map((key) => [key, editForm.properties[key] ?? ''])),
+}))
+const sectionEngineRequest = computed(() => {
+  if (editorResource.value !== 'sections') return null
+  const shape = editorSectionShape.value
+  const properties = editForm.properties
+  const value = (key) => {
+    const raw = properties[key]
+    if (raw === '' || raw === null || raw === undefined) return null
+    const number = Number(raw)
+    return Number.isFinite(number) && number > 0 ? number : null
+  }
+  let type
+  let dimensions
+  let geometryVariant = 'solid'
+  if (shape === 'rectangle') {
+    const width = value('width')
+    const height = value('depth')
+    if (width === null || height === null) return null
+    type = 'rectangle'
+    dimensions = { width, height }
+  } else if (shape === 'circle') {
+    const diameter = value('diameter')
+    if (diameter === null) return null
+    type = 'circle'
+    dimensions = { diameter }
+  } else if (shape === 'i') {
+    const depth = value('depth')
+    const width = value('width')
+    const webThickness = value('web_thickness')
+    const flangeThickness = value('flange_thickness')
+    if ([depth, width, webThickness, flangeThickness].some((dimension) => dimension === null)) return null
+    type = 'i_section'
+    geometryVariant = 'sharp_corner'
+    dimensions = {
+      depth,
+      top_flange_width: width,
+      bottom_flange_width: width,
+      web_thickness: webThickness,
+      top_flange_thickness: flangeThickness,
+      bottom_flange_thickness: flangeThickness,
+    }
+  } else {
+    return null
+  }
+  return {
+    geometry: { type, geometry_variant: geometryVariant, dimensions },
+    units: 'mm',
+    options: { include_plastic: true, include_advanced: true },
+  }
+})
+const sectionEngineCanCalculate = computed(() => Boolean(sectionEngineRequest.value))
+const sectionEngineSupportsShape = computed(() => ['rectangle', 'circle', 'i'].includes(editorSectionShape.value))
+
+function clearSectionEngineResult() {
+  sectionEngineSequence += 1
+  sectionEngineResult.value = null
+  sectionEngineError.value = null
+  sectionEngineLoading.value = false
+}
+
+watch(sectionDimensionFingerprint, clearSectionEngineResult, { flush: 'sync' })
+
+function sectionEngineFormat(value, unit = '') {
+  const formatted = formatValue(value)
+  return unit && formatted !== '—' ? `${formatted} ${unit}` : formatted
+}
+
+function sectionEngineAdvancedLabel(key) {
+  const labels = { torsion_constant_j: 'torsion', warping_constant_cw: 'warping', shear_center: 'shearCenter', effective_shear_area: 'effectiveShear' }
+  return sectionEditorT(labels[key] ?? key)
+}
+
+function sectionEngineAdvancedUnit(key) {
+  if (key === 'warping_constant_cw') return 'mm⁶'
+  if (key === 'effective_shear_area') return 'mm²'
+  if (key === 'shear_center') return 'mm'
+  return 'mm⁴'
+}
+
+function sectionEngineAdvancedStatus(reason) {
+  const key = `reason_${reason ?? 'default'}`
+  return `${sectionEditorT('unavailable')} · ${sectionEditorT(key)}`
+}
+
+function sectionEngineErrorDetails(error) {
+  const errorText = `${String(error?.message ?? '')} ${JSON.stringify(error?.errors ?? {})}`
+  const fieldAliases = { depth: ['height'] }
+  const fields = sectionDimensionFields.value
+    .filter((field) => errorText.includes(field.key) || (fieldAliases[field.key] ?? []).some((alias) => errorText.includes(alias)))
+    .map((field) => propertyLabel(field))
+  const messageCode = String(error?.message ?? '').match(/\b[A-Z][A-Z0-9]+(?:_[A-Z0-9]+)+\b/)?.[0]
+  return {
+    code: error?.code ?? error?.error_code ?? messageCode ?? null,
+    status: typeof error?.status === 'number' ? error.status : null,
+    fields: [...new Set(fields)],
+  }
+}
+
+async function calculateSectionProperties() {
+  const payload = sectionEngineRequest.value
+  if (!payload || sectionEngineLoading.value) return
+  const sequence = ++sectionEngineSequence
+  const fingerprint = sectionDimensionFingerprint.value
+  sectionEngineLoading.value = true
+  sectionEngineResult.value = null
+  sectionEngineError.value = null
+  try {
+    const result = await request('/api/v1/sections/calculate', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    })
+    if (sequence !== sectionEngineSequence || fingerprint !== sectionDimensionFingerprint.value) return
+    sectionEngineResult.value = result
+  } catch (error) {
+    if (sequence !== sectionEngineSequence || fingerprint !== sectionDimensionFingerprint.value) return
+    sectionEngineError.value = sectionEngineErrorDetails(error)
+  } finally {
+    if (sequence === sectionEngineSequence) sectionEngineLoading.value = false
+  }
+}
+
 const filteredRecords = computed(() => {
   const query = search.value.trim().toLocaleLowerCase()
   return activeRecords.value.filter((record) => {
@@ -557,6 +730,7 @@ function nextCopyCode(code) {
 
 function openEditor(record = null, mode = record ? 'edit' : 'create') {
   if (!props.canEdit) return
+  clearSectionEngineResult()
   errorKey.value = ''
   validationFieldKeys.value = []
   messageKey.value = ''
@@ -810,11 +984,118 @@ onMounted(async () => {
             <label class="field full-field"><span>{{ t('source') }}</span><input v-model.trim="editForm.source" maxlength="2000" :placeholder="t('sourcePlaceholder')" /><small class="field-hint">{{ t('sourceHelp') }}</small></label>
           </template>
 
-          <div v-if="editorResource !== 'section_types'" class="property-editor full-field">
+          <div v-if="editorResource === 'materials'" class="property-editor full-field">
             <div class="property-editor-heading"><h3>{{ t('engineeringProperties') }}</h3><span>{{ t('basisUnits') }}</span></div>
-            <div v-if="editorResource === 'sections' && !selectedSectionType" class="property-placeholder">{{ t('selectSectionTypeFirst') }}</div>
-            <div v-else-if="propertyFields.length" class="editor-form-grid">
+            <div v-if="propertyFields.length" class="editor-form-grid">
               <label v-for="field in propertyFields" :key="field.key" class="field">
+                <span>{{ propertyLabel(field) }} <small v-if="field.unit">{{ field.unit }}</small><b v-if="field.required">*</b></span>
+                <input v-model="editForm.properties[field.key]" :name="`property-${field.key}`" type="number" inputmode="decimal" step="any" :min="field.min" :max="field.max" :required="field.required" />
+              </label>
+            </div>
+            <p v-else class="property-placeholder">{{ t('noProperties') }}</p>
+          </div>
+
+          <div v-else-if="editorResource === 'sections'" class="property-editor full-field">
+            <div class="property-editor-heading"><h3>{{ sectionEditorT('dimensionsHeader') }}</h3><span>XY · mm</span></div>
+            <div v-if="!selectedSectionType" class="property-placeholder">{{ t('selectSectionTypeFirst') }}</div>
+            <div v-else-if="sectionDimensionFields.length" class="editor-form-grid">
+              <label v-for="field in sectionDimensionFields" :key="field.key" class="field">
+                <span>{{ propertyLabel(field) }} <small v-if="field.unit">{{ field.unit }}</small><b v-if="field.required">*</b></span>
+                <input v-model="editForm.properties[field.key]" :name="`property-${field.key}`" type="number" inputmode="decimal" step="any" :min="field.min" :max="field.max" :required="field.required" />
+              </label>
+            </div>
+            <p v-else class="property-placeholder">{{ t('noProperties') }}</p>
+          </div>
+
+          <section v-if="editorSectionShape" class="section-geometry-editor full-field" :aria-label="sectionEditorT('geometry')">
+            <header class="section-geometry-editor-heading">
+              <div><h3>{{ sectionEditorT('geometry') }}</h3><p>{{ sectionEditorT('geometryHint') }}</p></div>
+              <span>XY · mm</span>
+            </header>
+            <div class="section-geometry-editor-body">
+              <SectionGeometrySketch :shape="editorSectionShape" :dimensions="editorSectionDimensions" :locale="locale" />
+              <div v-if="editorResource === 'sections' && sectionEngineSupportsShape" class="section-engine-controls">
+                <div class="section-engine-controls-heading"><h4>{{ sectionEditorT('engine') }}</h4><span>{{ sectionEditorT('engineAxes') }}</span></div>
+                <button type="button" class="section-engine-calculate" :disabled="!sectionEngineCanCalculate || sectionEngineLoading" @click="calculateSectionProperties">
+                  <span v-if="sectionEngineLoading" class="section-engine-spinner" aria-hidden="true"></span>
+                  {{ sectionEngineLoading ? sectionEditorT('calculating') : sectionEditorT('calculate') }}
+                </button>
+                <p class="section-engine-note">{{ sectionEditorT('engineNote') }}</p>
+                <p v-if="!sectionEngineCanCalculate" class="section-engine-dimensions-hint">{{ sectionEditorT('enterDimensions') }}</p>
+                <p v-if="sectionEngineError" class="section-engine-error" role="alert">
+                  {{ sectionEditorT('failed') }}
+                  <span v-if="sectionEngineError.code"> {{ sectionEditorT('errorCode') }}: {{ sectionEngineError.code }}</span>
+                  <span v-if="sectionEngineError.status"> {{ sectionEditorT('status') }}: {{ sectionEngineError.status }}</span>
+                  <span v-if="sectionEngineError.fields.length"><br /><strong>{{ sectionEditorT('errorFields') }}:</strong> {{ sectionEngineError.fields.join(', ') }}</span>
+                </p>
+              </div>
+              <p v-else-if="editorResource === 'sections'" class="section-engine-unsupported">{{ sectionEditorT('unsupported') }}</p>
+              <p v-else class="section-engine-unsupported">{{ sectionEditorT('geometryTypeHint') }}</p>
+            </div>
+
+            <section v-if="sectionEngineResult" class="section-engine-results" :aria-label="sectionEditorT('result')">
+              <header class="section-engine-results-heading"><h4>{{ sectionEditorT('result') }}</h4><span>{{ sectionEditorT('engineAxes') }}</span></header>
+              <div class="section-engine-result-grid">
+                <article class="section-engine-result-card">
+                  <h5>{{ sectionEditorT('geometric') }}</h5>
+                  <dl class="section-engine-values">
+                    <div><dt>{{ sectionEditorT('area') }}</dt><dd>{{ sectionEngineFormat(sectionEngineResult.properties.geometric.area, 'mm²') }}</dd></div>
+                    <div><dt>{{ sectionEditorT('perimeter') }}</dt><dd>{{ sectionEngineFormat(sectionEngineResult.properties.geometric.perimeter, 'mm') }}</dd></div>
+                    <div><dt>{{ sectionEditorT('centroid') }} x</dt><dd>{{ sectionEngineFormat(sectionEngineResult.properties.geometric.centroid_x, 'mm') }}</dd></div>
+                    <div><dt>{{ sectionEditorT('centroid') }} y</dt><dd>{{ sectionEngineFormat(sectionEngineResult.properties.geometric.centroid_y, 'mm') }}</dd></div>
+                  </dl>
+                </article>
+                <article class="section-engine-result-card">
+                  <h5>{{ sectionEditorT('elastic') }}</h5>
+                  <dl class="section-engine-values">
+                    <div><dt>Ix</dt><dd>{{ sectionEngineFormat(sectionEngineResult.properties.elastic.ix, 'mm⁴') }}</dd></div>
+                    <div><dt>Iy</dt><dd>{{ sectionEngineFormat(sectionEngineResult.properties.elastic.iy, 'mm⁴') }}</dd></div>
+                    <div><dt>Ixy</dt><dd>{{ sectionEngineFormat(sectionEngineResult.properties.elastic.ixy, 'mm⁴') }}</dd></div>
+                    <div><dt>{{ sectionEditorT('sx') }} +</dt><dd>{{ sectionEngineFormat(sectionEngineResult.properties.elastic.sx_positive, 'mm³') }}</dd></div>
+                    <div><dt>{{ sectionEditorT('sx') }} −</dt><dd>{{ sectionEngineFormat(sectionEngineResult.properties.elastic.sx_negative, 'mm³') }}</dd></div>
+                    <div><dt>{{ sectionEditorT('sy') }} +</dt><dd>{{ sectionEngineFormat(sectionEngineResult.properties.elastic.sy_positive, 'mm³') }}</dd></div>
+                    <div><dt>{{ sectionEditorT('sy') }} −</dt><dd>{{ sectionEngineFormat(sectionEngineResult.properties.elastic.sy_negative, 'mm³') }}</dd></div>
+                    <div><dt>{{ sectionEditorT('radii') }} rx</dt><dd>{{ sectionEngineFormat(sectionEngineResult.properties.elastic.rx, 'mm') }}</dd></div>
+                    <div><dt>{{ sectionEditorT('radii') }} ry</dt><dd>{{ sectionEngineFormat(sectionEngineResult.properties.elastic.ry, 'mm') }}</dd></div>
+                  </dl>
+                </article>
+                <article class="section-engine-result-card">
+                  <h5>{{ sectionEditorT('plastic') }}</h5>
+                  <dl v-if="sectionEngineResult.properties.plastic" class="section-engine-values">
+                    <div><dt>{{ sectionEditorT('pnaX') }}</dt><dd>{{ sectionEngineFormat(sectionEngineResult.properties.plastic.pna_x, 'mm') }}</dd></div>
+                    <div><dt>{{ sectionEditorT('pnaY') }}</dt><dd>{{ sectionEngineFormat(sectionEngineResult.properties.plastic.pna_y, 'mm') }}</dd></div>
+                    <div><dt>{{ sectionEditorT('zx') }}</dt><dd>{{ sectionEngineFormat(sectionEngineResult.properties.plastic.zx, 'mm³') }}</dd></div>
+                    <div><dt>{{ sectionEditorT('zy') }}</dt><dd>{{ sectionEngineFormat(sectionEngineResult.properties.plastic.zy, 'mm³') }}</dd></div>
+                  </dl>
+                  <p v-else class="section-engine-unavailable">{{ sectionEditorT('unavailable') }}</p>
+                </article>
+                <article class="section-engine-result-card">
+                  <h5>{{ sectionEditorT('principal') }}</h5>
+                  <dl class="section-engine-values">
+                    <div><dt>Imax</dt><dd>{{ sectionEngineFormat(sectionEngineResult.properties.principal.i_major, 'mm⁴') }}</dd></div>
+                    <div><dt>Imin</dt><dd>{{ sectionEngineFormat(sectionEngineResult.properties.principal.i_minor, 'mm⁴') }}</dd></div>
+                    <div><dt>{{ sectionEditorT('angle') }}</dt><dd>{{ sectionEngineResult.properties.principal.major_axis_angle_degrees === null ? '—' : `${sectionEngineFormat(sectionEngineResult.properties.principal.major_axis_angle_degrees)}°` }}</dd></div>
+                    <div><dt>{{ sectionEditorT('orientation') }}</dt><dd>{{ sectionEditorT(sectionEngineResult.properties.principal.orientation_status) }}</dd></div>
+                  </dl>
+                </article>
+                <article class="section-engine-result-card section-engine-advanced-card">
+                  <h5>{{ sectionEditorT('advanced') }}</h5>
+                  <dl class="section-engine-values">
+                    <div v-for="(property, key) in sectionEngineResult.advanced" :key="key">
+                      <dt>{{ sectionEngineAdvancedLabel(String(key)) }}</dt>
+                      <dd v-if="property.status === 'computed' && property.value !== null">{{ sectionEngineFormat(property.value, sectionEngineAdvancedUnit(String(key))) }}</dd>
+                      <dd v-else class="section-engine-unavailable">{{ sectionEngineAdvancedStatus(property.reason) }}</dd>
+                    </div>
+                  </dl>
+                </article>
+              </div>
+            </section>
+          </section>
+
+          <div v-if="editorResource === 'sections' && selectedSectionType" class="property-editor full-field">
+            <div class="property-editor-heading"><h3>{{ sectionEditorT('manualProperties') }}</h3><span>{{ t('basisUnits') }}</span></div>
+            <div v-if="sectionManualPropertyFields.length" class="editor-form-grid">
+              <label v-for="field in sectionManualPropertyFields" :key="field.key" class="field">
                 <span>{{ propertyLabel(field) }} <small v-if="field.unit">{{ field.unit }}</small><b v-if="field.required">*</b></span>
                 <input v-model="editForm.properties[field.key]" :name="`property-${field.key}`" type="number" inputmode="decimal" step="any" :min="field.min" :max="field.max" :required="field.required" />
               </label>
@@ -871,7 +1152,39 @@ onMounted(async () => {
 .library-transfer-result dl > div { display: flex; align-items: center; gap: 5px; padding: 5px 7px; border-radius: 6px; background: #eaf6ee; }
 .library-transfer-result dt { color: #587765; font-size: 9px; }
 .library-transfer-result dd { margin: 0; color: #366b4b; font-size: 10px; font-weight: 750; font-variant-numeric: tabular-nums; }
+.section-geometry-editor { margin-top: 2px; padding: 13px; border: 1px solid #dce6ee; border-radius: 9px; background: linear-gradient(180deg, #fff, #f9fbfd); }
+.section-geometry-editor-heading, .section-engine-controls-heading, .section-engine-results-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.section-geometry-editor-heading h3 { margin: 0; color: #304f6c; font-size: 12px; }
+.section-geometry-editor-heading p { margin: 4px 0 0; color: #7b8c9c; font-size: 9px; line-height: 1.5; }
+.section-geometry-editor-heading > span, .section-engine-controls-heading > span, .section-engine-results-heading > span { flex: 0 0 auto; color: #6c87a0; font-size: 9px; font-weight: 700; }
+.section-geometry-editor-body { display: grid; grid-template-columns: minmax(210px, .9fr) minmax(220px, 1fr); align-items: start; gap: 12px; margin-top: 10px; }
+.section-engine-controls { min-width: 0; padding: 10px; border: 1px solid #e3ebf1; border-radius: 7px; background: #fff; }
+.section-engine-controls-heading { align-items: center; }
+.section-engine-controls-heading h4, .section-engine-results-heading h4 { margin: 0; color: #456681; font-size: 10px; font-weight: 750; }
+.section-engine-calculate { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 33px; margin-top: 9px; padding: 7px 10px; border: 1px solid #3d6f96; border-radius: 6px; background: #477da5; color: #fff; font: inherit; font-size: 10px; font-weight: 700; cursor: pointer; }
+.section-engine-calculate:disabled { border-color: #c7d3dd; background: #e7edf2; color: #8b9aa8; cursor: not-allowed; }
+.section-engine-calculate:focus-visible { outline: 3px solid #a8c7e2; outline-offset: 2px; }
+.section-engine-note, .section-engine-dimensions-hint, .section-engine-unsupported { margin: 7px 0 0; color: #7e8e9d; font-size: 9px; line-height: 1.55; }
+.section-engine-unsupported { align-self: center; padding: 10px; border: 1px dashed #d8e2eb; border-radius: 7px; }
+.section-engine-error { margin: 8px 0 0; padding: 7px 8px; border: 1px solid #efd5d5; border-radius: 6px; background: #fff8f8; color: #884d51; font-size: 9px; line-height: 1.5; }
+.section-engine-results { margin-top: 11px; padding-top: 10px; border-top: 1px solid #e7edf2; }
+.section-engine-results-heading { align-items: center; margin-bottom: 8px; }
+.section-engine-result-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.section-engine-result-card { min-width: 0; padding: 9px; border: 1px solid #e3ebf1; border-radius: 7px; background: #fff; }
+.section-engine-result-card h5 { margin: 0 0 6px; color: #52738f; font-size: 9px; font-weight: 750; letter-spacing: .035em; text-transform: uppercase; }
+.section-engine-values { display: grid; gap: 0; margin: 0; }
+.section-engine-values > div { display: flex; align-items: flex-start; justify-content: space-between; gap: 7px; padding: 5px 0; border-bottom: 1px solid #eef2f5; }
+.section-engine-values > div:last-child { border-bottom: 0; }
+.section-engine-values dt { color: #718498; font-size: 8px; line-height: 1.45; }
+.section-engine-values dd { margin: 0; color: #344f69; font-size: 8px; font-weight: 700; font-variant-numeric: tabular-nums; text-align: right; overflow-wrap: anywhere; }
+.section-engine-values .section-engine-unavailable, .section-engine-unavailable { color: #8795a2; font-weight: 550; }
+.section-engine-advanced-card { grid-column: 1 / -1; }
+.section-engine-advanced-card .section-engine-values { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 12px; }
+.section-engine-spinner { width: 12px; height: 12px; border: 2px solid #b9d0e1; border-top-color: currentColor; border-radius: 50%; animation: section-engine-spin .8s linear infinite; }
+@keyframes section-engine-spin { to { transform: rotate(360deg); } }
 @media (max-width: 760px) { .library-transfer-controls { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }.library-transfer-import { grid-column: 1 / -1; }.library-transfer-export { align-self: flex-start; } }
-@media (max-width: 520px) { .library-transfer { padding: 12px; }.library-transfer-header { flex-direction: column; }.library-transfer-controls { grid-template-columns: 1fr; }.library-transfer-import { grid-column: auto; }.library-transfer-export { width: 100%; }.library-transfer-choose { flex: 1; } }
+@media (max-width: 600px) { .section-geometry-editor-body { grid-template-columns: minmax(0, 1fr); }.section-geometry-editor-heading { flex-direction: column; gap: 5px; }.section-engine-result-grid { grid-template-columns: minmax(0, 1fr); }.section-engine-advanced-card { grid-column: auto; } }
+@media (max-width: 520px) { .library-transfer { padding: 12px; }.library-transfer-header { flex-direction: column; }.library-transfer-controls { grid-template-columns: 1fr; }.library-transfer-import { grid-column: auto; }.library-transfer-export { width: 100%; }.library-transfer-choose { flex: 1; }.section-engine-advanced-card .section-engine-values { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 760px) { .library-browser .library-filters { align-items: stretch; flex-direction: column; }.library-browser .library-search, .library-browser .filter-select { width: 100%; flex: initial; } }
+@media (prefers-reduced-motion: reduce) { .section-engine-spinner { animation-duration: 2s; } }
 </style>

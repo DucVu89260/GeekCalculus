@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EngineeringController;
 use App\Http\Controllers\LibraryController;
 use App\Http\Controllers\LibraryTransferController;
+use App\Http\Controllers\SectionalCalculationController;
 use App\Http\Controllers\UserAdminController;
 use Illuminate\Support\Facades\Route;
 
@@ -14,6 +15,10 @@ Route::middleware('web')->group(function () {
     Route::post('/auth/login', [AuthController::class, 'login'])->middleware('throttle:10,1');
     Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::middleware('auth')->group(function () {
+        Route::prefix('v1')->group(function () {
+            Route::post('/sections/calculate', [SectionalCalculationController::class, 'calculate'])->middleware('throttle:60,1');
+            Route::get('/section-types', [SectionalCalculationController::class, 'sectionTypes'])->middleware('throttle:60,1');
+        });
         Route::get('/catalog', [EngineeringController::class, 'catalog']);
         Route::get('/projects', [EngineeringController::class, 'index']);
         Route::post('/projects', [EngineeringController::class, 'store'])->middleware('throttle:60,1');

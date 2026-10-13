@@ -22,7 +22,7 @@ export async function request(path, options = {}) {
   if (!response.ok) {
     if ([419, 401].includes(response.status)) csrfToken = null
     const error = new Error(payload.message || `HTTP ${response.status}`)
-    error.status = response.status; error.errors = payload.errors || {}
+    error.status = response.status; error.code = payload.code; error.errors = payload.errors || {}
     if (response.status === 401) window.dispatchEvent(new Event('geekcalculus-session-expired'))
     throw error
   }

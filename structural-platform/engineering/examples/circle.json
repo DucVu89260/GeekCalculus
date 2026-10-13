@@ -1,0 +1,5 @@
+{
+  "geometry": {"type": "circle", "geometry_variant": "solid", "dimensions": {"diameter": 200}},
+  "units": "mm",
+  "options": {"solver": "analytical", "include_plastic": true, "include_advanced": true}
+}

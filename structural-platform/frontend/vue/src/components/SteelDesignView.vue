@@ -3,6 +3,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { request } from '../api'
 import DesignCodeIcon from './DesignCodeIcon.vue'
 import DesignCodeSelect from './DesignCodeSelect.vue'
+import SectionPropertiesView from './SectionPropertiesView.vue'
 
 const props = defineProps({ locale: { type: String, required: true } })
 const emit = defineEmits(['open-library'])
@@ -26,6 +27,7 @@ const text = {
     connectionNote: 'Các lựa chọn liên kết là thông tin sơ bộ. Chưa có thiết kế, kiểm tra sức chịu tải hoặc cấu tạo liên kết.',
     standardPlaceholder: 'Tiêu chuẩn chỉ là lựa chọn tham khảo; chưa có kiểm tra theo tiêu chuẩn.',
     component: 'Cấu kiện', connection: 'Liên kết', noDescription: 'Không có mô tả',
+    sectionCalculator: 'Đặc trưng tiết diện', sectionCalculatorSubtitle: 'Tính chất hình học · Không lưu vào dự án',
     computedShearModulus: 'Mô đun trượt G', computedGyrationY: 'Bán kính quán tính ry', computedGyrationZ: 'Bán kính quán tính rz',
   },
   en: {
@@ -46,6 +48,7 @@ const text = {
     connectionNote: 'Connection choices are preliminary only. Connection design, resistance checks, and detailing are not available.',
     standardPlaceholder: 'Standards are reference selections only; no code checks are performed.',
     component: 'Member setup', connection: 'Connection setup', noDescription: 'No description',
+    sectionCalculator: 'Section properties', sectionCalculatorSubtitle: 'Geometric calculator · Not saved to a project',
     computedShearModulus: 'Shear modulus G', computedGyrationY: 'Radius of gyration ry', computedGyrationZ: 'Radius of gyration rz',
   },
 }
@@ -261,6 +264,9 @@ onMounted(loadLibrary)
       <button type="button" role="tab" :aria-selected="activeTab === 'connection'" :class="{ active: activeTab === 'connection' }" @click="activeTab = 'connection'">
         <strong>Connection</strong><small>{{ t('connectionSubtitle') }}</small>
       </button>
+      <button type="button" role="tab" :aria-selected="activeTab === 'section-properties'" :class="{ active: activeTab === 'section-properties' }" @click="activeTab = 'section-properties'">
+        <strong>{{ t('sectionCalculator') }}</strong><small>{{ t('sectionCalculatorSubtitle') }}</small>
+      </button>
     </div>
 
     <section v-if="activeTab === 'component'" class="steel-design-panel" role="tabpanel">
@@ -345,7 +351,7 @@ onMounted(loadLibrary)
       <p class="steel-design-footnote">{{ t('dataOnly') }}</p>
     </section>
 
-    <section v-else class="steel-design-panel" role="tabpanel">
+    <section v-else-if="activeTab === 'connection'" class="steel-design-panel" role="tabpanel">
       <div class="steel-design-form-grid">
         <label class="steel-design-field">
           <span>{{ t('connectionType') }}</span>
@@ -378,6 +384,10 @@ onMounted(loadLibrary)
       <div class="steel-design-standard-note"><span aria-hidden="true">i</span>{{ t('standardPlaceholder') }}</div>
       <div class="steel-design-connection-notice"><span class="steel-design-notice-icon" aria-hidden="true">↗</span><p>{{ t('connectionNote') }}</p></div>
     </section>
+
+    <div v-show="activeTab === 'section-properties'" class="steel-design-properties-panel" role="tabpanel">
+      <SectionPropertiesView :locale="locale" />
+    </div>
   </section>
 </template>
 
@@ -391,13 +401,14 @@ onMounted(loadLibrary)
 .steel-design-mark { display: flex; align-items: center; justify-content: center; gap: 6px; width: 48px; height: 48px; border: 1px solid var(--surface-border); border-radius: 14px; background: linear-gradient(145deg, var(--surface-bg), var(--page-bg)); }
 .steel-design-mark span { display: block; width: 4px; border-radius: 3px; background: #6488ad; transform: skew(-20deg); }
 .steel-design-mark span:nth-child(1) { height: 18px; }.steel-design-mark span:nth-child(2) { height: 28px; background: #355e86; }.steel-design-mark span:nth-child(3) { height: 22px; }
-.steel-design-tabs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding: 5px; border: 1px solid var(--surface-border); border-radius: 12px; background: var(--soft-bg); }
+.steel-design-tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; padding: 5px; border: 1px solid var(--surface-border); border-radius: 12px; background: var(--soft-bg); }
 .steel-design-tabs button { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; min-width: 0; padding: 13px 16px; border: 1px solid transparent; border-radius: 8px; background: transparent; color: #4e6984; cursor: pointer; text-align: left; transition: color .16s ease, background .16s ease, border-color .16s ease, box-shadow .16s ease; }
 .steel-design-tabs button strong { font-size: 13px; font-weight: 700; }
 .steel-design-tabs button small { color: inherit; font-size: 11px; opacity: .78; }
 .steel-design-tabs button:hover, .steel-design-tabs button.active { border-color: #23395d; background: #23395d; color: #fff; box-shadow: 0 4px 12px #23395d26; }
 .steel-design-tabs button:focus-visible, .steel-design-select:focus-visible, .steel-design-link:focus-visible, .steel-design-retry:focus-visible { outline: 3px solid #8bb6df; outline-offset: 2px; }
 .steel-design-panel { margin-top: 14px; padding: 22px; border: 1px solid var(--surface-border); border-radius: 12px; background: var(--surface-bg); }
+.steel-design-properties-panel { margin-top: 14px; }
 .steel-design-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .steel-design-field { display: flex; flex-direction: column; gap: 7px; min-width: 0; color: #5d7690; font-size: 12px; font-weight: 650; }
 .steel-design-select { width: 100%; min-height: 42px; padding: 9px 36px 9px 12px; border: 1px solid var(--surface-border); border-radius: 8px; background: var(--surface-bg); color: #233850; font: inherit; font-size: 13px; }

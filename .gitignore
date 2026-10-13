@@ -8,3 +8,7 @@
 *.sqlite
 *.sqlite-shm
 *.sqlite-wal
+**/.pytest_cache/
+**/.hypothesis/
+**/*.egg-info/
+**/.venv/

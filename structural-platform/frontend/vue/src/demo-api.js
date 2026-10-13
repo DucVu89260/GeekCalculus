@@ -1,3 +1,4 @@
+import { calculateDemoSection } from './sectional-properties/demo-calculator'
 import catalog from '../../../database/seeds/catalog.json'
 import schema from '../../../database/seeds/engineering-schema.json'
 import seed from '../../../database/seeds/engineering-data.json'
@@ -149,6 +150,11 @@ export async function demoRequest(path, options = {}) {
   if (url.pathname === '/api/auth/logout') { localStorage.removeItem(SESSION_KEY); sessionStorage.removeItem(LEGACY_SESSION_KEY); return { data: null } }
   if (url.pathname === '/api/health') return { status: 'ok', storage: 'browser-demo' }
   if (!user) fail(401, 'Please sign in.')
+  if (url.pathname === '/api/v1/sections/calculate') {
+    if (method !== 'POST') fail(405, 'Method not allowed.')
+    try { return await calculateDemoSection(body) } catch (error) { error.status = 422; throw error }
+  }
+  if (url.pathname === '/api/v1/section-types' && method === 'GET') return { data: ['rectangle', 'circle', 'i_section'].map(type => ({ type, geometry_variant: type === 'i_section' ? 'sharp_corner' : 'solid' })) }
   const locale = url.searchParams.get('locale') || body.locale || 'vi'
   if (!['vi', 'en'].includes(locale)) fail(422, 'Unsupported locale')
   if (url.pathname === '/api/library/schema') return schema

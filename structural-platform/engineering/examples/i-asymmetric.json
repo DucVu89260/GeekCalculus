@@ -1,0 +1,16 @@
+{
+  "geometry": {
+    "type": "i_section",
+    "geometry_variant": "sharp_corner",
+    "dimensions": {
+      "depth": 400,
+      "top_flange_width": 200,
+      "bottom_flange_width": 250,
+      "web_thickness": 8,
+      "top_flange_thickness": 12,
+      "bottom_flange_thickness": 16
+    }
+  },
+  "units": "mm",
+  "options": {"solver": "analytical", "include_plastic": true, "include_advanced": true}
+}

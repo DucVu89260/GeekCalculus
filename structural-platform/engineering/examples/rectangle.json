@@ -1,0 +1,5 @@
+{
+  "geometry": {"type": "rectangle", "geometry_variant": "solid", "dimensions": {"width": 200, "height": 400}},
+  "units": "mm",
+  "options": {"solver": "analytical", "include_plastic": true, "include_advanced": true}
+}

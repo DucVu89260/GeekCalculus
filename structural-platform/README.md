@@ -275,9 +275,15 @@ chưa có, tạo APP_KEY nếu trống, tạo SQLite nếu thiếu rồi `php ar
 serve --host=127.0.0.1 --port=8000`. Trong terminal khác, ở `frontend/vue`,
 chạy `npm ci` và `npm run dev -- --host 127.0.0.1 --port 5173`.
 
-Các thư mục engineering/CSI vẫn là khung; chưa có tính toán, báo cáo hoặc
-kết nối SAP2000/ETABS. Composer lock dùng archive chính thức codeload GitHub
-với commit pin; setup giữ TLS verification và sử dụng CA bundle của máy.
+SectionalProperties v1 đã có engine Python, FastAPI/Laravel API tính nhanh và
+Vue 3 + TypeScript. Mở **Steel Design → Section properties** bên cạnh Component
+và Connection; **Concrete Design** dùng cùng module hình học. Chọn ví dụ và nhấn
+Tính toán để xem A, trọng tâm, Ix/Iy/Ixy, Sx+/Sx−/Sy+/Sy−, r, PNA, Z, trục chính.
+J có cho chữ nhật/tròn đặc; J I/H và Cw/tâm cắt/diện tích cắt trả `not_computed`.
+Admin editor có sơ đồ kích thước và vùng kết quả XY riêng, giữ nguyên catalog
+nhập tay. Tính nhanh chưa lưu definition/revision vào PostgreSQL.
+
+Xem [engineering/README.md](engineering/README.md) để chạy và kiểm chứng.
 
 ## Các trang chức năng và Steel Design
 
@@ -289,11 +295,13 @@ hash URL `#/modules/steel`, `concrete`, `analysis`, `loads`, `library`, `future`
 Với Laravel, session vẫn là cookie HttpOnly; không lưu token đăng nhập thật vào
 localStorage. Demo chỉ chia sẻ ID tài khoản mô phỏng trong browser.
 
-Steel Design gồm **Component** và **Connection**:
+Steel Design gồm **Component**, **Connection** và **Section properties**:
 - Component: dầm/cột/giằng, tiêu chuẩn, vật liệu và tiết diện thép từ database.
   Tiết diện lọc theo vật liệu đang chọn; hiển thị thông số và đơn vị đã lưu.
 - Connection: dầm–cột/nối cấu kiện/bản đế/bản mã; bu lông/hàn/hỗn hợp,
   cấp bền 4.6/8.8/10.9 và hàn góc/giáp mối.
+- Section properties: tính hình học Rectangle, Circle và I/H có cánh độc lập;
+  dùng chung với Concrete Design, không cần vật liệu.
 
 Các lựa chọn tiêu chuẩn và liên kết là sơ bộ, chưa có tính toán/kiểm tra thiết
 kế. Những nhóm chưa triển khai có dropdown để chuẩn bị chức năng. Engineering

@@ -1,0 +1,21 @@
+name: geekcalculus-dbtools
+services:
+  database-ui:
+    image: ghcr.io/coleifer/sqlite-web@sha256:ec3c5811216fa5f7313e9f7269e1a1ca9c1f24f5f5ac3668c1f398c97afa362b
+    user: "${LOCAL_UID:-1000}:${LOCAL_GID:-1000}"
+    working_dir: /data
+    entrypoint: ["python", "/config/launch.py"]
+    environment:
+      SQLITE_WEB_PASSWORD: "${DB_TOOLS_PASSWORD:-}"
+    volumes:
+      - ./backend/laravel/database:/data
+      - ./backend/laravel/storage/app/private/database-backups:/backups
+      - ./docker/db-tools:/config:ro
+    ports:
+      - "127.0.0.1:${DB_TOOLS_PORT:-8080}:8080"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/', timeout=2)"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s

@@ -103,6 +103,45 @@ Các bảng chính: `users` (role), `materials` (properties JSON), `section_type
 `catalog_options`, `catalog_option_translations`, `library_seed_state`.
 Nhãn vật liệu/tiết diện có `name_vi`/`name_en`; UI và schema đều song ngữ.
 
+## Giữ thư viện đã nhập và chuyển từ web demo sang Docker
+
+Trong **Quản trị dữ liệu → Thư viện kỹ thuật → Sao lưu và chuyển thư viện**,
+admin có thể **Xuất JSON** và **Nhập thư viện** trên cả demo web lẫn Laravel.
+Xuất toàn bộ vật liệu, loại tiết diện, tiết diện cụ thể, thông số, nguồn và
+tên VI/EN. Tệp không chứa tài khoản, mật khẩu, dự án hoặc kết quả tính toán.
+Đơn vị giữ nguyên theo schema; không chuyển đổi đơn vị tự động.
+
+1. Sau mỗi buổi nhập/sửa thư viện, **Xuất JSON**, kiểm tra tệp đã tải xuống và
+   lưu thêm một bản ngoài trình duyệt (ví dụ thư mục sao lưu hoặc ổ đĩa khác).
+2. Khi chuyển sang Docker, đăng nhập admin → chọn tệp JSON → kiểm tra số mục
+   → **Nhập thư viện**. Không phải nhập lại từng vật liệu/tiết diện.
+3. Mặc định **Bỏ qua mục đã có (mặc định)**; muốn cập nhật dữ liệu đã sửa ở cùng mã,
+   chọn **Ghi đè mục cùng mã**. Các bản ghi không nằm trong tệp vẫn được giữ.
+   Mã vật liệu/loại dùng để nối tiết diện, không dùng ID từ máy cũ.
+
+Trước mỗi lần nhập, UI tạo lượt tải bản JSON của thư viện hiện tại để có thể
+khôi phục. Hãy giữ tệp backup đó; trình duyệt không thể xác nhận bạn đã lưu
+an toàn lên ổ đĩa. Chọn tệp chỉ xem trước; nhấn nhập mới thay đổi thư viện.
+Nếu nhập gặp lỗi, thư viện hiện có không bị cập nhật dở dang. Nhập tối đa 10 MB, 20.000 bản ghi mỗi nhóm;
+kiểm tra thông số và liên kết theo cùng quy tắc CRUD. Chặn đổi loại/hệ vật
+liệu đã được tiết diện tham chiếu. Import không thay thế các bản ghi khác
+hoặc thực hiện xóa hàng loạt; phục hồi dữ liệu đã sửa bằng chế độ cập nhật mã.
+
+**Web demo chỉ lưu trong localStorage của đúng trình duyệt/domain đó.**
+Mở tab/refresh/cập nhật mã nguồn không chủ động reset dữ liệu. Tuy nhiên,
+xóa dữ liệu trình duyệt, đổi trình duyệt/domain, chế độ ẩn danh hoặc cơ chế
+dọn bộ nhớ của trình duyệt có thể khiến mất bản lưu này. Tệp JSON bên ngoài
+trình duyệt là cách giữ công sức nhập liệu; dữ liệu không tự đồng bộ vào Git
+hoặc SQLite. Cập nhật demo dùng nguyên khóa lưu trữ hiện có.
+
+**Docker:** dữ liệu SQLite nằm trong `backend/laravel/database/database.sqlite`
+trên host qua bind mount, nên stop/rebuild/down không xóa dữ liệu. Sao lưu
+toàn bộ database (tài khoản/dự án/thư viện) bằng cách dừng backend trước khi
+copy cả database và các tệp `database.sqlite-wal`/`database.sqlite-shm` nếu có;
+giữ cấu hình `.env` riêng và không commit vào Git. Khởi động lại sau khi
+copy xong. Khi đổi máy, mang theo database và `.env`, hoặc dùng JSON nếu
+chỉ cần chuyển thư viện sang một hệ thống đã có tài khoản/dự án riêng.
+
 ## API
 
 Các request dùng `Accept: application/json`. API ứng dụng cần session đăng nhập.
@@ -116,6 +155,8 @@ Client lấy CSRF token, gửi cookie và header `X-CSRF-TOKEN` cho thao tác gh
 | GET | `/api/catalog?locale=vi`, `/api/projects?locale=en&page=1` | Đăng nhập; dự án phân trang 50 mục |
 | POST | `/api/projects` | Đăng nhập; dự án gắn với tài khoản hiện tại |
 | GET | `/api/library/schema`, `/api/materials`, `/api/section-types`, `/api/sections` | Đăng nhập |
+| GET | `/api/library/export` | Admin; `{data:archive}` chứa thư viện JSON phiên bản 1 |
+| POST | `/api/library/import` | Admin + CSRF; `{archive,mode:"skip"\|"overwrite"}`, kết quả `{data:{created,updated,skipped}}` |
 | POST/PATCH/DELETE | `/api/materials`, `/api/section-types`, `/api/sections` (PATCH/DELETE thêm `/{id}`) | Admin |
 | GET/POST/PATCH/DELETE | `/api/admin/users` (PATCH/DELETE thêm `/{id}`) | Admin |
 
@@ -176,6 +217,11 @@ Với demo: `TEST_DEMO=1 AUTH_BASE_URL=<địa chỉ demo>`; không cần tài k
 Các test tạo bản ghi `browser_fixture_*` và xóa sau khi chạy thành công; dọn
 chúng nếu test bị ngắt. `tests/ui-smoke.cjs` kiểm tra dự án; `tests/demo-smoke.cjs`
 kiểm tra lưu trữ demo riêng cho mỗi trình duyệt và không gọi server API.
+`tests/library-transfer-smoke.cjs` kiểm tra xuất từ demo → nhập vào demo khác
+và Laravel, giữ thông số/tham chiếu, backup trước nhập, trùng mã, rollback,
+VI/EN và mobile; cần demo server qua `TRANSFER_DEMO_URL` và backend/Vite
+qua `TRANSFER_LOCAL_URL`, cùng `AUTH_FIXTURES` riêng cho hai tài khoản test.
+Test tạo/xóa chỉ những mã fixture duy nhất do chính lượt chạy tạo.
 
 ## Chạy native (không dùng Docker)
 

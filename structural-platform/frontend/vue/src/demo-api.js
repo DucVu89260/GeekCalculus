@@ -22,7 +22,8 @@ function present(resource, row) { if (resource === 'materials') return { ...row,
 function validate(resource, body, db, old) {
   const errors = {}
   const add = (field, message) => { errors[field] = [message] }
-  for (const key of ['code', 'name_vi', 'name_en']) if (typeof body[key] !== 'string' || !body[key].trim()) add(key, 'This field is required.')
+  for (const key of ['code', 'name_vi', 'name_en']) if (typeof body[key] !== 'string' || !body[key].trim() || body[key].length > (key === 'code' ? 64 : 255)) add(key, 'A non-empty name/code within the length limit is required.')
+  if (body.source != null && (typeof body.source !== 'string' || body.source.length > 2000)) add('source', 'Source must be text up to 2000 characters.')
   if (!/^[A-Za-z0-9_-]{1,64}$/.test(body.code)) add('code', 'Use a unique code containing letters, numbers, hyphens or underscores.')
   if (db[resource].some(row => row.code === body.code && row.id !== old?.id)) add('code', 'Code is already in use.')
   let category = body.category, shape
@@ -37,13 +38,17 @@ function validate(resource, body, db, old) {
     if (old && (body.category !== old.category || body.shape !== old.shape) && db.sections.some(row => row.section_type_id === old.id)) fail(409, 'A referenced type cannot change shape or category.')
   } else {
     const descriptors = schema.fields[resource].filter(f => (!f.categories || f.categories.includes(category)) && (!f.shapes || f.shapes.includes(shape)))
-    const p = body.properties || {}
+    if (!body.properties || typeof body.properties !== 'object' || Array.isArray(body.properties)) fail(422, 'Properties must be an object.', { properties: ['Properties must be an object.'] })
+    const rawProperties = body.properties
+    const p = Object.fromEntries(Object.entries(rawProperties).map(([key, value]) => [key, Number(value)]))
     for (const f of descriptors) {
-      if (p[f.key] === undefined || p[f.key] === '') { if (f.required) add(`properties.${f.key}`, 'This property is required.'); continue }
-      const value = Number(p[f.key]); if (!Number.isFinite(value) || value < f.min || value > (f.max ?? 1e24)) add(`properties.${f.key}`, 'Property is outside the allowed range.')
+      if (rawProperties[f.key] === undefined) { if (f.required) add(`properties.${f.key}`, 'This property is required.'); continue }
+      const value = Number(p[f.key]); if (!['number', 'string'].includes(typeof rawProperties[f.key]) || !String(rawProperties[f.key]).trim() || !Number.isFinite(value) || value < f.min || value > (f.max ?? 1e24)) add(`properties.${f.key}`, 'Property is outside the allowed range.')
     }
     for (const key of Object.keys(p)) if (!descriptors.some(f => f.key === key)) add(`properties.${key}`, 'Unsupported property.')
     if (resource === 'materials') {
+      if (Object.entries(catalog).some(([kind, rows]) => kind !== 'materials' && rows.some(row => row.code === body.code))) add('code', 'Code is used by another catalog.')
+      for (const strength of ['compressive', 'tensile']) if (p[`design_${strength}_strength`] !== undefined && Number(p[`design_${strength}_strength`]) > Number(p[`${strength}_strength`])) add(`properties.design_${strength}_strength`, 'Design strength cannot exceed reference strength.')
       if (p.ultimate_strength < p.yield_strength) add('properties.ultimate_strength', 'Ultimate strength must be at least yield strength.')
       if (old && old.category !== category && db.sections.some(row => row.material_id === old.id)) fail(409, 'A referenced material cannot change category.')
     } else {
@@ -54,6 +59,66 @@ function validate(resource, body, db, old) {
   }
   if (Object.keys(errors).length) fail(422, 'Check the entered values.', errors)
 }
+
+const libraryResources = ['materials', 'section_types', 'sections']
+function libraryRecord(resource, body, db, old) {
+  const record = { id: old?.id || Math.max(0, ...db[resource].map(row => row.id)) + 1, code: body.code, name_vi: body.name_vi, name_en: body.name_en }
+  if (resource === 'section_types') Object.assign(record, { category: body.category, shape: body.shape })
+  else Object.assign(record, { ...(resource === 'materials' ? { category: body.category } : { material_id: Number(body.material_id), section_type_id: Number(body.section_type_id) }), source: body.source || '', properties: Object.fromEntries(Object.entries(body.properties).map(([key, value]) => [key, Number(value)])) })
+  return record
+}
+function exportLibrary(db) {
+  const archive = { format: 'geekcalculus-engineering-library', version: 1, exported_at: new Date().toISOString() }
+  for (const resource of libraryResources) archive[resource] = db[resource].map(row => {
+    const { id, computed, created_at, updated_at, material_id, section_type_id, ...data } = row
+    if (resource === 'sections') {
+      const material = db.materials.find(item => item.id === material_id), type = db.section_types.find(item => item.id === section_type_id)
+      if (!material || !type) fail(422, 'A section has a missing material/type reference. Repair the library before exporting.')
+      Object.assign(data, { material_code: material.code, section_type_code: type.code })
+    }
+    return data
+  }).sort((a, b) => a.code.localeCompare(b.code))
+  return archive
+}
+function importLibrary(db, body) {
+  if (new TextEncoder().encode(JSON.stringify(body)).byteLength > 10 * 1024 * 1024) fail(413, 'Library file exceeds 10 MB.')
+  const a = body.archive
+  if (!['skip', 'overwrite'].includes(body.mode) || !a || a.format !== 'geekcalculus-engineering-library' || a.version !== 1 || Object.keys(a).some(key => !['format', 'version', 'exported_at', ...libraryResources].includes(key)) || (a.exported_at !== undefined && (typeof a.exported_at !== 'string' || !Number.isFinite(Date.parse(a.exported_at))))) fail(422, 'Unsupported library format, version or import mode.', { archive: ['Unsupported library format, version or import mode.'] })
+  for (const resource of libraryResources) {
+    if (!Array.isArray(a[resource]) || a[resource].length > 20000) fail(422, 'Each library collection must be an array of up to 20000 records.', { [`archive.${resource}`]: ['Invalid collection.'] })
+    const codes = new Set()
+    const allowedKeys = ['code', 'name_vi', 'name_en', ...(resource === 'section_types' ? ['category', 'shape'] : resource === 'materials' ? ['category', 'source', 'properties'] : ['material_code', 'section_type_code', 'source', 'properties'])]
+    a[resource].forEach((row, index) => {
+      if (!row || typeof row !== 'object' || Array.isArray(row) || !/^[A-Za-z0-9_-]{1,64}$/.test(row.code) || typeof row.code !== 'string' || codes.has(row.code) || Object.keys(row).some(key => !allowedKeys.includes(key)) || ['name_vi', 'name_en'].some(key => typeof row[key] !== 'string' || !row[key].trim() || row[key].length > 255)) fail(422, 'Invalid record or duplicate code in archive.', { [`archive.${resource}.${index}`]: ['Invalid record or duplicate code in archive.'] })
+      codes.add(row.code)
+    })
+  }
+  a.sections.forEach((row, index) => {
+    for (const [key, resource] of [['material_code', 'materials'], ['section_type_code', 'section_types']]) if (typeof row[key] !== 'string' || !a[resource].some(item => item.code === row[key])) fail(422, 'Referenced code must be included in the archive.', { [`archive.sections.${index}.${key}`]: ['Referenced code must be included in the archive.'] })
+  })
+  const staged = structuredClone(db), counts = { created: 0, updated: 0, skipped: 0 }
+  for (const resource of libraryResources) a[resource].forEach((row, index) => {
+    const old = staged[resource].find(item => item.code === row.code)
+    if (old && body.mode === 'skip') { counts.skipped++; return }
+    const data = { ...row }
+    if (resource === 'sections') {
+      data.material_id = staged.materials.find(item => item.code === row.material_code)?.id
+      data.section_type_id = staged.section_types.find(item => item.code === row.section_type_code)?.id
+      delete data.material_code; delete data.section_type_code
+    }
+    try { validate(resource, data, staged, old) } catch (error) {
+      error.errors = Object.fromEntries(Object.entries(error.errors || {}).map(([key, messages]) => [`archive.${resource}.${index}.${key}`, messages]))
+      error.message = `${resource} / ${row.code}: ${error.message}`; throw error
+    }
+    const record = libraryRecord(resource, data, staged, old)
+    if (old) staged[resource][staged[resource].indexOf(old)] = record; else staged[resource].push(record)
+    counts[old ? 'updated' : 'created']++
+  })
+  // Persist once after all records pass; an error leaves the existing database untouched.
+  save(staged)
+  return counts
+}
+
 // UI simulation only: localStorage can be edited. This is never server authorization.
 export async function demoRequest(path, options = {}) {
   const url = new URL(path, location.origin); const body = options.body ? JSON.parse(options.body) : {}; const method = options.method || 'GET'
@@ -71,6 +136,12 @@ export async function demoRequest(path, options = {}) {
   const locale = url.searchParams.get('locale') || body.locale || 'vi'
   if (!['vi', 'en'].includes(locale)) fail(422, 'Unsupported locale')
   if (url.pathname === '/api/library/schema') return schema
+  if (['/api/library/export', '/api/library/import'].includes(url.pathname)) {
+    if (user.role !== 'admin') fail(403, 'Administrator access required.')
+    if (url.pathname === '/api/library/export' && method === 'GET') return { data: exportLibrary(db) }
+    if (url.pathname === '/api/library/import' && method === 'POST') return { data: importLibrary(db, body) }
+    fail(405, 'Method not allowed.')
+  }
   if (url.pathname === '/api/catalog') return { locale, locales: [{ code: 'vi', name: 'Tiếng Việt' }, { code: 'en', name: 'English' }], ...Object.fromEntries(Object.entries(catalog).map(([kind, rows]) => [kind, kind === 'materials' ? db.materials.map(row => ({ code: row.code, name: row[`name_${locale}`] })) : rows.map(row => ({ code: row.code, name: row.translations[locale] }))])) }
   if (url.pathname === '/api/projects') {
     const projects = JSON.parse(localStorage.getItem(PROJECT_KEY) || '[]')
@@ -107,9 +178,7 @@ export async function demoRequest(path, options = {}) {
   } else {
     validate(resource, body, db, old)
     if (resource === 'materials' && old && body.code !== old.code && (db.sections.some(row => row.material_id === old.id) || JSON.parse(localStorage.getItem(PROJECT_KEY) || '[]').some(row => row.material === old.code))) fail(409, 'Referenced material codes cannot change.')
-    record = { id: old?.id || Math.max(0, ...db[resource].map(row => row.id)) + 1, code: body.code, name_vi: body.name_vi, name_en: body.name_en }
-    if (resource === 'section_types') Object.assign(record, { category: body.category, shape: body.shape })
-    else Object.assign(record, { ...(resource === 'materials' ? { category: body.category } : { material_id: Number(body.material_id), section_type_id: Number(body.section_type_id) }), source: body.source || '', properties: Object.fromEntries(Object.entries(body.properties).map(([key, value]) => [key, Number(value)])) })
+    record = libraryRecord(resource, body, db, old)
   }
   if (old) db[resource][index] = record; else db[resource].push(record)
   save(db); return { data: resource === 'users' ? publicUser(record) : present(resource, record) }

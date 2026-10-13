@@ -7,6 +7,7 @@ use App\Models\Section;
 use App\Models\SectionType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
@@ -65,16 +66,22 @@ class LibraryController extends Controller
 
     private function save(Request $r, $row)
     {
-        $resource = $r->route('resource');
+        $row = $this->persist($r->route('resource'), $row, $r->all());
+
+        return response()->json(['data' => $this->present($row)], $row->wasRecentlyCreated ? 201 : 200);
+    }
+
+    public function persist(string $resource, $row, array $input)
+    {
         $schema = $this->definitions();
         $rules = ['code' => ['required', 'string', 'max:64', 'regex:/^[A-Za-z0-9_-]+$/', Rule::unique($row->getTable())->ignore($row->id)], 'name_vi' => 'required|string|max:255|regex:/\S/u', 'name_en' => 'required|string|max:255|regex:/\S/u'];
-        $category = $r->input('category');
+        $category = $input['category'] ?? null;
         $shape = null;
         if ($resource === 'sections') {
             $rules += ['section_type_id' => 'required|integer|exists:section_types,id', 'material_id' => 'required|integer|exists:materials,id'];
-            $r->validate($rules);
-            $type = SectionType::findOrFail($r->input('section_type_id'));
-            $material = Material::findOrFail($r->input('material_id'));
+            Validator::make($input, $rules)->validate();
+            $type = SectionType::findOrFail($input['section_type_id']);
+            $material = Material::findOrFail($input['material_id']);
             $category = $type->category;
             $shape = $type->shape;
             if ($material->category !== ($category === 'rc' ? 'concrete' : 'steel')) {
@@ -93,7 +100,7 @@ class LibraryController extends Controller
                 $rules['properties.'.$f['key']] = [$f['required'] ? 'required' : 'sometimes', 'numeric', 'min:'.$f['min'], 'max:'.($f['max'] ?? 1e24)];
             }
         }
-        $data = $r->validate($rules);
+        $data = Validator::make($input, $rules)->validate();
         if (isset($data['properties'])) {
             $data['properties'] = array_map('floatval', $data['properties']);
         }
@@ -138,7 +145,7 @@ class LibraryController extends Controller
                 }
             }
 
-            return response()->json(['data' => $this->present($row)], $row->wasRecentlyCreated ? 201 : 200);
+            return $row;
         });
     }
 

@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EngineeringController;
 use App\Http\Controllers\LibraryController;
+use App\Http\Controllers\LibraryTransferController;
 use App\Http\Controllers\UserAdminController;
 use Illuminate\Support\Facades\Route;
 
@@ -17,6 +18,10 @@ Route::middleware('web')->group(function () {
         Route::get('/projects', [EngineeringController::class, 'index']);
         Route::post('/projects', [EngineeringController::class, 'store'])->middleware('throttle:60,1');
         Route::get('/library/schema', [LibraryController::class, 'schema']);
+        Route::middleware('admin')->group(function () {
+            Route::get('/library/export', [LibraryTransferController::class, 'export']);
+            Route::post('/library/import', [LibraryTransferController::class, 'import'])->middleware('throttle:10,1');
+        });
         foreach (['materials', 'section-types', 'sections'] as $resource) {
             Route::get('/'.$resource, [LibraryController::class, 'index'])->defaults('resource', $resource);
             Route::middleware('admin')->group(function () use ($resource) {

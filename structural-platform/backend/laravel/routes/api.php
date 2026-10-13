@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DoublySymmetricIController;
 use App\Http\Controllers\EngineeringController;
 use App\Http\Controllers\LibraryController;
 use App\Http\Controllers\LibraryTransferController;
@@ -16,6 +17,7 @@ Route::middleware('web')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::middleware('auth')->group(function () {
         Route::prefix('v1')->group(function () {
+            Route::post('/steel-design/components/hi-doubly-symmetric/legacy-parity', [DoublySymmetricIController::class, 'calculate'])->middleware('throttle:60,1');
             Route::post('/sections/calculate', [SectionalCalculationController::class, 'calculate'])->middleware('throttle:60,1');
             Route::get('/section-types', [SectionalCalculationController::class, 'sectionTypes'])->middleware('throttle:60,1');
         });

@@ -1,6 +1,6 @@
 :root
   {
-    --page-bg: #ded8cf;
+    --page-bg: #cbd5e1;
     --workspace-bg: #faf9f6;
     --surface-bg: #eae5dd;
     --soft-bg: #e3ddd4;
@@ -89,7 +89,7 @@ input::placeholder { color: var(--muted-ink); }
 .auth-loading { display: flex; min-height: 100vh; align-items: center; justify-content: center; gap: 12px; color: #58728d; font-size: 15px; }
 .auth-spinner { display: inline-block; flex: 0 0 auto; width: 17px; height: 17px; border: 2px solid #bbd2e8; border-right-color: #477eaf; border-radius: 50%; animation: auth-spin .75s linear infinite; }
 @keyframes auth-spin { to { transform: rotate(360deg); } }
-.auth-page { display: grid; grid-template-columns: minmax(0, 1.02fr) minmax(480px, .98fr); min-height: 100vh; color: #29435e; background: var(--workspace-bg); }
+.auth-page { display: grid; grid-template-columns: minmax(0, 1.02fr) minmax(480px, .98fr); min-height: 100vh; color: #29435e; background: var(--page-bg); }
 .login-visual { position: relative; display: flex; min-height: 100vh; overflow: hidden; background-color: #123754; background-image: linear-gradient(140deg, #102d4b88 0%, #163e6045 48%, #164d7766 100%), url('/structural-hero.jpg'); background-position: center; background-size: cover; }
 .login-visual::after { position: absolute; inset: 0; border-right: 1px solid #d7e8f21a; background: linear-gradient(0deg, #0c263c55, transparent 40%); content: ''; pointer-events: none; }
 .visual-grid { position: absolute; inset: 0; opacity: .45; background-image: linear-gradient(#c8e8ff0b 1px, transparent 1px), linear-gradient(90deg, #c8e8ff0b 1px, transparent 1px); background-size: 40px 40px; mask-image: linear-gradient(135deg, #000 0%, transparent 74%); }
@@ -104,10 +104,10 @@ input::placeholder { color: var(--muted-ink); }
 .visual-copy p { max-width: 420px; margin: 0; color: #c1d6e6; font-size: 16px; line-height: 1.8; }
 .visual-caption { display: flex; align-items: center; gap: 8px; color: #a4bfd2; font-size: 11px; font-weight: 600; letter-spacing: .7px; }
 .visual-caption-dot { width: 6px; height: 6px; border-radius: 50%; background: #71c29a; box-shadow: 0 0 0 4px #71c29a22; }
-.login-side { display: flex; min-height: 100vh; flex-direction: column; padding: 28px clamp(22px, 4.5vw, 66px) 18px; background: var(--workspace-bg); }
+.login-side { display: flex; min-height: 100vh; flex-direction: column; padding: 28px clamp(22px, 4.5vw, 66px) 18px; background: var(--page-bg); }
 .auth-topline { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
 .auth-wordmark-dark { display: none; color: #244b71; }
-.login-card { width: min(100%, 410px); margin: auto; padding: 42px 0 30px; }
+.login-card { width: min(100%, 470px); margin: auto; padding: 32px 28px; border: 1px solid var(--surface-border); border-radius: 16px; background: var(--workspace-bg); box-shadow: 0 8px 24px #243b570a; }
 .login-heading h2 { margin: 11px 0 8px; color: #203f5e; font-size: 32px; font-weight: 700; letter-spacing: -1px; }
 .login-heading p { margin: 0; color: var(--muted-ink); font-size: 15px; line-height: 1.7; }
 .login-form { display: grid; gap: 17px; margin-top: 29px; }
@@ -266,7 +266,7 @@ input::placeholder { color: var(--muted-ink); }
   .visual-caption { display: none; }
   .login-side { min-height: calc(100vh - 255px); padding: 17px 21px 14px; }
   .auth-wordmark-dark { display: inline-block; font-size: 16px; }
-  .login-card { padding: 31px 0 23px; }
+  .login-card { padding: 25px 18px; border-radius: 12px; }
   .login-heading h2 { font-size: 27px; }
   .demo-account-actions { grid-template-columns: 1fr; }
   .auth-footer { margin-top: auto; }

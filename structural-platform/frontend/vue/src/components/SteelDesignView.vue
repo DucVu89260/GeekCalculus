@@ -451,6 +451,6 @@ onMounted(loadLibrary)
 .steel-design-notice-icon { display: grid; flex: 0 0 30px; place-items: center; width: 30px; height: 30px; border-radius: 8px; background: #e2edf7; color: #547da2; font-size: 16px; }
 .steel-design-connection-notice p { margin: 1px 0 0; color: var(--muted-ink); font-size: 13px; line-height: 1.65; }
 @media (max-width: 760px) { .steel-design-record-grid { grid-template-columns: 1fr; } }
-@media (max-width: 560px) { .steel-design-header { align-items: flex-start; padding-bottom: 15px; }.steel-design-heading h2 { font-size: 21px; }.steel-design-mark { flex: 0 0 42px; width: 42px; height: 42px; }.steel-design-tabs button { padding: 11px 10px; }.steel-design-tabs button small { font-size: 11px; }.steel-design-panel { padding: 15px 12px; }.steel-design-form-grid { grid-template-columns: 1fr; gap: 12px; }.steel-design-record-card { padding: 13px; } }
+@media (max-width: 560px) { .steel-design-tabs { grid-template-columns: 1fr; }.steel-design-header { align-items: flex-start; padding-bottom: 15px; }.steel-design-heading h2 { font-size: 21px; }.steel-design-mark { flex: 0 0 42px; width: 42px; height: 42px; }.steel-design-tabs button { padding: 11px 10px; }.steel-design-tabs button small { font-size: 11px; }.steel-design-panel { padding: 15px 12px; }.steel-design-form-grid { grid-template-columns: 1fr; gap: 12px; }.steel-design-record-card { padding: 13px; } }
 @media (prefers-reduced-motion: reduce) { .steel-design-spinner { animation-duration: 2s; } .steel-design-tabs button { transition: none; } }
 </style>

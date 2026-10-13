@@ -63,7 +63,7 @@ function navigate(code) { window.location.hash = `/modules/${code}` }
 </template>
 
 <style scoped>
-.module-page { max-width: 1180px; padding: 0 28px 40px; margin: auto; }
+.module-page { width: calc(100% - 32px); max-width: 1180px; min-height: calc(100vh - 40px); padding: 0 28px 40px; margin: 16px auto 24px; border: 1px solid var(--surface-border); border-radius: 16px; background: var(--workspace-bg); box-shadow: 0 8px 24px #243b570a; }
 .module-topbar { min-height: 84px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
 .module-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .module-navigation { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 5px; padding: 6px; border: 1px solid var(--surface-border); background: var(--surface-bg); border-radius: 10px; }
@@ -81,5 +81,5 @@ function navigate(code) { window.location.hash = `/modules/${code}` }
 .pending-selector { display: flex; flex-direction: column; gap: 10px; max-width: 400px; font-size: 14px; color: #4b6a88; }
 .pending-note { font-size: 14px; line-height: 1.8; color: var(--muted-ink); margin: 24px 0 0; }
 @media (max-width: 900px) { .module-navigation { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-@media (max-width: 600px) { .module-page { padding: 0 16px 30px; }.module-topbar { align-items: flex-start; flex-direction: column; padding: 20px 0; gap: 12px; }.module-actions { width: 100%; justify-content: space-between; gap: 4px; }.module-actions .quiet-button { padding: 7px 4px; font-size: 12px; }.module-navigation { grid-template-columns: repeat(2, minmax(0, 1fr)); }.module-heading h1 { font-size: 23px; }.module-panel { padding: 16px 12px; }.concrete-module-panel { padding: 12px 9px; }.concrete-module-tabs button { padding: 8px 4px; font-size: 10px; } }
+@media (max-width: 600px) { .module-page { width: calc(100% - 16px); min-height: calc(100vh - 20px); padding: 0 16px 30px; margin: 8px auto 12px; border-radius: 12px; }.module-topbar { align-items: flex-start; flex-direction: column; padding: 20px 0; gap: 12px; }.module-actions { width: 100%; justify-content: space-between; gap: 4px; }.module-actions .quiet-button { padding: 7px 4px; font-size: 12px; }.module-navigation { grid-template-columns: repeat(2, minmax(0, 1fr)); }.module-heading h1 { font-size: 23px; }.module-panel { padding: 16px 12px; }.concrete-module-panel { padding: 12px 9px; }.concrete-module-tabs button { padding: 8px 4px; font-size: 10px; } }
 </style>

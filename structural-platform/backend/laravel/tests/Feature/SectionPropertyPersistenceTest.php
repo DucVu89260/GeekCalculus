@@ -278,6 +278,14 @@ class SectionPropertyPersistenceTest extends TestCase
         array_pop($bad['formula_report']['properties']);
         $invalidResults[] = $bad;
 
+        $bad = $fixture;
+        unset($bad['mechanics']);
+        $invalidResults[] = $bad;
+
+        $bad = $fixture;
+        $bad['mechanics']['geometry']['polar_centroidal']['inertia_mm4'] += 1;
+        $invalidResults[] = $bad;
+
         $this->fakeSectionPropertyCalculations($invalidResults);
         foreach ($invalidResults as $index => $_result) {
             $this->postJson('/api/sections', $this->section(['code' => 'invalid-engine-result-'.$index]))
@@ -306,7 +314,9 @@ class SectionPropertyPersistenceTest extends TestCase
                 'properties' => $dimensions,
             ]))->assertCreated();
             $section = Section::findOrFail($response->json('data.id'));
-            $this->assertCount(25, $section->formulaReport()['properties']);
+            $registry = json_decode(file_get_contents(base_path('../../section-properties/section-registry.json')), true);
+            $this->assertCount(count($registry['properties']), $section->formulaReport()['properties']);
+            $this->assertSame('computed', $section->mechanicalProperties()['geometry']['status']);
             $this->assertSame('section-properties/shared-typescript', $section->formulaReport()['core']);
             if ($shape === 'circular_hollow') {
                 $this->assertEquals(0, data_get($section->section_properties, 'advanced.warping_constant_cw.value'));

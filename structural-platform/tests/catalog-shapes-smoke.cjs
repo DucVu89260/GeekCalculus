@@ -42,10 +42,12 @@ function assertCanonicalSnapshot(snapshot, profile, caseDimensions) {
     const formulaProperty = snapshot.formula_report.properties.find(item => item.key === descriptor.key)
     assert.ok(formulaProperty, `${profile}: formula report has ${descriptor.key}`)
     const advanced = descriptor.key.startsWith('advanced.')
-    const resultProperty = advanced ? read(snapshot, descriptor.key) : read(snapshot.properties, descriptor.key)
-    const expectedStatus = advanced
+    const mechanics = descriptor.key.startsWith('mechanics.')
+    const resultProperty = advanced || mechanics ? read(snapshot, descriptor.key) : read(snapshot.properties, descriptor.key)
+    let expectedStatus = advanced
       ? resultProperty?.status ?? 'not_computed'
       : resultProperty === undefined || (resultProperty === null && descriptor.key !== 'principal.major_axis_angle_degrees') ? 'not_computed' : 'computed'
+    if (mechanics && descriptor.key.includes('.warping.modulus_') && resultProperty === null && snapshot.mechanics.advanced.warping.status === 'not_applicable') expectedStatus = 'not_applicable'
     const expectedValue = advanced ? resultProperty?.value ?? null : resultProperty ?? null
     assert.equal(formulaProperty.status, expectedStatus, `${profile}: ${descriptor.key} status matches the result`)
     assert.deepEqual(formulaProperty.value, expectedValue, `${profile}: ${descriptor.key} value matches the result`)

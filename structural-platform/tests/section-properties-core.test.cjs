@@ -37,9 +37,9 @@ for (const profile of registry.profiles) {
     assert.equal(result.status, 'success')
     assert.equal(result.formula_report.profile_id, profile.id)
     assert.equal(result.formula_report.manifest_hash, createHash('sha256').update(JSON.stringify(registry)).digest('hex'))
-    assert.equal(result.formula_report.properties.length, 25)
+    assert.equal(result.formula_report.properties.length, registry.properties.length)
     for (const item of result.formula_report.properties) {
-      assert.equal(item.status, 'computed', item.key)
+      assert.ok(item.status === 'computed' || (item.status === 'not_applicable' && item.value === null && item.reason === 'zero_warping'), item.key)
       assert.ok(item.expression.length && item.substitution.expression.length, item.key)
       assert.equal(item.substitution.context_ref, 'inputs')
       assert.ok(item.reference_ids.length, item.key)

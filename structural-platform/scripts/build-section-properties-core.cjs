@@ -22,3 +22,10 @@ esbuild.buildSync({
   nodePaths: [path.join(root, 'frontend/vue/node_modules')],
   logLevel: 'info',
 })
+// Public reusable library, including mechanics and stress response helpers.
+esbuild.buildSync({
+  entryPoints: [path.join(root, 'section-properties/index.ts')],
+  outfile: path.join(root, 'section-properties/dist/index.mjs'), bundle: true,
+  platform: 'neutral', format: 'esm', target: 'es2022',
+  nodePaths: [path.join(root, 'frontend/vue/node_modules')], logLevel: 'info',
+})

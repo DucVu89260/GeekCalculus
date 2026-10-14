@@ -44,7 +44,7 @@ counterclockwise from X in (−90°, 90°]; it is null for an indeterminate dire
 Channel opens right; Tee has the flange at the top; Angle has bottom/left legs.
 CHS uses outer D; SHS/RHS uses outer b/h and uniform t. Fillets are omitted.
 
-The 25 report entries cover A/P/x̄/ȳ, Ix/Iy/Ixy, Sx±/Sy±, rx/ry, PNAx/PNAy,
+The original 25 report entries cover A/P/x̄/ȳ, Ix/Iy/Ixy, Sx±/Sy±, rx/ry, PNAx/PNAy,
 Zx/Zy, Imax/Imin/angle/orientation, J, Cw, shear center and effective shear areas.
 The latter two entries contain multiple coordinates/components. Gross results
 are exact for the idealized geometry; advanced results use these conventions:
@@ -117,3 +117,49 @@ Python-oracle parity and browser/database coverage. Bump the solver/model/formul
 library versions as appropriate; never alter a published formula set without a
 version change. Rebuild the native engine image and web bundle together so manifest
 hashes agree. For tests see `../engineering/README.md` and `../tests/`.
+
+## Mechanics foundation (mechanics solver 1.0.0, formula library 1.1.0)
+
+The public API returns `mechanics`, stored unchanged with the section snapshot.
+The manifest now has 73 entries. This is the classical homogeneous beam-section
+foundation for the ten supported idealized profiles, independent of material
+strengths, design standards and member loads. Fillets, arbitrary 2D/3D elasticity
+and material systems outside the stated models are not represented.
+
+`mechanics.geometry` stores material integration primitives, centroidal polar
+inertia/radius, principal-axis positive/negative extreme fibers, elastic moduli,
+plastic moduli/PNA, radii, and third area moments (mm⁵) in XY and uv. Nonunique
+principal directions use an explicitly chosen reference basis. Here PNA is a
+centroidal coordinate; the original PNAx/PNAy are bbox coordinates. Coupled Mx/My
+moduli account for Ixy≠0; original Ix/c moduli retain their geometric definition.
+Plastic opt-out produces null principal PNA/Z with not_requested metadata.
+
+`mechanics.advanced` stores polar inertia/radius about the shear center, geometric
+coupling factor, Wagner integrals with explicit sign definitions, Wt, peak-shear
+moduli Wvx/Wvy and the full shear-energy compliance matrix including cross term.
+Wv=V/max(|τ|) is distinct from energy-effective As. Both are mechanical quantities.
+
+Warping data include signed ω± (mm²), Wω±=Cw/|ω±| (mm⁴), normalized wall coordinates
+and unit-force shear polynomials. Rectangles retain their harmonic Fourier field;
+maximum principle and boundary Lipschitz enclosures record tail/roundoff estimates
+and extrema error. Wω uses the upper ω enclosure, yielding a lower modulus bound.
+Circle/CHS, ideal T/L and square RHS have zero warping within their models; Wω is
+null with **not_applicable**, never a fake zero. Thin-wall assumptions carry into
+the stress fields. Double Angle retains its ideal rigid heel-link constraint:
+zero-area links transfer reaction flows but have no material stress/strain energy.
+
+Raw fields remain physical canonical mm powers. The shear-flow polynomial is
+`q(s)/V=q0+q1*s+q2*s²`; s runs from the stored segment start to end. Warping is
+`ω(s)=ω0+ω1*s`. Integration primitive conventions and moment signs are preserved
+in `formula_report.inputs.mechanics`. No design-code classification is stored.
+
+The package exports `sectionNormalStress(result, actions, point)`: actions are N
+(N), Mx/My (N·mm), optional bimoment (N·mm²); point is bbox x/y with optional ω
+(mm²). Tension is positive; generalized Mx=∫YσdA and My=∫XσdA. Callers select
+material points using stored integration primitives. A nonzero bimoment requires
+positive Cw and supplied ω. Member conventions need an explicit axis/sign adapter.
+
+Old snapshots remain historical. Create/update/copy/import recalculate the new
+mechanics. Laravel `$section->mechanicalProperties()` retrieves it. Optional
+numeric-range failures remain explicitly unavailable; catalog writes require the
+complete mechanics foundation. This is section data, not a member capacity check.

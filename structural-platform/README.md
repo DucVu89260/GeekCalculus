@@ -415,3 +415,5 @@ Chữ phụ `#4d5966` giữ tương phản trên nền mới. Ảnh cover đư�
 Toàn bộ cỡ chữ được tăng thêm 2 px, gồm các nhãn và chú thích sơ đồ.
 Button có hover và dropdown có viền navy `#23395d`, kể cả menu Design Code.
 Font Calibri, nền sáng bên trong/navy nhạt bên ngoài và hover navy giữ nguyên.
+
+Bộ dữ liệu cơ học mở rộng được lưu tại `section_properties.mechanics`: đặc trưng quanh trục chính, mô đun uốn có liên kết Ixy, tích phân bậc ba, Wagner, mô đun xoắn/vênh/cắt và hệ số phân bố ứng suất. Xem [package Section Properties](section-properties/README.md) cho định nghĩa/giả thiết; không chứa quy tắc tiêu chuẩn thiết kế.

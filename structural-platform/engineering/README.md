@@ -3,7 +3,7 @@
 Production dùng một bộ tính TypeScript tại
 [../section-properties](../section-properties/README.md). FastAPI gọi Node bundle
 của package này; Laravel và demo trình duyệt nhận cùng kết quả/công thức.
-Solver hiện tại 1.3.0, formula library 1.0.0. Python analytical solver được giữ
+Solver hiện tại 1.3.0, formula library 1.1.0. Python analytical solver được giữ
 độc lập để kiểm chứng, không được dùng làm fallback khi production core lỗi.
 
 Có 10 profile: Rectangle, Circle, CHS, SHS/RHS, Symmetric I/H, Asymmetric I/H,
@@ -74,7 +74,7 @@ tùy chọn xác định profile/symmetric I, `options.include_advanced=true` y�
 
 Output canonical mm, gồm `properties`, `advanced`, normalized input, geometry
 hash, solver version/config hash, diagnostics và `formula_report`. Report có
-25 mục đặc trưng, công thức, ký hiệu, giá trị thay số, inputs, assumptions và
+73 mục đặc trưng, công thức, ký hiệu, giá trị thay số, inputs, assumptions và
 reference IDs. Coordinate system là XY từ góc dưới trái bounding box; không
 tự chuyển Iy/Iz của catalog nguồn sang Ix/Iy. Cw 0 và tọa độ tâm cắt âm có thể
 hợp lệ. Ax cho Vx, Ay cho Vy. Result unit mm/cm/m chỉ đổi hiển thị.
@@ -118,3 +118,5 @@ native; `catalog-section-smoke.cjs` kiểm tra snapshot/import/tự tính;
 Xem [../README.md](../README.md) cho cấu hình Playwright và tài khoản riêng.
 Đặc tả công thức gross và benchmark lịch sử:
 [docs/sectional-properties-v1.md](docs/sectional-properties-v1.md).
+
+Bộ dữ liệu cơ học mở rộng được lưu tại `section_properties.mechanics`: đặc trưng quanh trục chính, mô đun uốn có liên kết Ixy, tích phân bậc ba, Wagner, mô đun xoắn/vênh/cắt và hệ số phân bố ứng suất. Xem [package Section Properties](../section-properties/README.md) cho định nghĩa/giả thiết; không chứa quy tắc tiêu chuẩn thiết kế.

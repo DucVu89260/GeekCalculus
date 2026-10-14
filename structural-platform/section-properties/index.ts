@@ -3,6 +3,13 @@ import { calculateDemoSection as calculateCore, DemoCalculationError } from './c
 import { buildFormulaReport } from './core/formula-report'
 import type { CalculationRequest, CalculationResult } from './core/types'
 import registry from './section-registry.json'
+import { calculateGeometryMechanics } from './core/mechanics-geometry'
+import { calculateAdvancedMechanics } from './core/mechanics-advanced'
+
+export { sectionNormalStress } from './core/mechanics-advanced'
+
+const finiteTree = (value: any): boolean => typeof value === 'number' ? Number.isFinite(value)
+  : Array.isArray(value) ? value.every(finiteTree) : value && typeof value === 'object' ? Object.values(value).every(finiteTree) : true
 
 export { DemoCalculationError } from './core/calculator'
 export type * from './core/types'
@@ -21,6 +28,23 @@ export async function calculateSectionProperties(input: CalculationRequest & { p
       throw new DemoCalculationError('INVALID_GEOMETRY', 'A symmetric I/H profile must have equal flange widths and thicknesses.')
     }
   }
+  let mechanicsGeometry: any
+  let mechanicsAdvanced: any
+  try {
+    mechanicsGeometry = { status: 'computed', method: 'normalized_material_integrals_and_principal_polygon_cuts', ...calculateGeometryMechanics(result) }
+    if (!finiteTree(mechanicsGeometry)) throw new RangeError('Geometry mechanics exceed the numerical range.')
+  } catch (error) {
+    if (!(error instanceof RangeError)) throw error
+    mechanicsGeometry = { status: 'not_computed', reason: 'numerical_range', method: 'normalized_material_integrals_and_principal_polygon_cuts' }
+  }
+  try {
+    mechanicsAdvanced = mechanicsGeometry.status === 'computed' ? calculateAdvancedMechanics(result, mechanicsGeometry) : { status: 'not_computed', reason: 'geometry_mechanics_unavailable' }
+    if (!finiteTree(mechanicsAdvanced)) throw new RangeError('Advanced mechanics exceed the numerical range.')
+  } catch (error) {
+    if (!(error instanceof RangeError)) throw error
+    mechanicsAdvanced = { status: 'not_computed', reason: 'numerical_range' }
+  }
+  result.mechanics = { schema_version: '1.0', solver_version: '1.0.0', geometry: mechanicsGeometry, advanced: mechanicsAdvanced }
   const report = await buildFormulaReport(result, profileId)
   return { ...result, formula_report: report }
 }

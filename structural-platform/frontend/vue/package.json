@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "build": "vite build",
-    "test": "node --test tests/geometry/*.test.js ../../tests/section-properties-core.test.cjs",
+    "test": "node --test tests/geometry/*.test.js ../../tests/section-properties-core.test.cjs ../../tests/section-mechanics-advanced.test.cjs",
     "preview": "vite preview --host 0.0.0.0",
     "typecheck": "vue-tsc --noEmit",
     "predev": "node ../../scripts/build-section-properties-core.cjs",

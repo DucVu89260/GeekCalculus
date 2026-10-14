@@ -26,6 +26,22 @@ const labels = {
     referenceIds: 'Reference IDs', computed: 'Computed', omitted: 'Not computed',
     properties: 'Properties',
     downloadReport: 'Download formula report JSON', substitutionDetails: 'Substitution details', reportInputs: 'Shared calculation inputs',
+    mechanics: 'Strength of materials', representation: 'Geometric representation', basisUnique: 'Principal basis', unique: 'Unique', notUnique: 'Not unique',
+    polarCentroidal: 'Polar centroidal', polarInertia: 'Ip · Polar moment', polarRadius: 'rp · Polar radius',
+    majorAxis: 'Major principal axis', minorAxis: 'Minor principal axis', extremePositive: 'c+ · Positive extreme', extremeNegative: 'c− · Negative extreme',
+    elasticModulusPositive: 'S+ · Elastic modulus', elasticModulusNegative: 'S− · Elastic modulus', principalRadius: 'r · Radius of gyration',
+    principalPna: 'PNA · Plastic neutral coordinate', principalZ: 'Z · Plastic modulus', thirdMoments: 'Centroidal third moments', principalThirdMoments: 'Principal third moments',
+    mechanicsAdvanced: 'Advanced strength properties', shearCenterGeometry: 'Shear-center geometry', couplingFactor: 'Coupling factor',
+    offsetX: 'Shear-center offset x', offsetY: 'Shear-center offset y', wagner: 'Wagner coefficients', betaX: 'βx', betaY: 'βy', betaMajor: 'β major', betaMinor: 'β minor',
+    torsionMechanics: 'Torsion', torsionModulus: 'Torsion modulus', unitMaxShear: 'Unit maximum shear per torque', shearMechanics: 'Shear stiffness',
+    shearModulusX: 'Shear modulus x', shearModulusY: 'Shear modulus y', shearCompliance: 'Shear compliance', complianceXX: 'Compliance xx', complianceXY: 'Compliance xy', complianceYY: 'Compliance yy',
+    warpingMechanics: 'Warping', omegaPositive: 'ω positive', omegaNegative: 'ω negative', warpingModulusPositive: 'Warping modulus positive',
+    warpingModulusNegative: 'Warping modulus negative', errorBound: 'Absolute error bound', notRequested: 'Not requested', notApplicable: 'Not applicable',
+    coupledElasticModulus: 'Coupled elastic modulus · Mx/My ±',
+    profileRectangle: 'Rectangle', profileCircle: 'Circle', profileChs: 'CHS', profileShsRhs: 'SHS/RHS',
+    profileSymmetricI: 'Symmetric I/H', profileAsymmetricI: 'Asymmetric I/H', profileChannel: 'Channel',
+    profileAngle: 'Angle', profileTee: 'Tee', profileDoubleAngle: 'Double angle',
+    rawMechanicsFields: 'Raw mechanics fields', downloadMechanicsFields: 'Download raw mechanics fields JSON',
   },
   vi: {
     title: 'Section Properties', calculatedAt: 'Thời điểm tính', geometric: 'Hình học', elastic: 'Đàn hồi',
@@ -44,6 +60,22 @@ const labels = {
     referenceIds: 'Mã tài liệu', computed: 'Đã tính', omitted: 'Chưa tính',
     properties: 'Đặc trưng',
     downloadReport: 'Tải JSON báo cáo công thức', substitutionDetails: 'Chi tiết thay số', reportInputs: 'Đầu vào tính toán dùng chung',
+    mechanics: 'Sức bền vật liệu', representation: 'Biểu diễn hình học', basisUnique: 'Cơ sở trục chính', unique: 'Duy nhất', notUnique: 'Không duy nhất',
+    polarCentroidal: 'Mômen cực qua trọng tâm', polarInertia: 'Ip · Mômen quán tính cực', polarRadius: 'rp · Bán kính quán tính cực',
+    majorAxis: 'Trục chính lớn', minorAxis: 'Trục chính nhỏ', extremePositive: 'c+ · Biên dương', extremeNegative: 'c− · Biên âm',
+    elasticModulusPositive: 'S+ · Môđun chống uốn', elasticModulusNegative: 'S− · Môđun chống uốn', principalRadius: 'r · Bán kính quán tính',
+    principalPna: 'PNA · Tọa độ trục trung hòa dẻo', principalZ: 'Z · Môđun dẻo', thirdMoments: 'Mômen bậc ba qua trọng tâm', principalThirdMoments: 'Mômen bậc ba theo trục chính',
+    mechanicsAdvanced: 'Đặc trưng sức bền nâng cao', shearCenterGeometry: 'Hình học tâm cắt', couplingFactor: 'Hệ số liên kết',
+    offsetX: 'Độ lệch tâm cắt x', offsetY: 'Độ lệch tâm cắt y', wagner: 'Hệ số Wagner', betaX: 'βx', betaY: 'βy', betaMajor: 'β trục lớn', betaMinor: 'β trục nhỏ',
+    torsionMechanics: 'Xoắn', torsionModulus: 'Môđun xoắn', unitMaxShear: 'Ứng suất cắt cực đại đơn vị trên mômen xoắn', shearMechanics: 'Độ cứng cắt',
+    shearModulusX: 'Môđun cắt x', shearModulusY: 'Môđun cắt y', shearCompliance: 'Độ mềm cắt', complianceXX: 'Độ mềm xx', complianceXY: 'Độ mềm xy', complianceYY: 'Độ mềm yy',
+    warpingMechanics: 'Vênh', omegaPositive: 'ω dương', omegaNegative: 'ω âm', warpingModulusPositive: 'Môđun vênh dương',
+    warpingModulusNegative: 'Môđun vênh âm', errorBound: 'Cận sai số tuyệt đối', notRequested: 'Chưa yêu cầu', notApplicable: 'Không áp dụng',
+    coupledElasticModulus: 'Môđun chống uốn liên kết · Mx/My ±',
+    profileRectangle: 'Hình chữ nhật', profileCircle: 'Hình tròn', profileChs: 'Ống tròn CHS', profileShsRhs: 'Hộp SHS/RHS',
+    profileSymmetricI: 'Tiết diện I/H đối xứng', profileAsymmetricI: 'Tiết diện I/H bất đối xứng', profileChannel: 'Tiết diện chữ C',
+    profileAngle: 'Tiết diện góc L', profileTee: 'Tiết diện chữ T', profileDoubleAngle: 'Hai thép góc',
+    rawMechanicsFields: 'Dữ liệu hình học thô', downloadMechanicsFields: 'Tải JSON dữ liệu hình học thô',
   },
 }
 const t = (key) => labels[props.locale]?.[key] ?? labels.en[key] ?? key
@@ -81,10 +113,163 @@ const groups = computed(() => {
       row(t('orientation'), t(principal.orientation_status ?? ''), ''),
     ] },
     { key: 'advanced', title: t('advanced'), rows: advancedRows(advanced) },
-  ].filter((group) => group.rows.length || group.key === 'plastic')
+  ].filter((group) => group.rows.length || group.key === 'plastic').concat(mechanicsGroups(props.result?.mechanics?.geometry))
 })
 
 function row(label, value, unit) { return { label, value, unit, method: '', reason: '' } }
+function representationSummary(representation) {
+  if (!representation || typeof representation !== 'object') return representation
+  const profileLabels = {
+    rectangle: 'profileRectangle', circle: 'profileCircle', chs: 'profileChs', shs_rhs: 'profileShsRhs',
+    symmetric_i: 'profileSymmetricI', asymmetric_i: 'profileAsymmetricI', channel: 'profileChannel',
+    angle: 'profileAngle', tee: 'profileTee', double_angle: 'profileDoubleAngle',
+  }
+  const profileId = props.result?.formula_report?.profile_id
+  if (profileLabels[profileId]) return t(profileLabels[profileId])
+  const geometryLabels = {
+    rectangle: 'profileRectangle', circle: 'profileCircle', circular_hollow: 'profileChs',
+    rectangular_hollow: 'profileShsRhs', i_section: 'profileSymmetricI', channel: 'profileChannel',
+    angle: 'profileAngle', tee: 'profileTee', double_angle: 'profileDoubleAngle',
+  }
+  return geometryLabels[representation.geometry_type]
+    ? t(geometryLabels[representation.geometry_type])
+    : String(representation.kind ?? t('representation')).replaceAll('_', ' ')
+}
+function mechanicsGroups(geometry) {
+  if (!geometry || typeof geometry !== 'object') return []
+  const groups = []
+  const metadataRows = []
+  if (Object.hasOwn(geometry, 'representation')) metadataRows.push(row(t('representation'), representationSummary(geometry.representation), ''))
+  if (Object.hasOwn(geometry.principal ?? {}, 'basis_unique')) {
+    const unique = geometry.principal.basis_unique
+    metadataRows.push(row(t('basisUnique'), typeof unique === 'boolean' ? t(unique ? 'unique' : 'notUnique') : unique, ''))
+  }
+  if (Object.hasOwn(geometry.principal ?? {}, 'basis_angle_degrees')) metadataRows.push(row(t('angle'), geometry.principal.basis_angle_degrees, '°'))
+  if (metadataRows.length) groups.push({ key: 'mechanics', title: t('mechanics'), rows: metadataRows })
+
+  const polar = geometry.polar_centroidal
+  if (polar && typeof polar === 'object') {
+    const rows = []
+    if (Object.hasOwn(polar, 'inertia_mm4')) rows.push(row(t('polarInertia'), polar.inertia_mm4, 'mm⁴'))
+    if (Object.hasOwn(polar, 'radius_mm')) rows.push(row(t('polarRadius'), polar.radius_mm, 'mm'))
+    if (rows.length) groups.push({ key: 'polar-centroidal', title: t('polarCentroidal'), rows })
+  }
+
+  for (const [axis, label] of [['major', 'majorAxis'], ['minor', 'minorAxis']]) {
+    const principalAxis = geometry.principal?.[axis]
+    if (!principalAxis || typeof principalAxis !== 'object') continue
+    const definitions = [
+      ['extremePositive', 'extreme_positive_mm', 'mm'], ['extremeNegative', 'extreme_negative_mm', 'mm'],
+      ['elasticModulusPositive', 'elastic_modulus_positive_mm3', 'mm³'], ['elasticModulusNegative', 'elastic_modulus_negative_mm3', 'mm³'],
+      ['principalZ', 'plastic_modulus_mm3', 'mm³'], ['principalRadius', 'radius_mm', 'mm'],
+      ['principalPna', 'plastic_neutral_coordinate_mm', 'mm'],
+    ]
+    const rows = definitions
+      .filter(([, key]) => Object.hasOwn(principalAxis, key))
+      .map(([key, property, unit]) => row(t(key), principalAxis[property], unit))
+    if (rows.length) groups.push({ key: `principal-${axis}-strength`, title: t(label), rows })
+  }
+
+  const moments = [
+    ['m30', 'm30_mm5'], ['m21', 'm21_mm5'], ['m12', 'm12_mm5'], ['m03', 'm03_mm5'],
+  ]
+  for (const [source, label] of [['third_moments', 'thirdMoments'], ['third_moments_principal', 'principalThirdMoments']]) {
+    const values = geometry[source]
+    if (!values || typeof values !== 'object') continue
+    const rows = moments
+      .filter(([, key]) => Object.hasOwn(values, key))
+      .map(([symbol, key]) => row(symbol, values[key], 'mm⁵'))
+    if (rows.length) groups.push({ key: source, title: t(label), rows })
+  }
+
+  const coupled = geometry.coupled_bending
+  if (coupled && typeof coupled === 'object') {
+    const rows = []
+    for (const [axis, axisLabel] of [['mx', 'Mx'], ['my', 'My']]) {
+      const values = coupled[axis]
+      if (!values || typeof values !== 'object') continue
+      for (const [suffix, property] of [['S+', 'elastic_modulus_positive_mm3'], ['S−', 'elastic_modulus_negative_mm3']]) {
+        if (Object.hasOwn(values, property)) rows.push(row(`${axisLabel} ${suffix}`, values[property], 'mm³'))
+      }
+    }
+    if (rows.length) groups.push({ key: 'coupled-bending', title: t('coupledElasticModulus'), rows })
+  }
+  return groups
+}
+function mechanicsAdvancedGroups(advanced) {
+  if (!advanced || typeof advanced !== 'object') return []
+  const groups = []
+  const add = (key, title, source, definitions) => {
+    if (!source || typeof source !== 'object') return
+    const rows = definitions
+      .filter(([, property]) => Object.hasOwn(source, property))
+      .map(([label, property, unit]) => row(t(label), source[property], unit))
+    if (rows.length || source.status || source.reason || source.method) {
+      groups.push({
+        key: `mechanics-advanced-${key}`,
+        title: t(title),
+        rows,
+        status: source.status ?? '',
+        reason: source.reason ?? '',
+        method: source.method ?? '',
+      })
+    }
+  }
+
+  add('shear-center-geometry', 'shearCenterGeometry', advanced.shear_center_geometry, [
+    ['polarInertia', 'polar_inertia_mm4', 'mm⁴'], ['polarRadius', 'polar_radius_mm', 'mm'],
+    ['couplingFactor', 'coupling_factor', ''], ['offsetX', 'offset_x_mm', 'mm'], ['offsetY', 'offset_y_mm', 'mm'],
+  ])
+  add('wagner', 'wagner', advanced.wagner, [
+    ['betaX', 'beta_x_mm', 'mm'], ['betaY', 'beta_y_mm', 'mm'], ['betaMajor', 'beta_major_mm', 'mm'], ['betaMinor', 'beta_minor_mm', 'mm'],
+  ])
+  add('torsion', 'torsionMechanics', advanced.torsion, [
+    ['torsionModulus', 'modulus_mm3', 'mm³'], ['unitMaxShear', 'unit_max_shear_per_torque_mm3_inverse', 'mm⁻³'],
+  ])
+
+  const shear = advanced.shear
+  if (shear && typeof shear === 'object') {
+    const rows = [
+      ['shearModulusX', 'modulus_x_mm2', shear, 'mm²'], ['shearModulusY', 'modulus_y_mm2', shear, 'mm²'],
+      ['complianceXX', 'xx_mm2_inverse', shear.compliance, 'mm⁻²'], ['complianceXY', 'xy_mm2_inverse', shear.compliance, 'mm⁻²'],
+      ['complianceYY', 'yy_mm2_inverse', shear.compliance, 'mm⁻²'],
+    ].filter(([, property, source]) => source && Object.hasOwn(source, property))
+      .map(([label, property, source, unit]) => row(t(label), source[property], unit))
+    if (rows.length || shear.status || shear.reason || shear.method) {
+      groups.push({ key: 'mechanics-advanced-shear', title: t('shearMechanics'), rows, status: shear.status ?? '', reason: shear.reason ?? '', method: shear.method ?? '' })
+    }
+  }
+
+  add('warping', 'warpingMechanics', advanced.warping, [
+    ['omegaPositive', 'omega_positive_mm2', 'mm²'], ['omegaNegative', 'omega_negative_mm2', 'mm²'],
+    ['warpingModulusPositive', 'modulus_positive_mm4', 'mm⁴'], ['warpingModulusNegative', 'modulus_negative_mm4', 'mm⁴'],
+    ['errorBound', 'absolute_error_bound_mm2', 'mm²'],
+  ])
+  return groups
+}
+function mechanicsStatus(value) {
+  const known = { computed: t('computed'), not_requested: t('notRequested'), not_computed: t('notComputed'), not_applicable: t('notApplicable') }
+  return known[value] ?? String(value ?? '').replaceAll('_', ' ')
+}
+function downloadMechanicsFields() {
+  const data = rawMechanicsData()
+  if (!Object.keys(data).length) return
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const anchor = document.createElement('a')
+  anchor.href = url
+  anchor.download = `section-mechanics-fields-${props.result?.formula_report?.profile_id ?? 'section'}.json`
+  anchor.click()
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000)
+}
+function rawMechanicsData() {
+  const mechanics = props.result?.mechanics
+  if (!mechanics) return {}
+  const data = {}
+  if (mechanics.geometry?.representation !== undefined) data.geometry_representation = mechanics.geometry.representation
+  if (mechanics.advanced?.fields !== undefined) data.advanced_fields = mechanics.advanced.fields
+  return data
+}
 function advancedRows(advanced) {
   const rows = []
   const methodText = (method) => {
@@ -127,15 +312,15 @@ function advancedRows(advanced) {
   return rows
 }
 function unitPower(unit) {
-  const normalized = String(unit ?? '').replaceAll('²', '2').replaceAll('³', '3').replaceAll('⁴', '4').replaceAll('⁶', '6')
-  if (!/^mm(?:\^?\d+)?$/.test(normalized)) return null
-  const power = Number(normalized.match(/\d+$/)?.[0] ?? 1)
-  return [1, 2, 3, 4, 6].includes(power) ? power : null
+  const normalized = String(unit ?? '').replaceAll('⁻', '-').replaceAll('²', '2').replaceAll('³', '3').replaceAll('⁴', '4').replaceAll('⁵', '5').replaceAll('⁶', '6')
+  if (!/^mm(?:\^?-?\d+)?$/.test(normalized)) return null
+  const power = Number(normalized.match(/-?\d+$/)?.[0] ?? 1)
+  return [-6, -5, -4, -3, -2, -1, 1, 2, 3, 4, 5, 6].includes(power) ? power : null
 }
 function displayUnitLabel(unit) {
   const power = unitPower(unit)
   if (power === null) return unit
-  const superscript = { 1: '', 2: '²', 3: '³', 4: '⁴', 6: '⁶' }[power]
+  const superscript = { 1: '', 2: '²', 3: '³', 4: '⁴', 5: '⁵', 6: '⁶', '-1': '⁻¹', '-2': '⁻²', '-3': '⁻³', '-4': '⁻⁴', '-5': '⁻⁵', '-6': '⁻⁶' }[power]
   return `${selectedDisplayUnit.value}${superscript}`
 }
 function format(value, unit = '') {
@@ -150,7 +335,21 @@ function format(value, unit = '') {
   }
   return String(value)
 }
-function formulaUnit(unit) { return String(unit ?? '').replaceAll('mm2', 'mm²').replaceAll('mm3', 'mm³').replaceAll('mm4', 'mm⁴').replaceAll('mm6', 'mm⁶') }
+function formulaUnit(unit) {
+  const normalized = String(unit ?? '')
+  const match = normalized.match(/^mm(?:\^?(-?\d+))?$/)
+  if (!match) return normalized
+  const power = Number(match[1] ?? 1)
+  const superscript = {
+    1: '', 2: '²', 3: '³', 4: '⁴', 5: '⁵', 6: '⁶',
+    '-1': '⁻¹', '-2': '⁻²', '-3': '⁻³', '-4': '⁻⁴', '-5': '⁻⁵', '-6': '⁻⁶',
+  }[power]
+  return superscript === undefined ? normalized : `mm${superscript}`
+}
+function formulaPropertyStatus(status) {
+  const known = { computed: 'computed', not_requested: 'notRequested', not_computed: 'notComputed', not_applicable: 'notApplicable' }
+  return known[status] ? t(known[status]) : t('omitted')
+}
 function pretty(value) {
   if (value === null || value === undefined || value === '') return '—'
   return typeof value === 'object' ? JSON.stringify(value) : String(value)
@@ -228,6 +427,32 @@ function formatDate(value) {
         </dl>
       </article>
     </div>
+    <details v-if="result?.mechanics?.advanced" class="section-calculated-mechanics-advanced">
+      <summary>{{ t('mechanicsAdvanced') }}<span v-if="result.mechanics.advanced.status"> · {{ mechanicsStatus(result.mechanics.advanced.status) }}</span></summary>
+      <p v-if="result.mechanics.advanced.reason" class="section-calculated-mechanics-status">
+        {{ t('status') }}: {{ mechanicsStatus(result.mechanics.advanced.status) }} · {{ reason(result.mechanics.advanced.reason) }}
+      </p>
+      <div class="section-calculated-grid">
+        <article v-for="group in mechanicsAdvancedGroups(result.mechanics.advanced)" :key="group.key" class="section-calculated-group">
+          <h5>{{ group.title }}</h5>
+          <p v-if="(group.status && group.status !== result.mechanics.advanced.status) || group.reason || group.method" class="section-calculated-mechanics-status">
+            <span v-if="group.status && group.status !== result.mechanics.advanced.status">{{ t('status') }}: {{ mechanicsStatus(group.status) }}</span>
+            <span v-if="group.reason"> · {{ reason(group.reason) }}</span>
+            <span v-if="group.method"> · {{ t('method') }}: {{ group.method.replaceAll('_', ' ') }}</span>
+          </p>
+          <dl>
+            <div v-for="item in group.rows" :key="item.label">
+              <dt>{{ item.label }}</dt><dd>{{ format(item.value, item.unit) }}</dd>
+            </div>
+          </dl>
+        </article>
+      </div>
+    </details>
+    <details v-if="Object.keys(rawMechanicsData()).length" class="section-calculated-mechanics-fields">
+      <summary>{{ t('rawMechanicsFields') }}</summary>
+      <pre>{{ JSON.stringify(rawMechanicsData(), null, 2) }}</pre>
+      <button type="button" class="section-calculated-report-download" @click="downloadMechanicsFields">{{ t('downloadMechanicsFields') }}</button>
+    </details>
     <details v-if="result?.solver" class="section-calculated-provenance">
       <summary>{{ result.solver.method }} · {{ result.solver.version }} · {{ result.geometry_hash }}</summary>
       <ul><li v-for="assumption in result.diagnostics?.assumptions ?? []" :key="assumption">{{ assumption.replaceAll('_', ' ') }}</li></ul>
@@ -256,7 +481,7 @@ function formatDate(value) {
       <section v-if="formulaProperties().length">
         <h6>{{ t('properties') }}</h6>
         <article v-for="property in formulaProperties()" :key="property.key" class="section-calculated-report-property">
-          <header><strong>{{ property.symbol }} · {{ property.key }}</strong><span>{{ property.status === 'computed' ? t('computed') : t('omitted') }} · {{ pretty(property.value) }} {{ formulaUnit(property.unit) }}</span></header>
+          <header><strong>{{ property.symbol }} · {{ property.key }}</strong><span>{{ formulaPropertyStatus(property.status) }}<template v-if="property.value !== null && property.value !== undefined"> · {{ pretty(property.value) }} {{ formulaUnit(property.unit) }}</template></span></header>
           <p v-if="property.expression"><b>{{ t('expression') }}:</b> {{ property.expression }}</p>
           <p v-if="property.substitution"><b>{{ t('substitution') }}:</b> {{ substitutionSummary(property.substitution) }}</p>
           <details v-if="property.substitution && typeof property.substitution === 'object'" class="section-calculated-substitution-details">
@@ -305,6 +530,11 @@ function formatDate(value) {
 .section-calculated-substitution-details { margin-top: 4px; color: var(--muted-ink); }
 .section-calculated-substitution-details summary { cursor: pointer; }
 .section-calculated-substitution-details pre { max-height: 260px; overflow: auto; padding: 7px; border-radius: 5px; background: var(--soft-bg); color: #49637c; font-size: 12px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.section-calculated-mechanics-advanced { margin-top: 8px; padding: 8px; border: 1px solid #e9eef2; border-radius: 6px; color: #456681; }
+.section-calculated-mechanics-advanced > summary, .section-calculated-mechanics-fields > summary { cursor: pointer; font-size: 13px; font-weight: 700; }
+.section-calculated-mechanics-status { margin: 5px 0; color: var(--muted-ink); font-size: 12px; }
+.section-calculated-mechanics-fields { margin-top: 8px; }
+.section-calculated-mechanics-fields pre { max-height: 300px; overflow: auto; padding: 8px; border-radius: 5px; background: var(--soft-bg); color: #49637c; font-size: 12px; white-space: pre-wrap; overflow-wrap: anywhere; }
 .section-calculated-report-inputs { margin-top: 7px; color: var(--muted-ink); }
 .section-calculated-report-inputs summary { cursor: pointer; }
 .section-calculated-report-inputs pre { max-height: 260px; overflow: auto; padding: 8px; border-radius: 5px; background: var(--soft-bg); color: #49637c; font-size: 13px; white-space: pre-wrap; overflow-wrap: anywhere; }

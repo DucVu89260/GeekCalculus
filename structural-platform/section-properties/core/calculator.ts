@@ -897,6 +897,33 @@ function sectorialProperties(segments: WallSegment[], centroidX: number, centroi
   }
 }
 
+/** Reuse the numerical wall model for stored stress/warping fields. All numbers here are normalized by scale. */
+export function sectionWallMechanics(geometry: GeometryDefinition, scale: number) {
+  const closed = geometry.type === 'rectangular_hollow'
+  const walls = closed ? rhsSegments(geometry, scale) : orientedTree(wallSegments(geometry, scale))
+  const line = lineProperties(walls)
+  const flowX = flowPolynomials(walls, line.cx, line.cy, line.ix, line.iy, line.ixy, 'x', closed)
+  const flowY = flowPolynomials(walls, line.cx, line.cy, line.ix, line.iy, line.ixy, 'y', closed)
+  const responseX = flowResponse(flowX, line.cx, line.cy), responseY = flowResponse(flowY, line.cx, line.cy)
+  const pole = closed ? { x: line.cx, y: line.cy } : { x: line.cx + responseY.torque, y: line.cy - responseX.torque }
+  const lengths = walls.map(segmentLength)
+  const closureSlope = closed ? Math.abs(fsum(walls.map(s => s.x0 * s.y1 - s.x1 * s.y0))) / fsum(lengths) : 0
+  const nodeOmega = new Map<string, number>()
+  let cumulative = 0
+  const zeroWarping = geometry.type === 'angle' || geometry.type === 'tee' || (closed && geometry.dimensions.width === geometry.dimensions.height)
+  const raw = walls.map((wall, index) => {
+    const length = lengths[index], ux = (wall.x1 - wall.x0) / length, uy = (wall.y1 - wall.y0) / length
+    const start = closed ? cumulative : nodeOmega.get(pointKey(wall.x0, wall.y0)) ?? 0
+    const derivative = (wall.x0 - pole.x) * uy - (wall.y0 - pole.y) * ux - closureSlope
+    cumulative = start + derivative * length
+    nodeOmega.set(pointKey(wall.x1, wall.y1), cumulative)
+    return { wall, length, start, derivative }
+  })
+  const mean = fsum(raw.map(s => s.wall.thickness * s.length * (s.start + s.derivative * s.length / 2))) / line.area
+  const warping = raw.map(s => ({ ...s, start: zeroWarping ? 0 : s.start - mean, derivative: zeroWarping ? 0 : s.derivative }))
+  return { walls, line, pole, flowX, flowY, responseX, responseY, warping, closed }
+}
+
 function rectangleWarpingConstant(width: number, height: number): { value: number | null; diagnostics: Record<string, unknown> } {
   const a = Math.max(width, height) / 2, b = Math.min(width, height) / 2
   const method = 'solid_rectangle_fourier_warping_norm'

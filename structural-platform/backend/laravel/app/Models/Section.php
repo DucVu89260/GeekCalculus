@@ -21,4 +21,10 @@ class Section extends Model
     {
         return $this->section_properties['formula_report'] ?? null;
     }
+
+    /** Stored code-independent mechanics and stress-field coefficients. */
+    public function mechanicalProperties(): ?array
+    {
+        return $this->section_properties['mechanics'] ?? null;
+    }
 }

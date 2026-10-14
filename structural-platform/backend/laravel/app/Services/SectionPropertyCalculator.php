@@ -76,6 +76,7 @@ class SectionPropertyCalculator
     /** Refuse truncated, stale or invalid engine responses before any database write. */
     private function validResult(array $r, array $payload): bool
     {
+        $registry = json_decode(file_get_contents(base_path('../../section-properties/section-registry.json')), true, 512, JSON_THROW_ON_ERROR);
         $geometry = data_get($r, 'normalized_input.geometry');
         if (($r['status'] ?? null) !== 'success' || ($r['schema_version'] ?? null) !== '1.0'
             || ($r['geometry_type'] ?? null) !== $payload['geometry']['type']
@@ -156,7 +157,7 @@ class SectionPropertyCalculator
 
         $report = $r['formula_report'] ?? null;
         if (! is_array($report) || ($report['schema_version'] ?? null) !== '1.0'
-            || ($report['library_version'] ?? null) !== '1.0.0'
+            || ($report['library_version'] ?? null) !== $registry['library_version']
             || ($report['core'] ?? null) !== 'section-properties/shared-typescript'
             || ($report['core_version'] ?? null) !== data_get($r, 'solver.version')
             || ($report['geometry_type'] ?? null) !== $payload['geometry']['type']
@@ -164,6 +165,15 @@ class SectionPropertyCalculator
             || ($report['units'] ?? null) !== 'mm'
             || ! is_string($report['manifest_hash'] ?? null) || ! preg_match('/^[a-f0-9]{64}$/', $report['manifest_hash'])
             || ! is_array($report['dimensions'] ?? null) || ! is_array($report['properties'] ?? null)) {
+            return false;
+        }
+        if (data_get($r, 'mechanics.schema_version') !== '1.0'
+            || data_get($r, 'mechanics.solver_version') !== $registry['mechanics_solver_version']
+            || data_get($report, 'mechanics_solver.version') !== $registry['mechanics_solver_version']
+            || data_get($r, 'mechanics.geometry.status') !== 'computed'
+            || data_get($r, 'mechanics.advanced.status') !== 'computed'
+            || ! is_array(data_get($r, 'mechanics.geometry.representation'))
+            || ! is_array(data_get($r, 'mechanics.advanced.fields'))) {
             return false;
         }
         $reportedDimensions = collect($report['dimensions'])->keyBy('key');
@@ -174,7 +184,6 @@ class SectionPropertyCalculator
                 return false;
             }
         }
-        $registry = json_decode(file_get_contents(base_path('../../section-properties/section-registry.json')), true, 512, JSON_THROW_ON_ERROR);
         $manifestObject = json_decode(file_get_contents(base_path('../../section-properties/section-registry.json')), false, 512, JSON_THROW_ON_ERROR);
         $manifestHash = hash('sha256', json_encode($manifestObject, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR));
         if ($report['manifest_hash'] !== $manifestHash) {
@@ -188,11 +197,24 @@ class SectionPropertyCalculator
             $key = $definition['key'];
             $reported = $reportedProperties->get($key);
             $advanced = str_starts_with($key, 'advanced.');
-            $value = data_get($r, $advanced ? $key.'.value' : 'properties.'.$key);
+            $mechanics = str_starts_with($key, 'mechanics.');
+            $value = data_get($r, $advanced ? $key.'.value' : ($mechanics ? $key : 'properties.'.$key));
             if (! is_array($reported) || ($reported['unit'] ?? null) !== $definition['unit']
                 || ! array_key_exists('value', $reported) || $reported['value'] != $value
                 || ! is_string($reported['expression'] ?? null) || ! $reported['expression']) {
                 return false;
+            }
+            if ($mechanics) {
+                $zeroWarping = str_starts_with($key, 'mechanics.advanced.warping.modulus_')
+                    && data_get($r, 'advanced.warping_constant_cw.value') === 0
+                    && data_get($r, 'mechanics.advanced.warping.status') === 'not_applicable';
+                if ($zeroWarping) {
+                    if ($value !== null || ($reported['status'] ?? null) !== 'not_applicable' || ($reported['reason'] ?? null) !== 'zero_warping') {
+                        return false;
+                    }
+                } elseif (! $this->finite($value) || ($reported['status'] ?? null) !== 'computed') {
+                    return false;
+                }
             }
             if ($advanced && (data_get($r, $key.'.status') !== 'computed' || ($reported['status'] ?? null) !== 'computed')) {
                 // New saved catalog records must contain every structural property requested.

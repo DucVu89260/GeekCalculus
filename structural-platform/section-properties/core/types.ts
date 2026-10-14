@@ -39,5 +39,6 @@ export interface CalculationResult {
     principal: { i_major: number; i_minor: number; major_axis_angle_degrees: number | null; orientation_status: 'determinate' | 'indeterminate' }
   }
   advanced: AdvancedProperties
+  mechanics?: { schema_version: '1.0'; solver_version: '1.0.0'; geometry: Record<string, any>; advanced: Record<string, any> }
   diagnostics: { bounding_box: { x_min: number; y_min: number; x_max: number; y_max: number }; intermediate: Record<string, number>; plastic: Record<string, unknown>; torsion?: Record<string, unknown>; i_section_advanced?: Record<string, unknown>; assumptions: string[] }
 }

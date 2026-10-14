@@ -4,6 +4,8 @@ type Result = Record<string, any>
 
 const get = (object: any, path: string): any => path.split('.').reduce((value, key) => value?.[key], object)
 const printable = (value: any): string => typeof value === 'number' ? String(value) : JSON.stringify(value)
+const propertyValue = (result: Result, key: string) => key.startsWith('advanced.') ? get(result, `${key}.value`)
+  : key.startsWith('mechanics.') ? get(result, key) : get(result, `properties.${key}`)
 
 function substitute(expression: string, symbols: Record<string, number>, outputSymbol: string): string {
   const equals = expression.indexOf('=')
@@ -46,17 +48,22 @@ export async function buildFormulaReport(result: Result, selectedProfileId?: str
   const dimensionSymbols = Object.fromEntries(symbolDimensions.map(dimension => [dimension.symbol, dimension.value]))
   const numericSymbols = { ...dimensionSymbols }
   for (const descriptor of registry.properties) {
-    const advanced = descriptor.key.startsWith('advanced.')
-    const value = get(result, advanced ? `${descriptor.key}.value` : `properties.${descriptor.key}`)
+    const value = propertyValue(result, descriptor.key)
     if (typeof value === 'number') numericSymbols[descriptor.symbol] = value
   }
   const properties = registry.properties.map(descriptor => {
     const advanced = descriptor.key.startsWith('advanced.')
-    const property = get(result, advanced ? descriptor.key : `properties.${descriptor.key}`)
-    const status = advanced ? property?.status ?? 'not_computed'
+    const mechanics = descriptor.key.startsWith('mechanics.')
+    const property = mechanics ? get(result, descriptor.key) : get(result, advanced ? descriptor.key : `properties.${descriptor.key}`)
+    let status = advanced ? property?.status ?? 'not_computed'
       : property === undefined || (property === null && descriptor.key !== 'principal.major_axis_angle_degrees') ? 'not_computed' : 'computed'
-    const value = advanced ? property?.value ?? null : property ?? null
-    const method = advanced ? property?.method ?? null : 'gross_geometry_integrals'
+    const value = propertyValue(result, descriptor.key) ?? null
+    const mechanicsGroup = mechanics ? get(result, descriptor.key.startsWith('mechanics.geometry.') ? 'mechanics.geometry' : 'mechanics.advanced') : null
+    let reason = advanced ? property?.reason ?? null : status === 'not_computed' ? mechanicsGroup?.reason ?? 'not_requested' : null
+    if (mechanics && descriptor.key.includes('.warping.modulus_') && value === null && get(result, 'mechanics.advanced.warping.status') === 'not_applicable') {
+      status = 'not_applicable'; reason = 'zero_warping'
+    }
+    const method = advanced ? property?.method ?? null : mechanics ? mechanicsGroup?.method ?? 'strength_of_materials_section_response' : 'gross_geometry_integrals'
     const overrides = registry.geometry_expressions[geometry.type as keyof typeof registry.geometry_expressions] as Record<string, string> | undefined
     const methodExpressions = registry.method_expressions as Record<string, string | Record<string, string>>
     const methodExpression = method ? methodExpressions[method] : undefined
@@ -71,7 +78,7 @@ export async function buildFormulaReport(result: Result, selectedProfileId?: str
         context_ref: 'inputs',
         result: `${descriptor.symbol} = ${printable(value)} ${descriptor.unit}`,
       },
-      reason: advanced ? property?.reason ?? null : status === 'not_computed' ? 'not_requested' : null,
+      reason,
       reference_ids: descriptor.reference_ids,
     }
   })
@@ -85,6 +92,7 @@ export async function buildFormulaReport(result: Result, selectedProfileId?: str
     profile_label: profile.label, geometry_model_version: registry.geometry_model_version,
     normalized_geometry: geometry,
     geometry_hash: result.geometry_hash, solver: result.solver,
+    mechanics_solver: result.mechanics ? { schema_version: result.mechanics.schema_version, version: result.mechanics.solver_version } : null,
     coordinate_system: registry.coordinate_system, units: 'mm',
     dimensions: symbolDimensions,
     components: result.diagnostics.components ?? result.diagnostics.intermediate?.components ?? [],
@@ -94,6 +102,7 @@ export async function buildFormulaReport(result: Result, selectedProfileId?: str
       geometric: result.properties.geometric, elastic: result.properties.elastic,
       plastic: result.properties.plastic, intermediate: result.diagnostics.intermediate,
       advanced_model: result.diagnostics.advanced_model,
+      mechanics: result.mechanics,
       options: result.normalized_input.options,
     },
     properties, assumptions, references: registry.references,

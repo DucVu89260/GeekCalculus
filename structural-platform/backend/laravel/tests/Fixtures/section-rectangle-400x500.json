@@ -174,10 +174,185 @@
     ]
   },
   "status": "success",
+  "mechanics": {
+    "schema_version": "1.0",
+    "solver_version": "1.0.0",
+    "geometry": {
+      "status": "computed",
+      "method": "normalized_material_integrals_and_principal_polygon_cuts",
+      "representation": {
+        "kind": "rectangle",
+        "geometry_type": "rectangle",
+        "units": "mm",
+        "coordinate_system": {
+          "origin": "bounding_box_lower_left",
+          "x": "right",
+          "y": "up"
+        },
+        "bounding_box_mm": {
+          "width": 400,
+          "height": 500
+        },
+        "centroid_mm": {
+          "x": 200,
+          "y": 250
+        },
+        "area_mm2": 200000,
+        "integration_primitives": [
+          {
+            "kind": "rectangle",
+            "x_min_mm": 0,
+            "y_min_mm": 0,
+            "width_mm": 400,
+            "height_mm": 500
+          }
+        ]
+      },
+      "polar_centroidal": {
+        "inertia_mm4": 6833333333.333333,
+        "radius_mm": 184.84227510682362
+      },
+      "coupled_bending": {
+        "mx": {
+          "elastic_modulus_positive_mm3": 16666666.666666664,
+          "elastic_modulus_negative_mm3": 16666666.666666664
+        },
+        "my": {
+          "elastic_modulus_positive_mm3": 13333333.333333334,
+          "elastic_modulus_negative_mm3": 13333333.333333334
+        }
+      },
+      "principal": {
+        "basis_angle_degrees": 0,
+        "basis_unique": true,
+        "major": {
+          "axis_angle_degrees": 0,
+          "bending_coordinate": "v",
+          "inertia_mm4": 4166666666.6666665,
+          "extreme_positive_mm": 250,
+          "extreme_negative_mm": -250,
+          "elastic_modulus_positive_mm3": 16666666.666666666,
+          "elastic_modulus_negative_mm3": 16666666.666666666,
+          "radius_mm": 144.33756729740642,
+          "plastic_neutral_coordinate_mm": 0,
+          "plastic_modulus_mm3": 25000000,
+          "plastic_status": "computed"
+        },
+        "minor": {
+          "axis_angle_degrees": 90,
+          "bending_coordinate": "u",
+          "inertia_mm4": 2666666666.6666665,
+          "extreme_positive_mm": 200,
+          "extreme_negative_mm": -200,
+          "elastic_modulus_positive_mm3": 13333333.333333332,
+          "elastic_modulus_negative_mm3": 13333333.333333332,
+          "radius_mm": 115.47005383792515,
+          "plastic_neutral_coordinate_mm": 0,
+          "plastic_modulus_mm3": 20000000.000000004,
+          "plastic_status": "computed"
+        }
+      },
+      "third_moments": {
+        "m30_mm5": 0,
+        "m21_mm5": 0,
+        "m12_mm5": 0,
+        "m03_mm5": 0
+      },
+      "third_moments_principal": {
+        "m30_mm5": 0,
+        "m21_mm5": 0,
+        "m12_mm5": 0,
+        "m03_mm5": 0
+      }
+    },
+    "advanced": {
+      "status": "computed",
+      "reason": null,
+      "shear_center_geometry": {
+        "polar_inertia_mm4": 6833333333.333333,
+        "polar_radius_mm": 184.84227510682362,
+        "coupling_factor": 1,
+        "offset_x_mm": 0,
+        "offset_y_mm": 0
+      },
+      "wagner": {
+        "beta_x_mm": 0,
+        "beta_y_mm": 0,
+        "beta_major_mm": 0,
+        "beta_minor_mm": 0
+      },
+      "fields": {
+        "units": {
+          "torque": "mm-3",
+          "force": "mm-2",
+          "bimoment": "mm-4"
+        },
+        "normal_stress": {
+          "coordinate_origin": "gross_centroid",
+          "moment_convention": "Mx=integral(Y*sigma)dA; My=integral(X*sigma)dA; tension-positive N",
+          "expression": "sigma=N/A + [(My*Ix-Mx*Ixy)*X+(Mx*Iy-My*Ixy)*Y]/(Ix*Iy-Ixy^2) + B*omega/Cw",
+          "bimoment_unit": "N mm2"
+        },
+        "rectangle": {
+          "model": "saint_venant_harmonic_fourier",
+          "long_axis": "y",
+          "half_long_mm": 250,
+          "half_short_mm": 200,
+          "terms": 1024,
+          "warping_expression": "psi=-xy+32b^2/pi^3 sum_odd((-1)^((n-1)/2)/n^3 * sinh(n*pi*x/(2b))/cosh(n*pi*a/(2b))*sin(n*pi*y/(2b)))",
+          "coordinate_convention": "centered x along longer side, y shorter; physical omega=psi when long_axis=x, omega=-psi when long_axis=y",
+          "stress_function_expression": "phi=b^2-y^2-32b^2/pi^3 sum_odd((-1)^((n-1)/2)/n^3*cosh(n*pi*x/(2b))/cosh(n*pi*a/(2b))*cos(n*pi*y/(2b)))",
+          "torsion_shear_expression": "phi_phys(X,Y)=phi(X,Y) when long_axis=x, else phi(Y,X); (tau_x,tau_y)=T/J*(d_phi_phys/dY,-d_phi_phys/dX)",
+          "shear_expression": "tau_x/Vx=3/(2A)*(1-4X^2/width^2); tau_y/Vy=3/(2A)*(1-4Y^2/height^2)"
+        }
+      },
+      "torsion": {
+        "status": "computed",
+        "method": "solid_rectangle_saint_venant_boundary_gradient",
+        "modulus_mm3": 17696613.215089932,
+        "unit_max_shear_per_torque_mm3_inverse": 5.65079875932022e-8
+      },
+      "shear": {
+        "method": "jourawski_rectangle",
+        "modulus_x_mm2": 133333.33333333334,
+        "modulus_y_mm2": 133333.33333333334,
+        "compliance": {
+          "xx_mm2_inverse": 0.000006,
+          "xy_mm2_inverse": 0,
+          "yy_mm2_inverse": 0.000006
+        }
+      },
+      "warping": {
+        "status": "computed",
+        "method": "harmonic_fourier_boundary_enclosure",
+        "omega_positive_mm2": 13704.040032339522,
+        "omega_negative_mm2": -13704.040032339522,
+        "modulus_positive_mm4": 266472418.37105337,
+        "modulus_negative_mm4": 266472418.37105337,
+        "absolute_error_bound_mm2": 0.6832510417217191,
+        "extrema_enclosure_mm2": {
+          "absolute_lower": 13703.3567812978,
+          "absolute_upper": 13704.723283381243
+        },
+        "modulus_convention": "lower_bound_using_upper_omega_enclosure",
+        "convergence": {
+          "lower": 0.0548134271251912,
+          "upper": 0.054818893133524976,
+          "estimate": 0.05481616012935809,
+          "error": 0.0000027330041668868765,
+          "truncation_tail_bound": 9.852005967839638e-9,
+          "floating_point_error_estimate": 7.566995918750763e-12,
+          "terms": 1024,
+          "iterations": 1298,
+          "relative_enclosure_width": 0.00009972024411627567
+        }
+      }
+    }
+  },
   "formula_report": {
     "schema_version": "1.0",
-    "library_version": "1.0.0",
-    "manifest_hash": "a0fff089d68dd7eeec5b1f009c998746b3288020b7cb3edf8c2d3177ca6ebf4a",
+    "library_version": "1.1.0",
+    "manifest_hash": "5a1481c0bd1940c94cd7c611ca4a4f040a30b047fa0f0b1e7e4ab7d0324393ee",
     "core": "section-properties/shared-typescript",
     "core_version": "1.3.0",
     "profile_id": "rectangle",
@@ -199,13 +374,19 @@
       "version": "1.3.0",
       "config_hash": "640fd9df4c86e8fbce4f0fcae9e2eab88a0314e94bba23c83d9cf269f4cb7ef1"
     },
+    "mechanics_solver": {
+      "schema_version": "1.0",
+      "version": "1.0.0"
+    },
     "coordinate_system": {
       "origin": "bounding_box_lower_left",
       "x": "right",
       "y": "up",
       "ixy": "positive_coordinate_product",
       "principal_angle": "counterclockwise_from_x_modulo_180",
-      "advanced_flow_convention": "xcℓ,ycℓ and Ixℓ,Iyℓ,Ixyℓ are median-wall area centroid/inertias; unit-force q gradients and torque use those centroidal coordinates. Sectorial warping uses the shear-center pole. Offsets use the gross centroid. Normalized diagnostic wall data are scaled by normalization_length_mm; returned properties and formula dimensions are physical mm powers."
+      "advanced_flow_convention": "xcℓ,ycℓ and Ixℓ,Iyℓ,Ixyℓ are median-wall area centroid/inertias; unit-force q gradients and torque use those centroidal coordinates. Sectorial warping uses the shear-center pole. Offsets use the gross centroid. Normalized diagnostic wall data are scaled by normalization_length_mm; returned properties and formula dimensions are physical mm powers.",
+      "component_convention": "Nonoverlapping material rectangles; x_i,y_i in stored components are lower-left corners, centroid x_i+b_i/2,y_i+h_i/2; A_i=b_i*h_i and intrinsic product inertia=0. Principal u follows major-inertia axis, v is its counterclockwise perpendicular; X=x-xbar,Y=y-ybar. Indeterminate principal bases use reference u=X,v=Y, explicitly nonunique.",
+      "mechanical_moment_convention": "Normal stress tensile positive; generalized Mx=integral(Y*sigma)dA and My=integral(X*sigma)dA. Other physical/member moment sign conventions require an explicit adapter."
     },
     "units": "mm",
     "dimensions": [
@@ -252,7 +433,55 @@
         "Imin": 2666666666.6666665,
         "θ": 0,
         "J": 5495441352.256769,
-        "Cw": 3651930756428.6826
+        "Cw": 3651930756428.6826,
+        "Ip": 6833333333.333333,
+        "rp": 184.84227510682362,
+        "cmajor+": 250,
+        "cmajor-": -250,
+        "Smajor+": 16666666.666666666,
+        "Smajor-": 16666666.666666666,
+        "rmajor": 144.33756729740642,
+        "pmajor": 0,
+        "Zmajor": 25000000,
+        "cminor+": 200,
+        "cminor-": -200,
+        "Sminor+": 13333333.333333332,
+        "Sminor-": 13333333.333333332,
+        "rminor": 115.47005383792515,
+        "pminor": 0,
+        "Zminor": 20000000.000000004,
+        "M30": 0,
+        "M21": 0,
+        "M12": 0,
+        "M03": 0,
+        "M30_uv": 0,
+        "M21_uv": 0,
+        "M12_uv": 0,
+        "M03_uv": 0,
+        "IpSC": 6833333333.333333,
+        "r0": 184.84227510682362,
+        "H": 1,
+        "ex": 0,
+        "ey": 0,
+        "beta_x": 0,
+        "beta_y": 0,
+        "beta_major": 0,
+        "beta_minor": 0,
+        "Wt": 17696613.215089932,
+        "tauTmax": 5.65079875932022e-8,
+        "Wvx": 133333.33333333334,
+        "Wvy": 133333.33333333334,
+        "Cxx": 0.000006,
+        "Cxy": 0,
+        "Cyy": 0.000006,
+        "omega+": 13704.040032339522,
+        "Womega+": 266472418.37105337,
+        "omega-": -13704.040032339522,
+        "Womega-": 266472418.37105337,
+        "S_mx_positive": 16666666.666666664,
+        "S_mx_negative": 16666666.666666664,
+        "S_my_positive": 13333333.333333334,
+        "S_my_negative": 13333333.333333334
       },
       "bounding_box": {
         "x_min": 0,
@@ -318,6 +547,181 @@
         "warping_method": "solid_rectangle_saint_venant_fourier",
         "shear_center_method": "geometric_symmetry",
         "effective_shear_area_method": "jourawski_rectangle_five_sixths_area"
+      },
+      "mechanics": {
+        "schema_version": "1.0",
+        "solver_version": "1.0.0",
+        "geometry": {
+          "status": "computed",
+          "method": "normalized_material_integrals_and_principal_polygon_cuts",
+          "representation": {
+            "kind": "rectangle",
+            "geometry_type": "rectangle",
+            "units": "mm",
+            "coordinate_system": {
+              "origin": "bounding_box_lower_left",
+              "x": "right",
+              "y": "up"
+            },
+            "bounding_box_mm": {
+              "width": 400,
+              "height": 500
+            },
+            "centroid_mm": {
+              "x": 200,
+              "y": 250
+            },
+            "area_mm2": 200000,
+            "integration_primitives": [
+              {
+                "kind": "rectangle",
+                "x_min_mm": 0,
+                "y_min_mm": 0,
+                "width_mm": 400,
+                "height_mm": 500
+              }
+            ]
+          },
+          "polar_centroidal": {
+            "inertia_mm4": 6833333333.333333,
+            "radius_mm": 184.84227510682362
+          },
+          "coupled_bending": {
+            "mx": {
+              "elastic_modulus_positive_mm3": 16666666.666666664,
+              "elastic_modulus_negative_mm3": 16666666.666666664
+            },
+            "my": {
+              "elastic_modulus_positive_mm3": 13333333.333333334,
+              "elastic_modulus_negative_mm3": 13333333.333333334
+            }
+          },
+          "principal": {
+            "basis_angle_degrees": 0,
+            "basis_unique": true,
+            "major": {
+              "axis_angle_degrees": 0,
+              "bending_coordinate": "v",
+              "inertia_mm4": 4166666666.6666665,
+              "extreme_positive_mm": 250,
+              "extreme_negative_mm": -250,
+              "elastic_modulus_positive_mm3": 16666666.666666666,
+              "elastic_modulus_negative_mm3": 16666666.666666666,
+              "radius_mm": 144.33756729740642,
+              "plastic_neutral_coordinate_mm": 0,
+              "plastic_modulus_mm3": 25000000,
+              "plastic_status": "computed"
+            },
+            "minor": {
+              "axis_angle_degrees": 90,
+              "bending_coordinate": "u",
+              "inertia_mm4": 2666666666.6666665,
+              "extreme_positive_mm": 200,
+              "extreme_negative_mm": -200,
+              "elastic_modulus_positive_mm3": 13333333.333333332,
+              "elastic_modulus_negative_mm3": 13333333.333333332,
+              "radius_mm": 115.47005383792515,
+              "plastic_neutral_coordinate_mm": 0,
+              "plastic_modulus_mm3": 20000000.000000004,
+              "plastic_status": "computed"
+            }
+          },
+          "third_moments": {
+            "m30_mm5": 0,
+            "m21_mm5": 0,
+            "m12_mm5": 0,
+            "m03_mm5": 0
+          },
+          "third_moments_principal": {
+            "m30_mm5": 0,
+            "m21_mm5": 0,
+            "m12_mm5": 0,
+            "m03_mm5": 0
+          }
+        },
+        "advanced": {
+          "status": "computed",
+          "reason": null,
+          "shear_center_geometry": {
+            "polar_inertia_mm4": 6833333333.333333,
+            "polar_radius_mm": 184.84227510682362,
+            "coupling_factor": 1,
+            "offset_x_mm": 0,
+            "offset_y_mm": 0
+          },
+          "wagner": {
+            "beta_x_mm": 0,
+            "beta_y_mm": 0,
+            "beta_major_mm": 0,
+            "beta_minor_mm": 0
+          },
+          "fields": {
+            "units": {
+              "torque": "mm-3",
+              "force": "mm-2",
+              "bimoment": "mm-4"
+            },
+            "normal_stress": {
+              "coordinate_origin": "gross_centroid",
+              "moment_convention": "Mx=integral(Y*sigma)dA; My=integral(X*sigma)dA; tension-positive N",
+              "expression": "sigma=N/A + [(My*Ix-Mx*Ixy)*X+(Mx*Iy-My*Ixy)*Y]/(Ix*Iy-Ixy^2) + B*omega/Cw",
+              "bimoment_unit": "N mm2"
+            },
+            "rectangle": {
+              "model": "saint_venant_harmonic_fourier",
+              "long_axis": "y",
+              "half_long_mm": 250,
+              "half_short_mm": 200,
+              "terms": 1024,
+              "warping_expression": "psi=-xy+32b^2/pi^3 sum_odd((-1)^((n-1)/2)/n^3 * sinh(n*pi*x/(2b))/cosh(n*pi*a/(2b))*sin(n*pi*y/(2b)))",
+              "coordinate_convention": "centered x along longer side, y shorter; physical omega=psi when long_axis=x, omega=-psi when long_axis=y",
+              "stress_function_expression": "phi=b^2-y^2-32b^2/pi^3 sum_odd((-1)^((n-1)/2)/n^3*cosh(n*pi*x/(2b))/cosh(n*pi*a/(2b))*cos(n*pi*y/(2b)))",
+              "torsion_shear_expression": "phi_phys(X,Y)=phi(X,Y) when long_axis=x, else phi(Y,X); (tau_x,tau_y)=T/J*(d_phi_phys/dY,-d_phi_phys/dX)",
+              "shear_expression": "tau_x/Vx=3/(2A)*(1-4X^2/width^2); tau_y/Vy=3/(2A)*(1-4Y^2/height^2)"
+            }
+          },
+          "torsion": {
+            "status": "computed",
+            "method": "solid_rectangle_saint_venant_boundary_gradient",
+            "modulus_mm3": 17696613.215089932,
+            "unit_max_shear_per_torque_mm3_inverse": 5.65079875932022e-8
+          },
+          "shear": {
+            "method": "jourawski_rectangle",
+            "modulus_x_mm2": 133333.33333333334,
+            "modulus_y_mm2": 133333.33333333334,
+            "compliance": {
+              "xx_mm2_inverse": 0.000006,
+              "xy_mm2_inverse": 0,
+              "yy_mm2_inverse": 0.000006
+            }
+          },
+          "warping": {
+            "status": "computed",
+            "method": "harmonic_fourier_boundary_enclosure",
+            "omega_positive_mm2": 13704.040032339522,
+            "omega_negative_mm2": -13704.040032339522,
+            "modulus_positive_mm4": 266472418.37105337,
+            "modulus_negative_mm4": 266472418.37105337,
+            "absolute_error_bound_mm2": 0.6832510417217191,
+            "extrema_enclosure_mm2": {
+              "absolute_lower": 13703.3567812978,
+              "absolute_upper": 13704.723283381243
+            },
+            "modulus_convention": "lower_bound_using_upper_omega_enclosure",
+            "convergence": {
+              "lower": 0.0548134271251912,
+              "upper": 0.054818893133524976,
+              "estimate": 0.05481616012935809,
+              "error": 0.0000027330041668868765,
+              "truncation_tail_bound": 9.852005967839638e-9,
+              "floating_point_error_estimate": 7.566995918750763e-12,
+              "terms": 1024,
+              "iterations": 1298,
+              "relative_enclosure_width": 0.00009972024411627567
+            }
+          }
+        }
       },
       "options": {
         "solver": "analytical",
@@ -492,7 +896,7 @@
         "method": "gross_geometry_integrals",
         "expression": "Sx+ = Ix/(H − ȳ)",
         "substitution": {
-          "expression": "Sx+ = (4166666666.6666665)/(H − (250))",
+          "expression": "Sx+ = (4166666666.6666665)/((1) − (250))",
           "dimensions": {
             "b": 400,
             "h": 500
@@ -889,6 +1293,1062 @@
         "reference_ids": [
           "saint_venant",
           "vlasov"
+        ]
+      },
+      {
+        "key": "mechanics.geometry.polar_centroidal.inertia_mm4",
+        "symbol": "Ip",
+        "unit": "mm4",
+        "status": "computed",
+        "value": 6833333333.333333,
+        "method": "normalized_material_integrals_and_principal_polygon_cuts",
+        "expression": "Ip = Ix + Iy",
+        "substitution": {
+          "expression": "Ip = (4166666666.6666665) + (2666666666.6666665)",
+          "dimensions": {
+            "b": 400,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "Ip = 6833333333.333333 mm4"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "mechanics.geometry.polar_centroidal.radius_mm",
+        "symbol": "rp",
+        "unit": "mm",
+        "status": "computed",
+        "value": 184.84227510682362,
+        "method": "normalized_material_integrals_and_principal_polygon_cuts",
+        "expression": "rp = sqrt(Ip/A)",
+        "substitution": {
+          "expression": "rp = sqrt((6833333333.333333)/(200000))",
+          "dimensions": {
+            "b": 400,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "rp = 184.84227510682362 mm"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "mechanics.geometry.principal.major.extreme_positive_mm",
+        "symbol": "cmajor+",
+        "unit": "mm",
+        "status": "computed",
+        "value": 250,
+        "method": "normalized_material_integrals_and_principal_polygon_cuts",
+        "expression": "cmajor+ = max_material(v); u=X cos(theta)+Y sin(theta), v=-X sin(theta)+Y cos(theta)",
+        "substitution": {
+          "expression": "cmajor+ = max_material(v); u=X cos(theta)+Y sin(theta), v=-X sin(theta)+Y cos(theta)",
+          "dimensions": {
+            "b": 400,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "cmajor+ = 250 mm"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "mechanics.geometry.principal.major.extreme_negative_mm",
+        "symbol": "cmajor-",
+        "unit": "mm",
+        "status": "computed",
+        "value": -250,
+        "method": "normalized_material_integrals_and_principal_polygon_cuts",
+        "expression": "cmajor- = min_material(v) (signed coordinate)",
+        "substitution": {
+          "expression": "cmajor- = min_material(v) (signed coordinate)",
+          "dimensions": {
+            "b": 400,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "cmajor- = -250 mm"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "mechanics.geometry.principal.major.elastic_modulus_positive_mm3",
+        "symbol": "Smajor+",
+        "unit": "mm3",
+        "status": "computed",
+        "value": 16666666.666666666,
+        "method": "normalized_material_integrals_and_principal_polygon_cuts",
+        "expression": "Smajor = Imax/abs(cmajor); use the stated positive/negative extreme",
+        "substitution": {
+          "expression": "Smajor = (4166666666.6666665)/abs(cmajor); use the stated positive/negative extreme",
+          "dimensions": {
+            "b": 400,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "Smajor+ = 16666666.666666666 mm3"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "mechanics.geometry.principal.major.elastic_modulus_negative_mm3",
+        "symbol": "Smajor-",
+        "unit": "mm3",
+        "status": "computed",
+        "value": 16666666.666666666,
+        "method": "normalized_material_integrals_and_principal_polygon_cuts",
+        "expression": "Smajor = Imax/abs(cmajor); use the stated positive/negative extreme",
+        "substitution": {
+          "expression": "Smajor = (4166666666.6666665)/abs(cmajor); use the stated positive/negative extreme",
+          "dimensions": {
+            "b": 400,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "Smajor- = 16666666.666666666 mm3"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "mechanics.geometry.principal.major.radius_mm",
+        "symbol": "rmajor",
+        "unit": "mm",
+        "status": "computed",
+        "value": 144.33756729740642,
+        "method": "normalized_material_integrals_and_principal_polygon_cuts",
+        "expression": "rmajor = sqrt(Imax/A)",
+        "substitution": {
+          "expression": "rmajor = sqrt((4166666666.6666665)/(200000))",
+          "dimensions": {
+            "b": 400,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "rmajor = 144.33756729740642 mm"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "mechanics.geometry.principal.major.plastic_neutral_coordinate_mm",
+        "symbol": "pmajor",
+        "unit": "mm",
+        "status": "computed",
+        "value": 0,
+        "method": "normalized_material_integrals_and_principal_polygon_cuts",
+        "expression": "integral_material(v <= pmajor) dA = A/2; local centroid coordinate",
+        "substitution": {
+          "expression": "integral_material(v <= pmajor) dA = (200000)/2; local centroid coordinate",
+          "dimensions": {
+            "b": 400,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "pmajor = 0 mm"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "mechanics.geometry.principal.major.plastic_modulus_mm3",
+        "symbol": "Zmajor",
+        "unit": "mm3",
+        "status": "computed",
+        "value": 25000000,
+        "method": "normalized_material_integrals_and_principal_polygon_cuts",
+        "expression": "Zmajor = integral_material(abs(v-pmajor)) dA",
+        "substitution": {
+          "expression": "Zmajor = integral_material(abs(v-(0))) dA",
+          "dimensions": {
+            "b": 400,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "Zmajor = 25000000 mm3"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "mechanics.geometry.principal.minor.extreme_positive_mm",
+        "symbol": "cminor+",
+        "unit": "mm",
+        "status": "computed",
+        "value": 200,
+        "method": "normalized_material_integrals_and_principal_polygon_cuts",
+        "expression": "cminor+ = max_material(u); u=X cos(theta)+Y sin(theta), v=-X sin(theta)+Y cos(theta)",
+        "substitution": {
+          "expression": "cminor+ = max_material(u); u=X cos(theta)+Y sin(theta), v=-X sin(theta)+Y cos(theta)",
+          "dimensions": {
+            "b": 400,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "cminor+ = 200 mm"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "mechanics.geometry.principal.minor.extreme_negative_mm",
+        "symbol": "cminor-",
+        "unit": "mm",
+        "status": "computed",
+        "value": -200,
+        "method": "normalized_material_integrals_and_principal_polygon_cuts",
+        "expression": "cminor- = min_material(u) (signed coordinate)",
+        "substitution": {
+          "expression": "cminor- = min_material(u) (signed coordinate)",
+          "dimensions": {
+            "b": 400,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "cminor- = -200 mm"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "mechanics.geometry.principal.minor.elastic_modulus_positive_mm3",
+        "symbol": "Sminor+",
+        "unit": "mm3",
+        "status": "computed",
+        "value": 13333333.333333332,
+        "method": "normalized_material_integrals_and_principal_polygon_cuts",
+        "expression": "Sminor = Imin/abs(cminor); use the stated positive/negative extreme",
+        "substitution": {
+          "expression": "Sminor = (2666666666.6666665)/abs(cminor); use the stated positive/negative extreme",
+          "dimensions": {
+            "b": 400,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "Sminor+ = 13333333.333333332 mm3"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "mechanics.geometry.principal.minor.elastic_modulus_negative_mm3",
+        "symbol": "Sminor-",
+        "unit": "mm3",
+        "status": "computed",
+        "value": 13333333.333333332,
+        "method": "normalized_material_integrals_and_principal_polygon_cuts",
+        "expression": "Sminor = Imin/abs(cminor); use the stated positive/negative extreme",
+        "substitution": {
+          "expression": "Sminor = (2666666666.6666665)/abs(cminor); use the stated positive/negative extreme",
+          "dimensions": {
+            "b": 400,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "Sminor- = 13333333.333333332 mm3"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "mechanics.geometry.principal.minor.radius_mm",
+        "symbol": "rminor",
+        "unit": "mm",
+        "status": "computed",
+        "value": 115.47005383792515,
+        "method": "normalized_material_integrals_and_principal_polygon_cuts",
+        "expression": "rminor = sqrt(Imin/A)",
+        "substitution": {
+          "expression": "rminor = sqrt((2666666666.6666665)/(200000))",
+          "dimensions": {
+            "b": 400,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "rminor = 115.47005383792515 mm"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "mechanics.geometry.principal.minor.plastic_neutral_coordinate_mm",
+        "symbol": "pminor",
+        "unit": "mm",
+        "status": "computed",
+        "value": 0,
+        "method": "normalized_material_integrals_and_principal_polygon_cuts",
+        "expression": "integral_material(u <= pminor) dA = A/2; local centroid coordinate",
+        "substitution": {
+          "expression": "integral_material(u <= pminor) dA = (200000)/2; local centroid coordinate",
+          "dimensions": {
+            "b": 400,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "pminor = 0 mm"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "mechanics.geometry.principal.minor.plastic_modulus_mm3",
+        "symbol": "Zminor",
+        "unit": "mm3",
+        "status": "computed",
+        "value": 20000000.000000004,
+        "method": "normalized_material_integrals_and_principal_polygon_cuts",
+        "expression": "Zminor = integral_material(abs(u-pminor)) dA",
+        "substitution": {
+          "expression": "Zminor = integral_material(abs(u-(0))) dA",
+          "dimensions": {
+            "b": 400,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "Zminor = 20000000.000000004 mm3"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "mechanics.geometry.third_moments.m30_mm5",
+        "symbol": "M30",
+        "unit": "mm5",
+        "status": "computed",
+        "value": 0,
+        "method": "normalized_material_integrals_and_principal_polygon_cuts",
+        "expression": "M30 = integral_material(X^3 Y^0) dA",
+        "substitution": {
+          "expression": "M30 = integral_material(X^3 Y^0) dA",
+          "dimensions": {
+            "b": 400,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "M30 = 0 mm5"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "mechanics.geometry.third_moments.m21_mm5",
+        "symbol": "M21",
+        "unit": "mm5",
+        "status": "computed",
+        "value": 0,
+        "method": "normalized_material_integrals_and_principal_polygon_cuts",
+        "expression": "M21 = integral_material(X^2 Y^1) dA",
+        "substitution": {
+          "expression": "M21 = integral_material(X^2 Y^1) dA",
+          "dimensions": {
+            "b": 400,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "M21 = 0 mm5"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "mechanics.geometry.third_moments.m12_mm5",
+        "symbol": "M12",
+        "unit": "mm5",
+        "status": "computed",
+        "value": 0,
+        "method": "normalized_material_integrals_and_principal_polygon_cuts",
+        "expression": "M12 = integral_material(X^1 Y^2) dA",
+        "substitution": {
+          "expression": "M12 = integral_material(X^1 Y^2) dA",
+          "dimensions": {
+            "b": 400,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "M12 = 0 mm5"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "mechanics.geometry.third_moments.m03_mm5",
+        "symbol": "M03",
+        "unit": "mm5",
+        "status": "computed",
+        "value": 0,
+        "method": "normalized_material_integrals_and_principal_polygon_cuts",
+        "expression": "M03 = integral_material(X^0 Y^3) dA",
+        "substitution": {
+          "expression": "M03 = integral_material(X^0 Y^3) dA",
+          "dimensions": {
+            "b": 400,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "M03 = 0 mm5"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "mechanics.geometry.third_moments_principal.m30_mm5",
+        "symbol": "M30_uv",
+        "unit": "mm5",
+        "status": "computed",
+        "value": 0,
+        "method": "normalized_material_integrals_and_principal_polygon_cuts",
+        "expression": "M30 = integral_material(u^3 v^0) dA",
+        "substitution": {
+          "expression": "M30 = integral_material(u^3 v^0) dA",
+          "dimensions": {
+            "b": 400,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "M30_uv = 0 mm5"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "mechanics.geometry.third_moments_principal.m21_mm5",
+        "symbol": "M21_uv",
+        "unit": "mm5",
+        "status": "computed",
+        "value": 0,
+        "method": "normalized_material_integrals_and_principal_polygon_cuts",
+        "expression": "M21 = integral_material(u^2 v^1) dA",
+        "substitution": {
+          "expression": "M21 = integral_material(u^2 v^1) dA",
+          "dimensions": {
+            "b": 400,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "M21_uv = 0 mm5"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "mechanics.geometry.third_moments_principal.m12_mm5",
+        "symbol": "M12_uv",
+        "unit": "mm5",
+        "status": "computed",
+        "value": 0,
+        "method": "normalized_material_integrals_and_principal_polygon_cuts",
+        "expression": "M12 = integral_material(u^1 v^2) dA",
+        "substitution": {
+          "expression": "M12 = integral_material(u^1 v^2) dA",
+          "dimensions": {
+            "b": 400,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "M12_uv = 0 mm5"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "mechanics.geometry.third_moments_principal.m03_mm5",
+        "symbol": "M03_uv",
+        "unit": "mm5",
+        "status": "computed",
+        "value": 0,
+        "method": "normalized_material_integrals_and_principal_polygon_cuts",
+        "expression": "M03 = integral_material(u^0 v^3) dA",
+        "substitution": {
+          "expression": "M03 = integral_material(u^0 v^3) dA",
+          "dimensions": {
+            "b": 400,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "M03_uv = 0 mm5"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "mechanics.advanced.shear_center_geometry.polar_inertia_mm4",
+        "symbol": "IpSC",
+        "unit": "mm4",
+        "status": "computed",
+        "value": 6833333333.333333,
+        "method": "strength_of_materials_section_response",
+        "expression": "IpSC = Ix+Iy+A*(ex^2+ey^2)",
+        "substitution": {
+          "expression": "IpSC = (4166666666.6666665)+(2666666666.6666665)+(200000)*((0)^2+(0)^2)",
+          "dimensions": {
+            "b": 400,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "IpSC = 6833333333.333333 mm4"
+        },
+        "reason": null,
+        "reference_ids": [
+          "vlasov"
+        ]
+      },
+      {
+        "key": "mechanics.advanced.shear_center_geometry.polar_radius_mm",
+        "symbol": "r0",
+        "unit": "mm",
+        "status": "computed",
+        "value": 184.84227510682362,
+        "method": "strength_of_materials_section_response",
+        "expression": "r0 = sqrt((Ix+Iy)/A+ex^2+ey^2)",
+        "substitution": {
+          "expression": "r0 = sqrt(((4166666666.6666665)+(2666666666.6666665))/(200000)+(0)^2+(0)^2)",
+          "dimensions": {
+            "b": 400,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "r0 = 184.84227510682362 mm"
+        },
+        "reason": null,
+        "reference_ids": [
+          "vlasov"
+        ]
+      },
+      {
+        "key": "mechanics.advanced.shear_center_geometry.coupling_factor",
+        "symbol": "H",
+        "unit": "1",
+        "status": "computed",
+        "value": 1,
+        "method": "strength_of_materials_section_response",
+        "expression": "H = ((Ix+Iy)/A)/r0^2",
+        "substitution": {
+          "expression": "H = (((4166666666.6666665)+(2666666666.6666665))/(200000))/(184.84227510682362)^2",
+          "dimensions": {
+            "b": 400,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "H = 1 1"
+        },
+        "reason": null,
+        "reference_ids": [
+          "vlasov"
+        ]
+      },
+      {
+        "key": "mechanics.advanced.shear_center_geometry.offset_x_mm",
+        "symbol": "ex",
+        "unit": "mm",
+        "status": "computed",
+        "value": 0,
+        "method": "strength_of_materials_section_response",
+        "expression": "ex = xs-xbar",
+        "substitution": {
+          "expression": "ex = xs-xbar",
+          "dimensions": {
+            "b": 400,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "ex = 0 mm"
+        },
+        "reason": null,
+        "reference_ids": [
+          "vlasov"
+        ]
+      },
+      {
+        "key": "mechanics.advanced.shear_center_geometry.offset_y_mm",
+        "symbol": "ey",
+        "unit": "mm",
+        "status": "computed",
+        "value": 0,
+        "method": "strength_of_materials_section_response",
+        "expression": "ey = ys-ybar",
+        "substitution": {
+          "expression": "ey = ys-ybar",
+          "dimensions": {
+            "b": 400,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "ey = 0 mm"
+        },
+        "reason": null,
+        "reference_ids": [
+          "vlasov"
+        ]
+      },
+      {
+        "key": "mechanics.advanced.wagner.beta_x_mm",
+        "symbol": "beta_x",
+        "unit": "mm",
+        "status": "computed",
+        "value": 0,
+        "method": "strength_of_materials_section_response",
+        "expression": "beta_x = (M21+M03)/Ix-2ey; eu=ex*cos(theta)+ey*sin(theta), ev=-ex*sin(theta)+ey*cos(theta)",
+        "substitution": {
+          "expression": "beta_x = ((0)+(0))/(4166666666.6666665)-2 × (0); eu=(0)*cos(theta)+(0)*sin(theta), ev=-(0)*sin(theta)+(0)*cos(theta)",
+          "dimensions": {
+            "b": 400,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "beta_x = 0 mm"
+        },
+        "reason": null,
+        "reference_ids": [
+          "vlasov"
+        ]
+      },
+      {
+        "key": "mechanics.advanced.wagner.beta_y_mm",
+        "symbol": "beta_y",
+        "unit": "mm",
+        "status": "computed",
+        "value": 0,
+        "method": "strength_of_materials_section_response",
+        "expression": "beta_y = (M30+M12)/Iy-2ex; eu=ex*cos(theta)+ey*sin(theta), ev=-ex*sin(theta)+ey*cos(theta)",
+        "substitution": {
+          "expression": "beta_y = ((0)+(0))/(2666666666.6666665)-2 × (0); eu=(0)*cos(theta)+(0)*sin(theta), ev=-(0)*sin(theta)+(0)*cos(theta)",
+          "dimensions": {
+            "b": 400,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "beta_y = 0 mm"
+        },
+        "reason": null,
+        "reference_ids": [
+          "vlasov"
+        ]
+      },
+      {
+        "key": "mechanics.advanced.wagner.beta_major_mm",
+        "symbol": "beta_major",
+        "unit": "mm",
+        "status": "computed",
+        "value": 0,
+        "method": "strength_of_materials_section_response",
+        "expression": "beta_major = (M21_uv+M03_uv)/Imax-2ev; eu=ex*cos(theta)+ey*sin(theta), ev=-ex*sin(theta)+ey*cos(theta)",
+        "substitution": {
+          "expression": "beta_major = ((0)+(0))/(4166666666.6666665)-2 × ev; eu=(0)*cos(theta)+(0)*sin(theta), ev=-(0)*sin(theta)+(0)*cos(theta)",
+          "dimensions": {
+            "b": 400,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "beta_major = 0 mm"
+        },
+        "reason": null,
+        "reference_ids": [
+          "vlasov"
+        ]
+      },
+      {
+        "key": "mechanics.advanced.wagner.beta_minor_mm",
+        "symbol": "beta_minor",
+        "unit": "mm",
+        "status": "computed",
+        "value": 0,
+        "method": "strength_of_materials_section_response",
+        "expression": "beta_minor = (M30_uv+M12_uv)/Imin-2eu; eu=ex*cos(theta)+ey*sin(theta), ev=-ex*sin(theta)+ey*cos(theta)",
+        "substitution": {
+          "expression": "beta_minor = ((0)+(0))/(2666666666.6666665)-2 × eu; eu=(0)*cos(theta)+(0)*sin(theta), ev=-(0)*sin(theta)+(0)*cos(theta)",
+          "dimensions": {
+            "b": 400,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "beta_minor = 0 mm"
+        },
+        "reason": null,
+        "reference_ids": [
+          "vlasov"
+        ]
+      },
+      {
+        "key": "mechanics.advanced.torsion.modulus_mm3",
+        "symbol": "Wt",
+        "unit": "mm3",
+        "status": "computed",
+        "value": 17696613.215089932,
+        "method": "strength_of_materials_section_response",
+        "expression": "Wt = 1/max_material(abs(tau/T)); circle/CHS: J/R; open walls: J/max(t); closed uniform cell: 2Am*t; rectangle: J/max_boundary(abs(grad(phi)))",
+        "substitution": {
+          "expression": "Wt = 1/max_material(abs(tau/T)); circle/CHS: (5495441352.256769)/R; open walls: (5495441352.256769)/max(t); closed uniform cell: 2 × Am*t; rectangle: (5495441352.256769)/max_boundary(abs(grad(phi)))",
+          "dimensions": {
+            "b": 400,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "Wt = 17696613.215089932 mm3"
+        },
+        "reason": null,
+        "reference_ids": [
+          "saint_venant"
+        ]
+      },
+      {
+        "key": "mechanics.advanced.torsion.unit_max_shear_per_torque_mm3_inverse",
+        "symbol": "tauTmax",
+        "unit": "mm-3",
+        "status": "computed",
+        "value": 5.65079875932022e-8,
+        "method": "strength_of_materials_section_response",
+        "expression": "max(abs(tau/T)) = 1/Wt",
+        "substitution": {
+          "expression": "max(abs(tau/T)) = 1/(17696613.215089932)",
+          "dimensions": {
+            "b": 400,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "tauTmax = 5.65079875932022e-8 mm-3"
+        },
+        "reason": null,
+        "reference_ids": [
+          "saint_venant"
+        ]
+      },
+      {
+        "key": "mechanics.advanced.shear.modulus_x_mm2",
+        "symbol": "Wvx",
+        "unit": "mm2",
+        "status": "computed",
+        "value": 133333.33333333334,
+        "method": "strength_of_materials_section_response",
+        "expression": "Wvx = 1/max_material(abs(tau/Vx)); unit-force distribution stored in mechanics.advanced.fields",
+        "substitution": {
+          "expression": "Wvx = 1/max_material(abs(tau/Vx)); unit-force distribution stored in mechanics.advanced.fields",
+          "dimensions": {
+            "b": 400,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "Wvx = 133333.33333333334 mm2"
+        },
+        "reason": null,
+        "reference_ids": [
+          "vlasov"
+        ]
+      },
+      {
+        "key": "mechanics.advanced.shear.modulus_y_mm2",
+        "symbol": "Wvy",
+        "unit": "mm2",
+        "status": "computed",
+        "value": 133333.33333333334,
+        "method": "strength_of_materials_section_response",
+        "expression": "Wvy = 1/max_material(abs(tau/Vy)); unit-force distribution stored in mechanics.advanced.fields",
+        "substitution": {
+          "expression": "Wvy = 1/max_material(abs(tau/Vy)); unit-force distribution stored in mechanics.advanced.fields",
+          "dimensions": {
+            "b": 400,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "Wvy = 133333.33333333334 mm2"
+        },
+        "reason": null,
+        "reference_ids": [
+          "vlasov"
+        ]
+      },
+      {
+        "key": "mechanics.advanced.shear.compliance.xx_mm2_inverse",
+        "symbol": "Cxx",
+        "unit": "mm-2",
+        "status": "computed",
+        "value": 0.000006,
+        "method": "strength_of_materials_section_response",
+        "expression": "Cxx = integral(qx*qx/t) ds for unit forces; U_shear=(Cxx*Vx^2+2Cxy*Vx*Vy+Cyy*Vy^2)/(2G)",
+        "substitution": {
+          "expression": "Cxx = integral(qx*qx/t) ds for unit forces; U_shear=(Cxx*Vx^2+2 × (0)*Vx*Vy+(0.000006)*Vy^2)/(2 × G)",
+          "dimensions": {
+            "b": 400,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "Cxx = 0.000006 mm-2"
+        },
+        "reason": null,
+        "reference_ids": [
+          "vlasov"
+        ]
+      },
+      {
+        "key": "mechanics.advanced.shear.compliance.xy_mm2_inverse",
+        "symbol": "Cxy",
+        "unit": "mm-2",
+        "status": "computed",
+        "value": 0,
+        "method": "strength_of_materials_section_response",
+        "expression": "Cxy = integral(qx*qy/t) ds for unit forces; U_shear=(Cxx*Vx^2+2Cxy*Vx*Vy+Cyy*Vy^2)/(2G)",
+        "substitution": {
+          "expression": "Cxy = integral(qx*qy/t) ds for unit forces; U_shear=((0.000006)*Vx^2+2 × Cxy*Vx*Vy+(0.000006)*Vy^2)/(2 × G)",
+          "dimensions": {
+            "b": 400,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "Cxy = 0 mm-2"
+        },
+        "reason": null,
+        "reference_ids": [
+          "vlasov"
+        ]
+      },
+      {
+        "key": "mechanics.advanced.shear.compliance.yy_mm2_inverse",
+        "symbol": "Cyy",
+        "unit": "mm-2",
+        "status": "computed",
+        "value": 0.000006,
+        "method": "strength_of_materials_section_response",
+        "expression": "Cyy = integral(qy*qy/t) ds for unit forces; U_shear=(Cxx*Vx^2+2Cxy*Vx*Vy+Cyy*Vy^2)/(2G)",
+        "substitution": {
+          "expression": "Cyy = integral(qy*qy/t) ds for unit forces; U_shear=((0.000006)*Vx^2+2 × (0)*Vx*Vy+Cyy*Vy^2)/(2 × G)",
+          "dimensions": {
+            "b": 400,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "Cyy = 0.000006 mm-2"
+        },
+        "reason": null,
+        "reference_ids": [
+          "vlasov"
+        ]
+      },
+      {
+        "key": "mechanics.advanced.warping.omega_positive_mm2",
+        "symbol": "omega+",
+        "unit": "mm2",
+        "status": "computed",
+        "value": 13704.040032339522,
+        "method": "strength_of_materials_section_response",
+        "expression": "max_material(omega); normalized zero area-weighted mean about shear-center pole",
+        "substitution": {
+          "expression": "max_material(omega); normalized zero area-weighted mean about shear-center pole",
+          "dimensions": {
+            "b": 400,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "omega+ = 13704.040032339522 mm2"
+        },
+        "reason": null,
+        "reference_ids": [
+          "vlasov"
+        ]
+      },
+      {
+        "key": "mechanics.advanced.warping.modulus_positive_mm4",
+        "symbol": "Womega+",
+        "unit": "mm4",
+        "status": "computed",
+        "value": 266472418.37105337,
+        "method": "strength_of_materials_section_response",
+        "expression": "Womega = Cw/abs(omega_extreme); zero Cw -> not applicable, value null. Solid rectangle uses upper extrema enclosure to produce a lower modulus bound.",
+        "substitution": {
+          "expression": "Womega = (3651930756428.6826)/abs(omega_extreme); zero (3651930756428.6826) -> not applicable, value null. Solid rectangle uses upper extrema enclosure to produce a lower modulus bound.",
+          "dimensions": {
+            "b": 400,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "Womega+ = 266472418.37105337 mm4"
+        },
+        "reason": null,
+        "reference_ids": [
+          "vlasov"
+        ]
+      },
+      {
+        "key": "mechanics.advanced.warping.omega_negative_mm2",
+        "symbol": "omega-",
+        "unit": "mm2",
+        "status": "computed",
+        "value": -13704.040032339522,
+        "method": "strength_of_materials_section_response",
+        "expression": "min_material(omega); normalized zero area-weighted mean about shear-center pole",
+        "substitution": {
+          "expression": "min_material(omega); normalized zero area-weighted mean about shear-center pole",
+          "dimensions": {
+            "b": 400,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "omega- = -13704.040032339522 mm2"
+        },
+        "reason": null,
+        "reference_ids": [
+          "vlasov"
+        ]
+      },
+      {
+        "key": "mechanics.advanced.warping.modulus_negative_mm4",
+        "symbol": "Womega-",
+        "unit": "mm4",
+        "status": "computed",
+        "value": 266472418.37105337,
+        "method": "strength_of_materials_section_response",
+        "expression": "Womega = Cw/abs(omega_extreme); zero Cw -> not applicable, value null. Solid rectangle uses upper extrema enclosure to produce a lower modulus bound.",
+        "substitution": {
+          "expression": "Womega = (3651930756428.6826)/abs(omega_extreme); zero (3651930756428.6826) -> not applicable, value null. Solid rectangle uses upper extrema enclosure to produce a lower modulus bound.",
+          "dimensions": {
+            "b": 400,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "Womega- = 266472418.37105337 mm4"
+        },
+        "reason": null,
+        "reference_ids": [
+          "vlasov"
+        ]
+      },
+      {
+        "key": "mechanics.geometry.coupled_bending.mx.elastic_modulus_positive_mm3",
+        "symbol": "S_mx_positive",
+        "unit": "mm3",
+        "status": "computed",
+        "value": 16666666.666666664,
+        "method": "normalized_material_integrals_and_principal_polygon_cuts",
+        "expression": "S_mx_positive = 1/extreme_abs(psi_mx); psi_mx=(-Ixy*X+Iy*Y)/(Ix*Iy-Ixy^2), psi_my=(Ix*X-Ixy*Y)/(Ix*Iy-Ixy^2); use max positive or abs min negative over material",
+        "substitution": {
+          "expression": "S_mx_positive = 1/extreme_abs(psi_mx); psi_mx=(-(0)*X+(2666666666.6666665)*Y)/((4166666666.6666665)*(2666666666.6666665)-(0)^2), psi_my=((4166666666.6666665)*X-(0)*Y)/((4166666666.6666665)*(2666666666.6666665)-(0)^2); use max positive or abs min negative over material",
+          "dimensions": {
+            "b": 400,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "S_mx_positive = 16666666.666666664 mm3"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "mechanics.geometry.coupled_bending.mx.elastic_modulus_negative_mm3",
+        "symbol": "S_mx_negative",
+        "unit": "mm3",
+        "status": "computed",
+        "value": 16666666.666666664,
+        "method": "normalized_material_integrals_and_principal_polygon_cuts",
+        "expression": "S_mx_negative = 1/extreme_abs(psi_mx); psi_mx=(-Ixy*X+Iy*Y)/(Ix*Iy-Ixy^2), psi_my=(Ix*X-Ixy*Y)/(Ix*Iy-Ixy^2); use max positive or abs min negative over material",
+        "substitution": {
+          "expression": "S_mx_negative = 1/extreme_abs(psi_mx); psi_mx=(-(0)*X+(2666666666.6666665)*Y)/((4166666666.6666665)*(2666666666.6666665)-(0)^2), psi_my=((4166666666.6666665)*X-(0)*Y)/((4166666666.6666665)*(2666666666.6666665)-(0)^2); use max positive or abs min negative over material",
+          "dimensions": {
+            "b": 400,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "S_mx_negative = 16666666.666666664 mm3"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "mechanics.geometry.coupled_bending.my.elastic_modulus_positive_mm3",
+        "symbol": "S_my_positive",
+        "unit": "mm3",
+        "status": "computed",
+        "value": 13333333.333333334,
+        "method": "normalized_material_integrals_and_principal_polygon_cuts",
+        "expression": "S_my_positive = 1/extreme_abs(psi_my); psi_mx=(-Ixy*X+Iy*Y)/(Ix*Iy-Ixy^2), psi_my=(Ix*X-Ixy*Y)/(Ix*Iy-Ixy^2); use max positive or abs min negative over material",
+        "substitution": {
+          "expression": "S_my_positive = 1/extreme_abs(psi_my); psi_mx=(-(0)*X+(2666666666.6666665)*Y)/((4166666666.6666665)*(2666666666.6666665)-(0)^2), psi_my=((4166666666.6666665)*X-(0)*Y)/((4166666666.6666665)*(2666666666.6666665)-(0)^2); use max positive or abs min negative over material",
+          "dimensions": {
+            "b": 400,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "S_my_positive = 13333333.333333334 mm3"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "mechanics.geometry.coupled_bending.my.elastic_modulus_negative_mm3",
+        "symbol": "S_my_negative",
+        "unit": "mm3",
+        "status": "computed",
+        "value": 13333333.333333334,
+        "method": "normalized_material_integrals_and_principal_polygon_cuts",
+        "expression": "S_my_negative = 1/extreme_abs(psi_my); psi_mx=(-Ixy*X+Iy*Y)/(Ix*Iy-Ixy^2), psi_my=(Ix*X-Ixy*Y)/(Ix*Iy-Ixy^2); use max positive or abs min negative over material",
+        "substitution": {
+          "expression": "S_my_negative = 1/extreme_abs(psi_my); psi_mx=(-(0)*X+(2666666666.6666665)*Y)/((4166666666.6666665)*(2666666666.6666665)-(0)^2), psi_my=((4166666666.6666665)*X-(0)*Y)/((4166666666.6666665)*(2666666666.6666665)-(0)^2); use max positive or abs min negative over material",
+          "dimensions": {
+            "b": 400,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "S_my_negative = 13333333.333333334 mm3"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
         ]
       }
     ],

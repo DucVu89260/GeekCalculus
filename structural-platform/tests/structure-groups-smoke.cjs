@@ -3,10 +3,10 @@ const { chromium } = require(process.env.PLAYWRIGHT_MODULE || '/opt/codex/cua_no
 const { signIn } = require('./browser-auth.cjs')
 
 const base = process.env.STRUCTURE_BASE_URL || 'http://127.0.0.1:8768/GeekCalculus/'
-const groupRoutes = ['steel', 'concrete', 'loads']
+const groupRoutes = ['loads', 'steel', 'concrete']
 const loadRoutes = ['combo', 'wind', 'dead', 'seismic', 'snow', 'temperature']
 const loadLabels = ['Combo Generator', 'Wind load', 'Dead load', 'Seismic load', 'Snow load', 'Temperature load']
-const cardLabels = ['Steel Structure', 'RC Structure', 'Loading']
+const cardLabels = ['Loading', 'Steel Structure', 'RC Structure']
 const expectedHash = routes => routes.map(route => `#/modules/${route}`)
 const moduleUrl = route => new URL(`#/modules/${route}`, base).href
 
@@ -70,7 +70,7 @@ async function verifySharedCalculator(page, route) {
 
     const cards = page.locator('.structure-card')
     assert.equal(await cards.count(), 3, 'Home should show Steel Structure, RC Structure, and Loading')
-    const cardRoutes = ['steel', 'concrete', 'loads']
+    const cardRoutes = ['loads', 'steel', 'concrete']
     for (let index = 0; index < cardRoutes.length; index += 1) {
       const card = cards.nth(index)
       assert.ok((await card.getAttribute('href')).endsWith(`#/modules/${cardRoutes[index]}`))
@@ -88,7 +88,7 @@ async function verifySharedCalculator(page, route) {
       assert.ok(accessibleName, `${cardRoutes[index]} illustration should have an accessible name`)
     }
 
-    const steelCard = cards.nth(0)
+    const steelCard = cards.nth(1)
     const tabPromise = context.waitForEvent('page')
     await steelCard.click()
     const modulePage = await tabPromise
@@ -141,6 +141,7 @@ async function verifySharedCalculator(page, route) {
     assert.ok((await modulePage.locator('.concrete-design-setup').innerText()).includes('awaiting implementation'))
 
     await modulePage.locator('.workspace-group-navigation a[href$="#/modules/loads"]').click()
+    await modulePage.locator('.module-heading').getByRole('heading', { name: 'Combo Generator', exact: true }).waitFor()
     assert.equal(await modulePage.locator('.module-heading h1').innerText(), 'Combo Generator', 'Loading opens its default Combo Generator page')
     assert.deepEqual(await navHashes(modulePage.locator('.module-navigation')), expectedHash(loadRoutes.map(route => `loads/${route}`)))
     for (let index = 0; index < loadRoutes.length; index += 1) {

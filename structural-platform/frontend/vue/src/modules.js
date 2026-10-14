@@ -1,7 +1,7 @@
 export const moduleGroups = [
+  { code: 'loads', title: 'structureLoading', description: 'structureLoadingDescription' },
   { code: 'steel', title: 'structureSteel', description: 'structureSteelDescription' },
   { code: 'concrete', title: 'structureRC', description: 'structureRCDescription' },
-  { code: 'loads', title: 'structureLoading', description: 'structureLoadingDescription' },
 ]
 export const groupTools = {
   steel: [

@@ -1,0 +1,850 @@
+{
+  "schema_version": "1.0",
+  "library_version": "1.0.0",
+  "geometry_model_version": "1.0.0",
+  "canonical_units": "mm",
+  "coordinate_system": {
+    "origin": "bounding_box_lower_left",
+    "x": "right",
+    "y": "up",
+    "ixy": "positive_coordinate_product",
+    "principal_angle": "counterclockwise_from_x_modulo_180",
+    "advanced_flow_convention": "xcℓ,ycℓ and Ixℓ,Iyℓ,Ixyℓ are median-wall area centroid/inertias; unit-force q gradients and torque use those centroidal coordinates. Sectorial warping uses the shear-center pole. Offsets use the gross centroid. Normalized diagnostic wall data are scaled by normalization_length_mm; returned properties and formula dimensions are physical mm powers."
+  },
+  "dimensions": {
+    "width": {
+      "symbol": "b",
+      "name_en": "Width",
+      "name_vi": "Bề rộng",
+      "unit": "mm",
+      "minimum": 0.001,
+      "allow_zero": false
+    },
+    "height": {
+      "symbol": "h",
+      "name_en": "Height",
+      "name_vi": "Chiều cao",
+      "unit": "mm",
+      "minimum": 0.001,
+      "allow_zero": false,
+      "catalog_key": "depth"
+    },
+    "depth": {
+      "symbol": "h",
+      "name_en": "Depth",
+      "name_vi": "Chiều cao",
+      "unit": "mm",
+      "minimum": 0.001,
+      "allow_zero": false
+    },
+    "diameter": {
+      "symbol": "D",
+      "name_en": "Diameter",
+      "name_vi": "Đường kính",
+      "unit": "mm",
+      "minimum": 0.001,
+      "allow_zero": false
+    },
+    "thickness": {
+      "symbol": "t",
+      "name_en": "Thickness",
+      "name_vi": "Bề dày",
+      "unit": "mm",
+      "minimum": 0.001,
+      "allow_zero": false
+    },
+    "web_thickness": {
+      "symbol": "tw",
+      "name_en": "Web thickness",
+      "name_vi": "Bề dày bụng",
+      "unit": "mm",
+      "minimum": 0.001,
+      "allow_zero": false
+    },
+    "flange_thickness": {
+      "symbol": "tf",
+      "name_en": "Flange thickness",
+      "name_vi": "Bề dày cánh",
+      "unit": "mm",
+      "minimum": 0.001,
+      "allow_zero": false
+    },
+    "top_flange_width": {
+      "symbol": "bt",
+      "name_en": "Top flange width",
+      "name_vi": "Bề rộng cánh trên",
+      "unit": "mm",
+      "minimum": 0.001,
+      "allow_zero": false
+    },
+    "bottom_flange_width": {
+      "symbol": "bb",
+      "name_en": "Bottom flange width",
+      "name_vi": "Bề rộng cánh dưới",
+      "unit": "mm",
+      "minimum": 0.001,
+      "allow_zero": false
+    },
+    "top_flange_thickness": {
+      "symbol": "tt",
+      "name_en": "Top flange thickness",
+      "name_vi": "Bề dày cánh trên",
+      "unit": "mm",
+      "minimum": 0.001,
+      "allow_zero": false
+    },
+    "bottom_flange_thickness": {
+      "symbol": "tb",
+      "name_en": "Bottom flange thickness",
+      "name_vi": "Bề dày cánh dưới",
+      "unit": "mm",
+      "minimum": 0.001,
+      "allow_zero": false
+    },
+    "distance": {
+      "symbol": "g",
+      "name_en": "Clear distance between angle backs",
+      "name_vi": "Khoảng hở giữa hai mặt lưng",
+      "unit": "mm",
+      "minimum": 0,
+      "allow_zero": true
+    }
+  },
+  "profiles": [
+    {
+      "id": "rectangle",
+      "geometry_type": "rectangle",
+      "catalog_shape": "rectangle",
+      "label": "RECTANGLE",
+      "name_en": "RECTANGLE",
+      "name_vi": "RECTANGLE",
+      "geometry_variant": "solid",
+      "dimensions": [
+        "width",
+        "height"
+      ],
+      "default_dimensions": {
+        "width": 200,
+        "height": 400,
+        "depth": 400,
+        "diameter": 200,
+        "thickness": 10,
+        "web_thickness": 8,
+        "flange_thickness": 12,
+        "top_flange_width": 200,
+        "bottom_flange_width": 250,
+        "top_flange_thickness": 12,
+        "bottom_flange_thickness": 16,
+        "distance": 20
+      },
+      "engine_dimensions": {
+        "width": "width",
+        "height": "height"
+      }
+    },
+    {
+      "id": "circle",
+      "geometry_type": "circle",
+      "catalog_shape": "circle",
+      "label": "CIRCLE",
+      "name_en": "CIRCLE",
+      "name_vi": "CIRCLE",
+      "geometry_variant": "solid",
+      "dimensions": [
+        "diameter"
+      ],
+      "default_dimensions": {
+        "width": 200,
+        "height": 400,
+        "depth": 400,
+        "diameter": 200,
+        "thickness": 10,
+        "web_thickness": 8,
+        "flange_thickness": 12,
+        "top_flange_width": 200,
+        "bottom_flange_width": 250,
+        "top_flange_thickness": 12,
+        "bottom_flange_thickness": 16,
+        "distance": 20
+      },
+      "engine_dimensions": {
+        "diameter": "diameter"
+      }
+    },
+    {
+      "id": "chs",
+      "geometry_type": "circular_hollow",
+      "catalog_shape": "circular_hollow",
+      "label": "CHS",
+      "name_en": "CHS",
+      "name_vi": "CHS",
+      "geometry_variant": "uniform_wall",
+      "dimensions": [
+        "diameter",
+        "thickness"
+      ],
+      "default_dimensions": {
+        "width": 200,
+        "height": 400,
+        "depth": 400,
+        "diameter": 200,
+        "thickness": 10,
+        "web_thickness": 8,
+        "flange_thickness": 12,
+        "top_flange_width": 200,
+        "bottom_flange_width": 250,
+        "top_flange_thickness": 12,
+        "bottom_flange_thickness": 16,
+        "distance": 20
+      },
+      "engine_dimensions": {
+        "diameter": "diameter",
+        "thickness": "thickness"
+      }
+    },
+    {
+      "id": "shs_rhs",
+      "geometry_type": "rectangular_hollow",
+      "catalog_shape": "rectangular_hollow",
+      "label": "SHS/RHS",
+      "name_en": "SHS/RHS",
+      "name_vi": "SHS/RHS",
+      "geometry_variant": "sharp_corner",
+      "dimensions": [
+        "width",
+        "height",
+        "thickness"
+      ],
+      "default_dimensions": {
+        "width": 200,
+        "height": 400,
+        "depth": 400,
+        "diameter": 200,
+        "thickness": 10,
+        "web_thickness": 8,
+        "flange_thickness": 12,
+        "top_flange_width": 200,
+        "bottom_flange_width": 250,
+        "top_flange_thickness": 12,
+        "bottom_flange_thickness": 16,
+        "distance": 20
+      },
+      "engine_dimensions": {
+        "width": "width",
+        "height": "height",
+        "thickness": "thickness"
+      }
+    },
+    {
+      "id": "symmetric_i",
+      "geometry_type": "i_section",
+      "catalog_shape": "i",
+      "label": "SYMMETRIC I/H",
+      "name_en": "SYMMETRIC I/H",
+      "name_vi": "SYMMETRIC I/H",
+      "geometry_variant": "sharp_corner",
+      "dimensions": [
+        "depth",
+        "width",
+        "web_thickness",
+        "flange_thickness"
+      ],
+      "default_dimensions": {
+        "width": 200,
+        "height": 400,
+        "depth": 400,
+        "diameter": 200,
+        "thickness": 10,
+        "web_thickness": 8,
+        "flange_thickness": 12,
+        "top_flange_width": 200,
+        "bottom_flange_width": 250,
+        "top_flange_thickness": 12,
+        "bottom_flange_thickness": 16,
+        "distance": 20
+      },
+      "engine_dimensions": {
+        "depth": "depth",
+        "top_flange_width": "width",
+        "bottom_flange_width": "width",
+        "web_thickness": "web_thickness",
+        "top_flange_thickness": "flange_thickness",
+        "bottom_flange_thickness": "flange_thickness"
+      }
+    },
+    {
+      "id": "asymmetric_i",
+      "geometry_type": "i_section",
+      "catalog_shape": "i",
+      "label": "ASYMMETRIC I/H",
+      "name_en": "ASYMMETRIC I/H",
+      "name_vi": "ASYMMETRIC I/H",
+      "geometry_variant": "sharp_corner",
+      "dimensions": [
+        "depth",
+        "top_flange_width",
+        "bottom_flange_width",
+        "web_thickness",
+        "top_flange_thickness",
+        "bottom_flange_thickness"
+      ],
+      "default_dimensions": {
+        "width": 200,
+        "height": 400,
+        "depth": 400,
+        "diameter": 200,
+        "thickness": 10,
+        "web_thickness": 8,
+        "flange_thickness": 12,
+        "top_flange_width": 200,
+        "bottom_flange_width": 250,
+        "top_flange_thickness": 12,
+        "bottom_flange_thickness": 16,
+        "distance": 20
+      },
+      "engine_dimensions": {
+        "depth": "depth",
+        "top_flange_width": "top_flange_width",
+        "bottom_flange_width": "bottom_flange_width",
+        "web_thickness": "web_thickness",
+        "top_flange_thickness": "top_flange_thickness",
+        "bottom_flange_thickness": "bottom_flange_thickness"
+      }
+    },
+    {
+      "id": "channel",
+      "geometry_type": "channel",
+      "catalog_shape": "channel",
+      "label": "CHANNEL",
+      "name_en": "CHANNEL",
+      "name_vi": "CHANNEL",
+      "geometry_variant": "sharp_corner",
+      "dimensions": [
+        "depth",
+        "width",
+        "web_thickness",
+        "flange_thickness"
+      ],
+      "default_dimensions": {
+        "width": 200,
+        "height": 400,
+        "depth": 400,
+        "diameter": 200,
+        "thickness": 10,
+        "web_thickness": 8,
+        "flange_thickness": 12,
+        "top_flange_width": 200,
+        "bottom_flange_width": 250,
+        "top_flange_thickness": 12,
+        "bottom_flange_thickness": 16,
+        "distance": 20
+      },
+      "engine_dimensions": {
+        "depth": "depth",
+        "width": "width",
+        "web_thickness": "web_thickness",
+        "flange_thickness": "flange_thickness"
+      }
+    },
+    {
+      "id": "angle",
+      "geometry_type": "angle",
+      "catalog_shape": "angle",
+      "label": "ANGLE",
+      "name_en": "ANGLE",
+      "name_vi": "ANGLE",
+      "geometry_variant": "sharp_corner",
+      "dimensions": [
+        "depth",
+        "width",
+        "thickness"
+      ],
+      "default_dimensions": {
+        "width": 200,
+        "height": 400,
+        "depth": 400,
+        "diameter": 200,
+        "thickness": 10,
+        "web_thickness": 8,
+        "flange_thickness": 12,
+        "top_flange_width": 200,
+        "bottom_flange_width": 250,
+        "top_flange_thickness": 12,
+        "bottom_flange_thickness": 16,
+        "distance": 20
+      },
+      "engine_dimensions": {
+        "depth": "depth",
+        "width": "width",
+        "thickness": "thickness"
+      }
+    },
+    {
+      "id": "tee",
+      "geometry_type": "tee",
+      "catalog_shape": "tee",
+      "label": "TEE",
+      "name_en": "TEE",
+      "name_vi": "TEE",
+      "geometry_variant": "sharp_corner",
+      "dimensions": [
+        "depth",
+        "width",
+        "web_thickness",
+        "flange_thickness"
+      ],
+      "default_dimensions": {
+        "width": 200,
+        "height": 400,
+        "depth": 400,
+        "diameter": 200,
+        "thickness": 10,
+        "web_thickness": 8,
+        "flange_thickness": 12,
+        "top_flange_width": 200,
+        "bottom_flange_width": 250,
+        "top_flange_thickness": 12,
+        "bottom_flange_thickness": 16,
+        "distance": 20
+      },
+      "engine_dimensions": {
+        "depth": "depth",
+        "width": "width",
+        "web_thickness": "web_thickness",
+        "flange_thickness": "flange_thickness"
+      }
+    },
+    {
+      "id": "double_angle",
+      "geometry_type": "double_angle",
+      "catalog_shape": "double_angle",
+      "label": "DOUBLE ANGLE",
+      "name_en": "DOUBLE ANGLE",
+      "name_vi": "DOUBLE ANGLE",
+      "geometry_variant": "back_to_back",
+      "dimensions": [
+        "depth",
+        "width",
+        "thickness",
+        "distance"
+      ],
+      "default_dimensions": {
+        "width": 200,
+        "height": 400,
+        "depth": 400,
+        "diameter": 200,
+        "thickness": 10,
+        "web_thickness": 8,
+        "flange_thickness": 12,
+        "top_flange_width": 200,
+        "bottom_flange_width": 250,
+        "top_flange_thickness": 12,
+        "bottom_flange_thickness": 16,
+        "distance": 20
+      },
+      "engine_dimensions": {
+        "depth": "depth",
+        "width": "width",
+        "thickness": "thickness",
+        "distance": "distance"
+      }
+    }
+  ],
+  "aliases": {
+    "i-h": "symmetric_i",
+    "i": "symmetric_i",
+    "i_section": "asymmetric_i",
+    "circular-tube": "chs",
+    "circular_hollow": "chs",
+    "rectangular-tube": "shs_rhs",
+    "rectangular_hollow": "shs_rhs",
+    "shs": "shs_rhs",
+    "rhs": "shs_rhs",
+    "double-angle": "double_angle"
+  },
+  "properties": [
+    {
+      "key": "geometric.area",
+      "symbol": "A",
+      "unit": "mm2",
+      "expression": "A = ∫_Ω dA = Σ A_i",
+      "reference_ids": [
+        "geometric_integrals"
+      ]
+    },
+    {
+      "key": "geometric.perimeter",
+      "symbol": "P",
+      "unit": "mm",
+      "expression": "P = ∫_∂Ω ds (outer + inner boundaries)",
+      "reference_ids": [
+        "geometric_integrals"
+      ]
+    },
+    {
+      "key": "geometric.centroid_x",
+      "symbol": "x̄",
+      "unit": "mm",
+      "expression": "x̄ = Σ(A_i x_i)/A",
+      "reference_ids": [
+        "geometric_integrals"
+      ]
+    },
+    {
+      "key": "geometric.centroid_y",
+      "symbol": "ȳ",
+      "unit": "mm",
+      "expression": "ȳ = Σ(A_i y_i)/A",
+      "reference_ids": [
+        "geometric_integrals"
+      ]
+    },
+    {
+      "key": "elastic.ix",
+      "symbol": "Ix",
+      "unit": "mm4",
+      "expression": "Ix = Σ[b_i h_i³/12 + A_i(y_i − ȳ)²]",
+      "reference_ids": [
+        "geometric_integrals"
+      ]
+    },
+    {
+      "key": "elastic.iy",
+      "symbol": "Iy",
+      "unit": "mm4",
+      "expression": "Iy = Σ[h_i b_i³/12 + A_i(x_i − x̄)²]",
+      "reference_ids": [
+        "geometric_integrals"
+      ]
+    },
+    {
+      "key": "elastic.ixy",
+      "symbol": "Ixy",
+      "unit": "mm4",
+      "expression": "Ixy = Σ A_i(x_i − x̄)(y_i − ȳ)",
+      "reference_ids": [
+        "geometric_integrals"
+      ]
+    },
+    {
+      "key": "elastic.sx_positive",
+      "symbol": "Sx+",
+      "unit": "mm3",
+      "expression": "Sx+ = Ix/(H − ȳ)",
+      "reference_ids": [
+        "geometric_integrals"
+      ]
+    },
+    {
+      "key": "elastic.sx_negative",
+      "symbol": "Sx−",
+      "unit": "mm3",
+      "expression": "Sx− = Ix/ȳ",
+      "reference_ids": [
+        "geometric_integrals"
+      ]
+    },
+    {
+      "key": "elastic.sy_positive",
+      "symbol": "Sy+",
+      "unit": "mm3",
+      "expression": "Sy+ = Iy/(B − x̄)",
+      "reference_ids": [
+        "geometric_integrals"
+      ]
+    },
+    {
+      "key": "elastic.sy_negative",
+      "symbol": "Sy−",
+      "unit": "mm3",
+      "expression": "Sy− = Iy/x̄",
+      "reference_ids": [
+        "geometric_integrals"
+      ]
+    },
+    {
+      "key": "elastic.rx",
+      "symbol": "rx",
+      "unit": "mm",
+      "expression": "rx = √(Ix/A)",
+      "reference_ids": [
+        "geometric_integrals"
+      ]
+    },
+    {
+      "key": "elastic.ry",
+      "symbol": "ry",
+      "unit": "mm",
+      "expression": "ry = √(Iy/A)",
+      "reference_ids": [
+        "geometric_integrals"
+      ]
+    },
+    {
+      "key": "plastic.pna_x",
+      "symbol": "PNAx",
+      "unit": "mm",
+      "expression": "∫_{x ≤ xp} dA = A/2",
+      "reference_ids": [
+        "geometric_integrals"
+      ]
+    },
+    {
+      "key": "plastic.pna_y",
+      "symbol": "PNAy",
+      "unit": "mm",
+      "expression": "∫_{y ≤ yp} dA = A/2",
+      "reference_ids": [
+        "geometric_integrals"
+      ]
+    },
+    {
+      "key": "plastic.zx",
+      "symbol": "Zx",
+      "unit": "mm3",
+      "expression": "Zx = ∫_Ω |y − yp| dA",
+      "reference_ids": [
+        "geometric_integrals"
+      ]
+    },
+    {
+      "key": "plastic.zy",
+      "symbol": "Zy",
+      "unit": "mm3",
+      "expression": "Zy = ∫_Ω |x − xp| dA",
+      "reference_ids": [
+        "geometric_integrals"
+      ]
+    },
+    {
+      "key": "principal.i_major",
+      "symbol": "Imax",
+      "unit": "mm4",
+      "expression": "Imax = (Ix + Iy)/2 + √[((Ix − Iy)/2)² + Ixy²]",
+      "reference_ids": [
+        "geometric_integrals"
+      ]
+    },
+    {
+      "key": "principal.i_minor",
+      "symbol": "Imin",
+      "unit": "mm4",
+      "expression": "Imin = (Ix + Iy)/2 − √[((Ix − Iy)/2)² + Ixy²]",
+      "reference_ids": [
+        "geometric_integrals"
+      ]
+    },
+    {
+      "key": "principal.major_axis_angle_degrees",
+      "symbol": "θ",
+      "unit": "deg",
+      "expression": "θ = ½ atan2(−2Ixy, Ix − Iy), modulo 180°",
+      "reference_ids": [
+        "geometric_integrals"
+      ]
+    },
+    {
+      "key": "principal.orientation_status",
+      "symbol": "Orientation",
+      "unit": "1",
+      "expression": "Indeterminate when Ix = Iy and Ixy = 0",
+      "reference_ids": [
+        "geometric_integrals"
+      ]
+    },
+    {
+      "key": "advanced.torsion_constant_j",
+      "symbol": "J",
+      "unit": "mm4",
+      "expression": "J = 2∫_Ω φ dA, ∇²φ = −2; boundary conditions per geometry",
+      "reference_ids": [
+        "saint_venant",
+        "vlasov"
+      ]
+    },
+    {
+      "key": "advanced.warping_constant_cw",
+      "symbol": "Cw",
+      "unit": "mm6",
+      "expression": "Cw = ∫_Ω ω_n² dA (normalized warping about shear center)",
+      "reference_ids": [
+        "saint_venant",
+        "vlasov"
+      ]
+    },
+    {
+      "key": "advanced.shear_center",
+      "symbol": "SC",
+      "unit": "mm",
+      "expression": "SC: torque of shear flow is zero about (xs, ys); Δ = SC − centroid",
+      "reference_ids": [
+        "saint_venant",
+        "vlasov"
+      ]
+    },
+    {
+      "key": "advanced.effective_shear_area",
+      "symbol": "Ax/Ay",
+      "unit": "mm2",
+      "expression": "Ak = Vk² / ∫_Ω τk² dA; thin-wall: Ak = Vk² / ∫ qk²/t ds",
+      "reference_ids": [
+        "saint_venant",
+        "vlasov"
+      ]
+    }
+  ],
+  "geometry_expressions": {
+    "rectangle": {
+      "geometric.area": "A = b h",
+      "geometric.perimeter": "P = 2(b + h)",
+      "geometric.centroid_x": "x̄ = b/2",
+      "geometric.centroid_y": "ȳ = h/2",
+      "elastic.ix": "Ix = b h³/12",
+      "elastic.iy": "Iy = h b³/12",
+      "elastic.ixy": "Ixy = 0",
+      "plastic.pna_x": "xp = b/2",
+      "plastic.pna_y": "yp = h/2",
+      "plastic.zx": "Zx = b h²/4",
+      "plastic.zy": "Zy = h b²/4",
+      "advanced.torsion_constant_j": "a = max(b,h); c = min(b,h); J = ac³/3 [1 − 192c/(π⁵a) Σ_{n=1,3,5,…} tanh(nπa/(2c))/n⁵]",
+      "advanced.warping_constant_cw": "a = b/2; c = h/2; ∇²ψ = 0; ψ_x = y on x=±a, ψ_y = −x on y=±c; Cw = ∫_{−a}^{a}∫_{−c}^{c} ψ² dy dx (convergent harmonic Fourier series)",
+      "advanced.shear_center": "xs = b/2; ys = h/2; Δx = Δy = 0",
+      "advanced.effective_shear_area": "Ax = Ay = 5 b h/6 (Jourawski shear-energy convention)"
+    },
+    "circle": {
+      "geometric.area": "A = πD²/4",
+      "geometric.perimeter": "P = πD",
+      "geometric.centroid_x": "x̄ = D/2",
+      "geometric.centroid_y": "ȳ = D/2",
+      "elastic.ix": "Ix = πD⁴/64",
+      "elastic.iy": "Iy = πD⁴/64",
+      "elastic.ixy": "Ixy = 0",
+      "plastic.zx": "Zx = D³/6",
+      "plastic.zy": "Zy = D³/6",
+      "advanced.torsion_constant_j": "J = πD⁴/32 = Ix + Iy",
+      "advanced.warping_constant_cw": "ψ = 0 for a circular section; Cw = ∫ψ² dA = 0",
+      "advanced.shear_center": "xs = ys = D/2; Δx = Δy = 0",
+      "advanced.effective_shear_area": "Ax = Ay = 9A/10 (geometric Jourawski convention)",
+      "plastic.pna_x": "xp = D/2",
+      "plastic.pna_y": "yp = D/2"
+    },
+    "circular_hollow": {
+      "geometric.area": "d = D − 2t; A = π(D² − d²)/4",
+      "geometric.perimeter": "P = π(D + d)",
+      "elastic.ix": "Ix = π(D⁴ − d⁴)/64",
+      "elastic.iy": "Iy = π(D⁴ − d⁴)/64",
+      "elastic.ixy": "Ixy = 0",
+      "plastic.zx": "Zx = (D³ − d³)/6",
+      "plastic.zy": "Zy = (D³ − d³)/6",
+      "advanced.torsion_constant_j": "d = D − 2t; J = π(D⁴ − d⁴)/32 = Ix + Iy",
+      "advanced.warping_constant_cw": "ψ = 0 for a concentric annulus; Cw = 0",
+      "advanced.shear_center": "xs = ys = D/2; Δx = Δy = 0",
+      "advanced.effective_shear_area": "Rm = (D − t)/2; Ax = Ay = πRm t = A/2; q = V cosθ/(πRm), As = V² / ∮q²/t ds (median-circle model)",
+      "geometric.centroid_x": "x̄ = D/2",
+      "geometric.centroid_y": "ȳ = D/2",
+      "plastic.pna_x": "xp = D/2",
+      "plastic.pna_y": "yp = D/2"
+    },
+    "rectangular_hollow": {
+      "geometric.area": "bi = b − 2t; hi = h − 2t; A = b h − bi hi",
+      "geometric.perimeter": "P = 2(b + h + bi + hi)",
+      "elastic.ix": "Ix = (b h³ − bi hi³)/12",
+      "elastic.iy": "Iy = (h b³ − hi bi³)/12",
+      "elastic.ixy": "Ixy = 0",
+      "plastic.zx": "Zx = (b h² − bi hi²)/4",
+      "plastic.zy": "Zy = (h b² − hi bi²)/4",
+      "advanced.torsion_constant_j": "bm = b − t; hm = h − t; Am = bm hm; J = 4Am² / [2(bm+hm)/t] (Bredt single-cell model)",
+      "advanced.warping_constant_cw": "L = 2(bm+hm); dω/ds = x dy/ds − y dx/ds − 2Am/L; ωn = ω − (∮tω ds)/(∮t ds); Cw = ∮tωn² ds",
+      "advanced.shear_center": "xs = b/2; ys = h/2; Δx = Δy = 0",
+      "advanced.effective_shear_area": "q = qb + q0; q0 = −[∮qb/t ds]/[∮1/t ds]; Ak = Vk² / ∮qk²/t ds (closed-cell shear energy)",
+      "geometric.centroid_x": "x̄ = b/2",
+      "geometric.centroid_y": "ȳ = h/2",
+      "plastic.pna_x": "xp = b/2",
+      "plastic.pna_y": "yp = h/2"
+    },
+    "i_section": {
+      "geometric.area": "hw = h − tt − tb; A = bt tt + tw hw + bb tb",
+      "geometric.perimeter": "P = 2(bt + bb + h − tw)",
+      "elastic.iy": "Iy = (tt bt³ + hw tw³ + tb bb³)/12",
+      "elastic.ixy": "Ixy = 0",
+      "plastic.zy": "Zy = (tt bt² + hw tw² + tb bb²)/4",
+      "advanced.torsion_constant_j": "h0 = h − (tt+tb)/2; J = (bt tt³ + bb tb³ + h0 tw³)/3 (median-wall approximation)",
+      "advanced.warping_constant_cw": "Ib = tb bb³/12; It = tt bt³/12; h0 = h − (tt+tb)/2; Cw = [Ib It/(Ib+It)] h0² (Vlasov median-wall model)",
+      "advanced.shear_center": "Ib = tb bb³/12; It = tt bt³/12; h0 = h − (tt+tb)/2; xs = max(bt,bb)/2; ys = tb/2 + h0 It/(Ib+It); Δx = xs − x̄; Δy = ys − ȳ",
+      "advanced.effective_shear_area": "Ax = 1/∫qx²/t ds; Ay = 1/∫qy²/t ds for unit global shear; q=0 at free ends and flow conservation at junctions"
+    },
+    "channel": {
+      "geometric.area": "hw = h − 2tf; A = 2b tf + tw hw",
+      "geometric.perimeter": "P = 2h + 4b − 2tw",
+      "elastic.ixy": "Ixy = 0",
+      "advanced.torsion_constant_j": "h0 = h − tf; c0 = b − tw/2; J = [h0 tw³ + 2c0 tf³]/3 (median-wall approximation)",
+      "advanced.warping_constant_cw": "h0 = h − tf; c0 = b − tw/2; Cw = tf c0³ h0² (2tw h0 + 3tf c0) / [12(tw h0 + 6tf c0)]",
+      "advanced.shear_center": "h0 = h − tf; c0 = b − tw/2; e = 3tf c0²/(tw h0 + 6tf c0); xs = tw/2 − e; ys = h/2; Δ = SC − gross centroid",
+      "advanced.effective_shear_area": "Ax = 1/∫qx²/t ds; Ay = 1/∫qy²/t ds for unit global shear; q=0 at free ends and flow conservation at junctions"
+    },
+    "tee": {
+      "geometric.area": "hw = h − tf; A = b tf + tw hw",
+      "geometric.perimeter": "P = 2(b + h)",
+      "elastic.ixy": "Ixy = 0",
+      "advanced.torsion_constant_j": "h0 = h − tf/2; J = [b tf³ + h0 tw³]/3 (median-wall approximation)",
+      "advanced.warping_constant_cw": "Cw = 0 in the ideal median-line model: every branch is radial from its shear-center pole, so dω = 0. Local finite-thickness plate warping is excluded.",
+      "advanced.shear_center": "xs = b/2; ys = h − tf/2 (web/flange median-line intersection); Δ = SC − gross centroid",
+      "advanced.effective_shear_area": "Ax = 1/∫qx²/t ds; Ay = 1/∫qy²/t ds for unit global shear; q=0 at free ends and flow conservation at junctions"
+    },
+    "angle": {
+      "geometric.area": "A = t(b + h − t)",
+      "geometric.perimeter": "P = 2(b + h)",
+      "advanced.torsion_constant_j": "Lh = h − t/2; Lb = b − t/2; J = t³(Lh+Lb)/3",
+      "advanced.warping_constant_cw": "Cw = 0 in the ideal median-line model: both legs are radial from the heel pole, so dω = 0. Local finite-thickness plate warping is excluded.",
+      "advanced.shear_center": "xs = ys = t/2 (heel median-line intersection); Δ = SC − gross centroid",
+      "advanced.effective_shear_area": "Ax = 1/∫qx²/t ds; Ay = 1/∫qy²/t ds for unit global shear; q=0 at free ends and flow conservation at junctions",
+      "geometric.centroid_x": "AL = t(b+h−t); x̄L = [b² + t(h−t)]/[2(b+h−t)] (from the vertical back face)",
+      "geometric.centroid_y": "ȳL = [h² + b t − t²]/[2(b+h−t)] (from the bottom face)"
+    },
+    "double_angle": {
+      "geometric.area": "AL = t(b + h − t); A = 2AL",
+      "geometric.perimeter": "P = 4(b + h), g > 0; P = 4(b + h) − 2h, g = 0 (union boundary)",
+      "geometric.centroid_x": "B = 2b + g; x̄ = B/2",
+      "elastic.ix": "Ix = 2Ix,L",
+      "elastic.iy": "AL = t(b+h−t); x̄L = [b² + t(h−t)]/[2(b+h−t)]; d = g/2 + x̄L; Iy = 2[Iy,L + AL d²] (single-L centroid measured from its vertical back face)",
+      "elastic.ixy": "Ixy = 0",
+      "advanced.torsion_constant_j": "J = 2 t³[(h−t/2)+(b−t/2)]/3; rigid heel link adds no material/torsion constant",
+      "advanced.warping_constant_cw": "dω = (x−xs)dy − (y−ys)dx; ∫tωn ds = ∫tωn(x−xc) ds = ∫tωn(y−yc) ds = 0; Cw = ∫tωn² ds",
+      "advanced.shear_center": "Dℓ = Ixℓ Iyℓ − Ixyℓ²; qx′ = −t[Ixℓ(x−xcℓ)−Ixyℓ(y−ycℓ)]/Dℓ; qy′ = −t[Iyℓ(y−ycℓ)−Ixyℓ(x−xcℓ)]/Dℓ; Tk = ∫qk[(x−xcℓ)dy−(y−ycℓ)dx]; xs = xcℓ + Ty; ys = ycℓ − Tx (unit Vx/Vy)",
+      "advanced.effective_shear_area": "Ax = 1/∫qx²/t ds; Ay = 1/∫qy²/t ds for unit global shear; q=0 at free ends and flow conservation at junctions",
+      "geometric.centroid_y": "ȳ = ȳL = [h² + b t − t²]/[2(b+h−t)]",
+      "plastic.pna_x": "xp = (2b+g)/2 is the symmetric representative; if g>0, every cut inside the clear gap divides A equally.",
+      "plastic.zy": "Zy = 2 AL (g/2 + x̄L) for the symmetric back-to-back pair",
+      "plastic.zx": "Zx = 2 Zx,L; yp = yp,L (same y-coordinate plastic cut in both angles)"
+    }
+  },
+  "method_expressions": {},
+  "references": [
+    {
+      "id": "geometric_integrals",
+      "title": "Area, first/second moments and plastic modulus: integral definitions and parallel-axis theorem"
+    },
+    {
+      "id": "saint_venant",
+      "title": "Saint-Venant torsion; Prandtl stress-function formulation"
+    },
+    {
+      "id": "vlasov",
+      "title": "V. Z. Vlasov, Thin-Walled Elastic Beams (1961): sectorial-coordinate and shear-flow theory"
+    }
+  ],
+  "double_angle": {
+    "arrangement": "back_to_back",
+    "distance_definition": "clear_gap_between_vertical_back_faces",
+    "horizontal_legs": "bottom_toes_outward",
+    "connection_model": "ideal_rigid_heel_link",
+    "distance_zero_perimeter": "union_boundary",
+    "assumptions": [
+      "Both angles are constrained to act together in bending and shear; connection adequacy is outside geometric calculation.",
+      "Gap contains no material; no fictitious spacer area, torsion or stiffness is added.",
+      "A rigid kinematic link between the two heels carries reaction shear but has zero area, torsion constant and strain energy.",
+      "Sectorial warping is integrated continuously through the heel link, then normalized globally; per-angle mean subtraction is not used.",
+      "Zero clear gap does not imply a continuously welded 2t web; plate torsion remains the sum of the two angle contributions."
+    ]
+  }
+}

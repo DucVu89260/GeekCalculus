@@ -1,0 +1,119 @@
+# Section Properties — shared production package
+
+This is the single numerical implementation for Section Properties, Steel Design,
+Concrete Design, admin previews, browser demo persistence and native Laravel CRUD.
+The registry owns profile names, dimension symbols, catalog aliases and formulas.
+The Python solver in `engineering/` is an independent verification oracle, not a
+production fallback.
+
+## Public API
+
+```ts
+import { calculateSectionProperties, sectionRegistry } from './index'
+
+const result = await calculateSectionProperties({
+  profile_id: 'double_angle',
+  geometry: {
+    type: 'double_angle', geometry_variant: 'back_to_back',
+    dimensions: { depth: 200, width: 100, thickness: 8, distance: 40 },
+  },
+  units: 'mm',
+  options: { include_plastic: true, include_advanced: true },
+})
+console.log(result.properties.elastic.ix) // mm^4
+console.log(result.formula_report)        // formulas + numeric substitution
+```
+
+Profiles: `rectangle`, `circle`, `chs`, `shs_rhs`, `symmetric_i`, `asymmetric_i`,
+`channel`, `angle`, `tee`, `double_angle`. Consult `section-registry.json` for
+actual IDs/input mappings; the two I/H profiles use one `i_section` geometry.
+Catalog legacy identifiers remain aliases; no existing type IDs are replaced.
+All dimensions must be finite numbers in mm. The legacy Geometry Models facade
+converts its supported input units to mm before calling this core. Outputs and saved formulas remain canonical mm regardless of display unit.
+
+`core/calculator.ts` validates dimensions and computes values;
+`core/formula-report.ts` attaches the registry's explanations. `index.ts` is the
+supported entrypoint. The compatibility facade in the old Analytical Engine
+calls the same core synchronously; it does not contain another numerical solver.
+
+## Geometry conventions and properties
+
+Origin is the bottom-left of the bounding box. X points right and Y up; moments
+use centroidal axes. `Ixy = ∫(x−x̄)(y−ȳ)dA`. Principal major-axis angle is measured
+counterclockwise from X in (−90°, 90°]; it is null for an indeterminate direction.
+Channel opens right; Tee has the flange at the top; Angle has bottom/left legs.
+CHS uses outer D; SHS/RHS uses outer b/h and uniform t. Fillets are omitted.
+
+The 25 report entries cover A/P/x̄/ȳ, Ix/Iy/Ixy, Sx±/Sy±, rx/ry, PNAx/PNAy,
+Zx/Zy, Imax/Imin/angle/orientation, J, Cw, shear center and effective shear areas.
+The latter two entries contain multiple coordinates/components. Gross results
+are exact for the idealized geometry; advanced results use these conventions:
+
+| Geometry | J | Cw / shear center | Effective shear areas |
+| --- | --- | --- | --- |
+| Rectangle | Convergent Saint-Venant odd series | Convergent harmonic warping Fourier norm; centroid | Jourawski energy: 5A/6 |
+| Circle | Polar moment, exact | Cw = 0, centroid | Geometric Jourawski energy: 9A/10 |
+| CHS | Polar moment, exact | Cw = 0, centroid | Median-ring thin wall: A/2 |
+| SHS/RHS | Single-cell Bredt thin wall | Periodic sectorial warping, centroid; square Cw = 0 | Closed-cell shear flow with ∮q/t ds = 0 |
+| I/H, Channel, Angle, Tee, Double Angle | Σ L t³/3 on median walls | Open-section sectorial warping and shear-flow torque | Unit-force shear energy: 1/∫q²/t ds |
+
+Advanced thin-wall results are not full 2D elasticity solutions for thick walls.
+T/L Cw = 0 is exact within the adopted straight median-wall model. Solid square
+rectangle Cw is nonzero; do not confuse it with a square hollow section. Cw = 0
+is never used to represent missing calculations. Shear center may lie outside
+the material/bounding box; its coordinates and offsets can be negative. Ax is
+for Vx and Ay for Vy. These energy definitions do not incorporate a material
+Poisson ratio or a design-code reduction/effective-width rule.
+
+Double Angle means two identical L sections back-to-back, horizontal toes
+outwards at the bottom. `distance`/g is the clear gap between vertical backs,
+including g = 0. Gross properties integrate the two actual L areas. Advanced
+properties assume a fully composite ideal rigid heel link: it transfers shear
+reactions and maintains the sectorial path, while adding no area, torsional
+stiffness or shear strain energy. Connection detailing must substantiate this
+assumption. Zero gap does not imply a continuously welded 2t web; J remains the
+sum of the two angles. The connection model is included in every saved report.
+
+For open/closed walls, `diagnostics.advanced_model` records normalized line
+integrals/flows. `normalization_length_mm` gives their length scale and
+`normalized_geometry_diagnostics=true` distinguishes them from dimensional
+properties. Returned J/Cw/shear center/shear areas are physical mm powers.
+Convergence diagnostics for solid rectangle include tail/roundoff estimates;
+unavailable optional results are null with a reason. Catalog writes require all
+advanced entries to be computed and reject incomplete responses atomically.
+
+## Saved formulas and reuse
+
+`result.formula_report` contains the formula-library version and manifest hash,
+core/geometry versions, profile, normalized dimensions with symbols, expressions,
+numeric substitutions, intermediate inputs, assumptions and reference IDs.
+Formulas are explanatory expressions, not a second executable solver.
+
+Laravel saves the complete result in `sections.section_properties` and a timestamp
+in `section_properties_calculated_at`. Read stored values without recalculation:
+
+```php
+$ix = data_get($section->section_properties, 'properties.elastic.ix');
+$cw = data_get($section->section_properties, 'advanced.warping_constant_cw.value');
+$formulas = $section->formulaReport();
+```
+
+Always check success/status, axis conventions, model assumptions and version when
+consuming a snapshot. GET preserves historical formula reports. Create/update/copy
+and import recompute with the current package; imported calculated values are not
+trusted. Existing manual records remain unchanged until explicitly saved again.
+
+## Build and extend
+
+From `structural-platform/frontend/vue`, run `npm ci` then `npm run build`.
+The pre-hooks call `scripts/build-section-properties-core.cjs`: it generates the
+Node CLI/registry packaged by FastAPI and the synchronous compatibility bundle.
+Generated artifacts are ignored by Git; Docker builds them from the same source.
+API path: Laravel → FastAPI → `node-cli.ts` → this package. No Python fallback.
+
+To add/change a shape, update the registry, input validation/types, numerical core
+and formula report context together. Add independent geometry/advanced benchmarks,
+Python-oracle parity and browser/database coverage. Bump the solver/model/formula
+library versions as appropriate; never alter a published formula set without a
+version change. Rebuild the native engine image and web bundle together so manifest
+hashes agree. For tests see `../engineering/README.md` and `../tests/`.

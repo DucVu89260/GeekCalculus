@@ -1,0 +1,1120 @@
+{
+  "schema_version": "1.0",
+  "geometry_model_version": "1.0.0",
+  "geometry_type": "double_angle",
+  "geometry_hash": "1b00a435d6090250894fdfc77803b6a26763f33b8b7342637036105059050537",
+  "solver": {
+    "method": "analytical",
+    "version": "1.3.0",
+    "config_hash": "640fd9df4c86e8fbce4f0fcae9e2eab88a0314e94bba23c83d9cf269f4cb7ef1"
+  },
+  "units": {
+    "length": "mm",
+    "area": "mm2",
+    "section_modulus": "mm3",
+    "second_moment": "mm4",
+    "torsion_constant": "mm4",
+    "warping_constant": "mm6",
+    "shear_center": "mm",
+    "effective_shear_area": "mm2",
+    "angle": "deg"
+  },
+  "normalized_input": {
+    "geometry": {
+      "type": "double_angle",
+      "geometry_variant": "back_to_back",
+      "geometry_model_version": "1.0.0",
+      "dimensions": {
+        "depth": 200,
+        "width": 100,
+        "thickness": 8,
+        "distance": 0
+      }
+    },
+    "units": "mm",
+    "options": {
+      "solver": "analytical",
+      "include_plastic": true,
+      "include_advanced": true,
+      "rectangle_j_relative_tolerance": 1e-10,
+      "rectangle_j_max_terms": 10000,
+      "required_properties": []
+    }
+  },
+  "properties": {
+    "geometric": {
+      "area": 4672,
+      "perimeter": 800,
+      "centroid_x": 100,
+      "centroid_y": 69.75342465753425
+    },
+    "elastic": {
+      "ix": 19966265.278538816,
+      "iy": 5398869.333333333,
+      "ixy": 0,
+      "sx_positive": 153295.89454494463,
+      "sx_negative": 286240.64519507723,
+      "sy_positive": 53988.69333333333,
+      "sy_negative": 53988.69333333333,
+      "rx": 65.37278715992694,
+      "ry": 33.993821625051204
+    },
+    "plastic": {
+      "pna_x": 100,
+      "pna_y": 54,
+      "zx": 267456,
+      "zy": 92288
+    },
+    "principal": {
+      "i_major": 19966265.278538816,
+      "i_minor": 5398869.333333333,
+      "major_axis_angle_degrees": 0,
+      "orientation_status": "determinate"
+    }
+  },
+  "advanced": {
+    "torsion_constant_j": {
+      "status": "computed",
+      "value": 99669.33333333334,
+      "reason": null,
+      "method": "open_section_thin_wall_j"
+    },
+    "warping_constant_cw": {
+      "status": "computed",
+      "value": 638028751.367955,
+      "reason": null,
+      "method": "open_section_sectorial_thin_wall"
+    },
+    "shear_center": {
+      "status": "computed",
+      "value": {
+        "x": 100,
+        "y": 3.0865512649800197,
+        "offset_x": 0,
+        "offset_y": -66.66687339255424
+      },
+      "reason": null,
+      "method": "open_section_shear_flow"
+    },
+    "effective_shear_area": {
+      "status": "computed",
+      "value": {
+        "x": 1422.0789095836328,
+        "y": 2423.6783962181194
+      },
+      "reason": null,
+      "method": "open_section_thin_wall_shear_energy"
+    }
+  },
+  "diagnostics": {
+    "plastic": {
+      "status": "computed",
+      "method": "component_area_bisection_with_piecewise_linear_refinement",
+      "x_axis": {
+        "method": "component_area_bisection_with_piecewise_linear_refinement",
+        "arithmetic": "decimal_80_then_float64",
+        "iterations": 1,
+        "relative_area_imbalance": 0
+      },
+      "y_axis": {
+        "method": "component_area_bisection_with_piecewise_linear_refinement",
+        "arithmetic": "decimal_80_then_float64",
+        "iterations": 78,
+        "relative_area_imbalance": 0
+      }
+    },
+    "advanced_model": {
+      "status": "computed",
+      "model": "centerline_open_thin_wall",
+      "assumptions": [
+        "open_section_centerline_thin_wall",
+        "uniform_thickness_on_each_wall",
+        "ideal_rigid_link_has_no_area_j_or_shear_energy",
+        "two_mirrored_angles_share_equal_twist",
+        "rigid_heel_link_transfers_reaction_flow_without_area_or_energy",
+        "zero_clear_gap_does_not_create_a_continuous_welded_web"
+      ],
+      "range_failures": [],
+      "normalization_length_mm": 200,
+      "normalized_geometry_diagnostics": true,
+      "line_area": 0.11679999999999999,
+      "line_centroid": {
+        "x": 0.5,
+        "y": 0.3489041095890411
+      },
+      "line_inertias": {
+        "ix": 0.012463273059360729,
+        "iy": 0.00336448,
+        "ixy": 0
+      },
+      "unit_shear_responses": {
+        "x": {
+          "force_x": 1.0000000000000002,
+          "force_y": 0,
+          "torque": 0.333471353264141,
+          "energy": 28.1278343490176
+        },
+        "y": {
+          "force_x": 2.7755575615628914e-17,
+          "force_y": 1.0000000000000004,
+          "torque": 6.938893903907228e-18,
+          "energy": 16.503839809116403
+        }
+      },
+      "sectorial_orthogonality": {
+        "mean_sectorial_coordinate": -0.0022836218375499513,
+        "orthogonality_x": -4.671244117480503e-16,
+        "orthogonality_y": -1.4418011280761224e-17
+      },
+      "torsion_method": "open_section_thin_wall_j",
+      "warping_method": "open_section_sectorial_thin_wall",
+      "shear_center_method": "open_section_shear_flow",
+      "effective_shear_area_method": "open_section_thin_wall_shear_energy"
+    },
+    "components": [
+      {
+        "width": 100,
+        "height": 8,
+        "x": 0,
+        "y": 0,
+        "area": 800
+      },
+      {
+        "width": 8,
+        "height": 192,
+        "x": 92,
+        "y": 8,
+        "area": 1536
+      },
+      {
+        "width": 100,
+        "height": 8,
+        "x": 100,
+        "y": 0,
+        "area": 800
+      },
+      {
+        "width": 8,
+        "height": 192,
+        "x": 100,
+        "y": 8,
+        "area": 1536
+      }
+    ],
+    "intermediate": {
+      "overall_width": 200,
+      "clear_distance": 0,
+      "clear_vertical_leg_depth": 192,
+      "horizontal_leg_area_each": 800,
+      "vertical_leg_area_each": 1536,
+      "pna_x": 100,
+      "pna_y": 54
+    },
+    "bounding_box": {
+      "x_min": 0,
+      "y_min": 0,
+      "x_max": 200,
+      "y_max": 200
+    },
+    "assumptions": [
+      "dimensions_in_mm",
+      "xy_plane_x_right_y_up",
+      "bbox_origin_bottom_left",
+      "centroidal_unrotated_inertias",
+      "positive_coordinate_product_ixy",
+      "sharp_corners",
+      "homogeneous_geometric_plastic_properties"
+    ]
+  },
+  "status": "success",
+  "formula_report": {
+    "schema_version": "1.0",
+    "library_version": "1.0.0",
+    "manifest_hash": "a0fff089d68dd7eeec5b1f009c998746b3288020b7cb3edf8c2d3177ca6ebf4a",
+    "core": "section-properties/shared-typescript",
+    "core_version": "1.3.0",
+    "profile_id": "double_angle",
+    "geometry_type": "double_angle",
+    "profile_label": "DOUBLE ANGLE",
+    "geometry_model_version": "1.0.0",
+    "normalized_geometry": {
+      "type": "double_angle",
+      "geometry_variant": "back_to_back",
+      "geometry_model_version": "1.0.0",
+      "dimensions": {
+        "depth": 200,
+        "width": 100,
+        "thickness": 8,
+        "distance": 0
+      }
+    },
+    "geometry_hash": "1b00a435d6090250894fdfc77803b6a26763f33b8b7342637036105059050537",
+    "solver": {
+      "method": "analytical",
+      "version": "1.3.0",
+      "config_hash": "640fd9df4c86e8fbce4f0fcae9e2eab88a0314e94bba23c83d9cf269f4cb7ef1"
+    },
+    "coordinate_system": {
+      "origin": "bounding_box_lower_left",
+      "x": "right",
+      "y": "up",
+      "ixy": "positive_coordinate_product",
+      "principal_angle": "counterclockwise_from_x_modulo_180",
+      "advanced_flow_convention": "xcℓ,ycℓ and Ixℓ,Iyℓ,Ixyℓ are median-wall area centroid/inertias; unit-force q gradients and torque use those centroidal coordinates. Sectorial warping uses the shear-center pole. Offsets use the gross centroid. Normalized diagnostic wall data are scaled by normalization_length_mm; returned properties and formula dimensions are physical mm powers."
+    },
+    "units": "mm",
+    "dimensions": [
+      {
+        "key": "depth",
+        "symbol": "h",
+        "value": 200,
+        "unit": "mm"
+      },
+      {
+        "key": "width",
+        "symbol": "b",
+        "value": 100,
+        "unit": "mm"
+      },
+      {
+        "key": "thickness",
+        "symbol": "t",
+        "value": 8,
+        "unit": "mm"
+      },
+      {
+        "key": "distance",
+        "symbol": "g",
+        "value": 0,
+        "unit": "mm"
+      }
+    ],
+    "components": [
+      {
+        "width": 100,
+        "height": 8,
+        "x": 0,
+        "y": 0,
+        "area": 800
+      },
+      {
+        "width": 8,
+        "height": 192,
+        "x": 92,
+        "y": 8,
+        "area": 1536
+      },
+      {
+        "width": 100,
+        "height": 8,
+        "x": 100,
+        "y": 0,
+        "area": 800
+      },
+      {
+        "width": 8,
+        "height": 192,
+        "x": 100,
+        "y": 8,
+        "area": 1536
+      }
+    ],
+    "inputs": {
+      "dimensions": {
+        "h": 200,
+        "b": 100,
+        "t": 8,
+        "g": 0
+      },
+      "symbols": {
+        "h": 200,
+        "b": 100,
+        "t": 8,
+        "g": 0,
+        "A": 4672,
+        "P": 800,
+        "x̄": 100,
+        "ȳ": 69.75342465753425,
+        "Ix": 19966265.278538816,
+        "Iy": 5398869.333333333,
+        "Ixy": 0,
+        "Sx+": 153295.89454494463,
+        "Sx−": 286240.64519507723,
+        "Sy+": 53988.69333333333,
+        "Sy−": 53988.69333333333,
+        "rx": 65.37278715992694,
+        "ry": 33.993821625051204,
+        "PNAx": 100,
+        "PNAy": 54,
+        "Zx": 267456,
+        "Zy": 92288,
+        "Imax": 19966265.278538816,
+        "Imin": 5398869.333333333,
+        "θ": 0,
+        "J": 99669.33333333334,
+        "Cw": 638028751.367955
+      },
+      "bounding_box": {
+        "x_min": 0,
+        "y_min": 0,
+        "x_max": 200,
+        "y_max": 200
+      },
+      "geometric": {
+        "area": 4672,
+        "perimeter": 800,
+        "centroid_x": 100,
+        "centroid_y": 69.75342465753425
+      },
+      "elastic": {
+        "ix": 19966265.278538816,
+        "iy": 5398869.333333333,
+        "ixy": 0,
+        "sx_positive": 153295.89454494463,
+        "sx_negative": 286240.64519507723,
+        "sy_positive": 53988.69333333333,
+        "sy_negative": 53988.69333333333,
+        "rx": 65.37278715992694,
+        "ry": 33.993821625051204
+      },
+      "plastic": {
+        "pna_x": 100,
+        "pna_y": 54,
+        "zx": 267456,
+        "zy": 92288
+      },
+      "intermediate": {
+        "overall_width": 200,
+        "clear_distance": 0,
+        "clear_vertical_leg_depth": 192,
+        "horizontal_leg_area_each": 800,
+        "vertical_leg_area_each": 1536,
+        "pna_x": 100,
+        "pna_y": 54
+      },
+      "advanced_model": {
+        "status": "computed",
+        "model": "centerline_open_thin_wall",
+        "assumptions": [
+          "open_section_centerline_thin_wall",
+          "uniform_thickness_on_each_wall",
+          "ideal_rigid_link_has_no_area_j_or_shear_energy",
+          "two_mirrored_angles_share_equal_twist",
+          "rigid_heel_link_transfers_reaction_flow_without_area_or_energy",
+          "zero_clear_gap_does_not_create_a_continuous_welded_web"
+        ],
+        "range_failures": [],
+        "normalization_length_mm": 200,
+        "normalized_geometry_diagnostics": true,
+        "line_area": 0.11679999999999999,
+        "line_centroid": {
+          "x": 0.5,
+          "y": 0.3489041095890411
+        },
+        "line_inertias": {
+          "ix": 0.012463273059360729,
+          "iy": 0.00336448,
+          "ixy": 0
+        },
+        "unit_shear_responses": {
+          "x": {
+            "force_x": 1.0000000000000002,
+            "force_y": 0,
+            "torque": 0.333471353264141,
+            "energy": 28.1278343490176
+          },
+          "y": {
+            "force_x": 2.7755575615628914e-17,
+            "force_y": 1.0000000000000004,
+            "torque": 6.938893903907228e-18,
+            "energy": 16.503839809116403
+          }
+        },
+        "sectorial_orthogonality": {
+          "mean_sectorial_coordinate": -0.0022836218375499513,
+          "orthogonality_x": -4.671244117480503e-16,
+          "orthogonality_y": -1.4418011280761224e-17
+        },
+        "torsion_method": "open_section_thin_wall_j",
+        "warping_method": "open_section_sectorial_thin_wall",
+        "shear_center_method": "open_section_shear_flow",
+        "effective_shear_area_method": "open_section_thin_wall_shear_energy"
+      },
+      "options": {
+        "solver": "analytical",
+        "include_plastic": true,
+        "include_advanced": true,
+        "rectangle_j_relative_tolerance": 1e-10,
+        "rectangle_j_max_terms": 10000,
+        "required_properties": []
+      }
+    },
+    "properties": [
+      {
+        "key": "geometric.area",
+        "symbol": "A",
+        "unit": "mm2",
+        "status": "computed",
+        "value": 4672,
+        "method": "gross_geometry_integrals",
+        "expression": "AL = t(b + h − t); A = 2AL",
+        "substitution": {
+          "expression": "AL = (8)((100) + (200) − (8)); A = 2 × AL",
+          "dimensions": {
+            "h": 200,
+            "b": 100,
+            "t": 8,
+            "g": 0
+          },
+          "context_ref": "inputs",
+          "result": "A = 4672 mm2"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "geometric.perimeter",
+        "symbol": "P",
+        "unit": "mm",
+        "status": "computed",
+        "value": 800,
+        "method": "gross_geometry_integrals",
+        "expression": "P = 4(b + h), g > 0; P = 4(b + h) − 2h, g = 0 (union boundary)",
+        "substitution": {
+          "expression": "P = 4((100) + (200)), (0) > 0; P = 4((100) + (200)) − 2 × (200), (0) = 0 (union boundary)",
+          "dimensions": {
+            "h": 200,
+            "b": 100,
+            "t": 8,
+            "g": 0
+          },
+          "context_ref": "inputs",
+          "result": "P = 800 mm"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "geometric.centroid_x",
+        "symbol": "x̄",
+        "unit": "mm",
+        "status": "computed",
+        "value": 100,
+        "method": "gross_geometry_integrals",
+        "expression": "B = 2b + g; x̄ = B/2",
+        "substitution": {
+          "expression": "B = 2 × (100) + (0); x̄ = B/2",
+          "dimensions": {
+            "h": 200,
+            "b": 100,
+            "t": 8,
+            "g": 0
+          },
+          "context_ref": "inputs",
+          "result": "x̄ = 100 mm"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "geometric.centroid_y",
+        "symbol": "ȳ",
+        "unit": "mm",
+        "status": "computed",
+        "value": 69.75342465753425,
+        "method": "gross_geometry_integrals",
+        "expression": "ȳ = ȳL = [h² + b t − t²]/[2(b+h−t)]",
+        "substitution": {
+          "expression": "ȳ = ȳL = [h² + (100) (8) − t²]/[2((100)+(200)−(8))]",
+          "dimensions": {
+            "h": 200,
+            "b": 100,
+            "t": 8,
+            "g": 0
+          },
+          "context_ref": "inputs",
+          "result": "ȳ = 69.75342465753425 mm"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "elastic.ix",
+        "symbol": "Ix",
+        "unit": "mm4",
+        "status": "computed",
+        "value": 19966265.278538816,
+        "method": "gross_geometry_integrals",
+        "expression": "Ix = 2Ix,L",
+        "substitution": {
+          "expression": "Ix = 2 × Ix,L",
+          "dimensions": {
+            "h": 200,
+            "b": 100,
+            "t": 8,
+            "g": 0
+          },
+          "context_ref": "inputs",
+          "result": "Ix = 19966265.278538816 mm4"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "elastic.iy",
+        "symbol": "Iy",
+        "unit": "mm4",
+        "status": "computed",
+        "value": 5398869.333333333,
+        "method": "gross_geometry_integrals",
+        "expression": "AL = t(b+h−t); x̄L = [b² + t(h−t)]/[2(b+h−t)]; d = g/2 + x̄L; Iy = 2[Iy,L + AL d²] (single-L centroid measured from its vertical back face)",
+        "substitution": {
+          "expression": "AL = (8)((100)+(200)−(8)); x̄L = [b² + (8)((200)−(8))]/[2((100)+(200)−(8))]; d = (0)/2 + x̄L; Iy = 2[Iy,L + AL d²] (single-L centroid measured from its vertical back face)",
+          "dimensions": {
+            "h": 200,
+            "b": 100,
+            "t": 8,
+            "g": 0
+          },
+          "context_ref": "inputs",
+          "result": "Iy = 5398869.333333333 mm4"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "elastic.ixy",
+        "symbol": "Ixy",
+        "unit": "mm4",
+        "status": "computed",
+        "value": 0,
+        "method": "gross_geometry_integrals",
+        "expression": "Ixy = 0",
+        "substitution": {
+          "expression": "Ixy = 0",
+          "dimensions": {
+            "h": 200,
+            "b": 100,
+            "t": 8,
+            "g": 0
+          },
+          "context_ref": "inputs",
+          "result": "Ixy = 0 mm4"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "elastic.sx_positive",
+        "symbol": "Sx+",
+        "unit": "mm3",
+        "status": "computed",
+        "value": 153295.89454494463,
+        "method": "gross_geometry_integrals",
+        "expression": "Sx+ = Ix/(H − ȳ)",
+        "substitution": {
+          "expression": "Sx+ = (19966265.278538816)/(H − (69.75342465753425))",
+          "dimensions": {
+            "h": 200,
+            "b": 100,
+            "t": 8,
+            "g": 0
+          },
+          "context_ref": "inputs",
+          "result": "Sx+ = 153295.89454494463 mm3"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "elastic.sx_negative",
+        "symbol": "Sx−",
+        "unit": "mm3",
+        "status": "computed",
+        "value": 286240.64519507723,
+        "method": "gross_geometry_integrals",
+        "expression": "Sx− = Ix/ȳ",
+        "substitution": {
+          "expression": "Sx− = (19966265.278538816)/(69.75342465753425)",
+          "dimensions": {
+            "h": 200,
+            "b": 100,
+            "t": 8,
+            "g": 0
+          },
+          "context_ref": "inputs",
+          "result": "Sx− = 286240.64519507723 mm3"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "elastic.sy_positive",
+        "symbol": "Sy+",
+        "unit": "mm3",
+        "status": "computed",
+        "value": 53988.69333333333,
+        "method": "gross_geometry_integrals",
+        "expression": "Sy+ = Iy/(B − x̄)",
+        "substitution": {
+          "expression": "Sy+ = (5398869.333333333)/(B − (100))",
+          "dimensions": {
+            "h": 200,
+            "b": 100,
+            "t": 8,
+            "g": 0
+          },
+          "context_ref": "inputs",
+          "result": "Sy+ = 53988.69333333333 mm3"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "elastic.sy_negative",
+        "symbol": "Sy−",
+        "unit": "mm3",
+        "status": "computed",
+        "value": 53988.69333333333,
+        "method": "gross_geometry_integrals",
+        "expression": "Sy− = Iy/x̄",
+        "substitution": {
+          "expression": "Sy− = (5398869.333333333)/(100)",
+          "dimensions": {
+            "h": 200,
+            "b": 100,
+            "t": 8,
+            "g": 0
+          },
+          "context_ref": "inputs",
+          "result": "Sy− = 53988.69333333333 mm3"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "elastic.rx",
+        "symbol": "rx",
+        "unit": "mm",
+        "status": "computed",
+        "value": 65.37278715992694,
+        "method": "gross_geometry_integrals",
+        "expression": "rx = √(Ix/A)",
+        "substitution": {
+          "expression": "rx = √((19966265.278538816)/(4672))",
+          "dimensions": {
+            "h": 200,
+            "b": 100,
+            "t": 8,
+            "g": 0
+          },
+          "context_ref": "inputs",
+          "result": "rx = 65.37278715992694 mm"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "elastic.ry",
+        "symbol": "ry",
+        "unit": "mm",
+        "status": "computed",
+        "value": 33.993821625051204,
+        "method": "gross_geometry_integrals",
+        "expression": "ry = √(Iy/A)",
+        "substitution": {
+          "expression": "ry = √((5398869.333333333)/(4672))",
+          "dimensions": {
+            "h": 200,
+            "b": 100,
+            "t": 8,
+            "g": 0
+          },
+          "context_ref": "inputs",
+          "result": "ry = 33.993821625051204 mm"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "plastic.pna_x",
+        "symbol": "PNAx",
+        "unit": "mm",
+        "status": "computed",
+        "value": 100,
+        "method": "gross_geometry_integrals",
+        "expression": "xp = (2b+g)/2 is the symmetric representative; if g>0, every cut inside the clear gap divides A equally.",
+        "substitution": {
+          "expression": "xp = (2 × (100)+(0))/2 is the symmetric representative; if (0)>0, every cut inside the clear gap divides (4672) equally.",
+          "dimensions": {
+            "h": 200,
+            "b": 100,
+            "t": 8,
+            "g": 0
+          },
+          "context_ref": "inputs",
+          "result": "PNAx = 100 mm"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "plastic.pna_y",
+        "symbol": "PNAy",
+        "unit": "mm",
+        "status": "computed",
+        "value": 54,
+        "method": "gross_geometry_integrals",
+        "expression": "∫_{y ≤ yp} dA = A/2",
+        "substitution": {
+          "expression": "∫_{y ≤ yp} dA = (4672)/2",
+          "dimensions": {
+            "h": 200,
+            "b": 100,
+            "t": 8,
+            "g": 0
+          },
+          "context_ref": "inputs",
+          "result": "PNAy = 54 mm"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "plastic.zx",
+        "symbol": "Zx",
+        "unit": "mm3",
+        "status": "computed",
+        "value": 267456,
+        "method": "gross_geometry_integrals",
+        "expression": "Zx = 2 Zx,L; yp = yp,L (same y-coordinate plastic cut in both angles)",
+        "substitution": {
+          "expression": "Zx = 2 Zx,L; yp = yp,L (same y-coordinate plastic cut in both angles)",
+          "dimensions": {
+            "h": 200,
+            "b": 100,
+            "t": 8,
+            "g": 0
+          },
+          "context_ref": "inputs",
+          "result": "Zx = 267456 mm3"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "plastic.zy",
+        "symbol": "Zy",
+        "unit": "mm3",
+        "status": "computed",
+        "value": 92288,
+        "method": "gross_geometry_integrals",
+        "expression": "Zy = 2 AL (g/2 + x̄L) for the symmetric back-to-back pair",
+        "substitution": {
+          "expression": "Zy = 2 AL ((0)/2 + x̄L) for the symmetric back-to-back pair",
+          "dimensions": {
+            "h": 200,
+            "b": 100,
+            "t": 8,
+            "g": 0
+          },
+          "context_ref": "inputs",
+          "result": "Zy = 92288 mm3"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "principal.i_major",
+        "symbol": "Imax",
+        "unit": "mm4",
+        "status": "computed",
+        "value": 19966265.278538816,
+        "method": "gross_geometry_integrals",
+        "expression": "Imax = (Ix + Iy)/2 + √[((Ix − Iy)/2)² + Ixy²]",
+        "substitution": {
+          "expression": "Imax = ((19966265.278538816) + (5398869.333333333))/2 + √[(((19966265.278538816) − (5398869.333333333))/2)² + Ixy²]",
+          "dimensions": {
+            "h": 200,
+            "b": 100,
+            "t": 8,
+            "g": 0
+          },
+          "context_ref": "inputs",
+          "result": "Imax = 19966265.278538816 mm4"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "principal.i_minor",
+        "symbol": "Imin",
+        "unit": "mm4",
+        "status": "computed",
+        "value": 5398869.333333333,
+        "method": "gross_geometry_integrals",
+        "expression": "Imin = (Ix + Iy)/2 − √[((Ix − Iy)/2)² + Ixy²]",
+        "substitution": {
+          "expression": "Imin = ((19966265.278538816) + (5398869.333333333))/2 − √[(((19966265.278538816) − (5398869.333333333))/2)² + Ixy²]",
+          "dimensions": {
+            "h": 200,
+            "b": 100,
+            "t": 8,
+            "g": 0
+          },
+          "context_ref": "inputs",
+          "result": "Imin = 5398869.333333333 mm4"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "principal.major_axis_angle_degrees",
+        "symbol": "θ",
+        "unit": "deg",
+        "status": "computed",
+        "value": 0,
+        "method": "gross_geometry_integrals",
+        "expression": "θ = ½ atan2(−2Ixy, Ix − Iy), modulo 180°",
+        "substitution": {
+          "expression": "θ = ½ atan2(−2 × (0), (19966265.278538816) − (5398869.333333333)), modulo 180°",
+          "dimensions": {
+            "h": 200,
+            "b": 100,
+            "t": 8,
+            "g": 0
+          },
+          "context_ref": "inputs",
+          "result": "θ = 0 deg"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "principal.orientation_status",
+        "symbol": "Orientation",
+        "unit": "1",
+        "status": "computed",
+        "value": "determinate",
+        "method": "gross_geometry_integrals",
+        "expression": "Indeterminate when Ix = Iy and Ixy = 0",
+        "substitution": {
+          "expression": "Indeterminate when Ix = (5398869.333333333) and (0) = 0",
+          "dimensions": {
+            "h": 200,
+            "b": 100,
+            "t": 8,
+            "g": 0
+          },
+          "context_ref": "inputs",
+          "result": "Orientation = \"determinate\" 1"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "advanced.torsion_constant_j",
+        "symbol": "J",
+        "unit": "mm4",
+        "status": "computed",
+        "value": 99669.33333333334,
+        "method": "open_section_thin_wall_j",
+        "expression": "J = 2 t³[(h−t/2)+(b−t/2)]/3; rigid heel link adds no material/torsion constant",
+        "substitution": {
+          "expression": "J = 2 t³[((200)−(8)/2)+((100)−(8)/2)]/3; rigid heel link adds no material/torsion constant",
+          "dimensions": {
+            "h": 200,
+            "b": 100,
+            "t": 8,
+            "g": 0
+          },
+          "context_ref": "inputs",
+          "result": "J = 99669.33333333334 mm4"
+        },
+        "reason": null,
+        "reference_ids": [
+          "saint_venant",
+          "vlasov"
+        ]
+      },
+      {
+        "key": "advanced.warping_constant_cw",
+        "symbol": "Cw",
+        "unit": "mm6",
+        "status": "computed",
+        "value": 638028751.367955,
+        "method": "open_section_sectorial_thin_wall",
+        "expression": "dω = (x−xs)dy − (y−ys)dx; ∫tωn ds = ∫tωn(x−xc) ds = ∫tωn(y−yc) ds = 0; Cw = ∫tωn² ds",
+        "substitution": {
+          "expression": "dω = (x−xs)dy − (y−ys)dx; ∫tωn ds = ∫tωn(x−xc) ds = ∫tωn(y−yc) ds = 0; Cw = ∫tωn² ds",
+          "dimensions": {
+            "h": 200,
+            "b": 100,
+            "t": 8,
+            "g": 0
+          },
+          "context_ref": "inputs",
+          "result": "Cw = 638028751.367955 mm6"
+        },
+        "reason": null,
+        "reference_ids": [
+          "saint_venant",
+          "vlasov"
+        ]
+      },
+      {
+        "key": "advanced.shear_center",
+        "symbol": "SC",
+        "unit": "mm",
+        "status": "computed",
+        "value": {
+          "x": 100,
+          "y": 3.0865512649800197,
+          "offset_x": 0,
+          "offset_y": -66.66687339255424
+        },
+        "method": "open_section_shear_flow",
+        "expression": "Dℓ = Ixℓ Iyℓ − Ixyℓ²; qx′ = −t[Ixℓ(x−xcℓ)−Ixyℓ(y−ycℓ)]/Dℓ; qy′ = −t[Iyℓ(y−ycℓ)−Ixyℓ(x−xcℓ)]/Dℓ; Tk = ∫qk[(x−xcℓ)dy−(y−ycℓ)dx]; xs = xcℓ + Ty; ys = ycℓ − Tx (unit Vx/Vy)",
+        "substitution": {
+          "expression": "Dℓ = Ixℓ Iyℓ − Ixyℓ²; qx′ = −(8)[Ixℓ(x−xcℓ)−Ixyℓ(y−ycℓ)]/Dℓ; qy′ = −(8)[Iyℓ(y−ycℓ)−Ixyℓ(x−xcℓ)]/Dℓ; Tk = ∫qk[(x−xcℓ)dy−(y−ycℓ)dx]; xs = xcℓ + Ty; ys = ycℓ − Tx (unit Vx/Vy)",
+          "dimensions": {
+            "h": 200,
+            "b": 100,
+            "t": 8,
+            "g": 0
+          },
+          "context_ref": "inputs",
+          "result": "SC = {\"x\":100,\"y\":3.0865512649800197,\"offset_x\":0,\"offset_y\":-66.66687339255424} mm"
+        },
+        "reason": null,
+        "reference_ids": [
+          "saint_venant",
+          "vlasov"
+        ]
+      },
+      {
+        "key": "advanced.effective_shear_area",
+        "symbol": "Ax/Ay",
+        "unit": "mm2",
+        "status": "computed",
+        "value": {
+          "x": 1422.0789095836328,
+          "y": 2423.6783962181194
+        },
+        "method": "open_section_thin_wall_shear_energy",
+        "expression": "Ax = 1/∫qx²/t ds; Ay = 1/∫qy²/t ds for unit global shear; q=0 at free ends and flow conservation at junctions",
+        "substitution": {
+          "expression": "Ax = 1/∫qx²/(8) ds; Ay = 1/∫qy²/(8) ds for unit global shear; q=0 at free ends and flow conservation at junctions",
+          "dimensions": {
+            "h": 200,
+            "b": 100,
+            "t": 8,
+            "g": 0
+          },
+          "context_ref": "inputs",
+          "result": "Ax/Ay = {\"x\":1422.0789095836328,\"y\":2423.6783962181194} mm2"
+        },
+        "reason": null,
+        "reference_ids": [
+          "saint_venant",
+          "vlasov"
+        ]
+      }
+    ],
+    "assumptions": [
+      "dimensions_in_mm",
+      "xy_plane_x_right_y_up",
+      "bbox_origin_bottom_left",
+      "centroidal_unrotated_inertias",
+      "positive_coordinate_product_ixy",
+      "sharp_corners",
+      "homogeneous_geometric_plastic_properties",
+      "open_section_centerline_thin_wall",
+      "uniform_thickness_on_each_wall",
+      "ideal_rigid_link_has_no_area_j_or_shear_energy",
+      "two_mirrored_angles_share_equal_twist",
+      "rigid_heel_link_transfers_reaction_flow_without_area_or_energy",
+      "zero_clear_gap_does_not_create_a_continuous_welded_web",
+      "Both angles are constrained to act together in bending and shear; connection adequacy is outside geometric calculation.",
+      "Gap contains no material; no fictitious spacer area, torsion or stiffness is added.",
+      "A rigid kinematic link between the two heels carries reaction shear but has zero area, torsion constant and strain energy.",
+      "Sectorial warping is integrated continuously through the heel link, then normalized globally; per-angle mean subtraction is not used.",
+      "Zero clear gap does not imply a continuously welded 2t web; plate torsion remains the sum of the two angle contributions."
+    ],
+    "references": [
+      {
+        "id": "geometric_integrals",
+        "title": "Area, first/second moments and plastic modulus: integral definitions and parallel-axis theorem"
+      },
+      {
+        "id": "saint_venant",
+        "title": "Saint-Venant torsion; Prandtl stress-function formulation"
+      },
+      {
+        "id": "vlasov",
+        "title": "V. Z. Vlasov, Thin-Walled Elastic Beams (1961): sectorial-coordinate and shear-flow theory"
+      }
+    ],
+    "reference_ids": [
+      "geometric_integrals",
+      "saint_venant",
+      "vlasov"
+    ],
+    "connection_model": {
+      "arrangement": "back_to_back",
+      "distance_definition": "clear_gap_between_vertical_back_faces",
+      "horizontal_legs": "bottom_toes_outward",
+      "connection_model": "ideal_rigid_heel_link",
+      "distance_zero_perimeter": "union_boundary",
+      "assumptions": [
+        "Both angles are constrained to act together in bending and shear; connection adequacy is outside geometric calculation.",
+        "Gap contains no material; no fictitious spacer area, torsion or stiffness is added.",
+        "A rigid kinematic link between the two heels carries reaction shear but has zero area, torsion constant and strain energy.",
+        "Sectorial warping is integrated continuously through the heel link, then normalized globally; per-angle mean subtraction is not used.",
+        "Zero clear gap does not imply a continuously welded 2t web; plate torsion remains the sum of the two angle contributions."
+      ]
+    }
+  }
+}

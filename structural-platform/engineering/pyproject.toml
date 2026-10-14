@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "geekcalculus-structural-engine"
-version = "1.2.0"
+version = "1.3.0"
 description = "Validated geometric models and analytical sectional properties in millimetres"
 requires-python = ">=3.11"
 dependencies = ["pydantic==2.13.4"]
@@ -16,6 +16,9 @@ test = ["pytest==9.0.2", "hypothesis==6.151.9", "mpmath==1.3.0", "httpx==0.28.1"
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["structural_engine*"]
+
+[tool.setuptools.package-data]
+"structural_engine.sectional_properties" = ["data/*.mjs", "data/*.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

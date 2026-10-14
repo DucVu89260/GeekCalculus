@@ -45,7 +45,7 @@ def test_cli_calculates_every_added_seeded_geometry(geometry):
         assert result["advanced"]["torsion_constant_j"]["value"] == 2 * result["properties"]["elastic"]["ix"]
 
 
-@pytest.mark.parametrize("change,expected", [({"units": "m"}, "UNSUPPORTED_UNITS"), ({"geometry": {"type": "circle", "geometry_variant": "solid", "dimensions": {"diameter": -1}}}, "INVALID_DIMENSION"), ({"geometry": {"type": "i_section", "geometry_variant": "fillet", "dimensions": {}}}, "UNSUPPORTED_VARIANT"), ({"options": {"required_properties": ["shear_center"]}}, "UNSUPPORTED_PROPERTY")])
+@pytest.mark.parametrize("change,expected", [({"units": "m"}, "UNSUPPORTED_UNITS"), ({"geometry": {"type": "circle", "geometry_variant": "solid", "dimensions": {"diameter": -1}}}, "INVALID_DIMENSION"), ({"geometry": {"type": "i_section", "geometry_variant": "fillet", "dimensions": {}}}, "UNSUPPORTED_VARIANT"), ({"options": {"required_properties": ["not_a_property"]}}, "UNSUPPORTED_PROPERTY")])
 def test_cli_reports_stable_errors_without_tracebacks(change, expected):
     data = {"geometry": {"type": "rectangle", "geometry_variant": "solid", "dimensions": {"width": 20, "height": 40}}, "units": "mm", **change}
     run = cli(data)

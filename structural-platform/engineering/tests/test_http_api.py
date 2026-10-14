@@ -12,12 +12,15 @@ def test_health_and_section_type_schemas_are_available():
     response = client.get("/v1/section-types")
     assert response.status_code == 200
     types = response.json()["data"]
-    assert [item["type"] for item in types] == ["rectangle", "circle", "i_section", "rectangular_hollow", "circular_hollow", "channel", "tee", "angle"]
+    assert [item["type"] for item in types] == ["rectangle", "circle", "i_section", "rectangular_hollow", "circular_hollow", "channel", "tee", "angle", "double_angle"]
     rectangle = types[0]["input_schema"]
     assert rectangle["properties"]["dimensions"]["required"] == ["width", "height"]
     circular_hollow = next(item for item in types if item["type"] == "circular_hollow")
     assert circular_hollow["geometry_variant"] == "uniform_wall"
     assert circular_hollow["input_schema"]["properties"]["dimensions"]["required"] == ["diameter", "thickness"]
+    double_angle = next(item for item in types if item["type"] == "double_angle")
+    assert double_angle["geometry_variant"] == "back_to_back"
+    assert double_angle["input_schema"]["properties"]["dimensions"]["required"] == ["depth", "width", "thickness", "distance"]
 
 
 def test_calculate_returns_the_engine_result_directly():
@@ -74,7 +77,7 @@ def test_variant_units_and_required_property_errors_are_classified():
     unsupported_property = {
         **unsupported_units,
         "units": "mm",
-        "options": {"required_properties": ["warping_constant_cw"]},
+        "options": {"required_properties": ["not_a_property"]},
     }
     response = client.post("/v1/sections/calculate", json=unsupported_property)
     assert response.status_code == 422
@@ -85,7 +88,7 @@ def test_unexpected_calculation_errors_are_sanitized(monkeypatch):
     def fail(*args, **kwargs):
         raise RuntimeError("private implementation details")
 
-    monkeypatch.setattr("structural_engine.sectional_properties.api.main.calculate", fail)
+    monkeypatch.setattr("structural_engine.sectional_properties.api.main.calculate_canonical", fail)
     response = client.post(
         "/v1/sections/calculate",
         json={

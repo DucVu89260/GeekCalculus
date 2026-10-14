@@ -64,7 +64,8 @@ def test_tc003_independent_i_flanges_and_all_reference_values():
     assert p.zy == 375952
     assert result.diagnostics["intermediate"] == {"web_clear_depth": 372, "bottom_flange_area": 4000, "web_area": 2976, "top_flange_area": 2400, "pna_x": 125, "pna_y": 102}
     assert result.diagnostics["plastic"]["area_below"] == 4688
-    assert result.advanced.torsion_constant_j.model_dump() == {"status": "not_computed", "value": None, "reason": "solver_not_implemented", "method": None}
+    assert result.advanced.torsion_constant_j.status == "computed"
+    assert result.advanced.torsion_constant_j.value == pytest.approx(522410.6666666667)
     thinwall = independent_i_thin_wall_reference(i_section().model_dump())
     assert result.advanced.warping_constant_cw.value == pytest.approx(thinwall["warping_constant_cw"], rel=1e-12)
     assert result.advanced.shear_center.value.x == pytest.approx(125)
@@ -72,12 +73,12 @@ def test_tc003_independent_i_flanges_and_all_reference_values():
     assert result.advanced.shear_center.value.offset_y == pytest.approx(thinwall["shear_center_y"] - g.centroid_y, rel=1e-12)
     assert result.advanced.effective_shear_area.value.x == pytest.approx(thinwall["effective_shear_area_x"], rel=1e-12)
     assert result.advanced.effective_shear_area.value.y == pytest.approx(thinwall["effective_shear_area_y"], rel=1e-12)
-    assert result.advanced.warping_constant_cw.method == "vlasov_thin_wall_i_section"
-    assert result.advanced.effective_shear_area.method == "thin_wall_shear_energy_i_section"
+    assert result.advanced.warping_constant_cw.method == "open_section_sectorial_thin_wall"
+    assert result.advanced.effective_shear_area.method == "open_section_thin_wall_shear_energy"
     assert result.units.warping_constant == "mm6"
     assert result.units.shear_center == "mm"
     assert result.units.effective_shear_area == "mm2"
-    assert result.diagnostics["i_section_advanced"]["model"] == "sharp_corner_centerline_thin_wall"
+    assert result.diagnostics["advanced_model"]["model"] == "centerline_open_thin_wall"
     # Review independently via raw coordinate integration at 60-digit precision.
     reference = independent_i_reference(i_section().model_dump())
     for field in ["area", "centroid_x", "centroid_y"]:
@@ -134,7 +135,9 @@ def test_i_geometric_limit_of_full_width_web_matches_solid_rectangle():
     i = calculate(i_section(depth=100, top_flange_width=30, bottom_flange_width=30, web_thickness=30, top_flange_thickness=10, bottom_flange_thickness=20))
     r = calculate(RectangleGeometry(type="rectangle", width=30, height=100))
     assert i.properties.model_dump() == r.properties.model_dump()
-    assert i.advanced.torsion_constant_j.status == "not_computed"
+    assert i.advanced.torsion_constant_j.reason == "not_requested"
+    i_advanced = calculate(i_section(depth=100, top_flange_width=30, bottom_flange_width=30, web_thickness=30, top_flange_thickness=10, bottom_flange_thickness=20), CalculationOptions(include_advanced=True))
+    assert i_advanced.advanced.torsion_constant_j.status == "computed"
 
 
 @pytest.mark.parametrize("width,height", [(1, 1), (200, 400), (400, 200), (1, 100), (100, 1), (0.5, 0.7)])
@@ -193,12 +196,13 @@ def test_thin_web_nearly_equal_flange_areas_preserve_the_pna_coordinate():
     assert result.properties.plastic.zx == pytest.approx(reference["zx"], rel=1e-12)
 
 
-@pytest.mark.parametrize("property", ["torsion_constant_j"])
-def test_required_unimplemented_i_section_properties_raise_instead_of_zero(property):
-    with pytest.raises(UnsupportedPropertyError) as caught:
-        calculate(i_section(), CalculationOptions(required_properties=(property,)))
-    assert caught.value.code == "UNSUPPORTED_PROPERTY"
-    assert caught.value.details["properties"] == [property]
+@pytest.mark.parametrize("property", ["torsion_constant_j", "warping_constant_cw", "shear_center", "effective_shear_area"])
+def test_required_i_section_advanced_properties_are_computed_individually(property):
+    result = calculate(i_section(), CalculationOptions(required_properties=(property,)))
+    assert getattr(result.advanced, property).status == "computed"
+    assert getattr(result.advanced, property).value is not None
+    for other in {"torsion_constant_j", "warping_constant_cw", "shear_center", "effective_shear_area"} - {property}:
+        assert getattr(result.advanced, other).reason == "not_requested"
 
 
 @pytest.mark.parametrize("property", ["warping_constant_cw", "shear_center", "effective_shear_area"])
@@ -224,7 +228,7 @@ def test_optional_i_section_advanced_range_failure_preserves_gross_properties(sc
     assert result.properties.elastic.iy > 0
     assert result.advanced.warping_constant_cw.status == "not_computed"
     assert result.advanced.warping_constant_cw.reason == "numerical_range"
-    assert result.diagnostics["i_section_advanced"]["range_failures"] == ["warping_constant_cw"]
+    assert result.diagnostics["advanced_model"]["range_failures"] == ["warping_constant_cw"]
     assert result.advanced.shear_center.status == "computed"
     assert result.advanced.effective_shear_area.status == "computed"
 
@@ -238,12 +242,11 @@ def test_required_i_section_out_of_range_advanced_value_raises_calculation_error
     assert caught.value.details == {"property": "warping_constant_cw", "reason": "numerical_range"}
 
 
-@pytest.mark.parametrize("property", ["warping_constant_cw", "shear_center", "effective_shear_area"])
+@pytest.mark.parametrize("property", ["torsion_constant_j", "warping_constant_cw", "shear_center", "effective_shear_area"])
 @pytest.mark.parametrize("geometry", [RectangleGeometry(type="rectangle", width=30, height=60), CircleGeometry(type="circle", diameter=30)])
-def test_thin_wall_properties_remain_unsupported_for_solid_shapes(property, geometry):
-    with pytest.raises(UnsupportedPropertyError) as caught:
-        calculate(geometry, CalculationOptions(required_properties=(property,)))
-    assert caught.value.details["properties"] == [property]
+def test_all_advanced_properties_are_available_for_solid_shapes(property, geometry):
+    result = calculate(geometry, CalculationOptions(required_properties=(property,)))
+    assert getattr(result.advanced, property).status == "computed"
 
 
 def test_omitted_plastic_and_advanced_properties_are_explicit():
@@ -253,7 +256,7 @@ def test_omitted_plastic_and_advanced_properties_are_explicit():
     assert result.advanced.torsion_constant_j.value is None
     assert result.advanced.torsion_constant_j.reason == "not_requested"
     for property in [result.advanced.warping_constant_cw, result.advanced.shear_center, result.advanced.effective_shear_area]:
-        assert property.model_dump() == {"status": "not_computed", "value": None, "reason": "solver_not_implemented", "method": None}
+        assert property.model_dump() == {"status": "not_computed", "value": None, "reason": "not_requested", "method": None}
 
 
 def test_core_is_deterministic_versioned_serializable_and_does_not_mutate_input():
@@ -264,7 +267,7 @@ def test_core_is_deterministic_versioned_serializable_and_does_not_mutate_input(
     assert geometry.model_dump() == before
     assert first.geometry_hash == geometry_hash(geometry)
     assert first.schema_version == "1.0"
-    assert first.solver.version == "1.2.0"
+    assert first.solver.version == "1.3.0"
     assert first.geometry_model_version == "1.0.0"
     assert first.units.length == "mm"
     assert first.units.section_modulus == "mm3"
@@ -286,7 +289,12 @@ def test_unrepresentable_derived_values_fail_instead_of_emitting_nan_or_zero(dim
         calculate(RectangleGeometry(type="rectangle", width=dimension, height=dimension))
 
 
-@pytest.mark.parametrize("data", [{"status": "not_computed", "value": 0, "reason": "solver_not_implemented"}, {"status": "computed", "value": None}, {"status": "computed", "value": 0}])
+@pytest.mark.parametrize("data", [{"status": "not_computed", "value": 0, "reason": "solver_not_implemented"}, {"status": "computed", "value": None}])
 def test_advanced_result_schema_forbids_fake_available_values(data):
     with pytest.raises(ValidationError):
         AdvancedProperty(**data)
+
+
+def test_advanced_result_schema_allows_legitimate_zero_warping_value():
+    result = AdvancedProperty(status="computed", value=0, method="axisymmetric_zero_warping")
+    assert result.value == 0

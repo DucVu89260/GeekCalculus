@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 from typing import Annotated, Literal, TypeAlias, Union
 
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, TypeAdapter, model_validator
@@ -20,6 +21,10 @@ GEOMETRY_UNITS = "mm"
 PositiveFiniteDimension: TypeAlias = Annotated[
     float,
     Field(strict=True, gt=0, allow_inf_nan=False),
+]
+NonnegativeFiniteDimension: TypeAlias = Annotated[
+    float,
+    Field(strict=True, ge=0, allow_inf_nan=False),
 ]
 PositiveFiniteTolerance: TypeAlias = Annotated[
     float,
@@ -180,6 +185,29 @@ class AngleGeometry(_FrozenModel):
         return self
 
 
+class DoubleAngleGeometry(_FrozenModel):
+    """Back-to-back, mirrored equal angles with a clear gap and shared action."""
+
+    type: Literal["double_angle"]
+    depth: PositiveFiniteDimension
+    width: PositiveFiniteDimension
+    thickness: PositiveFiniteDimension
+    distance: NonnegativeFiniteDimension
+    geometry_variant: Literal["back_to_back"]
+    geometry_model_version: Literal["1.0.0"] = GEOMETRY_MODEL_VERSION
+
+    @model_validator(mode="after")
+    def validate_proportions(self) -> DoubleAngleGeometry:
+        clear_depth = self.depth - self.thickness
+        clear_width = self.width - self.thickness
+        overall_width = 2 * self.width + self.distance
+        if not (clear_depth > 0 and clear_depth < self.depth and clear_width > 0 and clear_width < self.width):
+            raise PydanticCustomError("invalid_geometry", "double-angle thickness must be representably less than width and depth")
+        if not (math.isfinite(overall_width) and overall_width > self.width and (self.distance == 0 or overall_width > 2 * self.width)):
+            raise PydanticCustomError("invalid_geometry", "double-angle overall width and clear distance must be representable")
+        return self
+
+
 Geometry: TypeAlias = Annotated[
     Union[
         RectangleGeometry,
@@ -190,6 +218,7 @@ Geometry: TypeAlias = Annotated[
         ChannelGeometry,
         TeeGeometry,
         AngleGeometry,
+        DoubleAngleGeometry,
     ],
     Field(discriminator="type"),
 ]
@@ -199,8 +228,8 @@ _GEOMETRY_ADAPTER = TypeAdapter(Geometry)
 class _GeometryDefinitionEnvelope(_FrozenModel):
     """Strict wrapper used to validate canonical internal definitions."""
 
-    type: Literal["rectangle", "circle", "i_section", "rectangular_hollow", "circular_hollow", "channel", "tee", "angle"]
-    geometry_variant: Literal["solid", "sharp_corner", "uniform_wall"]
+    type: Literal["rectangle", "circle", "i_section", "rectangular_hollow", "circular_hollow", "channel", "tee", "angle", "double_angle"]
+    geometry_variant: Literal["solid", "sharp_corner", "uniform_wall", "back_to_back"]
     geometry_model_version: Literal["1.0.0"] = GEOMETRY_MODEL_VERSION
     dimensions: dict[str, object]
 
@@ -242,6 +271,7 @@ _DIMENSION_FIELDS: dict[type[BaseModel], tuple[str, ...]] = {
     ChannelGeometry: ("depth", "width", "web_thickness", "flange_thickness"),
     TeeGeometry: ("depth", "width", "web_thickness", "flange_thickness"),
     AngleGeometry: ("depth", "width", "thickness"),
+    DoubleAngleGeometry: ("depth", "width", "thickness", "distance"),
 }
 
 
@@ -302,6 +332,7 @@ __all__ = [
     "GEOMETRY_UNITS",
     "CalculationOptions",
     "AngleGeometry",
+    "DoubleAngleGeometry",
     "ChannelGeometry",
     "CircleGeometry",
     "CircularHollowGeometry",

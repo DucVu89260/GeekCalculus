@@ -9,11 +9,11 @@ import math
 from pydantic import ValidationError
 
 from .errors import CalculationError, ConvergenceError, UnsupportedPropertyError
-from .models import AngleGeometry, CalculationOptions, ChannelGeometry, CircleGeometry, CircularHollowGeometry, Geometry, ISectionGeometry, RectangleGeometry, RectangularHollowGeometry, TeeGeometry, geometry_definition, geometry_hash, validate_geometry
+from .models import AngleGeometry, CalculationOptions, ChannelGeometry, CircleGeometry, CircularHollowGeometry, DoubleAngleGeometry, Geometry, ISectionGeometry, RectangleGeometry, RectangularHollowGeometry, TeeGeometry, geometry_definition, geometry_hash, validate_geometry
 from .results import AdvancedProperties, AdvancedProperty, CalculationResult, EffectiveShearAreaProperty, EffectiveShearAreaValue, ElasticProperties, GeometricProperties, PlasticProperties, PrincipalProperties, Properties, ShearCenterProperty, ShearCenterValue, SolverIdentity
 from .torsion import rectangle_torsion
 
-SOLVER_VERSION = "1.2.0"
+SOLVER_VERSION = "1.3.0"
 
 
 @dataclass(frozen=True)
@@ -26,6 +26,30 @@ class RectangleComponent:
     @property
     def area(self) -> float:
         return self.width * self.height
+
+
+@dataclass(frozen=True)
+class WallSegment:
+    """Straight median-line wall; thickness zero marks an ideal kinematic link."""
+
+    x0: float
+    y0: float
+    x1: float
+    y1: float
+    thickness: float
+    label: str = "wall"
+
+    @property
+    def length(self) -> float:
+        return math.hypot(self.x1 - self.x0, self.y1 - self.y0)
+
+    @property
+    def ux(self) -> float:
+        return (self.x1 - self.x0) / self.length
+
+    @property
+    def uy(self) -> float:
+        return (self.y1 - self.y0) / self.length
 
 
 def i_components(geometry: ISectionGeometry) -> tuple[RectangleComponent, ...]:
@@ -69,6 +93,15 @@ def composite_components(geometry: Geometry) -> tuple[RectangleComponent, ...]:
         return (
             RectangleComponent(geometry.width, geometry.thickness, 0.0, 0.0),
             RectangleComponent(geometry.thickness, clear_depth, 0.0, geometry.thickness),
+        )
+    if isinstance(geometry, DoubleAngleGeometry):
+        h, b, t, gap = geometry.depth, geometry.width, geometry.thickness, geometry.distance
+        clear_depth = h - t
+        return (
+            RectangleComponent(b, t, 0.0, 0.0),
+            RectangleComponent(t, clear_depth, b - t, t),
+            RectangleComponent(b, t, b + gap, 0.0),
+            RectangleComponent(t, clear_depth, b + gap, t),
         )
     raise TypeError("geometry is not a composite rectangle section")
 
@@ -226,140 +259,691 @@ def _unavailable_effective_shear_area(reason: str) -> EffectiveShearAreaProperty
     return EffectiveShearAreaProperty(status="not_computed", value=None, reason=reason)
 
 
-def _i_section_advanced(geometry: ISectionGeometry, centroid_y: float) -> tuple[dict[str, object], dict[str, object]]:
-    """Evaluate Vlasov/centerline thin-wall estimates for a sharp-corner I/H.
+def _wall_segments(geometry: Geometry, scale: float) -> tuple[WallSegment, ...]:
+    """Build median-line walls in normalized coordinates; zero t is a rigid link."""
+    n = lambda value: value / scale
+    if isinstance(geometry, ISectionGeometry):
+        h, bt, bb = n(geometry.depth), n(geometry.top_flange_width), n(geometry.bottom_flange_width)
+        tt, tb, tw = n(geometry.top_flange_thickness), n(geometry.bottom_flange_thickness), n(geometry.web_thickness)
+        width, xc = max(bt, bb), max(bt, bb) / 2
+        yb, yt = tb / 2, h - tt / 2
+        return (
+            WallSegment(xc - bb / 2, yb, xc, yb, tb, "bottom_flange_left"),
+            WallSegment(xc, yb, xc, yt, tw, "web"),
+            WallSegment(xc, yb, xc + bb / 2, yb, tb, "bottom_flange_right"),
+            WallSegment(xc - bt / 2, yt, xc, yt, tt, "top_flange_left"),
+            WallSegment(xc, yt, xc + bt / 2, yt, tt, "top_flange_right"),
+        )
+    if isinstance(geometry, ChannelGeometry):
+        h, w, tw, tf = map(n, (geometry.depth, geometry.width, geometry.web_thickness, geometry.flange_thickness))
+        xw, yb, yt = tw / 2, tf / 2, h - tf / 2
+        return (
+            WallSegment(xw, yb, w, yb, tf, "bottom_flange"),
+            WallSegment(xw, yb, xw, yt, tw, "web"),
+            WallSegment(xw, yt, w, yt, tf, "top_flange"),
+        )
+    if isinstance(geometry, TeeGeometry):
+        h, w, tw, tf = map(n, (geometry.depth, geometry.width, geometry.web_thickness, geometry.flange_thickness))
+        xw, yf = w / 2, h - tf / 2
+        return (
+            WallSegment(xw, 0.0, xw, yf, tw, "web"),
+            WallSegment(0.0, yf, xw, yf, tf, "flange_left"),
+            WallSegment(xw, yf, w, yf, tf, "flange_right"),
+        )
+    if isinstance(geometry, AngleGeometry):
+        h, w, t = map(n, (geometry.depth, geometry.width, geometry.thickness))
+        heel = (t / 2, t / 2)
+        return (
+            WallSegment(heel[0], heel[1], heel[0], h, t, "vertical_leg"),
+            WallSegment(heel[0], heel[1], w, heel[1], t, "horizontal_leg"),
+        )
+    if isinstance(geometry, DoubleAngleGeometry):
+        h, b, t, gap = map(n, (geometry.depth, geometry.width, geometry.thickness, geometry.distance))
+        left_heel, right_heel = b - t / 2, b + gap + t / 2
+        overall_width = 2 * b + gap
+        yheel = t / 2
+        return (
+            WallSegment(0.0, yheel, left_heel, yheel, t, "left_toe"),
+            WallSegment(left_heel, yheel, left_heel, h, t, "left_web"),
+            WallSegment(left_heel, yheel, right_heel, yheel, 0.0, "ideal_rigid_heel_link"),
+            WallSegment(right_heel, yheel, right_heel, h, t, "right_web"),
+            WallSegment(right_heel, yheel, overall_width, yheel, t, "right_toe"),
+        )
+    raise TypeError("open thin-wall model does not apply to this geometry")
 
-    Effective shear areas use the same idealized centerline section. The web
-    shear-flow squared is quartic, so three-point Gauss-Legendre integration is
-    exact for its energy integral. These estimates do not model thick-wall
-    elasticity, fillets, restraint, or warping boundary conditions.
-    """
+
+def _rhs_segments(geometry: RectangularHollowGeometry, scale: float) -> tuple[WallSegment, ...]:
+    w, h, t = (value / scale for value in (geometry.width, geometry.height, geometry.thickness))
+    left, right, bottom, top = t / 2, w - t / 2, t / 2, h - t / 2
+    return (
+        WallSegment(left, bottom, right, bottom, t, "bottom_wall"),
+        WallSegment(right, bottom, right, top, t, "right_wall"),
+        WallSegment(right, top, left, top, t, "top_wall"),
+        WallSegment(left, top, left, bottom, t, "left_wall"),
+    )
+
+
+def _seg_length(segment: WallSegment) -> float:
+    return math.hypot(segment.x1 - segment.x0, segment.y1 - segment.y0)
+
+
+def _line_properties(segments: tuple[WallSegment, ...]) -> tuple[float, float, float, float, float, float]:
+    material = [segment for segment in segments if segment.thickness > 0]
+    line_area = math.fsum(segment.thickness * _seg_length(segment) for segment in material)
+    if not math.isfinite(line_area) or line_area <= 0:
+        raise ArithmeticError("thin-wall line area is outside the numerical range")
+    cx = math.fsum(segment.thickness * _seg_length(segment) * (segment.x0 + segment.x1) / 2 for segment in material) / line_area
+    cy = math.fsum(segment.thickness * _seg_length(segment) * (segment.y0 + segment.y1) / 2 for segment in material) / line_area
+    ix = math.fsum(segment.thickness * _seg_length(segment) * (((segment.y0 + segment.y1) / 2 - cy)**2 + (segment.y1 - segment.y0)**2 / 12) for segment in material)
+    iy = math.fsum(segment.thickness * _seg_length(segment) * (((segment.x0 + segment.x1) / 2 - cx)**2 + (segment.x1 - segment.x0)**2 / 12) for segment in material)
+    ixy = math.fsum(segment.thickness * _seg_length(segment) * (((segment.x0 + segment.x1) / 2 - cx) * ((segment.y0 + segment.y1) / 2 - cy) + (segment.x1 - segment.x0) * (segment.y1 - segment.y0) / 12) for segment in material)
+    return line_area, cx, cy, ix, iy, ixy
+
+
+def _oriented_tree(segments: tuple[WallSegment, ...]) -> tuple[WallSegment, ...]:
+    """Orient an open, connected tree from a free edge for flow/warping integration."""
+    adjacency: dict[tuple[float, float], list[tuple[int, tuple[float, float]]]] = {}
+    for index, segment in enumerate(segments):
+        start, end = (segment.x0, segment.y0), (segment.x1, segment.y1)
+        adjacency.setdefault(start, []).append((index, end))
+        adjacency.setdefault(end, []).append((index, start))
+    roots = [node for node, linked in adjacency.items() if len(linked) == 1]
+    if len(roots) < 2:
+        raise ArithmeticError("open thin-wall graph is not a tree")
+    root = roots[0]
+    ordered: list[WallSegment] = []
+    seen: set[int] = set()
+    stack: list[tuple[tuple[float, float], tuple[float, float], int]] = [(root, child, edge) for edge, child in adjacency[root]]
+    while stack:
+        parent, child, edge_index = stack.pop()
+        if edge_index in seen:
+            continue
+        seen.add(edge_index)
+        original = segments[edge_index]
+        if (original.x0, original.y0) == parent:
+            oriented = original
+        else:
+            oriented = WallSegment(original.x1, original.y1, original.x0, original.y0, original.thickness, original.label)
+        ordered.append(oriented)
+        for next_edge, next_node in adjacency[child]:
+            if next_edge not in seen:
+                stack.append((child, next_node, next_edge))
+    if len(seen) != len(segments):
+        raise ArithmeticError("open thin-wall graph is disconnected")
+    # DFS order is needed so a child edge is always visited after its parent.
+    # Rebuild a deterministic preorder; the stack above only established connectivity.
+    ordered_by_pair = {(s.x0, s.y0, s.x1, s.y1, s.label): s for s in ordered}
+    result: list[WallSegment] = []
+    visited_nodes = {root}
+    todo = [root]
+    while todo:
+        node = todo.pop()
+        for edge_index, child in adjacency[node]:
+            if child in visited_nodes:
+                continue
+            original = segments[edge_index]
+            oriented = original if (original.x0, original.y0) == node else WallSegment(original.x1, original.y1, original.x0, original.y0, original.thickness, original.label)
+            result.append(oriented)
+            visited_nodes.add(child)
+            todo.append(child)
+    if len(result) != len(segments):
+        raise ArithmeticError("open thin-wall graph has an invalid traversal")
+    return tuple(result)
+
+
+def _flow_coefficients(
+    segment: WallSegment,
+    centroid_x: float,
+    centroid_y: float,
+    ix: float,
+    iy: float,
+    ixy: float,
+    determinant: float,
+    axis: str,
+) -> tuple[float, float, float]:
+    length = _seg_length(segment)
+    ux, uy = (segment.x1 - segment.x0) / length, (segment.y1 - segment.y0) / length
+
+    def derivative(s: float) -> float:
+        x = segment.x0 + ux * s - centroid_x
+        y = segment.y0 + uy * s - centroid_y
+        if axis == "x":
+            return -segment.thickness * (ix * x - ixy * y) / determinant
+        return -segment.thickness * (iy * y - ixy * x) / determinant
+
+    start, end = derivative(0.0), derivative(length)
+    slope = (end - start) / length
+    return start, slope, length
+
+
+def _flow_polynomials(
+    segments: tuple[WallSegment, ...],
+    centroid_x: float,
+    centroid_y: float,
+    ix: float,
+    iy: float,
+    ixy: float,
+    axis: str,
+    *,
+    closed: bool = False,
+) -> tuple[tuple[WallSegment, float, float, float], ...]:
+    determinant = ix * iy - ixy * ixy
+    if not math.isfinite(determinant) or determinant <= 0:
+        raise ArithmeticError("thin-wall line inertia matrix is singular")
+    ordered = segments if closed else _oriented_tree(segments)
+    coefficients = [_flow_coefficients(seg, centroid_x, centroid_y, ix, iy, ixy, determinant, axis) for seg in ordered]
+    sources = [a * length + slope * length**2 / 2 for a, slope, length in coefficients]
+    starts = [0.0] * len(ordered)
+    if not closed:
+        # Orient the tree from a free endpoint. Back-substitution enforces
+        # zero flow at every free end and conservation at each junction.
+        start_children: dict[tuple[float, float], list[int]] = {}
+        for index, segment in enumerate(ordered):
+            start_children.setdefault((segment.x0, segment.y0), []).append(index)
+        for index in range(len(ordered) - 1, -1, -1):
+            segment = ordered[index]
+            children = [child for child in start_children.get((segment.x1, segment.y1), []) if child > index]
+            end_flow = math.fsum(starts[child] for child in children)
+            starts[index] = end_flow - sources[index]
+        end_nodes = {(segment.x1, segment.y1) for segment in ordered}
+        roots = {(segment.x0, segment.y0) for segment in ordered} - end_nodes
+        if len(roots) != 1:
+            raise ArithmeticError("open thin-wall traversal has no unique root")
+        root = next(iter(roots))
+        root_flow = math.fsum(starts[index] for index, seg in enumerate(ordered) if (seg.x0, seg.y0) == root)
+        scale = max(1.0, math.fsum(abs(value) for value in sources))
+        if abs(root_flow) > 2e-10 * scale:
+            # Root is a free edge selected by the traversal; its outward flow
+            # must also vanish when the centroidal source has zero total.
+            raise ArithmeticError("thin-wall shear flow does not balance at the tree root")
+        return tuple((seg, starts[index], coefficients[index][0], coefficients[index][1]) for index, seg in enumerate(ordered))
+    # For a single closed cell, first integrate an open flow from the chosen
+    # cut, then add the constant flow that enforces zero twist compatibility.
+    for index in range(1, len(ordered)):
+        starts[index] = starts[index - 1] + sources[index - 1]
+    if abs(starts[-1] + sources[-1]) > 2e-10:
+        raise ArithmeticError("closed-cell shear flow is not periodic")
+    compatibility = math.fsum(
+        (starts[index] * coefficients[index][2]
+         + coefficients[index][0] * coefficients[index][2]**2 / 2
+         + coefficients[index][1] * coefficients[index][2]**3 / 6) / seg.thickness
+        for index, seg in enumerate(ordered)
+    )
+    compliance = math.fsum(coefficients[index][2] / seg.thickness for index, seg in enumerate(ordered))
+    constant = -compatibility / compliance
+    return tuple((seg, starts[index] + constant, coefficients[index][0], coefficients[index][1]) for index, seg in enumerate(ordered))
+
+
+def _polynomial_integrals(q0: float, a: float, b: float, length: float) -> tuple[float, float]:
+    """Return integral(q ds), integral(q² ds) for q=q0+a*s+b*s²/2."""
+    q_integral = q0 * length + a * length**2 / 2 + b * length**3 / 6
+    terms = []
+    coeffs = (q0, a, b / 2)
+    for i, left in enumerate(coeffs):
+        for j, right in enumerate(coeffs):
+            terms.append(left * right * length ** (i + j + 1) / (i + j + 1))
+    return q_integral, math.fsum(terms)
+
+
+def _flow_response(
+    flow: tuple[tuple[WallSegment, float, float, float], ...],
+    centroid_x: float,
+    centroid_y: float,
+) -> tuple[float, float, float, float]:
+    force_x, force_y, torque, energy = [], [], [], []
+    for segment, q0, a, b in flow:
+        length = _seg_length(segment)
+        ux, uy = (segment.x1 - segment.x0) / length, (segment.y1 - segment.y0) / length
+        q_integral, q2_integral = _polynomial_integrals(q0, a, b, length)
+        force_x.append(q_integral * ux)
+        force_y.append(q_integral * uy)
+        # x*dy-y*dx is constant along a straight segment. A virtual link
+        # carries reaction and torque but has no material shear energy.
+        x0, y0 = segment.x0 - centroid_x, segment.y0 - centroid_y
+        torque.append((x0 * uy - y0 * ux) * q_integral)
+        if segment.thickness > 0:
+            energy.append(q2_integral / segment.thickness)
+    return math.fsum(force_x), math.fsum(force_y), math.fsum(torque), math.fsum(energy)
+
+
+def _sectorial_properties(
+    segments: tuple[WallSegment, ...],
+    centroid_x: float,
+    centroid_y: float,
+    shear_center_x: float,
+    shear_center_y: float,
+    ix: float,
+    iy: float,
+    *,
+    closed: bool = False,
+) -> tuple[float, dict[str, float | None]]:
+    if closed:
+        # The RHS loop is ordered counter-clockwise. Sectorial omega has a
+        # closure jump 2*A_m; subtract its constant slope before normalizing.
+        ordered = segments
+        length = math.fsum(_seg_length(seg) for seg in ordered)
+        twice_area = abs(math.fsum(seg.x0 * seg.y1 - seg.x1 * seg.y0 for seg in ordered))
+        closure_slope = twice_area / length
+        cumulative = 0.0
+        raw: list[tuple[WallSegment, float, float, float]] = []
+        for segment in ordered:
+            seg_length = _seg_length(segment)
+            ux, uy = (segment.x1 - segment.x0) / seg_length, (segment.y1 - segment.y0) / seg_length
+            derivative = (segment.x0 - shear_center_x) * uy - (segment.y0 - shear_center_y) * ux - closure_slope
+            raw.append((segment, cumulative, derivative, seg_length))
+            cumulative += derivative * seg_length
+        area = math.fsum(seg.thickness * _seg_length(seg) for seg in ordered)
+        mean = math.fsum(
+            seg.thickness * (start * length + derivative * length**2 / 2)
+            for seg, start, derivative, length in raw
+        ) / area
+        cw = math.fsum(
+            seg.thickness * length * ((start - mean + derivative * length / 2)**2 + (derivative * length)**2 / 12)
+            for seg, start, derivative, length in raw
+        )
+        return cw, {"closure_slope": closure_slope, "mean_sectorial_coordinate": mean, "orthogonality_x": 0.0, "orthogonality_y": 0.0}
+
+    ordered = _oriented_tree(segments)
+    start_omega: list[float] = []
+    derivatives: list[float] = []
+    node_omega: dict[tuple[float, float], float] = {}
+    for segment in ordered:
+        start = (segment.x0, segment.y0)
+        end = (segment.x1, segment.y1)
+        length = _seg_length(segment)
+        ux, uy = (segment.x1 - segment.x0) / length, (segment.y1 - segment.y0) / length
+        omega_start = node_omega.get(start, 0.0)
+        derivative = (segment.x0 - shear_center_x) * uy - (segment.y0 - shear_center_y) * ux
+        start_omega.append(omega_start)
+        derivatives.append(derivative)
+        node_omega[end] = omega_start + derivative * length
+    line_area = math.fsum(seg.thickness * _seg_length(seg) for seg in ordered)
+    mean = math.fsum(
+        seg.thickness * (start * _seg_length(seg) + derivative * _seg_length(seg)**2 / 2)
+        for seg, start, derivative in zip(ordered, start_omega, derivatives)
+    ) / line_area
+    cw_terms, orth_x_terms, orth_y_terms = [], [], []
+    for segment, omega_start, derivative in zip(ordered, start_omega, derivatives):
+        length = _seg_length(segment)
+        ux, uy = (segment.x1 - segment.x0) / length, (segment.y1 - segment.y0) / length
+        base = omega_start - mean
+        cw_terms.append(segment.thickness * length * ((base + derivative * length / 2)**2 + (derivative * length)**2 / 12))
+        xbase, ybase = segment.x0 - centroid_x, segment.y0 - centroid_y
+        # Integrals of (base + derivative*s)*(coordinate_base + tangent*s).
+        orth_x_terms.append(segment.thickness * (base * xbase * length + (base * ux + derivative * xbase) * length**2 / 2 + derivative * ux * length**3 / 3))
+        orth_y_terms.append(segment.thickness * (base * ybase * length + (base * uy + derivative * ybase) * length**2 / 2 + derivative * uy * length**3 / 3))
+    cw = math.fsum(cw_terms)
+    orth_x, orth_y = math.fsum(orth_x_terms), math.fsum(orth_y_terms)
+    if cw == 0:
+        return cw, {"mean_sectorial_coordinate": mean, "orthogonality_x": None, "orthogonality_y": None}
+    return cw, {
+        "mean_sectorial_coordinate": mean,
+        "orthogonality_x": orth_x / max(math.sqrt(abs(cw * iy)), 1e-300),
+        "orthogonality_y": orth_y / max(math.sqrt(abs(cw * ix)), 1e-300),
+    }
+
+
+def _rectangle_warping_constant(width: float, height: float) -> tuple[float | None, dict[str, object]]:
+    """Dimensionless Saint-Venant warping norm with a direct absolute tail bound."""
+    a, b = max(width, height) / 2, min(width, height) / 2
+    method = "solid_rectangle_fourier_warping_norm"
+
+    def stable_factor(z: float) -> float:
+        # tanh(z) - z*sech²(z) is O(z³); direct subtraction loses its
+        # significant digits for shallow aspect ratios and large mode counts.
+        if z < 1e-3:
+            z2 = z * z
+            return z * z2 * (2 / 3 + z2 * (-8 / 15 + z2 * (34 / 105)))
+        if z > 350:
+            return 1.0
+        c = math.cosh(z)
+        return math.tanh(z) - z / (c * c)
+
+    value = 0.0
+    absolute_tail_bound = math.inf
+    roundoff_estimate = math.inf
+    used = 0
+    for terms in (16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536):
+        try:
+            ks = [(n + 0.5) * math.pi / b for n in range(terms)]
+            ls = [(m + 0.5) * math.pi / a for m in range(terms)]
+            u_terms = [4 / b * stable_factor(k * a) / k**7 for k in ks]
+            v_terms = [4 / a * stable_factor(l * b) / l**7 for l in ls]
+            def sech_squared(z: float) -> float:
+                if z > 350:
+                    return 0.0
+                c = math.cosh(z)
+                return 1 / (c * c)
+
+            # Sum the m-series analytically for each retained k. This is the
+            # partial-fraction identity for the half-integer l_m spectrum;
+            # it avoids an O(N²) cross sum while leaving a simple k-tail bound.
+            cross_terms = [
+                -32 / (a * b) * (
+                    a*a / (4 * k**6) * (2 + sech_squared(a*k))
+                    - 3 * a * math.tanh(a*k) / (4 * k**7)
+                )
+                for k in ks
+            ]
+            u, v, cross = math.fsum(u_terms), math.fsum(v_terms), math.fsum(cross_terms)
+            value = math.fsum((u, v, cross))
+            # For omitted n>=terms, use the integral test for the diagonal
+            # n^-7 tails and sum_m(l_m^-2)=a²/2 for the analytically summed
+            # cross tail. The first omitted half-index is terms+1/2; the
+            # decreasing integral begins at terms-1/2.
+            denominator = max(terms - 0.5, 0.5)
+            u_tail = 4 * b**6 / (6 * math.pi**7 * denominator**6)
+            v_tail = 4 * a**6 / (6 * math.pi**7 * denominator**6)
+            cross_tail = 16 * a / b * (b / math.pi) ** 6 / (5 * denominator**5)
+            absolute_tail_bound = math.fsum((u_tail, v_tail, cross_tail))
+            roundoff_estimate = 64 * math.ulp(1.0) * math.fsum((abs(u), abs(v), abs(cross)))
+        except (OverflowError, ZeroDivisionError, ValueError):
+            return None, {"method": method, "terms": terms, "status": "numerical_range"}
+        used = terms
+        if not math.isfinite(value) or value <= 0 or not math.isfinite(absolute_tail_bound):
+            return None, {"method": method, "terms": terms, "status": "numerical_range"}
+        relative_bound = (absolute_tail_bound + roundoff_estimate) / value
+        if relative_bound <= 1e-10:
+            return value, {
+                "method": method,
+                "terms_per_axis": terms,
+                "absolute_tail_bound": absolute_tail_bound,
+                "floating_point_abs_error_estimate": roundoff_estimate,
+                "relative_error_bound_with_roundoff_estimate": relative_bound,
+                "relative_tolerance": 1e-10,
+                "converged": True,
+            }
+    relative_bound = (absolute_tail_bound + roundoff_estimate) / value if value > 0 else math.inf
+    return None, {
+        "method": method,
+        "terms_per_axis": used,
+        "absolute_tail_bound": absolute_tail_bound,
+        "floating_point_abs_error_estimate": roundoff_estimate,
+        "relative_error_bound_with_roundoff_estimate": relative_bound,
+        "relative_tolerance": 1e-10,
+        "converged": False,
+    }
+
+
+def _rescale_dimensionless(value: float, scale: float, power: int, *, allow_zero: bool = False) -> float | None:
+    if not math.isfinite(value) or value < 0 or (value == 0 and not allow_zero):
+        return None
+    try:
+        result = float(Decimal(str(value)) * Decimal(str(scale)) ** power)
+    except (OverflowError, ArithmeticError):
+        return None
+    if not math.isfinite(result) or (value != 0 and result == 0):
+        return None
+    return result
+
+
+def _advanced_model(
+    geometry: Geometry,
+    width: float,
+    height: float,
+    centroid_x: float,
+    centroid_y: float,
+    options: CalculationOptions,
+) -> tuple[dict[str, object], dict[str, object]]:
+    """Calculate advanced properties using exact circular or declared line models."""
+    scale = max(width, height)
+    wn, hn = width / scale, height / scale
+    props: dict[str, object] = {}
+    range_failures: list[str] = []
+    needed = set(options.required_properties)
+    if options.include_advanced:
+        needed.update({"torsion_constant_j", "warping_constant_cw", "shear_center", "effective_shear_area"})
+    if not needed:
+        return {}, {"status": "not_requested", "model": "advanced_properties_not_requested", "assumptions": []}
+
+    # Geometry-only special cases with exact or explicitly chosen elementary
+    # shear-area conventions.
+    if isinstance(geometry, RectangleGeometry):
+        segments = ()
+        cxn, cyn = wn / 2, hn / 2
+        scx, scy = cxn, cyn
+        j_dimless = None
+        if "torsion_constant_j" in needed:
+            torsion = rectangle_torsion(wn, hn, relative_tolerance=options.rectangle_j_relative_tolerance, max_terms=options.rectangle_j_max_terms)
+            diagnostics_torsion: dict[str, object] = dict(torsion.diagnostics)
+            # The series is evaluated in normalized coordinates to avoid
+            # overflowing its intermediate powers. Public absolute error
+            # bounds, however, describe the returned mm⁴ value.
+            for bound in ("truncation_abs_error_bound", "floating_point_abs_error_estimate"):
+                if bound in diagnostics_torsion:
+                    diagnostics_torsion[bound] = _rescale_dimensionless(float(diagnostics_torsion[bound]), scale, 4)
+            j_dimless = torsion.value if torsion.converged else None
+            if not torsion.converged and "torsion_constant_j" in options.required_properties:
+                raise ConvergenceError("Required rectangle torsion did not meet the requested tolerance.", details={"property": "torsion_constant_j", "reason": torsion.reason, **torsion.diagnostics})
+            torsion_reason = torsion.reason or "numerical_range"
+        else:
+            diagnostics_torsion = {"method": "solid_rectangle_saint_venant_odd_series", "status": "not_requested"}
+            torsion_reason = "not_requested"
+        if "torsion_constant_j" in needed:
+            value = None if j_dimless is None else _rescale_dimensionless(j_dimless, scale, 4)
+            if value is None:
+                props["torsion_constant_j"] = _unavailable(torsion_reason if not torsion.converged else "numerical_range")
+                range_failures.append("torsion_constant_j")
+            else:
+                props["torsion_constant_j"] = AdvancedProperty(status="computed", value=value, method="solid_rectangle_saint_venant_odd_series")
+        if "warping_constant_cw" in needed:
+            cw_dimless, cw_diag = _rectangle_warping_constant(wn, hn)
+            value = None if cw_dimless is None else _rescale_dimensionless(cw_dimless, scale, 6)
+            if value is None:
+                props["warping_constant_cw"] = _unavailable("convergence_not_achieved" if not cw_diag.get("converged", True) else "numerical_range")
+                range_failures.append("warping_constant_cw")
+            else:
+                props["warping_constant_cw"] = AdvancedProperty(status="computed", value=value, method="solid_rectangle_saint_venant_fourier")
+        if "shear_center" in needed:
+            props["shear_center"] = _center_property(scx * scale, scy * scale, centroid_x, centroid_y, "geometric_symmetry")
+        if "effective_shear_area" in needed:
+            area = _rescale_dimensionless(wn * hn * 5 / 6, scale, 2)
+            if area is None:
+                props["effective_shear_area"] = _unavailable_effective_shear_area("numerical_range")
+                range_failures.append("effective_shear_area")
+            else:
+                props["effective_shear_area"] = EffectiveShearAreaProperty(status="computed", value=EffectiveShearAreaValue(x=area, y=area), method="jourawski_rectangle_five_sixths_area")
+        diag = {"model": "solid_rectangle", "torsion": diagnostics_torsion}
+        if "warping_constant_cw" in needed:
+            diag["warping"] = cw_diag
+        assumptions = ["homogeneous_isotropic_geometry_only", "rectangle_shear_area_uses_jourawski_five_sixths_convention"]
+    elif isinstance(geometry, CircleGeometry):
+        d = geometry.diameter / scale
+        if "torsion_constant_j" in needed:
+            j = _rescale_dimensionless(math.pi * d**4 / 32, scale, 4)
+            _set_scalar(props, range_failures, "torsion_constant_j", j, "solid_circle_closed_form")
+        if "warping_constant_cw" in needed:
+            props["warping_constant_cw"] = AdvancedProperty(status="computed", value=0.0, method="axisymmetric_zero_warping")
+        if "shear_center" in needed:
+            props["shear_center"] = _center_property(width / 2, height / 2, centroid_x, centroid_y, "axisymmetric_centroid")
+        if "effective_shear_area" in needed:
+            area = _rescale_dimensionless(math.pi * d*d / 4 * 0.9, scale, 2)
+            _set_shear_area(props, range_failures, area, area, "solid_circle_geometric_nine_tenths_area")
+        diag = {"model": "solid_circle", "warping": {"method": "axisymmetric_zero_warping"}}
+        assumptions = ["homogeneous_isotropic_geometry_only", "solid_circle_effective_shear_area_uses_geometric_nine_tenths_area_convention"]
+    elif isinstance(geometry, CircularHollowGeometry):
+        d = geometry.diameter / scale
+        t = geometry.thickness / scale
+        dm = d - t
+        area_dimless = math.pi * t * dm
+        if "torsion_constant_j" in needed:
+            jdim = math.pi * t * (d - t) * (d*d + (d - 2*t)**2) / 8
+            j = _rescale_dimensionless(jdim, scale, 4)
+            _set_scalar(props, range_failures, "torsion_constant_j", j, "circular_hollow_exact_polar_moment")
+        if "warping_constant_cw" in needed:
+            props["warping_constant_cw"] = AdvancedProperty(status="computed", value=0.0, method="axisymmetric_zero_warping")
+        if "shear_center" in needed:
+            props["shear_center"] = _center_property(width / 2, height / 2, centroid_x, centroid_y, "axisymmetric_centroid")
+        if "effective_shear_area" in needed:
+            # Median-radius thin-wall shear flow gives As = pi*Rm*t.
+            area = _rescale_dimensionless(math.pi * (d - t) / 2 * t, scale, 2)
+            _set_shear_area(props, range_failures, area, area, "circular_hollow_thin_wall_shear_flow")
+        diag = {"model": "uniform_wall_circular", "warping": {"method": "axisymmetric_zero_warping"}, "effective_shear_area": {"formula": "pi*R_m*t"}}
+        assumptions = ["circular_closed_form_geometry", "thin_wall_shear_energy_uses_median_radius"]
+    elif isinstance(geometry, RectangularHollowGeometry):
+        t = geometry.thickness / scale
+        segments = _rhs_segments(geometry, scale)
+        bw, bh = wn - t, hn - t
+        median_area = bw * bh
+        perimeter_median = 2 * (bw + bh)
+        line_area, cxline, cyline, ixline, iyline, ixyline = _line_properties(segments)
+        jdim = 4 * median_area**2 / (perimeter_median / t)
+        if "torsion_constant_j" in needed:
+            j = _rescale_dimensionless(jdim, scale, 4)
+            _set_scalar(props, range_failures, "torsion_constant_j", j, "single_cell_bredt_thin_wall")
+        if "shear_center" in needed:
+            props["shear_center"] = _center_property(width / 2, height / 2, centroid_x, centroid_y, "closed_cell_shear_flow_symmetry")
+        if "warping_constant_cw" in needed:
+            cw_dim, cw_residuals = _sectorial_properties(segments, wn / 2, hn / 2, wn / 2, hn / 2, 1.0, 1.0, closed=True)
+            if geometry.width == geometry.height:
+                cw_dim = 0.0
+            cw = _rescale_dimensionless(max(cw_dim, 0.0), scale, 6, allow_zero=True)
+            _set_scalar(props, range_failures, "warping_constant_cw", cw, "closed_section_sectorial_thin_wall")
+        else:
+            cw_residuals = {}
+        if "effective_shear_area" in needed:
+            fx = _flow_response(_flow_polynomials(segments, cxline, cyline, ixline, iyline, ixyline, "x", closed=True), cxline, cyline)
+            fy = _flow_response(_flow_polynomials(segments, cxline, cyline, ixline, iyline, ixyline, "y", closed=True), cxline, cyline)
+            ax = _rescale_dimensionless(1 / fx[3], scale, 2)
+            ay = _rescale_dimensionless(1 / fy[3], scale, 2)
+            _set_shear_area(props, range_failures, ax, ay, "closed_cell_thin_wall_shear_energy")
+            closed_flow_responses = {"x": {"force_x": fx[0], "force_y": fx[1], "torque": fx[2], "energy": fx[3]}, "y": {"force_x": fy[0], "force_y": fy[1], "torque": fy[2], "energy": fy[3]}}
+        else:
+            closed_flow_responses = {}
+        diag = {"model": "sharp_corner_closed_cell_centerline_thin_wall", "median_cell_area": median_area, "median_perimeter": perimeter_median, "line_area": line_area, "line_centroid": {"x": cxline, "y": cyline}, "line_inertias": {"ix": ixline, "iy": iyline, "ixy": ixyline}, "sectorial": cw_residuals}
+        if closed_flow_responses:
+            diag["unit_shear_responses"] = closed_flow_responses
+        assumptions = ["sharp_corner_uniform_thickness_median_line", "single_cell_bredt_torsion", "closed_cell_shear_flow_uses_zero_twist_compatibility", "no_corner_radii_or_thick_wall_elasticity"]
+    else:
+        segments = _wall_segments(geometry, scale)
+        ordered = _oriented_tree(segments)
+        line_area, cxline, cyline, ixline, iyline, ixyline = _line_properties(ordered)
+        if not all(math.isfinite(v) and v > 0 for v in (line_area, ixline, iyline)):
+            raise ArithmeticError("open thin-wall line properties are outside the numerical range")
+        needs_flow = bool(needed.intersection({"warping_constant_cw", "shear_center", "effective_shear_area"}))
+        if needs_flow:
+            response_x = _flow_response(_flow_polynomials(ordered, cxline, cyline, ixline, iyline, ixyline, "x"), cxline, cyline)
+            response_y = _flow_response(_flow_polynomials(ordered, cxline, cyline, ixline, iyline, ixyline, "y"), cxline, cyline)
+            flow_scx = cxline + response_y[2]
+            flow_scy = cyline - response_x[2]
+        if "torsion_constant_j" in needed:
+            jdim = math.fsum(_seg_length(seg) * seg.thickness**3 / 3 for seg in ordered if seg.thickness > 0)
+            j = _rescale_dimensionless(jdim, scale, 4)
+            _set_scalar(props, range_failures, "torsion_constant_j", j, "open_section_thin_wall_j")
+        if "shear_center" in needed:
+            if isinstance(geometry, ISectionGeometry):
+                scx, scy, offset_y = _i_section_shear_center(geometry)
+                props["shear_center"] = _center_property_with_offsets(scx, scy, 0.0, offset_y, "open_section_shear_flow")
+            elif isinstance(geometry, ChannelGeometry):
+                props["shear_center"] = _center_property_with_offsets(flow_scx * scale, height / 2, flow_scx * scale - centroid_x, 0.0, "open_section_shear_flow")
+            elif isinstance(geometry, (TeeGeometry, DoubleAngleGeometry)):
+                props["shear_center"] = _center_property_with_offsets(width / 2, flow_scy * scale, 0.0, flow_scy * scale - centroid_y, "open_section_shear_flow")
+            else:
+                props["shear_center"] = _center_property(flow_scx * scale, flow_scy * scale, centroid_x, centroid_y, "open_section_shear_flow")
+        if "effective_shear_area" in needed:
+            ax = _rescale_dimensionless(1 / response_x[3], scale, 2)
+            ay = _rescale_dimensionless(1 / response_y[3], scale, 2)
+            _set_shear_area(props, range_failures, ax, ay, "open_section_thin_wall_shear_energy")
+        if "warping_constant_cw" in needed:
+            cw_dim, orthogonality = _sectorial_properties(ordered, cxline, cyline, flow_scx, flow_scy, ixline, iyline)
+            if isinstance(geometry, (TeeGeometry, AngleGeometry)):
+                cw_dim = 0.0
+                orthogonality = {
+                    "mean_sectorial_coordinate": orthogonality["mean_sectorial_coordinate"],
+                    "orthogonality_x": None,
+                    "orthogonality_y": None,
+                }
+            cw = _rescale_dimensionless(cw_dim, scale, 6, allow_zero=True)
+            _set_scalar(props, range_failures, "warping_constant_cw", cw, "open_section_sectorial_thin_wall")
+        else:
+            orthogonality = {}
+        diag = {
+            "model": "centerline_open_thin_wall",
+            "line_area": line_area,
+            "line_centroid": {"x": cxline, "y": cyline},
+            "line_inertias": {"ix": ixline, "iy": iyline, "ixy": ixyline},
+        }
+        if needs_flow:
+            diag["unit_shear_responses"] = {"x": {"force_x": response_x[0], "force_y": response_x[1], "torque": response_x[2], "energy": response_x[3]}, "y": {"force_x": response_y[0], "force_y": response_y[1], "torque": response_y[2], "energy": response_y[3]}}
+        if "warping_constant_cw" in needed:
+            diag["sectorial_orthogonality"] = orthogonality
+        assumptions = ["open_section_centerline_thin_wall", "uniform_thickness_on_each_wall", "ideal_rigid_link_has_no_area_j_or_shear_energy"] if isinstance(geometry, DoubleAngleGeometry) else ["open_section_centerline_thin_wall", "uniform_thickness_on_each_wall", "no_fillet_or_finite_wall_elasticity"]
+        if isinstance(geometry, DoubleAngleGeometry):
+            assumptions.extend(["two_mirrored_angles_share_equal_twist", "rigid_heel_link_transfers_reaction_flow_without_area_or_energy", "zero_clear_gap_does_not_create_a_continuous_welded_web"])
+
+    # Required-property failures are surfaced after independent calculations,
+    # allowing optional out-of-range properties to coexist with gross results.
+    for name in options.required_properties:
+        prop = props.get(name)
+        if prop is not None and prop.status != "computed":
+            raise CalculationError("A required advanced property is outside the numerical range.", details={"property": name, "reason": prop.reason or "numerical_range"})
+    diagnostics: dict[str, object] = {
+        "status": "partial" if range_failures else "computed",
+        "model": diag["model"],
+        "assumptions": assumptions,
+        "range_failures": range_failures,
+        "normalization_length_mm": scale,
+        "normalized_geometry_diagnostics": True,
+        **{key: value for key, value in diag.items() if key != "model"},
+    }
+    if "torsion_constant_j" in props:
+        diagnostics["torsion_method"] = props["torsion_constant_j"].method
+    if "warping_constant_cw" in props:
+        diagnostics["warping_method"] = props["warping_constant_cw"].method
+    if "shear_center" in props:
+        diagnostics["shear_center_method"] = props["shear_center"].method
+    if "effective_shear_area" in props:
+        diagnostics["effective_shear_area_method"] = props["effective_shear_area"].method
+    return props, diagnostics
+
+
+def _center_property(x: float, y: float, centroid_x: float, centroid_y: float, method: str) -> ShearCenterProperty:
+    values = (x, y, x - centroid_x, y - centroid_y)
+    if not all(math.isfinite(value) for value in values):
+        return _unavailable_shear_center("numerical_range")
+    return ShearCenterProperty(status="computed", value=ShearCenterValue(x=x, y=y, offset_x=x-centroid_x, offset_y=y-centroid_y), method=method)
+
+
+def _center_property_with_offsets(x: float, y: float, offset_x: float, offset_y: float, method: str) -> ShearCenterProperty:
+    values = (x, y, offset_x, offset_y)
+    if not all(math.isfinite(value) for value in values):
+        return _unavailable_shear_center("numerical_range")
+    return ShearCenterProperty(status="computed", value=ShearCenterValue(x=x, y=y, offset_x=offset_x, offset_y=offset_y), method=method)
+
+
+def _i_section_shear_center(geometry: ISectionGeometry) -> tuple[float, float, float]:
+    """Exact centerline pole and centroid offsets, evaluated before float subtraction."""
     with localcontext() as context:
         context.prec = 80
         dec = lambda value: Decimal(str(value))
-        h = dec(geometry.depth)
-        bt, bb = dec(geometry.top_flange_width), dec(geometry.bottom_flange_width)
-        tt, tb, tw = dec(geometry.top_flange_thickness), dec(geometry.bottom_flange_thickness), dec(geometry.web_thickness)
+        h, bt, bb = dec(geometry.depth), dec(geometry.top_flange_width), dec(geometry.bottom_flange_width)
+        tw, tt, tb = dec(geometry.web_thickness), dec(geometry.top_flange_thickness), dec(geometry.bottom_flange_thickness)
+        web_height = h - tt - tb
         yb, yt = tb / 2, h - tt / 2
-        h0 = yt - yb
-        iyb, iyt = tb * bb**3 / 12, tt * bt**3 / 12
-        flange_i = iyb + iyt
+        bottom_area, web_area, top_area = bb * tb, tw * web_height, bt * tt
+        gross_area = bottom_area + web_area + top_area
+        gross_y = (bottom_area * yb + web_area * (tb + web_height / 2) + top_area * yt) / gross_area
+        iy_bottom, iy_top = tb * bb**3 / 12, tt * bt**3 / 12
+        center_y = (iy_bottom * yb + iy_top * yt) / (iy_bottom + iy_top)
+        x = max(bt, bb) / 2
+        offset_y = center_y - gross_y
+        return float(x), float(center_y), float(offset_y)
 
-        # The harmonic product is algebraically Ib*It/(Ib+It), with less
-        # intermediate growth than multiplying both flange inertias first.
-        low_i, high_i = min(iyb, iyt), max(iyb, iyt)
-        cw = h0**2 * (low_i / (1 + low_i / high_i))
-        shear_center_y = (iyb * yb + iyt * yt) / flange_i
-        width = max(bt, bb)
-        shear_center_x = width / 2
-        shear_offset_y = shear_center_y - dec(centroid_y)
 
-        # Thin-wall shear-energy estimate for horizontal (x) shear.
-        ax_denominator = tb * bb**5 / 120 + tt * bt**5 / 120
-        effective_ax = flange_i**2 / ax_denominator
+def _set_scalar(props: dict[str, object], failures: list[str], name: str, value: float | None, method: str) -> None:
+    if value is None:
+        props[name] = _unavailable("numerical_range")
+        failures.append(name)
+    else:
+        props[name] = AdvancedProperty(status="computed", value=value, method=method)
 
-        # For vertical shear, use the idealized line-area centroid and Ix,
-        # web flow Q/Ix, and flange branch energy Iyf*(yf-cy)^2.
-        area_bottom, area_web, area_top = bb * tb, tw * h0, bt * tt
-        y_web = (yb + yt) / 2
-        cy_line = (area_bottom * yb + area_web * y_web + area_top * yt) / (area_bottom + area_web + area_top)
-        ix_line = (
-            area_bottom * (yb - cy_line)**2
-            + tw * (h0**3 / 12 + h0 * (y_web - cy_line)**2)
-            + area_top * (yt - cy_line)**2
-        )
 
-        # Q(y) = At*(yt-cy) + tw/2*((yt-cy)^2-(y-cy)^2). Three-point
-        # Gauss-Legendre integrates Q²/tw (a quartic) exactly.
-        def web_first_moment(y: Decimal) -> Decimal:
-            return area_top * (yt - cy_line) + tw / 2 * (yt - y) * (yt + y - 2 * cy_line)
-
-        half_depth = h0 / 2
-        mid = (yb + yt) / 2
-        gauss_offset = half_depth * (Decimal(3) / 5).sqrt()
-        q_lower = web_first_moment(mid - gauss_offset)
-        q_mid = web_first_moment(mid)
-        q_upper = web_first_moment(mid + gauss_offset)
-        web_energy = half_depth / tw * (Decimal(5) / 9 * (q_lower**2 + q_upper**2) + Decimal(8) / 9 * q_mid**2)
-        flange_energy = iyb * (yb - cy_line)**2 + iyt * (yt - cy_line)**2
-        ay_denominator = web_energy + flange_energy
-        effective_ay = ix_line**2 / ay_denominator
-
-        def finite_value(value: Decimal, *, positive: bool = True) -> float | None:
-            converted = float(value)
-            if not math.isfinite(converted) or (positive and converted <= 0) or (value != 0 and converted == 0):
-                return None
-            return converted
-
-        def diagnostic_value(value: Decimal) -> float | None:
-            return finite_value(value, positive=False)
-
-        cw_float = finite_value(cw)
-        center_values = (
-            finite_value(shear_center_x), finite_value(shear_center_y),
-            finite_value(Decimal(0), positive=False), finite_value(shear_offset_y, positive=False),
-        )
-        ax_float, ay_float = finite_value(effective_ax), finite_value(effective_ay)
-        props: dict[str, object] = {}
-        range_failures: list[str] = []
-        if cw_float is None:
-            props["warping_constant_cw"] = _unavailable("numerical_range")
-            range_failures.append("warping_constant_cw")
-        else:
-            props["warping_constant_cw"] = AdvancedProperty(status="computed", value=cw_float, method="vlasov_thin_wall_i_section")
-        if any(value is None for value in center_values):
-            props["shear_center"] = _unavailable_shear_center("numerical_range")
-            range_failures.append("shear_center")
-        else:
-            props["shear_center"] = ShearCenterProperty(
-                status="computed",
-                value=ShearCenterValue(x=center_values[0], y=center_values[1], offset_x=center_values[2], offset_y=center_values[3]),
-                method="vlasov_thin_wall_i_section",
-            )
-        if ax_float is None or ay_float is None:
-            props["effective_shear_area"] = _unavailable_effective_shear_area("numerical_range")
-            range_failures.append("effective_shear_area")
-        else:
-            props["effective_shear_area"] = EffectiveShearAreaProperty(
-                status="computed", value=EffectiveShearAreaValue(x=ax_float, y=ay_float),
-                method="thin_wall_shear_energy_i_section",
-            )
-        d = {key: diagnostic_value(value) for key, value in {
-            "centerline_depth": h0,
-            "iy_bottom_flange": iyb,
-            "iy_top_flange": iyt,
-            "line_area_centroid_y": cy_line,
-            "line_area_second_moment_ix": ix_line,
-            "effective_shear_area_x_denominator": ax_denominator,
-            "effective_shear_area_y_web_denominator": web_energy,
-            "effective_shear_area_y_flange_denominator": flange_energy,
-            "effective_shear_area_y_total_denominator": ay_denominator,
-        }.items()}
-    diagnostics: dict[str, object] = {
-        "status": "partial" if range_failures else "computed",
-        "model": "sharp_corner_centerline_thin_wall",
-        "assumptions": [
-            "uniform_homogeneous_material",
-            "flanges_reduced_to_centerlines_for_warping_and_shear_flow",
-            "web_retains_uniform_thickness_over_centerline_depth",
-            "no_fillets_or_local_thick_wall_elasticity",
-            "shear_center_offsets_from_gross_geometric_centroid",
-            "effective_shear_area_is_an_energy_equivalent_thin_wall_estimate",
-        ],
-        "range_failures": range_failures,
-        "centerline_depth": d["centerline_depth"],
-        "flange_centroidal_inertias_about_y": {"bottom": d["iy_bottom_flange"], "top": d["iy_top_flange"]},
-        "line_area_centroid_y": d["line_area_centroid_y"],
-        "line_area_second_moment_ix": d["line_area_second_moment_ix"],
-        "effective_shear_area_energy": {
-            "x_flange_denominator": d["effective_shear_area_x_denominator"],
-            "y_web_denominator": d["effective_shear_area_y_web_denominator"],
-            "y_flange_denominator": d["effective_shear_area_y_flange_denominator"],
-            "y_total_denominator": d["effective_shear_area_y_total_denominator"],
-            "web_quadrature": "three_point_gauss_legendre_exact_for_quartic",
-        },
-    }
-    return props, diagnostics
+def _set_shear_area(props: dict[str, object], failures: list[str], x: float | None, y: float | None, method: str) -> None:
+    if x is None or y is None:
+        props["effective_shear_area"] = _unavailable_effective_shear_area("numerical_range")
+        failures.append("effective_shear_area")
+    else:
+        props["effective_shear_area"] = EffectiveShearAreaProperty(status="computed", value=EffectiveShearAreaValue(x=x, y=y), method=method)
 
 
 def calculate(geometry: Geometry, options: CalculationOptions | None = None) -> CalculationResult:
@@ -368,19 +952,10 @@ def calculate(geometry: Geometry, options: CalculationOptions | None = None) -> 
     Raw JSON belongs to validate_geometry/validate_geometry_definition first.
     A quick calculation returns a value only; nothing is persisted or mutated.
     """
-    if not isinstance(geometry, (RectangleGeometry, CircleGeometry, ISectionGeometry, RectangularHollowGeometry, CircularHollowGeometry, ChannelGeometry, TeeGeometry, AngleGeometry)):
+    if not isinstance(geometry, (RectangleGeometry, CircleGeometry, ISectionGeometry, RectangularHollowGeometry, CircularHollowGeometry, ChannelGeometry, TeeGeometry, AngleGeometry, DoubleAngleGeometry)):
         raise TypeError("calculate requires a validated geometry model, not raw JSON")
     geometry = validate_geometry(geometry.model_dump())
     options = CalculationOptions() if options is None else CalculationOptions.model_validate(options)
-    if isinstance(geometry, ISectionGeometry):
-        supported = {"warping_constant_cw", "shear_center", "effective_shear_area"}
-    elif isinstance(geometry, (RectangleGeometry, CircleGeometry, CircularHollowGeometry)):
-        supported = {"torsion_constant_j"}
-    else:
-        supported = set()
-    unsupported = set(options.required_properties) - supported
-    if unsupported:
-        raise UnsupportedPropertyError("A required advanced property has no v1 solver.", details={"properties": sorted(unsupported), "reason": "solver_not_implemented"})
     try:
         return _calculate_validated(geometry, options)
     except CalculationError:
@@ -425,10 +1000,16 @@ def _calculate_validated(geometry: Geometry, options: CalculationOptions) -> Cal
             diagnostics["plastic"] = {"status": "computed", "method": "annulus_symmetric_closed_form", "relative_area_imbalance": 0.0}
     else:
         parts = composite_components(geometry)
+        diagnostics["components"] = [
+            {"width": part.width, "height": part.height, "x": part.x, "y": part.y, "area": part.area}
+            for part in parts
+        ]
         if isinstance(geometry, ISectionGeometry):
             width, height = max(geometry.top_flange_width, geometry.bottom_flange_width), geometry.depth
         elif isinstance(geometry, RectangularHollowGeometry):
             width, height = geometry.width, geometry.height
+        elif isinstance(geometry, DoubleAngleGeometry):
+            width, height = 2 * geometry.width + geometry.distance, geometry.depth
         else:
             width, height = geometry.width, geometry.depth
         area = math.fsum(part.area for part in parts)
@@ -457,6 +1038,15 @@ def _calculate_validated(geometry: Geometry, options: CalculationOptions) -> Cal
         elif isinstance(geometry, TeeGeometry):
             perimeter = 2 * (width + height)
             intermediates = {"clear_web_depth": parts[0].height, "web_area": parts[0].area, "flange_area": parts[1].area}
+        elif isinstance(geometry, DoubleAngleGeometry):
+            perimeter = 4 * (geometry.width + geometry.depth) - (2 * geometry.depth if geometry.distance == 0 else 0)
+            intermediates = {
+                "overall_width": width,
+                "clear_distance": geometry.distance,
+                "clear_vertical_leg_depth": parts[1].height,
+                "horizontal_leg_area_each": parts[0].area,
+                "vertical_leg_area_each": parts[1].area,
+            }
         else:
             perimeter = 2 * (width + height)
             intermediates = {"clear_vertical_leg_depth": parts[1].height, "horizontal_leg_area": parts[0].area, "vertical_leg_area": parts[1].area}
@@ -488,49 +1078,14 @@ def _calculate_validated(geometry: Geometry, options: CalculationOptions) -> Cal
     geometric = GeometricProperties(area=area, perimeter=perimeter, centroid_x=centroid_x, centroid_y=centroid_y)
     elastic = ElasticProperties(ix=ix, iy=iy, ixy=ixy, sx_positive=ix / (height - centroid_y), sx_negative=ix / centroid_y, sy_positive=iy / (width - centroid_x), sy_negative=iy / centroid_x, rx=math.sqrt(ix / area), ry=math.sqrt(iy / area))
     principal = _principal_properties(ix, iy, ixy)
-    want_j = options.include_advanced or "torsion_constant_j" in options.required_properties
-    j = _unavailable("not_requested")
-    if isinstance(geometry, ISectionGeometry):
-        j = _unavailable("solver_not_implemented")
-    elif want_j and isinstance(geometry, CircleGeometry):
-        j = AdvancedProperty(status="computed", value=math.pi * geometry.diameter**4 / 32, method="solid_circle_closed_form")
-        diagnostics["torsion"] = {"method": "solid_circle_closed_form"}
-    elif want_j and isinstance(geometry, CircularHollowGeometry):
-        j = AdvancedProperty(status="computed", value=2 * ix, method="circular_hollow_exact_polar_moment")
-        diagnostics["torsion"] = {"method": "circular_hollow_exact_polar_moment"}
-    elif want_j and isinstance(geometry, RectangleGeometry):
-        torsion = rectangle_torsion(width, height, relative_tolerance=options.rectangle_j_relative_tolerance, max_terms=options.rectangle_j_max_terms)
-        diagnostics["torsion"] = torsion.diagnostics
-        if torsion.converged:
-            j = AdvancedProperty(status="computed", value=torsion.value)
-        else:
-            if "torsion_constant_j" in options.required_properties:
-                raise ConvergenceError("Required rectangle torsion did not meet the requested tolerance.", details={"property": "torsion_constant_j", "reason": torsion.reason, **torsion.diagnostics})
-            j = _unavailable(torsion.reason)
-    if isinstance(geometry, ISectionGeometry):
-        wants_cw = options.include_advanced or "warping_constant_cw" in options.required_properties
-        wants_shear_center = options.include_advanced or "shear_center" in options.required_properties
-        wants_effective_shear = options.include_advanced or "effective_shear_area" in options.required_properties
-        if wants_cw or wants_shear_center or wants_effective_shear:
-            thin_wall_properties, thin_wall_diagnostics = _i_section_advanced(geometry, centroid_y)
-            diagnostics["i_section_advanced"] = thin_wall_diagnostics
-            for name in options.required_properties:
-                if name in thin_wall_properties and thin_wall_properties[name].status != "computed":
-                    raise CalculationError(
-                        "A required advanced property is outside the numerical range.",
-                        details={"property": name, "reason": "numerical_range"},
-                    )
-        else:
-            thin_wall_properties = {}
-        cw = thin_wall_properties.get("warping_constant_cw", _unavailable("not_requested")) if wants_cw else _unavailable("not_requested")
-        shear_center = thin_wall_properties.get("shear_center", _unavailable_shear_center("not_requested")) if wants_shear_center else _unavailable_shear_center("not_requested")
-        effective_shear = thin_wall_properties.get("effective_shear_area", _unavailable_effective_shear_area("not_requested")) if wants_effective_shear else _unavailable_effective_shear_area("not_requested")
-    else:
-        cw = _unavailable("solver_not_implemented")
-        shear_center = _unavailable_shear_center("solver_not_implemented")
-        effective_shear = _unavailable_effective_shear_area("solver_not_implemented")
-        if not isinstance(geometry, (RectangleGeometry, CircleGeometry, CircularHollowGeometry)):
-            j = _unavailable("solver_not_implemented")
+    advanced_properties, advanced_diagnostics = _advanced_model(geometry, width, height, centroid_x, centroid_y, options)
+    diagnostics["advanced_model"] = advanced_diagnostics
+    if isinstance(advanced_diagnostics.get("torsion"), dict) and advanced_diagnostics["torsion"].get("status") != "not_requested":
+        diagnostics["torsion"] = advanced_diagnostics["torsion"]
+    j = advanced_properties.get("torsion_constant_j", _unavailable("not_requested"))
+    cw = advanced_properties.get("warping_constant_cw", _unavailable("not_requested"))
+    shear_center = advanced_properties.get("shear_center", _unavailable_shear_center("not_requested"))
+    effective_shear = advanced_properties.get("effective_shear_area", _unavailable_effective_shear_area("not_requested"))
     advanced = AdvancedProperties(torsion_constant_j=j, warping_constant_cw=cw, shear_center=shear_center, effective_shear_area=effective_shear)
     diagnostics["intermediate"] = intermediates
     diagnostics["bounding_box"] = {"x_min": 0.0, "y_min": 0.0, "x_max": width, "y_max": height}

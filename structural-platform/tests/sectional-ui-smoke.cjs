@@ -5,158 +5,46 @@ const { signIn } = require('./browser-auth.cjs')
 
 const demo = process.env.TEST_DEMO === '1'
 const base = process.env.AUTH_BASE_URL || (demo ? 'http://127.0.0.1:8765/GeekCalculus/' : 'http://127.0.0.1:5173')
-const numberFromText = value => Number(value.replace(/[^0-9,.-]/g, '').replaceAll(',', ''))
-
-function close(actual, expected, label, relativeTolerance = 1e-9) {
-  const tolerance = Math.max(1e-7, Math.abs(expected) * relativeTolerance)
-  assert.ok(Number.isFinite(actual), `${label}: expected a finite number, got ${actual}`)
-  assert.ok(Math.abs(actual - expected) <= tolerance, `${label}: expected ${expected}, got ${actual} (tolerance ${tolerance})`)
+const expectedProfileIds = ['rectangle', 'circle', 'chs', 'shs_rhs', 'symmetric_i', 'asymmetric_i', 'channel', 'angle', 'tee', 'double_angle']
+const profilesToCalculate = process.env.SECTION_PROFILE_LIMIT
+  ? expectedProfileIds.slice(0, Number(process.env.SECTION_PROFILE_LIMIT))
+  : expectedProfileIds
+const profileDimensions = {
+  rectangle: { width: 200, height: 400 },
+  circle: { diameter: 200 },
+  chs: { diameter: 200, thickness: 10 },
+  shs_rhs: { width: 200, height: 400, thickness: 10 },
+  symmetric_i: { depth: 400, width: 200, web_thickness: 8, flange_thickness: 12 },
+  asymmetric_i: { depth: 400, top_flange_width: 200, bottom_flange_width: 250, web_thickness: 8, top_flange_thickness: 12, bottom_flange_thickness: 16 },
+  channel: { depth: 400, width: 200, web_thickness: 8, flange_thickness: 12 },
+  angle: { depth: 400, width: 200, thickness: 8 },
+  tee: { depth: 400, width: 200, web_thickness: 8, flange_thickness: 12 },
+  double_angle: { depth: 400, width: 200, thickness: 8, distance: 0 },
 }
 
-function expectedISection() {
-  const depth = 400, topWidth = 200, bottomWidth = 250, web = 8, topThickness = 12, bottomThickness = 16
-  const bottomArea = bottomWidth * bottomThickness
-  const webHeight = depth - topThickness - bottomThickness
-  const webArea = web * webHeight
-  const topArea = topWidth * topThickness
-  const area = bottomArea + webArea + topArea
-  const centroidY = (bottomArea * bottomThickness / 2
-    + webArea * (bottomThickness + webHeight / 2)
-    + topArea * (depth - topThickness / 2)) / area
-  const ix = bottomWidth * bottomThickness ** 3 / 12 + bottomArea * (bottomThickness / 2 - centroidY) ** 2
-    + web * webHeight ** 3 / 12 + webArea * (bottomThickness + webHeight / 2 - centroidY) ** 2
-    + topWidth * topThickness ** 3 / 12 + topArea * (depth - topThickness / 2 - centroidY) ** 2
-  // Half the section area is 4,688 mm². The lower flange contains 4,000 mm²;
-  // the remaining 688 mm² reaches 86 mm into the 8 mm web.
-  return { area, ix, pnaX: bottomWidth / 2, pnaY: bottomThickness + (area / 2 - bottomArea) / web }
-}
-
-function expectedFor(type) {
-  if (type === 'rectangle') return { area: 80000, ix: 200 * 400 ** 3 / 12, pnaX: 100, pnaY: 200 }
-  if (type === 'circle') return { area: Math.PI * 200 ** 2 / 4, ix: Math.PI * 200 ** 4 / 64, pnaX: 100, pnaY: 100 }
-  return expectedISection()
-}
-
-async function assertDisplayNumber(result, label, expected, unit) {
-  const term = result.getByText(label, { exact: true })
-  await term.waitFor()
-  const value = await term.locator('xpath=..').locator('dd').innerText()
-  close(numberFromText(value), expected, `displayed ${label}`, 1e-6)
-  if (unit) assert.ok(value.includes(unit), `${label} should display ${unit}; got ${value}`)
-}
-
-async function exportResult(page, section, name) {
-  const path = `/tmp/geekcalculus-sectional-${name}.json`
-  const [download] = await Promise.all([
-    page.waitForEvent('download'),
-    section.getByRole('button', { name: 'Download result JSON', exact: true }).click(),
-  ])
-  await download.saveAs(path)
-  const payload = JSON.parse(fs.readFileSync(path, 'utf8'))
-  fs.unlinkSync(path)
-  return payload
-}
-
-async function verifyPreset(page, section, name, buttonName, type, extra = {}) {
-  await section.getByRole('button', { name: buttonName, exact: true }).click()
-  assert.equal(await section.locator('#section-geometry-type').inputValue(), type)
-  await section.getByRole('button', { name: 'Calculate', exact: true }).click()
-  const output = section.locator('.section-properties-result')
-  await output.waitFor()
-
-  const payload = await exportResult(page, section, name)
-  const result = payload.result
-  const expected = expectedFor(type)
-  assert.equal(result.geometry_type, type)
-  assert.equal(result.units.length, 'mm')
-  assert.equal(result.units.area, 'mm2')
-  assert.equal(result.units.second_moment, 'mm4')
-  close(result.properties.geometric.area, expected.area, `${name} area`)
-  close(result.properties.elastic.ix, expected.ix, `${name} Ix`)
-  close(result.properties.plastic.pna_x, expected.pnaX, `${name} PNA x`)
-  close(result.properties.plastic.pna_y, expected.pnaY, `${name} PNA y`)
-  assert.equal(result.normalized_input.units, 'mm')
-  assert.equal(result.normalized_input.options.include_advanced, true)
-  for (const [key, value] of Object.entries(extra)) close(result.properties.elastic[key], value, `${name} ${key}`)
-
-  await section.getByRole('img', { name: /Section diagram to scale/ }).waitFor()
-  await assertDisplayNumber(output, 'Area A', expected.area, 'mm²')
-  await assertDisplayNumber(output, 'Ix', expected.ix, 'mm⁴')
-  await assertDisplayNumber(output, 'PNA coordinate x', expected.pnaX, 'mm')
-  await assertDisplayNumber(output, 'PNA coordinate y', expected.pnaY, 'mm')
-  await assertDisplayNumber(output, 'Elastic section moduli Sx+', result.properties.elastic.sx_positive, 'mm³')
-  await assertDisplayNumber(output, 'Elastic section moduli Sx−', result.properties.elastic.sx_negative, 'mm³')
-  assert.ok(await output.locator('.section-properties-advanced-card').isVisible())
-  if (type === 'i_section') {
-    for (const key of ['warping_constant_cw', 'shear_center', 'effective_shear_area']) {
-      assert.equal(result.advanced[key].status, 'computed', `${key} must be computed for I/H`)
-      assert.equal(result.advanced[key].reason, null)
-      assert.ok(result.advanced[key].method, `${key} must identify its thin-wall method`)
-    }
-    assert.ok(result.advanced.warping_constant_cw.value > 0)
-    assert.ok(result.advanced.effective_shear_area.value.x > 0)
-    assert.ok(result.advanced.effective_shear_area.value.y > 0)
-    await output.locator('.section-properties-shear-marker').waitFor()
-  } else {
-    assert.equal(result.advanced.warping_constant_cw.status, 'not_computed')
-    assert.equal(result.advanced.warping_constant_cw.value, null)
-    assert.equal(result.advanced.shear_center.status, 'not_computed')
-    assert.equal(result.advanced.effective_shear_area.value, null)
+async function setGeometry(panel, profileId) {
+  const selector = panel.locator('select').first()
+  await selector.selectOption(profileId)
+  for (const [key, value] of Object.entries(profileDimensions[profileId])) {
+    const input = panel.locator(`input[name="dimension-${key}"]`)
+    await input.fill(String(value))
   }
-  return { output, result }
+  const result = panel.locator('.section-calculated-properties')
+  try { await result.waitFor({ state: 'visible', timeout: 15000 }) } catch (error) {
+    console.error(`Calculation failed for ${profileId}:`, await panel.innerText())
+    throw error
+  }
+  await panel.locator('details.section-calculated-formula-report > summary').waitFor({ state: 'visible', timeout: 15000 })
+  await panel.page().waitForFunction(expected => {
+    const value = document.querySelector('.section-properties-panel .section-calculated-report-meta dd')?.textContent?.trim()
+    return value === expected
+  }, profileId, { timeout: 15000 })
+  return result
 }
 
-async function verifyAdvancedUnits(page, section, result, name) {
-  const output = section.locator('.section-properties-result')
-  const advanced = output.locator('.section-properties-advanced-card')
-  const row = label => advanced.locator('dt').filter({ hasText: new RegExp(`^${label}`) }).locator('..').locator('dd')
-  for (const [unit, ratio] of [['mm', 1], ['cm', 0.1], ['m', 0.001]]) {
-    await section.getByLabel('Result unit', { exact: true }).selectOption(unit)
-    await assertDisplayNumber(output, 'Area A', result.properties.geometric.area * ratio ** 2, `${unit}²`)
-    await assertDisplayNumber(output, 'Ix', result.properties.elastic.ix * ratio ** 4, `${unit}⁴`)
-    await assertDisplayNumber(output, 'Elastic section moduli Sx+', result.properties.elastic.sx_positive * ratio ** 3, `${unit}³`)
-    await assertDisplayNumber(output, 'PNA coordinate y', result.properties.plastic.pna_y * ratio, unit)
-    const cw = await row('Warping constant Cw').innerText()
-    close(numberFromText(cw), result.advanced.warping_constant_cw.value * ratio ** 6, `${name} Cw ${unit}`, 1e-7)
-    assert.ok(cw.includes(`${unit}⁶`))
-    const centerLines = row('Shear center').locator('span')
-    const center = (await centerLines.nth(0).innerText()).match(/x = ([0-9.,-]+), y = ([0-9.,-]+)/)
-    const offsets = (await centerLines.nth(1).innerText()).match(/Δx = ([0-9.,-]+), Δy = ([0-9.,-]+)/)
-    assert.ok(center && offsets)
-    close(numberFromText(center[1]), result.advanced.shear_center.value.x * ratio, `${name} center x ${unit}`, 1e-7)
-    close(numberFromText(center[2]), result.advanced.shear_center.value.y * ratio, `${name} center y ${unit}`, 1e-7)
-    close(numberFromText(offsets[1]), result.advanced.shear_center.value.offset_x * ratio, `${name} offset x ${unit}`, 1e-7)
-    close(numberFromText(offsets[2]), result.advanced.shear_center.value.offset_y * ratio, `${name} offset y ${unit}`, 1e-7)
-    const shearLines = row('Effective shear area').locator('span')
-    for (const [index, axis] of [[0, 'x'], [1, 'y']]) {
-      const line = await shearLines.nth(index).innerText()
-      close(numberFromText(line.split('=')[1]), result.advanced.effective_shear_area.value[axis] * ratio ** 2, `${name} shear ${axis} ${unit}`, 1e-7)
-      assert.ok(line.includes(`${unit}²`))
-    }
-  }
-  const exported = await exportResult(page, section, `${name}-metres`)
-  assert.equal(exported.display_unit, 'm')
-  assert.equal(exported.result.units.length, 'mm')
-  assert.deepEqual(exported.result, result, 'Changing display units must not change canonical engine values')
-  assert.equal(await section.locator('.section-properties-input-grid input').first().inputValue(), '400')
-  await section.getByLabel('Result unit', { exact: true }).selectOption('mm')
-}
-
-async function fillCatalogProperties(dialog, shape) {
-  const values = {
-    depth: 400, width: 200, diameter: 200, web_thickness: 8, flange_thickness: 13,
-    area: 9999, inertia_y: 12345678, inertia_z: 2345678, torsion_constant: 350000,
-    elastic_modulus_y: 1000000, elastic_modulus_z: 200000, shear_area_y: 5000, shear_area_z: 4500,
-  }
-  const keys = shape === 'i' || shape === 'channel' ? ['depth', 'width', 'web_thickness', 'flange_thickness']
-    : shape === 'rectangle' ? ['depth', 'width'] : ['diameter']
-  for (const key of [...keys, 'area', 'inertia_y', 'inertia_z', 'torsion_constant', 'elastic_modulus_y', 'elastic_modulus_z', 'shear_area_y', 'shear_area_z']) {
-    const input = dialog.locator(`input[name="property-${key}"]`)
-    if (await input.count()) await input.fill(String(values[key]))
-  }
-  return Object.fromEntries(await Promise.all(
-    (await dialog.locator('input[name^="property-"]').evaluateAll(inputs => inputs.map(input => input.name))).map(async name => [name, await dialog.locator(`input[name="${name}"]`).inputValue()]),
-  ))
+async function assertProfileOptions(panel) {
+  const options = await panel.locator('select').first().locator('option').evaluateAll(items => items.map(item => item.value))
+  assert.deepEqual(options, expectedProfileIds)
 }
 
 ;(async () => {
@@ -164,13 +52,10 @@ async function fillCatalogProperties(dialog, shape) {
   const context = await browser.newContext({ viewport: { width: 1440, height: 1100 }, acceptDownloads: true })
   const page = await context.newPage()
   const errors = []
-  const calculationRequests = []
-  const catalogWrites = []
+  const calculationResponses = []
   page.on('pageerror', error => errors.push(error.message))
-  page.on('request', request => {
-    const url = new URL(request.url())
-    if (url.pathname === '/api/v1/sections/calculate') calculationRequests.push(request.method())
-    if (/^\/api\/(sections|section-types|materials)(\/[^/]+)?$/.test(url.pathname) && !['GET', 'HEAD'].includes(request.method())) catalogWrites.push(`${request.method()} ${url.pathname}`)
+  page.on('response', response => {
+    if (new URL(response.url()).pathname === '/api/v1/sections/calculate') calculationResponses.push(response.status())
   })
 
   try {
@@ -179,146 +64,57 @@ async function fillCatalogProperties(dialog, shape) {
     await page.getByRole('heading', { name: 'Sign in', exact: true }).waitFor()
     await signIn(page, { demo, role: 'user' })
 
-    const steelUrl = new URL('#/modules/steel', base).href
-    await page.goto(steelUrl)
-    await page.getByRole('tab', { name: /^Component/ }).waitFor()
-    await page.getByLabel(/^Member type/).waitFor()
-    await page.getByRole('tab', { name: /^Connection/ }).click()
-    await page.getByLabel(/^Connection type/).waitFor()
-    await page.getByRole('tab', { name: /^Component/ }).click()
-    const steelSection = page.locator('.section-properties').last()
-    await page.getByRole('tab', { name: /^Section properties/ }).click()
-    await page.getByText('Asymmetric I/H and advanced properties', { exact: true }).click()
-    await steelSection.getByRole('heading', { name: 'Section properties', exact: true }).waitFor()
+    await page.goto(new URL('#/modules/analysis', base).href)
+    const analysis = page.locator('.section-properties-panel')
+    await analysis.waitFor()
+    await assertProfileOptions(analysis)
+    assert.equal(await page.locator('.geometry-workbench').count(), 0, 'The legacy calculator must not remain in the live page.')
 
-    assert.deepEqual(await steelSection.locator('#section-geometry-type option').evaluateAll(options => options.map(option => option.value)), ['i_section'])
-    assert.equal(await steelSection.getByRole('button', { name: /TC-00[12]/ }).count(), 0)
-    const steelI = await verifyPreset(page, steelSection, 'steel-i', 'TC-003 · Asymmetric I/H', 'i_section')
-    await verifyAdvancedUnits(page, steelSection, steelI.result, 'steel-i')
-    await page.screenshot({ path: '/tmp/geekcalculus-steel-advanced-i.png', fullPage: true })
-
-    // Rectangle/circle and their torsion calculations remain available in the standalone page.
-    await page.locator('.module-navigation a[href$="/modules/analysis"]').click()
-    await page.getByText('Asymmetric I/H and advanced properties', { exact: true }).click()
-    const standaloneSection = page.locator('.section-properties').last()
-    const rectangle = await verifyPreset(page, standaloneSection, 'rectangle', 'TC-001 · Rectangle 200 × 400', 'rectangle')
-    const width = standaloneSection.locator('.section-properties-input-grid input').nth(0)
-    await width.fill('201')
-    await rectangle.output.waitFor({ state: 'detached' })
-    await standaloneSection.getByRole('button', { name: 'TC-001 · Rectangle 200 × 400', exact: true }).click()
-    await standaloneSection.getByRole('button', { name: 'Calculate', exact: true }).click()
-    await standaloneSection.locator('.section-properties-result').waitFor()
-    const repeatedRectangle = await exportResult(page, standaloneSection, 'rectangle-repeat')
-    assert.equal(repeatedRectangle.result.advanced.torsion_constant_j.status, 'computed')
-    assert.ok(repeatedRectangle.result.advanced.torsion_constant_j.value > 0)
-    await page.screenshot({ path: '/tmp/geekcalculus-section-properties-rectangle.png', fullPage: true })
-
-    const circle = await verifyPreset(page, standaloneSection, 'circle', 'TC-002 · Circle D200', 'circle')
-    assert.equal(circle.result.advanced.torsion_constant_j.status, 'computed')
-    close(circle.result.advanced.torsion_constant_j.value, Math.PI * 200 ** 4 / 32, 'circle torsion J')
-    const iSection = await verifyPreset(page, standaloneSection, 'i-section', 'TC-003 · Asymmetric I/H', 'i_section')
-    await verifyAdvancedUnits(page, standaloneSection, iSection.result, 'standalone-i')
-
-    await page.locator('.module-navigation a[href$="/modules/concrete"]').click()
-    const concreteSection = page.locator('.concrete-section-properties .section-properties')
-    await page.getByRole('tab', { name: 'Section properties', exact: true }).click()
-    await page.getByText('Asymmetric I/H and advanced properties', { exact: true }).click()
-    await concreteSection.getByRole('heading', { name: 'Section properties', exact: true }).waitFor()
-    assert.deepEqual(await concreteSection.locator('#section-geometry-type option').evaluateAll(options => options.map(option => option.value)), ['i_section'])
-    assert.equal(await concreteSection.getByRole('button', { name: /TC-00[12]/ }).count(), 0)
-    const concreteI = await verifyPreset(page, concreteSection, 'concrete-i', 'TC-003 · Asymmetric I/H', 'i_section')
-    close(concreteI.result.advanced.warping_constant_cw.value, steelI.result.advanced.warping_constant_cw.value, 'Steel/Concrete Cw parity')
-    await verifyAdvancedUnits(page, concreteSection, concreteI.result, 'concrete-i')
-    await page.screenshot({ path: '/tmp/geekcalculus-concrete-advanced-i.png', fullPage: true })
-
-    await page.getByRole('button', { name: 'VI', exact: true }).click()
-    await page.getByRole('heading', { name: 'Đặc trưng tiết diện', exact: true }).waitFor()
-    assert.equal(await page.locator('html').getAttribute('lang'), 'vi')
-    await concreteSection.getByLabel('Đơn vị kết quả', { exact: true }).selectOption('cm')
-    await concreteSection.getByText('Xấp xỉ thành mỏng', { exact: true }).first().waitFor()
-    await page.setViewportSize({ width: 390, height: 844 })
-    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'Vietnamese sectional UI overflows the 390px viewport')
-    await page.screenshot({ path: '/tmp/geekcalculus-section-properties-mobile-vi.png', fullPage: true })
-    await page.setViewportSize({ width: 1440, height: 1100 })
-    await page.getByRole('button', { name: 'EN', exact: true }).click()
-
-    await page.getByRole('button', { name: /Sign out/ }).click()
-    await page.getByRole('heading', { name: 'Sign in', exact: true }).waitFor()
-    await page.goto(base)
-    await page.getByRole('heading', { name: 'Sign in', exact: true }).waitFor()
-    await signIn(page, { demo, role: 'admin' })
-    await page.getByRole('heading', { name: 'Which workspace do you want to open?', exact: true }).waitFor()
-    await page.getByRole('button', { name: /Admin interface/ }).click()
-    await page.getByRole('tab', { name: 'Sections', exact: true }).click()
-    const addSection = page.getByRole('button', { name: /Add section$/ })
-    await addSection.waitFor({ state: 'visible' })
-    await addSection.waitFor({ state: 'attached' })
-    await page.waitForFunction(() => {
-      const button = [...document.querySelectorAll('.library-add-button')].find(item => item.textContent.includes('Add section'))
-      return button && !button.disabled
-    })
-    await addSection.click()
-    const editor = page.getByRole('dialog')
-    await editor.waitFor()
-    const typeSelect = editor.getByLabel(/^Section type/)
-    const materialSelect = editor.getByLabel(/^Material/)
-    async function chooseSectionType(code) {
-      const option = typeSelect.locator('option').filter({ hasText: new RegExp(`^${code}\\s·`) }).first()
-      const value = await option.getAttribute('value')
-      assert.ok(value, `Missing seeded section type ${code}`)
-      await typeSelect.selectOption(value)
-      await editor.getByRole('img', { name: 'Section sketch', exact: true }).waitFor()
+    for (const profileId of profilesToCalculate) {
+      const result = await setGeometry(analysis, profileId)
+      const reportDetails = result.locator('.section-calculated-formula-report')
+      if (!await reportDetails.evaluate(element => element.open)) await reportDetails.locator(':scope > summary').click()
+      await result.locator('.section-calculated-report-meta dd').first().waitFor()
+      assert.equal((await result.locator('.section-calculated-report-meta dd').first().innerText()).trim(), profileId)
     }
-    await chooseSectionType('i')
-    const steelMaterial = materialSelect.locator('option').filter({ hasText: /^steel_s235\s·/ }).first()
-    await materialSelect.selectOption(await steelMaterial.getAttribute('value'))
-    assert.equal(await editor.locator('input[name="property-depth"]').count(), 1)
-    assert.equal(await editor.locator('input[name="property-width"]').count(), 1)
-    const original = await fillCatalogProperties(editor, 'i')
-    await editor.getByRole('button', { name: 'Calculate XY properties', exact: true }).click()
-    const engineResult = editor.getByRole('region', { name: 'Calculated properties' })
-    await engineResult.waitFor()
-    await assertDisplayNumber(engineResult, 'Area A', 8192, 'mm²')
-    assert.equal(await editor.locator('input[name="property-area"]').inputValue(), original['property-area'], 'Calculating must not overwrite catalog area')
-    assert.equal(await editor.locator('input[name="property-inertia_y"]').inputValue(), original['property-inertia_y'], 'Calculating must not overwrite catalog inertia')
-    const editorProperties = await editor.locator('input[name^="property-"]').evaluateAll(inputs => Object.fromEntries(inputs.map(input => [input.name, input.value])))
-    assert.deepEqual(editorProperties, original, 'Calculated XY properties must leave all manually entered catalog properties untouched')
-    await page.screenshot({ path: '/tmp/geekcalculus-section-editor-i-result.png', fullPage: true })
 
-    await editor.locator('input[name="property-depth"]').fill('410')
-    await engineResult.waitFor({ state: 'detached' })
+    const rectangleResult = await setGeometry(analysis, 'rectangle')
+    await rectangleResult.getByLabel('Display unit', { exact: true }).selectOption('cm')
+    const areaRow = rectangleResult.getByText('A · Area', { exact: true }).locator('..')
+    assert.match(await areaRow.locator('dd').innerText(), /800\s+cm²/)
+    await rectangleResult.locator('details.section-calculated-formula-report > summary').click()
+    const [download] = await Promise.all([
+      page.waitForEvent('download'),
+      rectangleResult.getByRole('button', { name: 'Download formula report JSON', exact: true }).click(),
+    ])
+    const reportPath = '/tmp/geekcalculus-formula-report.json'
+    await download.saveAs(reportPath)
+    const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'))
+    fs.unlinkSync(reportPath)
+    assert.equal(report.profile_id, 'rectangle')
+    assert.equal(report.units, 'mm', 'Formula report values must remain in canonical units when the display unit changes.')
+    assert.ok(report.properties.some(property => property.key === 'geometric.area' && property.expression))
 
-    await chooseSectionType('rectangle')
-    assert.equal(await editor.locator('input[name="property-depth"]').count(), 1)
-    assert.equal(await editor.locator('input[name="property-width"]').count(), 1)
-    await editor.locator('input[name="property-depth"]').fill('400')
-    await editor.locator('input[name="property-width"]').fill('200')
-    await editor.getByRole('button', { name: 'Calculate XY properties', exact: true }).click()
-    await editor.getByRole('region', { name: 'Calculated properties' }).waitFor()
+    for (const moduleCode of ['steel', 'concrete']) {
+      await page.goto(new URL(`#/modules/${moduleCode}`, base).href)
+      const tabLabel = 'Section properties'
+      await page.getByRole('tab', { name: tabLabel, exact: false }).click()
+      const panel = page.locator('.section-properties-panel')
+      await panel.waitFor({ state: 'visible' })
+      await assertProfileOptions(panel)
+      const result = await setGeometry(panel, 'chs')
+      await result.getByText('A · Area', { exact: true }).waitFor()
+    }
 
-    await chooseSectionType('circle')
-    assert.equal(await editor.locator('input[name="property-diameter"]').count(), 1)
-    await editor.locator('input[name="property-diameter"]').fill('200')
-    await editor.getByRole('button', { name: 'Calculate XY properties', exact: true }).click()
-    const circleEditorResult = editor.getByRole('region', { name: 'Calculated properties' })
-    await circleEditorResult.waitFor()
-    await assertDisplayNumber(circleEditorResult, 'Area A', Math.PI * 200 ** 2 / 4, 'mm²')
-
-    await chooseSectionType('channel')
-    await editor.locator('input[name="property-depth"]').fill('400')
-    await editor.locator('input[name="property-width"]').fill('200')
-    await editor.locator('input[name="property-web_thickness"]').fill('8')
-    await editor.locator('input[name="property-flange_thickness"]').fill('13')
-    await editor.getByRole('img', { name: 'Section sketch', exact: true }).waitFor()
-    await editor.getByText('V1 calculations support solid rectangles, solid circles, and I-sections.', { exact: false }).waitFor()
-    assert.equal(await editor.getByRole('button', { name: 'Calculate XY properties', exact: true }).count(), 0, 'Unsupported shapes must not expose the calculator button')
-    await page.screenshot({ path: '/tmp/geekcalculus-section-editor-unsupported.png', fullPage: true })
-    await editor.locator('.editor-actions').getByRole('button', { name: 'Cancel', exact: true }).click()
-    assert.equal(catalogWrites.length, 0, `Admin preview unexpectedly wrote catalog records: ${catalogWrites.join(', ')}`)
-
-    if (demo) assert.equal(calculationRequests.length, 0, 'Browser demo should calculate locally without network requests')
+    await page.setViewportSize({ width: 390, height: 844 })
+    const overflowDetails = await page.evaluate(() => ({
+      width: document.documentElement.scrollWidth,
+      elements: [...document.querySelectorAll('body *')].filter(element => element.scrollWidth > element.clientWidth + 2).slice(0, 24).map(element => `${element.tagName}.${String(element.className?.baseVal ?? element.className ?? '').slice(0, 60)}:${element.clientWidth}/${element.scrollWidth}:${element.textContent.trim().slice(0, 36)}`),
+    }))
+    assert.ok(overflowDetails.width <= await page.evaluate(() => innerWidth), `Shared Section Properties layout overflows on a narrow viewport: ${JSON.stringify(overflowDetails)}`)
+    assert.ok(calculationResponses.every(status => status === 200), `Calculation endpoint returned ${calculationResponses.join(', ')}`)
     assert.equal(errors.length, 0, errors.join('\n'))
-    console.log(`${demo ? 'Demo' : 'Laravel'} sectional UI checks passed: asymmetric-only Steel/Concrete, Cw/shear center/effective areas and mm/cm/m conversion, canonical JSON exports, three numeric fixtures, SVG and method assumptions, rectangle J rerun, editor read-only properties, supported/unsupported catalog sketches, VI mobile layout, and no catalog writes.`)
+    console.log(`${demo ? 'Demo' : 'Laravel'} Section Properties smoke passed: ${profilesToCalculate.length}/${expectedProfileIds.length} profiles calculated, Steel and RC expose the same registry profiles, formula report JSON stays in mm, display units convert values, and mobile layout fits.`)
   } finally {
     await browser.close()
   }

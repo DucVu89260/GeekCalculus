@@ -132,6 +132,7 @@ class SectionPropertyPersistenceTest extends TestCase
             ['angle', ['depth' => 200, 'width' => 100, 'thickness' => 10], 'angle', 'sharp_corner', ['depth' => 200, 'width' => 100, 'thickness' => 10]],
             ['rectangular_hollow', ['depth' => 200, 'width' => 100, 'thickness' => 5], 'rectangular_hollow', 'sharp_corner', ['width' => 100, 'height' => 200, 'thickness' => 5]],
             ['circular_hollow', ['diameter' => 100, 'thickness' => 5], 'circular_hollow', 'uniform_wall', ['diameter' => 100, 'thickness' => 5]],
+            ['double_angle', ['depth' => 200, 'width' => 100, 'thickness' => 8, 'distance' => 0], 'double_angle', 'back_to_back', ['depth' => 200, 'width' => 100, 'thickness' => 8, 'distance' => 0]],
         ];
 
         foreach ($cases as [$catalogShape, $properties, $type, $variant, $dimensions]) {
@@ -261,6 +262,22 @@ class SectionPropertyPersistenceTest extends TestCase
         $bad['properties']['geometric']['area'] = '150000';
         $invalidResults[] = $bad;
 
+        $bad = $fixture;
+        unset($bad['formula_report']);
+        $invalidResults[] = $bad;
+
+        $bad = $fixture;
+        $bad['formula_report']['manifest_hash'] = str_repeat('0', 64);
+        $invalidResults[] = $bad;
+
+        $bad = $fixture;
+        $bad['formula_report']['properties'][0]['value'] += 1;
+        $invalidResults[] = $bad;
+
+        $bad = $fixture;
+        array_pop($bad['formula_report']['properties']);
+        $invalidResults[] = $bad;
+
         $this->fakeSectionPropertyCalculations($invalidResults);
         foreach ($invalidResults as $index => $_result) {
             $this->postJson('/api/sections', $this->section(['code' => 'invalid-engine-result-'.$index]))
@@ -269,5 +286,35 @@ class SectionPropertyPersistenceTest extends TestCase
 
         $this->assertDatabaseCount('sections', 0);
         Http::assertSentCount(count($invalidResults));
+    }
+
+    public function test_zero_warping_and_zero_double_angle_distance_are_saved_with_formula_snapshots(): void
+    {
+        $this->fakeSectionPropertyCalculations([
+            $this->sectionPropertyFixture('section-chs.json'),
+            $this->sectionPropertyFixture('section-double-angle-zero-gap.json'),
+        ]);
+        $steel = Material::where('category', 'steel')->value('id');
+        foreach ([
+            ['circular_hollow', ['diameter' => 200, 'thickness' => 8]],
+            ['double_angle', ['depth' => 200, 'width' => 100, 'thickness' => 8, 'distance' => 0]],
+        ] as [$shape, $dimensions]) {
+            $response = $this->postJson('/api/sections', $this->section([
+                'code' => 'zero-valid-'.$shape,
+                'material_id' => $steel,
+                'section_type_id' => SectionType::where('shape', $shape)->value('id'),
+                'properties' => $dimensions,
+            ]))->assertCreated();
+            $section = Section::findOrFail($response->json('data.id'));
+            $this->assertCount(25, $section->formulaReport()['properties']);
+            $this->assertSame('section-properties/shared-typescript', $section->formulaReport()['core']);
+            if ($shape === 'circular_hollow') {
+                $this->assertEquals(0, data_get($section->section_properties, 'advanced.warping_constant_cw.value'));
+                $this->assertSame('computed', data_get($section->section_properties, 'advanced.warping_constant_cw.status'));
+            } else {
+                $this->assertEquals(0, data_get($section->section_properties, 'normalized_input.geometry.dimensions.distance'));
+                $this->assertNotEmpty($section->formulaReport()['connection_model']);
+            }
+        }
     }
 }

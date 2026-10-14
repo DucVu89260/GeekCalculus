@@ -5,7 +5,7 @@
   "geometry_hash": "bdd857552bfa4d0df1c246c6ef7b10825a470a2fd055ad47cc443b171ed620d8",
   "solver": {
     "method": "analytical",
-    "version": "1.2.0",
+    "version": "1.3.0",
     "config_hash": "640fd9df4c86e8fbce4f0fcae9e2eab88a0314e94bba23c83d9cf269f4cb7ef1"
   },
   "units": {
@@ -25,8 +25,8 @@
       "geometry_variant": "solid",
       "geometry_model_version": "1.0.0",
       "dimensions": {
-        "width": 300.0,
-        "height": 500.0
+        "width": 300,
+        "height": 500
       }
     },
     "units": "mm",
@@ -41,84 +41,127 @@
   },
   "properties": {
     "geometric": {
-      "area": 150000.0,
-      "perimeter": 1600.0,
-      "centroid_x": 150.0,
-      "centroid_y": 250.0
+      "area": 150000,
+      "perimeter": 1600,
+      "centroid_x": 150,
+      "centroid_y": 250
     },
     "elastic": {
-      "ix": 3125000000.0,
-      "iy": 1125000000.0,
-      "ixy": 0.0,
-      "sx_positive": 12500000.0,
-      "sx_negative": 12500000.0,
-      "sy_positive": 7500000.0,
-      "sy_negative": 7500000.0,
+      "ix": 3125000000,
+      "iy": 1125000000,
+      "ixy": 0,
+      "sx_positive": 12500000,
+      "sx_negative": 12500000,
+      "sy_positive": 7500000,
+      "sy_negative": 7500000,
       "rx": 144.33756729740642,
       "ry": 86.60254037844386
     },
     "plastic": {
-      "pna_x": 150.0,
-      "pna_y": 250.0,
-      "zx": 18750000.0,
-      "zy": 11250000.0
+      "pna_x": 150,
+      "pna_y": 250,
+      "zx": 18750000,
+      "zy": 11250000
     },
     "principal": {
-      "i_major": 3125000000.0,
-      "i_minor": 1125000000.0,
-      "major_axis_angle_degrees": 0.0,
+      "i_major": 3125000000,
+      "i_minor": 1125000000,
+      "major_axis_angle_degrees": 0,
       "orientation_status": "determinate"
     }
   },
   "advanced": {
     "torsion_constant_j": {
       "status": "computed",
-      "value": 2816262154.9596443,
+      "value": 2816262154.959644,
       "reason": null,
-      "method": null
+      "method": "solid_rectangle_saint_venant_odd_series"
     },
     "warping_constant_cw": {
-      "status": "not_computed",
-      "value": null,
-      "reason": "solver_not_implemented",
-      "method": null
+      "status": "computed",
+      "value": 5448497945211.81,
+      "reason": null,
+      "method": "solid_rectangle_saint_venant_fourier"
     },
     "shear_center": {
-      "status": "not_computed",
-      "value": null,
-      "reason": "solver_not_implemented",
-      "method": null
+      "status": "computed",
+      "value": {
+        "x": 150,
+        "y": 250,
+        "offset_x": 0,
+        "offset_y": 0
+      },
+      "reason": null,
+      "method": "geometric_symmetry"
     },
     "effective_shear_area": {
-      "status": "not_computed",
-      "value": null,
-      "reason": "solver_not_implemented",
-      "method": null
+      "status": "computed",
+      "value": {
+        "x": 125000,
+        "y": 125000
+      },
+      "reason": null,
+      "method": "jourawski_rectangle_five_sixths_area"
     }
   },
   "diagnostics": {
     "plastic": {
       "status": "computed",
       "method": "symmetric_closed_form",
-      "relative_area_imbalance": 0.0
+      "relative_area_imbalance": 0
+    },
+    "advanced_model": {
+      "status": "computed",
+      "model": "solid_rectangle",
+      "assumptions": [
+        "homogeneous_isotropic_geometry_only",
+        "rectangle_shear_area_uses_jourawski_five_sixths_convention"
+      ],
+      "range_failures": [],
+      "normalization_length_mm": 500,
+      "normalized_geometry_diagnostics": true,
+      "torsion": {
+        "method": "saint_venant_odd_series",
+        "terms": 84,
+        "requested_relative_tolerance": 1e-10,
+        "truncation_abs_error_bound": 0.272244903135585,
+        "floating_point_abs_error_estimate": 0.00004567282353235922,
+        "relative_error_bound_with_roundoff_estimate": 9.668509570599459e-11,
+        "scaled_tail_bound": 6.049886736346334e-11,
+        "scaled_roundoff_estimate": 1.014951634052427e-14,
+        "converged": true
+      },
+      "warping": {
+        "method": "solid_rectangle_fourier_warping_norm",
+        "terms_per_axis": 64,
+        "absolute_tail_bound": 3.972104134045773e-15,
+        "floating_point_abs_error_estimate": 2.1316282072748957e-17,
+        "relative_error_bound_with_roundoff_estimate": 1.1452182717016005e-11,
+        "relative_tolerance": 1e-10,
+        "converged": true
+      },
+      "torsion_method": "solid_rectangle_saint_venant_odd_series",
+      "warping_method": "solid_rectangle_saint_venant_fourier",
+      "shear_center_method": "geometric_symmetry",
+      "effective_shear_area_method": "jourawski_rectangle_five_sixths_area"
     },
     "torsion": {
       "method": "saint_venant_odd_series",
       "terms": 84,
       "requested_relative_tolerance": 1e-10,
-      "truncation_abs_error_bound": 0.2722449031355851,
-      "floating_point_abs_error_estimate": 4.5845448689194915e-05,
-      "relative_error_bound_with_roundoff_estimate": 9.668515700183546e-11,
+      "truncation_abs_error_bound": 0.272244903135585,
+      "floating_point_abs_error_estimate": 0.00004567282353235922,
+      "relative_error_bound_with_roundoff_estimate": 9.668509570599459e-11,
       "scaled_tail_bound": 6.049886736346334e-11,
-      "scaled_roundoff_estimate": 1.0187877486487757e-14,
+      "scaled_roundoff_estimate": 1.014951634052427e-14,
       "converged": true
     },
     "intermediate": {},
     "bounding_box": {
-      "x_min": 0.0,
-      "y_min": 0.0,
-      "x_max": 300.0,
-      "y_max": 500.0
+      "x_min": 0,
+      "y_min": 0,
+      "x_max": 300,
+      "y_max": 500
     },
     "assumptions": [
       "dimensions_in_mm",
@@ -130,5 +173,754 @@
       "homogeneous_geometric_plastic_properties"
     ]
   },
-  "status": "success"
+  "status": "success",
+  "formula_report": {
+    "schema_version": "1.0",
+    "library_version": "1.0.0",
+    "manifest_hash": "a0fff089d68dd7eeec5b1f009c998746b3288020b7cb3edf8c2d3177ca6ebf4a",
+    "core": "section-properties/shared-typescript",
+    "core_version": "1.3.0",
+    "profile_id": "rectangle",
+    "geometry_type": "rectangle",
+    "profile_label": "RECTANGLE",
+    "geometry_model_version": "1.0.0",
+    "normalized_geometry": {
+      "type": "rectangle",
+      "geometry_variant": "solid",
+      "geometry_model_version": "1.0.0",
+      "dimensions": {
+        "width": 300,
+        "height": 500
+      }
+    },
+    "geometry_hash": "bdd857552bfa4d0df1c246c6ef7b10825a470a2fd055ad47cc443b171ed620d8",
+    "solver": {
+      "method": "analytical",
+      "version": "1.3.0",
+      "config_hash": "640fd9df4c86e8fbce4f0fcae9e2eab88a0314e94bba23c83d9cf269f4cb7ef1"
+    },
+    "coordinate_system": {
+      "origin": "bounding_box_lower_left",
+      "x": "right",
+      "y": "up",
+      "ixy": "positive_coordinate_product",
+      "principal_angle": "counterclockwise_from_x_modulo_180",
+      "advanced_flow_convention": "xcℓ,ycℓ and Ixℓ,Iyℓ,Ixyℓ are median-wall area centroid/inertias; unit-force q gradients and torque use those centroidal coordinates. Sectorial warping uses the shear-center pole. Offsets use the gross centroid. Normalized diagnostic wall data are scaled by normalization_length_mm; returned properties and formula dimensions are physical mm powers."
+    },
+    "units": "mm",
+    "dimensions": [
+      {
+        "key": "width",
+        "symbol": "b",
+        "value": 300,
+        "unit": "mm"
+      },
+      {
+        "key": "height",
+        "symbol": "h",
+        "value": 500,
+        "unit": "mm"
+      }
+    ],
+    "components": [],
+    "inputs": {
+      "dimensions": {
+        "b": 300,
+        "h": 500
+      },
+      "symbols": {
+        "b": 300,
+        "h": 500,
+        "A": 150000,
+        "P": 1600,
+        "x̄": 150,
+        "ȳ": 250,
+        "Ix": 3125000000,
+        "Iy": 1125000000,
+        "Ixy": 0,
+        "Sx+": 12500000,
+        "Sx−": 12500000,
+        "Sy+": 7500000,
+        "Sy−": 7500000,
+        "rx": 144.33756729740642,
+        "ry": 86.60254037844386,
+        "PNAx": 150,
+        "PNAy": 250,
+        "Zx": 18750000,
+        "Zy": 11250000,
+        "Imax": 3125000000,
+        "Imin": 1125000000,
+        "θ": 0,
+        "J": 2816262154.959644,
+        "Cw": 5448497945211.81
+      },
+      "bounding_box": {
+        "x_min": 0,
+        "y_min": 0,
+        "x_max": 300,
+        "y_max": 500
+      },
+      "geometric": {
+        "area": 150000,
+        "perimeter": 1600,
+        "centroid_x": 150,
+        "centroid_y": 250
+      },
+      "elastic": {
+        "ix": 3125000000,
+        "iy": 1125000000,
+        "ixy": 0,
+        "sx_positive": 12500000,
+        "sx_negative": 12500000,
+        "sy_positive": 7500000,
+        "sy_negative": 7500000,
+        "rx": 144.33756729740642,
+        "ry": 86.60254037844386
+      },
+      "plastic": {
+        "pna_x": 150,
+        "pna_y": 250,
+        "zx": 18750000,
+        "zy": 11250000
+      },
+      "intermediate": {},
+      "advanced_model": {
+        "status": "computed",
+        "model": "solid_rectangle",
+        "assumptions": [
+          "homogeneous_isotropic_geometry_only",
+          "rectangle_shear_area_uses_jourawski_five_sixths_convention"
+        ],
+        "range_failures": [],
+        "normalization_length_mm": 500,
+        "normalized_geometry_diagnostics": true,
+        "torsion": {
+          "method": "saint_venant_odd_series",
+          "terms": 84,
+          "requested_relative_tolerance": 1e-10,
+          "truncation_abs_error_bound": 0.272244903135585,
+          "floating_point_abs_error_estimate": 0.00004567282353235922,
+          "relative_error_bound_with_roundoff_estimate": 9.668509570599459e-11,
+          "scaled_tail_bound": 6.049886736346334e-11,
+          "scaled_roundoff_estimate": 1.014951634052427e-14,
+          "converged": true
+        },
+        "warping": {
+          "method": "solid_rectangle_fourier_warping_norm",
+          "terms_per_axis": 64,
+          "absolute_tail_bound": 3.972104134045773e-15,
+          "floating_point_abs_error_estimate": 2.1316282072748957e-17,
+          "relative_error_bound_with_roundoff_estimate": 1.1452182717016005e-11,
+          "relative_tolerance": 1e-10,
+          "converged": true
+        },
+        "torsion_method": "solid_rectangle_saint_venant_odd_series",
+        "warping_method": "solid_rectangle_saint_venant_fourier",
+        "shear_center_method": "geometric_symmetry",
+        "effective_shear_area_method": "jourawski_rectangle_five_sixths_area"
+      },
+      "options": {
+        "solver": "analytical",
+        "include_plastic": true,
+        "include_advanced": true,
+        "rectangle_j_relative_tolerance": 1e-10,
+        "rectangle_j_max_terms": 10000,
+        "required_properties": []
+      }
+    },
+    "properties": [
+      {
+        "key": "geometric.area",
+        "symbol": "A",
+        "unit": "mm2",
+        "status": "computed",
+        "value": 150000,
+        "method": "gross_geometry_integrals",
+        "expression": "A = b h",
+        "substitution": {
+          "expression": "A = (300) (500)",
+          "dimensions": {
+            "b": 300,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "A = 150000 mm2"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "geometric.perimeter",
+        "symbol": "P",
+        "unit": "mm",
+        "status": "computed",
+        "value": 1600,
+        "method": "gross_geometry_integrals",
+        "expression": "P = 2(b + h)",
+        "substitution": {
+          "expression": "P = 2((300) + (500))",
+          "dimensions": {
+            "b": 300,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "P = 1600 mm"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "geometric.centroid_x",
+        "symbol": "x̄",
+        "unit": "mm",
+        "status": "computed",
+        "value": 150,
+        "method": "gross_geometry_integrals",
+        "expression": "x̄ = b/2",
+        "substitution": {
+          "expression": "x̄ = (300)/2",
+          "dimensions": {
+            "b": 300,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "x̄ = 150 mm"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "geometric.centroid_y",
+        "symbol": "ȳ",
+        "unit": "mm",
+        "status": "computed",
+        "value": 250,
+        "method": "gross_geometry_integrals",
+        "expression": "ȳ = h/2",
+        "substitution": {
+          "expression": "ȳ = (500)/2",
+          "dimensions": {
+            "b": 300,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "ȳ = 250 mm"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "elastic.ix",
+        "symbol": "Ix",
+        "unit": "mm4",
+        "status": "computed",
+        "value": 3125000000,
+        "method": "gross_geometry_integrals",
+        "expression": "Ix = b h³/12",
+        "substitution": {
+          "expression": "Ix = (300) h³/12",
+          "dimensions": {
+            "b": 300,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "Ix = 3125000000 mm4"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "elastic.iy",
+        "symbol": "Iy",
+        "unit": "mm4",
+        "status": "computed",
+        "value": 1125000000,
+        "method": "gross_geometry_integrals",
+        "expression": "Iy = h b³/12",
+        "substitution": {
+          "expression": "Iy = (500) b³/12",
+          "dimensions": {
+            "b": 300,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "Iy = 1125000000 mm4"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "elastic.ixy",
+        "symbol": "Ixy",
+        "unit": "mm4",
+        "status": "computed",
+        "value": 0,
+        "method": "gross_geometry_integrals",
+        "expression": "Ixy = 0",
+        "substitution": {
+          "expression": "Ixy = 0",
+          "dimensions": {
+            "b": 300,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "Ixy = 0 mm4"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "elastic.sx_positive",
+        "symbol": "Sx+",
+        "unit": "mm3",
+        "status": "computed",
+        "value": 12500000,
+        "method": "gross_geometry_integrals",
+        "expression": "Sx+ = Ix/(H − ȳ)",
+        "substitution": {
+          "expression": "Sx+ = (3125000000)/(H − (250))",
+          "dimensions": {
+            "b": 300,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "Sx+ = 12500000 mm3"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "elastic.sx_negative",
+        "symbol": "Sx−",
+        "unit": "mm3",
+        "status": "computed",
+        "value": 12500000,
+        "method": "gross_geometry_integrals",
+        "expression": "Sx− = Ix/ȳ",
+        "substitution": {
+          "expression": "Sx− = (3125000000)/(250)",
+          "dimensions": {
+            "b": 300,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "Sx− = 12500000 mm3"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "elastic.sy_positive",
+        "symbol": "Sy+",
+        "unit": "mm3",
+        "status": "computed",
+        "value": 7500000,
+        "method": "gross_geometry_integrals",
+        "expression": "Sy+ = Iy/(B − x̄)",
+        "substitution": {
+          "expression": "Sy+ = (1125000000)/(B − (150))",
+          "dimensions": {
+            "b": 300,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "Sy+ = 7500000 mm3"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "elastic.sy_negative",
+        "symbol": "Sy−",
+        "unit": "mm3",
+        "status": "computed",
+        "value": 7500000,
+        "method": "gross_geometry_integrals",
+        "expression": "Sy− = Iy/x̄",
+        "substitution": {
+          "expression": "Sy− = (1125000000)/(150)",
+          "dimensions": {
+            "b": 300,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "Sy− = 7500000 mm3"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "elastic.rx",
+        "symbol": "rx",
+        "unit": "mm",
+        "status": "computed",
+        "value": 144.33756729740642,
+        "method": "gross_geometry_integrals",
+        "expression": "rx = √(Ix/A)",
+        "substitution": {
+          "expression": "rx = √((3125000000)/(150000))",
+          "dimensions": {
+            "b": 300,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "rx = 144.33756729740642 mm"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "elastic.ry",
+        "symbol": "ry",
+        "unit": "mm",
+        "status": "computed",
+        "value": 86.60254037844386,
+        "method": "gross_geometry_integrals",
+        "expression": "ry = √(Iy/A)",
+        "substitution": {
+          "expression": "ry = √((1125000000)/(150000))",
+          "dimensions": {
+            "b": 300,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "ry = 86.60254037844386 mm"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "plastic.pna_x",
+        "symbol": "PNAx",
+        "unit": "mm",
+        "status": "computed",
+        "value": 150,
+        "method": "gross_geometry_integrals",
+        "expression": "xp = b/2",
+        "substitution": {
+          "expression": "xp = (300)/2",
+          "dimensions": {
+            "b": 300,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "PNAx = 150 mm"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "plastic.pna_y",
+        "symbol": "PNAy",
+        "unit": "mm",
+        "status": "computed",
+        "value": 250,
+        "method": "gross_geometry_integrals",
+        "expression": "yp = h/2",
+        "substitution": {
+          "expression": "yp = (500)/2",
+          "dimensions": {
+            "b": 300,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "PNAy = 250 mm"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "plastic.zx",
+        "symbol": "Zx",
+        "unit": "mm3",
+        "status": "computed",
+        "value": 18750000,
+        "method": "gross_geometry_integrals",
+        "expression": "Zx = b h²/4",
+        "substitution": {
+          "expression": "Zx = (300) h²/4",
+          "dimensions": {
+            "b": 300,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "Zx = 18750000 mm3"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "plastic.zy",
+        "symbol": "Zy",
+        "unit": "mm3",
+        "status": "computed",
+        "value": 11250000,
+        "method": "gross_geometry_integrals",
+        "expression": "Zy = h b²/4",
+        "substitution": {
+          "expression": "Zy = (500) b²/4",
+          "dimensions": {
+            "b": 300,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "Zy = 11250000 mm3"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "principal.i_major",
+        "symbol": "Imax",
+        "unit": "mm4",
+        "status": "computed",
+        "value": 3125000000,
+        "method": "gross_geometry_integrals",
+        "expression": "Imax = (Ix + Iy)/2 + √[((Ix − Iy)/2)² + Ixy²]",
+        "substitution": {
+          "expression": "Imax = ((3125000000) + (1125000000))/2 + √[(((3125000000) − (1125000000))/2)² + Ixy²]",
+          "dimensions": {
+            "b": 300,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "Imax = 3125000000 mm4"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "principal.i_minor",
+        "symbol": "Imin",
+        "unit": "mm4",
+        "status": "computed",
+        "value": 1125000000,
+        "method": "gross_geometry_integrals",
+        "expression": "Imin = (Ix + Iy)/2 − √[((Ix − Iy)/2)² + Ixy²]",
+        "substitution": {
+          "expression": "Imin = ((3125000000) + (1125000000))/2 − √[(((3125000000) − (1125000000))/2)² + Ixy²]",
+          "dimensions": {
+            "b": 300,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "Imin = 1125000000 mm4"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "principal.major_axis_angle_degrees",
+        "symbol": "θ",
+        "unit": "deg",
+        "status": "computed",
+        "value": 0,
+        "method": "gross_geometry_integrals",
+        "expression": "θ = ½ atan2(−2Ixy, Ix − Iy), modulo 180°",
+        "substitution": {
+          "expression": "θ = ½ atan2(−2 × (0), (3125000000) − (1125000000)), modulo 180°",
+          "dimensions": {
+            "b": 300,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "θ = 0 deg"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "principal.orientation_status",
+        "symbol": "Orientation",
+        "unit": "1",
+        "status": "computed",
+        "value": "determinate",
+        "method": "gross_geometry_integrals",
+        "expression": "Indeterminate when Ix = Iy and Ixy = 0",
+        "substitution": {
+          "expression": "Indeterminate when Ix = (1125000000) and (0) = 0",
+          "dimensions": {
+            "b": 300,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "Orientation = \"determinate\" 1"
+        },
+        "reason": null,
+        "reference_ids": [
+          "geometric_integrals"
+        ]
+      },
+      {
+        "key": "advanced.torsion_constant_j",
+        "symbol": "J",
+        "unit": "mm4",
+        "status": "computed",
+        "value": 2816262154.959644,
+        "method": "solid_rectangle_saint_venant_odd_series",
+        "expression": "a = max(b,h); c = min(b,h); J = ac³/3 [1 − 192c/(π⁵a) Σ_{n=1,3,5,…} tanh(nπa/(2c))/n⁵]",
+        "substitution": {
+          "expression": "a = max((300),(500)); c = min((300),(500)); J = ac³/3 [1 − 192 × c/(π⁵a) Σ_{n=1,3,5,…} tanh(nπ × a/(2 × c))/n⁵]",
+          "dimensions": {
+            "b": 300,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "J = 2816262154.959644 mm4"
+        },
+        "reason": null,
+        "reference_ids": [
+          "saint_venant",
+          "vlasov"
+        ]
+      },
+      {
+        "key": "advanced.warping_constant_cw",
+        "symbol": "Cw",
+        "unit": "mm6",
+        "status": "computed",
+        "value": 5448497945211.81,
+        "method": "solid_rectangle_saint_venant_fourier",
+        "expression": "a = b/2; c = h/2; ∇²ψ = 0; ψ_x = y on x=±a, ψ_y = −x on y=±c; Cw = ∫_{−a}^{a}∫_{−c}^{c} ψ² dy dx (convergent harmonic Fourier series)",
+        "substitution": {
+          "expression": "a = (300)/2; c = (500)/2; ∇²ψ = 0; ψ_x = y on x=±a, ψ_y = −x on y=±c; Cw = ∫_{−a}^{a}∫_{−c}^{c} ψ² dy dx (convergent harmonic Fourier series)",
+          "dimensions": {
+            "b": 300,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "Cw = 5448497945211.81 mm6"
+        },
+        "reason": null,
+        "reference_ids": [
+          "saint_venant",
+          "vlasov"
+        ]
+      },
+      {
+        "key": "advanced.shear_center",
+        "symbol": "SC",
+        "unit": "mm",
+        "status": "computed",
+        "value": {
+          "x": 150,
+          "y": 250,
+          "offset_x": 0,
+          "offset_y": 0
+        },
+        "method": "geometric_symmetry",
+        "expression": "xs = b/2; ys = h/2; Δx = Δy = 0",
+        "substitution": {
+          "expression": "xs = (300)/2; ys = (500)/2; Δx = Δy = 0",
+          "dimensions": {
+            "b": 300,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "SC = {\"x\":150,\"y\":250,\"offset_x\":0,\"offset_y\":0} mm"
+        },
+        "reason": null,
+        "reference_ids": [
+          "saint_venant",
+          "vlasov"
+        ]
+      },
+      {
+        "key": "advanced.effective_shear_area",
+        "symbol": "Ax/Ay",
+        "unit": "mm2",
+        "status": "computed",
+        "value": {
+          "x": 125000,
+          "y": 125000
+        },
+        "method": "jourawski_rectangle_five_sixths_area",
+        "expression": "Ax = Ay = 5 b h/6 (Jourawski shear-energy convention)",
+        "substitution": {
+          "expression": "Ax = Ay = 5 (300) (500)/6 (Jourawski shear-energy convention)",
+          "dimensions": {
+            "b": 300,
+            "h": 500
+          },
+          "context_ref": "inputs",
+          "result": "Ax/Ay = {\"x\":125000,\"y\":125000} mm2"
+        },
+        "reason": null,
+        "reference_ids": [
+          "saint_venant",
+          "vlasov"
+        ]
+      }
+    ],
+    "assumptions": [
+      "dimensions_in_mm",
+      "xy_plane_x_right_y_up",
+      "bbox_origin_bottom_left",
+      "centroidal_unrotated_inertias",
+      "positive_coordinate_product_ixy",
+      "sharp_corners",
+      "homogeneous_geometric_plastic_properties",
+      "homogeneous_isotropic_geometry_only",
+      "rectangle_shear_area_uses_jourawski_five_sixths_convention"
+    ],
+    "references": [
+      {
+        "id": "geometric_integrals",
+        "title": "Area, first/second moments and plastic modulus: integral definitions and parallel-axis theorem"
+      },
+      {
+        "id": "saint_venant",
+        "title": "Saint-Venant torsion; Prandtl stress-function formulation"
+      },
+      {
+        "id": "vlasov",
+        "title": "V. Z. Vlasov, Thin-Walled Elastic Beams (1961): sectorial-coordinate and shear-flow theory"
+      }
+    ],
+    "reference_ids": [
+      "geometric_integrals",
+      "saint_venant",
+      "vlasov"
+    ]
+  }
 }

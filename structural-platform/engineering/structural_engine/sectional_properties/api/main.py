@@ -10,7 +10,8 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from .. import CalculationError, CalculationOptions, calculate, validate_geometry_definition
-from ..models import AngleGeometry, ChannelGeometry, CircleGeometry, CircularHollowGeometry, ISectionGeometry, RectangleGeometry, RectangularHollowGeometry, TeeGeometry
+from ..canonical import CoreUnavailableError, calculate_canonical, section_registry
+from ..models import AngleGeometry, ChannelGeometry, CircleGeometry, CircularHollowGeometry, DoubleAngleGeometry, ISectionGeometry, RectangleGeometry, RectangularHollowGeometry, TeeGeometry
 
 
 app = FastAPI(title="Sectional Properties API", version="1.0.0")
@@ -107,7 +108,7 @@ def _dimension_input_schema(
 
 
 @app.get("/v1/section-types")
-def section_types() -> dict[str, list[dict[str, Any]]]:
+def section_types() -> dict[str, Any]:
     """Return v1 type identifiers and JSON Schemas for the geometry envelope."""
 
     types = [
@@ -171,8 +172,19 @@ def section_types() -> dict[str, list[dict[str, Any]]]:
             "geometry_variant": "sharp_corner",
             "input_schema": _dimension_input_schema(AngleGeometry, "angle", "sharp_corner", ("depth", "width", "thickness")),
         },
+        {
+            "type": "double_angle",
+            "name": "Double angle",
+            "geometry_variant": "back_to_back",
+            "input_schema": _dimension_input_schema(DoubleAngleGeometry, "double_angle", "back_to_back", ("depth", "width", "thickness", "distance")),
+        },
     ]
-    return {"data": types}
+    registry = section_registry()
+    for item in types:
+        profiles = [profile for profile in registry["profiles"] if profile["geometry_type"] == item["type"]]
+        item["name"] = " / ".join(profile["label"] for profile in profiles)
+        item["profile_ids"] = [profile["id"] for profile in profiles]
+    return {"data": types, "profiles": registry["profiles"], "formula_library_version": registry["library_version"]}
 
 
 class _CalculationRequest(BaseModel):
@@ -185,36 +197,11 @@ class _CalculationRequest(BaseModel):
 
 @app.post("/v1/sections/calculate")
 def calculate_section(payload: dict[str, Any] = Body(...)) -> JSONResponse:
-    """Validate a unit-explicit geometry envelope and return engine output."""
-
+    """Use the same validation, numerical core and report as the browser."""
     try:
-        request = _CalculationRequest.model_validate(payload)
-    except ValidationError as error:
-        errors = _validation_errors(error)
-        return _error(422, _validation_code(errors), "Input validation failed.", errors=errors)
-
-    if request.units != "mm":
-        errors = [{"path": "units", "type": "literal_error", "message": "Only millimetres (mm) are supported."}]
-        return _error(422, "UNSUPPORTED_UNITS", "Input validation failed.", errors=errors)
-
-    try:
-        geometry = validate_geometry_definition(request.geometry)
-    except ValidationError as error:
-        errors = _validation_errors(error, "geometry")
-        return _error(422, _validation_code(errors), "Input validation failed.", errors=errors)
-
-    try:
-        options = CalculationOptions.model_validate(request.options)
-    except ValidationError as error:
-        errors = _validation_errors(error, "options")
-        return _error(422, _validation_code(errors), "Input validation failed.", errors=errors)
-
-    try:
-        result = calculate(geometry, options)
-    except CalculationError as error:
-        return _error(422, error.code, str(error), details=error.details)
+        result = calculate_canonical(payload)
+    except CoreUnavailableError as error:
+        return _error(503, "ENGINE_UNAVAILABLE", str(error))
     except Exception:
-        # Keep unexpected implementation details and tracebacks out of the API contract.
         return _error(500, "INTERNAL_ERROR", "Calculation failed unexpectedly.")
-
-    return JSONResponse(content=result.model_dump(mode="json"))
+    return JSONResponse(content=result, status_code=200 if result["status"] == "success" else 422)

@@ -1,7 +1,9 @@
 name: geekcalculus
 services:
   section-engine:
-    build: ./engineering
+    build:
+      context: .
+      dockerfile: engineering/Dockerfile
     expose:
       - "8001"
     command: ["python", "-m", "uvicorn", "structural_engine.sectional_properties.api.main:app", "--host", "0.0.0.0", "--port", "8001"]

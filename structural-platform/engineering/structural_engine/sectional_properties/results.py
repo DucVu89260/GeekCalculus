@@ -5,6 +5,7 @@ from typing import Annotated, Literal
 from pydantic import BaseModel, ConfigDict, Field, FiniteFloat, model_validator
 
 PositiveResult = Annotated[FiniteFloat, Field(gt=0)]
+NonnegativeResult = Annotated[FiniteFloat, Field(ge=0)]
 
 
 class ResultModel(BaseModel):
@@ -53,7 +54,7 @@ class Properties(ResultModel):
 
 class AdvancedProperty(ResultModel):
     status: Literal["computed", "not_computed"]
-    value: PositiveResult | None
+    value: NonnegativeResult | None
     reason: str | None = None
     method: str | None = None
 
@@ -69,8 +70,8 @@ class AdvancedProperty(ResultModel):
 class ShearCenterValue(ResultModel):
     """Global coordinates and offsets from the gross centroid, in mm."""
 
-    x: PositiveResult
-    y: PositiveResult
+    x: FiniteFloat
+    y: FiniteFloat
     offset_x: FiniteFloat
     offset_y: FiniteFloat
 
@@ -142,6 +143,7 @@ class CalculationResult(ResultModel):
         "channel",
         "tee",
         "angle",
+        "double_angle",
     ]
     geometry_hash: str
     solver: SolverIdentity

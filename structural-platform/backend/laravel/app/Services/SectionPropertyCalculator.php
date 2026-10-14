@@ -11,27 +11,24 @@ class SectionPropertyCalculator
     /** All dimensions are in mm. The result uses the package's XY axes, never implicit catalog Y/Z aliases. */
     public static function requestFor(string $shape, array $p): array
     {
-        $type = $shape === 'i' ? 'i_section' : $shape;
-        $variant = in_array($shape, ['rectangle', 'circle']) ? 'solid' : ($shape === 'circular_hollow' ? 'uniform_wall' : 'sharp_corner');
-        $dimensions = match ($shape) {
-            'rectangle' => ['width' => $p['width'], 'height' => $p['depth']],
-            'circle' => ['diameter' => $p['diameter']],
-            'i' => [
-                'depth' => $p['depth'],
-                'top_flange_width' => $p['top_flange_width'] ?? $p['width'],
-                'bottom_flange_width' => $p['bottom_flange_width'] ?? $p['width'],
-                'web_thickness' => $p['web_thickness'],
-                'top_flange_thickness' => $p['top_flange_thickness'] ?? $p['flange_thickness'],
-                'bottom_flange_thickness' => $p['bottom_flange_thickness'] ?? $p['flange_thickness'],
-            ],
-            'rectangular_hollow' => ['width' => $p['width'], 'height' => $p['depth'], 'thickness' => $p['thickness']],
-            'circular_hollow' => ['diameter' => $p['diameter'], 'thickness' => $p['thickness']],
-            'channel', 'tee' => ['depth' => $p['depth'], 'width' => $p['width'], 'web_thickness' => $p['web_thickness'], 'flange_thickness' => $p['flange_thickness']],
-            'angle' => ['depth' => $p['depth'], 'width' => $p['width'], 'thickness' => $p['thickness']],
-            default => throw ValidationException::withMessages(['section_type_id' => ['This geometry has no section-property solver.']]),
-        };
+        $registry = json_decode(file_get_contents(base_path('../../section-properties/section-registry.json')), true, 512, JSON_THROW_ON_ERROR);
+        $profileId = $shape === 'i'
+            ? (isset($p['top_flange_width']) ? 'asymmetric_i' : 'symmetric_i')
+            : ($registry['aliases'][$shape] ?? $shape);
+        $profile = collect($registry['profiles'])->firstWhere('id', $profileId);
+        if (! $profile) {
+            throw ValidationException::withMessages(['section_type_id' => ['This geometry has no section-property solver.']]);
+        }
+        $dimensions = [];
+        foreach ($profile['engine_dimensions'] as $engineKey => $inputKey) {
+            $catalogKey = $registry['dimensions'][$inputKey]['catalog_key'] ?? $inputKey;
+            $dimensions[$engineKey] = $p[$catalogKey];
+        }
+        $type = $profile['geometry_type'];
+        $variant = $profile['geometry_variant'];
 
         return [
+            'profile_id' => $profile['id'],
             'geometry' => ['type' => $type, 'geometry_variant' => $variant, 'geometry_model_version' => '1.0.0', 'dimensions' => $dimensions],
             'units' => 'mm',
             'options' => ['include_plastic' => true, 'include_advanced' => true],
@@ -96,7 +93,7 @@ class SectionPropertyCalculator
             || ($geometry['geometry_model_version'] ?? null) !== '1.0.0'
             || data_get($r, 'solver.method') !== 'analytical'
             || ! is_string(data_get($r, 'solver.config_hash')) || ! preg_match('/^[a-f0-9]{64}$/', data_get($r, 'solver.config_hash'))
-            || ! is_string(data_get($r, 'solver.version')) || ! data_get($r, 'solver.version')
+            || ! is_string(data_get($r, 'solver.version')) || version_compare(data_get($r, 'solver.version'), '1.3.0', '<')
             || ! is_string($r['geometry_hash'] ?? null) || ! preg_match('/^[a-f0-9]{64}$/', $r['geometry_hash'])
             || ! is_array($r['diagnostics'] ?? null)) {
             return false;
@@ -106,7 +103,7 @@ class SectionPropertyCalculator
             return false;
         }
         foreach ($payload['geometry']['dimensions'] as $key => $value) {
-            if (! $this->finite($dimensions[$key] ?? null, true) || $dimensions[$key] != $value) {
+            if (! $this->finite($dimensions[$key] ?? null, $key !== 'distance') || ($key === 'distance' && $dimensions[$key] < 0) || $dimensions[$key] != $value) {
                 return false;
             }
         }
@@ -142,7 +139,7 @@ class SectionPropertyCalculator
                     return false;
                 }
                 if (in_array($key, ['torsion_constant_j', 'warping_constant_cw'])) {
-                    if (! $this->finite($property['value'] ?? null, true)) {
+                    if (! $this->finite($property['value'] ?? null, $key !== 'warping_constant_cw') || ($key === 'warping_constant_cw' && $property['value'] < 0)) {
                         return false;
                     }
                 } else {
@@ -153,6 +150,52 @@ class SectionPropertyCalculator
                     }
                 }
             } else {
+                return false;
+            }
+        }
+
+        $report = $r['formula_report'] ?? null;
+        if (! is_array($report) || ($report['schema_version'] ?? null) !== '1.0'
+            || ($report['library_version'] ?? null) !== '1.0.0'
+            || ($report['core'] ?? null) !== 'section-properties/shared-typescript'
+            || ($report['core_version'] ?? null) !== data_get($r, 'solver.version')
+            || ($report['geometry_type'] ?? null) !== $payload['geometry']['type']
+            || ($report['profile_id'] ?? null) !== $payload['profile_id']
+            || ($report['units'] ?? null) !== 'mm'
+            || ! is_string($report['manifest_hash'] ?? null) || ! preg_match('/^[a-f0-9]{64}$/', $report['manifest_hash'])
+            || ! is_array($report['dimensions'] ?? null) || ! is_array($report['properties'] ?? null)) {
+            return false;
+        }
+        $reportedDimensions = collect($report['dimensions'])->keyBy('key');
+        foreach ($payload['geometry']['dimensions'] as $key => $value) {
+            $reportedDimension = $reportedDimensions->get($key);
+            if (! is_array($reportedDimension) || ! array_key_exists('value', $reportedDimension)
+                || ! $this->finite($reportedDimension['value']) || $reportedDimension['value'] != $value) {
+                return false;
+            }
+        }
+        $registry = json_decode(file_get_contents(base_path('../../section-properties/section-registry.json')), true, 512, JSON_THROW_ON_ERROR);
+        $manifestObject = json_decode(file_get_contents(base_path('../../section-properties/section-registry.json')), false, 512, JSON_THROW_ON_ERROR);
+        $manifestHash = hash('sha256', json_encode($manifestObject, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR));
+        if ($report['manifest_hash'] !== $manifestHash) {
+            return false;
+        }
+        $reportedProperties = collect($report['properties'])->keyBy('key');
+        if ($reportedProperties->count() !== count($registry['properties'])) {
+            return false;
+        }
+        foreach ($registry['properties'] as $definition) {
+            $key = $definition['key'];
+            $reported = $reportedProperties->get($key);
+            $advanced = str_starts_with($key, 'advanced.');
+            $value = data_get($r, $advanced ? $key.'.value' : 'properties.'.$key);
+            if (! is_array($reported) || ($reported['unit'] ?? null) !== $definition['unit']
+                || ! array_key_exists('value', $reported) || $reported['value'] != $value
+                || ! is_string($reported['expression'] ?? null) || ! $reported['expression']) {
+                return false;
+            }
+            if ($advanced && (data_get($r, $key.'.status') !== 'computed' || ($reported['status'] ?? null) !== 'computed')) {
+                // New saved catalog records must contain every structural property requested.
                 return false;
             }
         }

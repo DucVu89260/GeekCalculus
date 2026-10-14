@@ -18,7 +18,10 @@ class LibraryController extends Controller
 
     private function definitions(): array
     {
-        return json_decode(file_get_contents(base_path('../../database/seeds/engineering-schema.json')), true, 512, JSON_THROW_ON_ERROR);
+        $schema = json_decode(file_get_contents(base_path('../../database/seeds/engineering-schema.json')), true, 512, JSON_THROW_ON_ERROR);
+        $schema['section_properties_registry'] = json_decode(file_get_contents(base_path('../../section-properties/section-registry.json')), true, 512, JSON_THROW_ON_ERROR);
+
+        return $schema;
     }
 
     public function schema()
@@ -202,7 +205,7 @@ class LibraryController extends Controller
         if (in_array($shape, ['channel', 'tee'])) {
             $invalid = $p['web_thickness'] >= $p['width'] || (in_array($shape, ['i', 'channel']) ? 2 : 1) * $p['flange_thickness'] >= $p['depth'];
         }
-        if ($shape === 'angle') {
+        if (in_array($shape, ['angle', 'double_angle'])) {
             $invalid = $p['thickness'] >= min($p['depth'], $p['width']);
         }
         if ($shape === 'rectangular_hollow') {

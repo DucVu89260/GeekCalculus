@@ -1,146 +1,127 @@
 <script setup>
 import { computed, useId } from 'vue'
+import { resolveSectionProfile, sectionProfileDimensions, SECTION_REGISTRY } from '../sectional-properties/catalog.js'
 
 const props = defineProps({
+  profileId: { type: String, default: '' },
   shape: { type: String, default: '' },
   dimensions: { type: Object, default: () => ({}) },
   locale: { type: String, default: 'en' },
 })
-
 const markerId = `section-dimension-arrow-${useId().replaceAll(':', '')}`
 const labels = {
-  vi: { title: 'Sơ đồ tiết diện', schematic: 'Sơ đồ minh họa; không theo tỷ lệ khi thiếu kích thước hoặc tỷ lệ không hợp lệ.', diameter: 'Đường kính' },
-  en: { title: 'Section sketch', schematic: 'Schematic; not to scale when dimensions are missing or proportions are invalid.', diameter: 'Diameter' },
+  vi: { title: 'Sơ đồ tiết diện', schematic: 'Sơ đồ minh họa; không theo tỷ lệ khi thiếu kích thước.', width: 'Bề rộng', height: 'Chiều cao', diameter: 'Đường kính' },
+  en: { title: 'Section sketch', schematic: 'Schematic; not to scale when dimensions are missing.', width: 'Width', height: 'Height', diameter: 'Diameter' },
 }
 const t = (key) => labels[props.locale]?.[key] ?? labels.en[key]
 
-function positive(value, fallback) {
+function numeric(value, fallback, allowZero = false) {
   const parsed = Number(value)
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback
+  return Number.isFinite(parsed) && (allowZero ? parsed >= 0 : parsed > 0) ? parsed : fallback
 }
-
-function dimensionText(symbol, value) {
+function valueLabel(symbol, value) {
   const parsed = Number(value)
-  return Number.isFinite(parsed) && parsed > 0
-    ? `${symbol} = ${new Intl.NumberFormat(props.locale === 'vi' ? 'vi-VN' : 'en-US', { maximumSignificantDigits: 5 }).format(parsed)} mm`
+  return Number.isFinite(parsed) && parsed >= 0
+    ? `${symbol} = ${new Intl.NumberFormat(props.locale === 'vi' ? 'vi-VN' : 'en-US', { maximumSignificantDigits: 4 }).format(parsed)} mm`
     : symbol
 }
 
-function featureText(symbol, value) {
-  const parsed = Number(value)
-  return Number.isFinite(parsed) && parsed > 0
-    ? `${symbol} ${new Intl.NumberFormat(props.locale === 'vi' ? 'vi-VN' : 'en-US', { maximumSignificantDigits: 4 }).format(parsed)}`
-    : symbol
-}
-
+const profile = computed(() => resolveSectionProfile(props.profileId || props.shape, props.dimensions))
+const values = computed(() => sectionProfileDimensions(profile.value, props.dimensions))
+const suppliedValues = computed(() => sectionProfileDimensions(profile.value, props.dimensions, { includeDefaults: false }))
 const drawing = computed(() => {
-  const d = props.dimensions ?? {}
-  const shape = props.shape
-  const diameter = positive(d.diameter, 160)
-  const legacyWidth = positive(d.width, 160)
-  const topFlangeWidth = positive(d.top_flange_width, legacyWidth)
-  const bottomFlangeWidth = positive(d.bottom_flange_width, legacyWidth)
-  const width = shape === 'circle' || shape === 'circular_hollow' ? diameter : shape === 'i' ? Math.max(topFlangeWidth, bottomFlangeWidth) : legacyWidth
-  const height = shape === 'circle' || shape === 'circular_hollow' ? diameter : positive(d.depth, 300)
-  const rawTw = positive(d.web_thickness, 12)
-  const rawTf = positive(d.flange_thickness, positive(d.top_flange_thickness, 14))
-  const rawTopTf = positive(d.top_flange_thickness, rawTf)
-  const rawBottomTf = positive(d.bottom_flange_thickness, rawTf)
-  const rawThickness = positive(d.thickness, 12)
-  const tw = Math.min(rawTw, width * 0.42)
-  const tf = Math.min(rawTf, height * 0.35)
-  const topTf = Math.min(rawTopTf, height * 0.35)
-  const bottomTf = Math.min(rawBottomTf, height * 0.35)
-  const thickness = Math.min(rawThickness, width * 0.4, height * 0.4)
-  const scale = Math.min(138 / width, 126 / height)
-  const drawWidth = width * scale
-  const drawHeight = height * scale
-  const left = 112 + (138 - drawWidth) / 2
-  const top = 23 + (128 - drawHeight) / 2
-  const x = (value) => left + value * scale
-  const y = (value) => top + (height - value) * scale
-  const center = width / 2
-  const pointsPath = (points) => `M ${points.map(([px, py]) => `${x(px)} ${y(py)}`).join(' L ')} Z`
+  const p = profile.value
+  const d = values.value
+  if (!p) return { hasDimensions: false, outline: '', circles: [], holes: [], labels: [] }
+  const v = (key, fallback = 1) => numeric(d[key], fallback)
+  const width = p.id === 'circle' || p.id === 'chs'
+    ? v('diameter')
+    : p.id === 'double_angle' ? 2 * v('width') + numeric(d.distance, 0, true)
+      : p.id === 'symmetric_i' ? v('width')
+        : p.id === 'asymmetric_i' ? Math.max(v('top_flange_width'), v('bottom_flange_width'))
+          : v('width')
+  const height = p.id === 'circle' || p.id === 'chs' ? v('diameter') : v(p.id === 'rectangle' || p.id === 'shs_rhs' ? 'height' : 'depth')
+  const scale = Math.min(140 / Math.max(width, Number.EPSILON), 124 / Math.max(height, Number.EPSILON))
+  const drawWidth = width * scale, drawHeight = height * scale
+  const left = 112 + (140 - drawWidth) / 2
+  const top = 20 + (124 - drawHeight) / 2
+  const x = (position) => left + position * scale
+  const y = (position) => top + (height - position) * scale
+  const path = (points) => `M ${points.map(([px, py]) => `${x(px)} ${y(py)}`).join(' L ')} Z`
   let outline = ''
-  let inner = null
-  let circle = null
-  let innerCircle = null
-  let webLabel = null
-  let flangeLabel = null
-  let bottomFlangeLabel = null
-  let thicknessLabel = null
-  const hasAsymmetricFlangeDimensions = ['top_flange_width', 'bottom_flange_width', 'top_flange_thickness', 'bottom_flange_thickness'].some((key) => Number.isFinite(Number(d[key])) && Number(d[key]) > 0)
-  const requiredDimensions = shape === 'circle' ? ['diameter']
-    : shape === 'circular_hollow' ? ['diameter', 'thickness']
-      : shape === 'i' && hasAsymmetricFlangeDimensions ? ['depth', 'web_thickness', 'top_flange_width', 'bottom_flange_width', 'top_flange_thickness', 'bottom_flange_thickness']
-        : ['i', 'channel', 'tee'].includes(shape) ? ['depth', 'width', 'web_thickness', 'flange_thickness']
-        : ['angle', 'rectangular_hollow'].includes(shape) ? ['depth', 'width', 'thickness']
-          : shape === 'rectangle' ? ['depth', 'width'] : []
-  const allDimensionsPresent = requiredDimensions.length > 0 && requiredDimensions.every((key) => Number.isFinite(Number(d[key])) && Number(d[key]) > 0)
-  const proportionsValid = shape === 'circle' || shape === 'rectangle'
-    ? true
-    : shape === 'circular_hollow' ? rawThickness * 2 < diameter
-      : shape === 'rectangular_hollow' ? rawThickness * 2 < Math.min(width, height)
-        : shape === 'angle' ? rawThickness < Math.min(width, height)
-      : shape === 'i' ? rawTw <= Math.min(topFlangeWidth, bottomFlangeWidth) && rawTopTf + rawBottomTf < height
-        : shape === 'channel' ? rawTw < width && rawTf * 2 < height
-            : shape === 'tee' ? rawTw < width && rawTf < height : false
-  const thicknessWasClamped = (['i', 'channel', 'tee'].includes(shape) && (rawTw > width * 0.42 || rawTf > height * 0.35 || rawTopTf > height * 0.35 || rawBottomTf > height * 0.35))
-    || (['angle', 'rectangular_hollow', 'circular_hollow'].includes(shape) && rawThickness > Math.min(width * 0.4, height * 0.4))
+  const circles = []
+  const holes = []
+  const featureLabels = []
+  const b = v('width', width), h = height
+  const tw = v('web_thickness'), tf = v('flange_thickness'), t = v('thickness')
+  const hasDimensions = p.dimensions.every((key) => {
+    const raw = Number(suppliedValues.value[key]), def = SECTION_REGISTRY.dimensions[key]
+    return Number.isFinite(raw) && (def?.allow_zero ? raw >= (def.minimum ?? 0) : raw >= (def.minimum ?? 0))
+  })
 
-  if (shape === 'circle') {
-    circle = { cx: x(center), cy: y(height / 2), r: drawWidth / 2 }
-  } else if (shape === 'circular_hollow') {
-    circle = { cx: x(center), cy: y(height / 2), r: drawWidth / 2 }
-    const innerDiameter = Math.max(diameter - 2 * thickness, diameter * 0.1)
-    innerCircle = { cx: x(center), cy: y(height / 2), r: (innerDiameter / diameter) * drawWidth / 2 }
-    thicknessLabel = featureText('t', d.thickness)
-  } else if (shape === 'rectangle') {
-    outline = `M ${x(0)} ${y(0)} H ${x(width)} V ${y(height)} H ${x(0)} Z`
-  } else if (shape === 'rectangular_hollow') {
-    outline = `M ${x(0)} ${y(0)} H ${x(width)} V ${y(height)} H ${x(0)} Z`
-    inner = { x: x(thickness), y: y(height - thickness), width: drawWidth - 2 * thickness * scale, height: drawHeight - 2 * thickness * scale }
-    thicknessLabel = featureText('t', d.thickness)
-  } else if (shape === 'i') {
-    const topWidth = topFlangeWidth
-    const bottomWidth = bottomFlangeWidth
-    const centerX = center
-    outline = pointsPath([
-      [centerX - bottomWidth / 2, 0], [centerX + bottomWidth / 2, 0], [centerX + bottomWidth / 2, bottomTf],
-      [centerX + tw / 2, bottomTf], [centerX + tw / 2, height - topTf], [centerX + topWidth / 2, height - topTf],
-      [centerX + topWidth / 2, height], [centerX - topWidth / 2, height], [centerX - topWidth / 2, height - topTf],
-      [centerX - tw / 2, height - topTf], [centerX - tw / 2, bottomTf], [centerX - bottomWidth / 2, bottomTf],
-    ])
-    webLabel = featureText('tw', d.web_thickness)
-    if (Math.abs(rawTopTf - rawBottomTf) < 1e-9) flangeLabel = featureText('tf', d.flange_thickness ?? d.top_flange_thickness)
-    else {
-      flangeLabel = featureText('tft', d.top_flange_thickness)
-      bottomFlangeLabel = featureText('tfb', d.bottom_flange_thickness)
+  if (p.id === 'circle' || p.id === 'chs') {
+    circles.push({ cx: x(width / 2), cy: y(height / 2), r: drawWidth / 2 })
+    if (p.id === 'chs') {
+      const innerDiameter = Math.max(0, width - 2 * numeric(d.thickness, 0))
+      holes.push({ cx: x(width / 2), cy: y(height / 2), r: innerDiameter / 2 * scale })
+      featureLabels.push({ text: valueLabel('t', d.thickness), x: x(width / 2) + 6, y: y(height / 2) + 4 })
     }
-  } else if (shape === 'channel') {
-    outline = pointsPath([[0, 0], [width, 0], [width, tf], [tw, tf], [tw, height - tf], [width, height - tf], [width, height], [0, height]])
-    webLabel = featureText('tw', d.web_thickness)
-    flangeLabel = featureText('tf', d.flange_thickness)
-  } else if (shape === 'tee') {
+  } else if (p.id === 'rectangle') {
+    outline = path([[0, 0], [b, 0], [b, h], [0, h]])
+  } else if (p.id === 'shs_rhs') {
+    outline = path([[0, 0], [b, 0], [b, h], [0, h]])
+    const innerWidth = Math.max(0, b - 2 * t), innerHeight = Math.max(0, h - 2 * t)
+    holes.push({ x: x(t), y: y(h - t), width: innerWidth * scale, height: innerHeight * scale })
+    featureLabels.push({ text: valueLabel('t', d.thickness), x: x(b / 2) + 6, y: y(h / 2) + 4 })
+  } else if (p.id === 'symmetric_i' || p.id === 'asymmetric_i') {
+    const topWidth = p.id === 'symmetric_i' ? b : v('top_flange_width', b)
+    const bottomWidth = p.id === 'symmetric_i' ? b : v('bottom_flange_width', b)
+    const topThickness = p.id === 'symmetric_i' ? tf : v('top_flange_thickness')
+    const bottomThickness = p.id === 'symmetric_i' ? tf : v('bottom_flange_thickness')
     const centerX = width / 2
-    outline = pointsPath([[0, height], [width, height], [width, height - tf], [centerX + tw / 2, height - tf], [centerX + tw / 2, 0], [centerX - tw / 2, 0], [centerX - tw / 2, height - tf], [0, height - tf]])
-    webLabel = featureText('tw', d.web_thickness)
-    flangeLabel = featureText('tf', d.flange_thickness)
-  } else if (shape === 'angle') {
-    outline = pointsPath([[0, 0], [width, 0], [width, thickness], [thickness, thickness], [thickness, height], [0, height]])
-    thicknessLabel = featureText('t', d.thickness)
-  } else {
-    outline = `M ${x(0)} ${y(0)} H ${x(width)} V ${y(height)} H ${x(0)} Z`
+    const topLeft = centerX - topWidth / 2, bottomLeft = centerX - bottomWidth / 2
+    outline = path([
+      [bottomLeft, 0], [bottomLeft + bottomWidth, 0], [bottomLeft + bottomWidth, bottomThickness],
+      [centerX + tw / 2, bottomThickness], [centerX + tw / 2, h - topThickness],
+      [topLeft + topWidth, h - topThickness], [topLeft + topWidth, h], [topLeft, h],
+      [topLeft, h - topThickness], [centerX - tw / 2, h - topThickness],
+      [centerX - tw / 2, bottomThickness], [bottomLeft, bottomThickness],
+    ])
+    featureLabels.push({ text: valueLabel('tw', d.web_thickness), x: x(centerX) + 6, y: y(h / 2) })
+    featureLabels.push({ text: valueLabel('tf', p.id === 'symmetric_i' ? d.flange_thickness : d.top_flange_thickness), x: x(centerX + topWidth / 2) + 5, y: y(h - topThickness / 2) })
+    if (p.id === 'asymmetric_i') featureLabels.push({ text: valueLabel('tb', d.bottom_flange_thickness), x: x(centerX + bottomWidth / 2) + 5, y: y(bottomThickness / 2) })
+  } else if (p.id === 'channel') {
+    outline = path([[0, 0], [b, 0], [b, tf], [tw, tf], [tw, h - tf], [b, h - tf], [b, h], [0, h]])
+    featureLabels.push({ text: valueLabel('tw', d.web_thickness), x: x(tw / 2) + 5, y: y(h / 2) })
+    featureLabels.push({ text: valueLabel('tf', d.flange_thickness), x: x(b) + 5, y: y(h - tf / 2) })
+  } else if (p.id === 'tee') {
+    const center = b / 2
+    outline = path([[0, h], [b, h], [b, h - tf], [center + tw / 2, h - tf], [center + tw / 2, 0], [center - tw / 2, 0], [center - tw / 2, h - tf], [0, h - tf]])
+    featureLabels.push({ text: valueLabel('tw', d.web_thickness), x: x(center) + 5, y: y(h / 2) })
+    featureLabels.push({ text: valueLabel('tf', d.flange_thickness), x: x(b) + 5, y: y(h - tf / 2) })
+  } else if (p.id === 'angle') {
+    outline = path([[0, 0], [b, 0], [b, t], [t, t], [t, h], [0, h]])
+    featureLabels.push({ text: valueLabel('t', d.thickness), x: x(t) + 5, y: y(t) - 4 })
+  } else if (p.id === 'double_angle') {
+    const gap = numeric(d.distance, 0, true), legWidth = b, bottomLeft = [[0, 0], [legWidth, 0], [legWidth, h], [legWidth - t, h], [legWidth - t, t], [0, t]]
+    const rightStart = legWidth + gap
+    const bottomRight = [[rightStart, 0], [rightStart + legWidth, 0], [rightStart + legWidth, t], [rightStart + t, t], [rightStart + t, h], [rightStart, h]]
+    outline = `${path(bottomLeft)} ${path(bottomRight)}`
+    featureLabels.push({ text: valueLabel('t', d.thickness), x: x(legWidth - t / 2) + 5, y: y(t / 2) })
+    featureLabels.push({ text: valueLabel('g', d.distance), x: x(legWidth + gap / 2) - 3, y: y(h / 2) })
   }
 
-  const isCircular = shape === 'circle' || shape === 'circular_hollow'
+  const circular = p.id === 'circle' || p.id === 'chs'
+  const horizontalKey = circular ? 'diameter' : 'width'
+  const verticalKey = circular ? 'diameter' : (p.id === 'rectangle' || p.id === 'shs_rhs' ? 'height' : 'depth')
+  const horizontalSymbol = circular ? 'D' : p.id === 'double_angle' ? '2b + g' : p.id === 'angle' ? 'b' : 'b'
+  const horizontalValue = p.id === 'double_angle' ? width : circular ? d.diameter : p.id === 'symmetric_i' ? d.width : p.id === 'asymmetric_i' ? width : d[horizontalKey]
+
   return {
-    left, top, right: left + drawWidth, bottom: top + drawHeight,
-    centerX: left + drawWidth / 2, centerY: top + drawHeight / 2,
-    outline, inner, circle, innerCircle, webLabel, flangeLabel, bottomFlangeLabel, thicknessLabel,
-    horizontalLabel: dimensionText(isCircular ? 'D' : 'b', isCircular ? d.diameter : width),
-    verticalLabel: dimensionText(isCircular ? 'D' : 'h', isCircular ? d.diameter : d.depth),
-    hasDimensions: allDimensionsPresent && proportionsValid && !thicknessWasClamped,
+    left, top, right: left + drawWidth, bottom: top + drawHeight, centerX: left + drawWidth / 2, centerY: top + drawHeight / 2,
+    outline, circles, holes, featureLabels, hasDimensions,
+    horizontalLabel: valueLabel(horizontalSymbol, horizontalValue),
+    verticalLabel: valueLabel(circular ? 'D' : 'h', d[verticalKey]),
   }
 })
 </script>
@@ -149,21 +130,14 @@ const drawing = computed(() => {
   <div class="section-geometry-sketch">
     <svg viewBox="0 0 360 220" role="img" :aria-label="t('title')">
       <title>{{ t('title') }}</title>
-      <defs>
-        <marker :id="markerId" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto-start-reverse">
-          <path d="M 0 0 L 7 3.5 L 0 7 z" fill="#6b86a0" />
-        </marker>
-      </defs>
-      <path v-if="drawing.outline" :d="drawing.outline" class="section-geometry-outline" />
-      <rect v-if="drawing.inner" v-bind="drawing.inner" class="section-geometry-hole" />
-      <circle v-if="drawing.circle" v-bind="drawing.circle" class="section-geometry-outline" />
-      <circle v-if="drawing.innerCircle" v-bind="drawing.innerCircle" class="section-geometry-hole" />
-
-      <text v-if="drawing.webLabel" :x="drawing.centerX + 5" :y="drawing.centerY + 3" class="section-geometry-feature-label">{{ drawing.webLabel }}</text>
-      <text v-if="drawing.flangeLabel" :x="drawing.right + 6" :y="drawing.top + 15" class="section-geometry-feature-label">{{ drawing.flangeLabel }}</text>
-      <text v-if="drawing.bottomFlangeLabel" :x="drawing.right + 6" :y="drawing.bottom - 7" class="section-geometry-feature-label">{{ drawing.bottomFlangeLabel }}</text>
-      <text v-if="drawing.thicknessLabel" :x="drawing.centerX + 7" :y="drawing.centerY + 3" class="section-geometry-feature-label">{{ drawing.thicknessLabel }}</text>
-
+      <defs><marker :id="markerId" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto-start-reverse"><path d="M 0 0 L 7 3.5 L 0 7 z" fill="#6b86a0" /></marker></defs>
+      <path v-if="drawing.outline" :d="drawing.outline" class="section-geometry-outline" fill-rule="evenodd" />
+      <circle v-for="(circle, index) in drawing.circles" :key="`circle-${index}`" v-bind="circle" class="section-geometry-outline" />
+      <template v-for="(hole, index) in drawing.holes" :key="`hole-${index}`">
+        <rect v-if="'width' in hole" v-bind="hole" class="section-geometry-hole" />
+        <circle v-else v-bind="hole" class="section-geometry-hole" />
+      </template>
+      <text v-for="(label, index) in drawing.featureLabels" :key="`feature-${index}`" :x="label.x" :y="label.y" class="section-geometry-feature-label">{{ label.text }}</text>
       <line x1="83" :x2="drawing.left" :y1="drawing.top" :y2="drawing.top" class="section-geometry-extension" />
       <line x1="83" :x2="drawing.left" :y1="drawing.bottom" :y2="drawing.bottom" class="section-geometry-extension" />
       <line x1="83" x2="83" :y1="drawing.top" :y2="drawing.bottom" class="section-geometry-dimension" :marker-start="`url(#${markerId})`" :marker-end="`url(#${markerId})`" />
@@ -172,11 +146,8 @@ const drawing = computed(() => {
       <line :x1="drawing.right" :x2="drawing.right" :y1="drawing.bottom" y2="177" class="section-geometry-extension" />
       <line :x1="drawing.left" :x2="drawing.right" y1="177" y2="177" class="section-geometry-dimension" :marker-start="`url(#${markerId})`" :marker-end="`url(#${markerId})`" />
       <text :x="drawing.centerX" y="194" class="section-geometry-dimension-label section-geometry-horizontal-label">{{ drawing.horizontalLabel }}</text>
-
-      <line x1="296" y1="160" x2="326" y2="160" class="section-geometry-axis" />
-      <line x1="296" y1="160" x2="296" y2="132" class="section-geometry-axis" />
-      <text x="332" y="163" class="section-geometry-axis-label">X</text>
-      <text x="293" y="126" class="section-geometry-axis-label">Y</text>
+      <line x1="296" y1="160" x2="326" y2="160" class="section-geometry-axis" /><line x1="296" y1="160" x2="296" y2="132" class="section-geometry-axis" />
+      <text x="332" y="163" class="section-geometry-axis-label">X</text><text x="293" y="126" class="section-geometry-axis-label">Y</text>
     </svg>
     <p v-if="!drawing.hasDimensions" class="section-geometry-sketch-note">{{ t('schematic') }}</p>
   </div>
@@ -192,8 +163,7 @@ const drawing = computed(() => {
 .section-geometry-dimension-label { fill: #536f89; font-size: 13px; font-weight: 650; }
 .section-geometry-horizontal-label { text-anchor: middle; }
 .section-geometry-vertical-label { text-anchor: middle; dominant-baseline: middle; transform: rotate(-90deg); transform-box: fill-box; transform-origin: center; }
-.section-geometry-feature-label { fill: #52718e; font-size: 12px; font-weight: 700; }
-.section-geometry-axis { stroke: #65809a; stroke-width: 1.1; }
-.section-geometry-axis-label { fill: #65809a; font-size: 13px; font-weight: 700; }
+.section-geometry-feature-label { fill: #52718e; font-size: 10px; font-weight: 700; }
+.section-geometry-axis { stroke: #65809a; stroke-width: 1.1; }.section-geometry-axis-label { fill: #65809a; font-size: 13px; font-weight: 700; }
 .section-geometry-sketch-note { margin: 0; color: #8495a5; font-size: 13px; line-height: 1.5; }
 </style>

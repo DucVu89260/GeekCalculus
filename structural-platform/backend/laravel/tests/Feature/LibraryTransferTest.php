@@ -40,7 +40,7 @@ class LibraryTransferTest extends TestCase
         $this->assertSame('geekcalculus-engineering-library', $archive['format']);
         $this->assertSame(1, $archive['version']);
         $this->assertCount(4, $archive['materials']);
-        $this->assertCount(8, $archive['section_types']);
+        $this->assertCount(9, $archive['section_types']);
         foreach (['users', 'projects', 'password'] as $key) {
             $this->assertArrayNotHasKey($key, $archive);
         }
@@ -66,7 +66,7 @@ class LibraryTransferTest extends TestCase
         $section['properties']['area'] = 999999;
         $section['properties']['inertia_y'] = 888888;
         $archive['sections'][] = $section;
-        $this->postJson('/api/library/import', ['mode' => 'skip', 'archive' => $archive])->assertOk()->assertJsonPath('data.created', 1)->assertJsonPath('data.skipped', 12);
+        $this->postJson('/api/library/import', ['mode' => 'skip', 'archive' => $archive])->assertOk()->assertJsonPath('data.created', 1)->assertJsonPath('data.skipped', 13);
         $archive = $this->archive();
         $originalId = Section::first()->material_id;
         $this->assertSame('concrete_b25', $archive['sections'][0]['material_code']);
@@ -78,7 +78,7 @@ class LibraryTransferTest extends TestCase
         Section::query()->delete();
         Material::query()->delete();
         SectionType::query()->delete();
-        $this->postJson('/api/library/import', ['mode' => 'skip', 'archive' => $archive])->assertOk()->assertExactJson(['data' => ['created' => 13, 'updated' => 0, 'skipped' => 0]]);
+        $this->postJson('/api/library/import', ['mode' => 'skip', 'archive' => $archive])->assertOk()->assertExactJson(['data' => ['created' => 14, 'updated' => 0, 'skipped' => 0]]);
         $this->assertNotSame($originalId, Section::first()->material_id);
         $this->assertSame(Material::where('code', 'concrete_b25')->value('id'), Section::first()->material_id);
         $this->assertSame(SectionType::where('code', 'rectangle')->value('id'), Section::first()->section_type_id);
@@ -102,7 +102,7 @@ class LibraryTransferTest extends TestCase
         $this->postJson('/api/library/import', ['mode' => 'overwrite', 'archive' => $archive])->assertOk()->assertExactJson(['data' => ['created' => 0, 'updated' => 1, 'skipped' => 0]]);
         $this->assertDatabaseHas('materials', ['id' => $id, 'name_en' => 'Verified label', 'source' => 'Test source']);
         $this->assertDatabaseCount('materials', 4);
-        $this->assertDatabaseCount('section_types', 8);
+        $this->assertDatabaseCount('section_types', 9);
         $this->getJson('/api/catalog?locale=en')->assertJsonFragment(['name' => 'Verified label']);
         $this->seed(DatabaseSeeder::class);
         $this->assertDatabaseHas('materials', ['id' => $id, 'name_en' => 'Verified label']);

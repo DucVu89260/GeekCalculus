@@ -19,4 +19,6 @@ if ! grep -q '^APP_KEY=base64:' backend/laravel/.env; then docker compose run --
 docker compose run --rm --no-deps backend php artisan migrate --seed --force --no-interaction
 docker run --rm --user "$LOCAL_UID:$LOCAL_GID" -e npm_config_cache=/tmp/npm-cache "${node_cert_args[@]}" \
   -v "$PWD:/app" -w /app/frontend/vue node:24-alpine npm ci --no-audit --no-fund
+docker run --rm --user "$LOCAL_UID:$LOCAL_GID" -v "$PWD:/app" -w /app node:24-alpine \
+  node scripts/build-section-properties-core.cjs
 printf 'Setup complete. Start with: docker compose up -d\n'

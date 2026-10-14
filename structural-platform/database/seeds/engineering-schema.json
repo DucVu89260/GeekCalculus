@@ -34,8 +34,8 @@
     {
       "code": "i",
       "category": "steel",
-      "name_vi": "Chữ I / H",
-      "name_en": "I / H",
+      "name_vi": "I/H — Đối xứng / không đối xứng",
+      "name_en": "I/H — Symmetric / asymmetric",
       "geometry_fields": [
         "depth",
         "width",
@@ -54,8 +54,8 @@
     {
       "code": "channel",
       "category": "steel",
-      "name_vi": "Chữ U / C",
-      "name_en": "Channel",
+      "name_vi": "CHANNEL — U/C",
+      "name_en": "CHANNEL",
       "geometry_fields": [
         "depth",
         "width",
@@ -66,8 +66,8 @@
     {
       "code": "angle",
       "category": "steel",
-      "name_vi": "Thép góc L",
-      "name_en": "Angle",
+      "name_vi": "ANGLE — Góc L",
+      "name_en": "ANGLE",
       "geometry_fields": [
         "depth",
         "width",
@@ -77,8 +77,8 @@
     {
       "code": "tee",
       "category": "steel",
-      "name_vi": "Chữ T",
-      "name_en": "Tee",
+      "name_vi": "TEE — T",
+      "name_en": "TEE",
       "geometry_fields": [
         "depth",
         "width",
@@ -89,8 +89,8 @@
     {
       "code": "rectangular_hollow",
       "category": "steel",
-      "name_vi": "Hộp chữ nhật",
-      "name_en": "Rectangular hollow",
+      "name_vi": "SHS/RHS — Hộp vuông/chữ nhật",
+      "name_en": "SHS/RHS",
       "geometry_fields": [
         "depth",
         "width",
@@ -100,8 +100,8 @@
     {
       "code": "circular_hollow",
       "category": "steel",
-      "name_vi": "Ống tròn",
-      "name_en": "Circular hollow",
+      "name_vi": "CHS — Ống tròn",
+      "name_en": "CHS",
       "geometry_fields": [
         "diameter",
         "thickness"
@@ -110,8 +110,8 @@
     {
       "code": "rectangle",
       "category": "rc",
-      "name_vi": "BTCT chữ nhật",
-      "name_en": "RC rectangle",
+      "name_vi": "RECTANGLE — Chữ nhật",
+      "name_en": "RECTANGLE",
       "geometry_fields": [
         "depth",
         "width"
@@ -120,10 +120,22 @@
     {
       "code": "circle",
       "category": "rc",
-      "name_vi": "BTCT tròn",
-      "name_en": "RC circle",
+      "name_vi": "CIRCLE — Tròn đặc",
+      "name_en": "CIRCLE",
       "geometry_fields": [
         "diameter"
+      ]
+    },
+    {
+      "code": "double_angle",
+      "category": "steel",
+      "name_vi": "DOUBLE ANGLE — Hai thép góc",
+      "name_en": "DOUBLE ANGLE",
+      "geometry_fields": [
+        "depth",
+        "width",
+        "thickness",
+        "distance"
       ]
     }
   ],
@@ -267,7 +279,8 @@
           "angle",
           "tee",
           "rectangular_hollow",
-          "rectangle"
+          "rectangle",
+          "double_angle"
         ]
       },
       {
@@ -283,7 +296,8 @@
           "angle",
           "tee",
           "rectangular_hollow",
-          "rectangle"
+          "rectangle",
+          "double_angle"
         ]
       },
       {
@@ -334,8 +348,21 @@
         "shapes": [
           "angle",
           "rectangular_hollow",
-          "circular_hollow"
+          "circular_hollow",
+          "double_angle"
         ]
+      },
+      {
+        "key": "distance",
+        "label_vi": "Khoảng hở giữa hai mặt lưng g",
+        "label_en": "Clear gap between angle backs g",
+        "unit": "mm",
+        "min": 0,
+        "required": true,
+        "shapes": [
+          "double_angle"
+        ],
+        "geometry_field": true
       },
       {
         "key": "top_flange_width",
@@ -906,14 +933,18 @@
     "coordinate_system": "XY; origin at lower-left bounding box",
     "authoritative_on_save": true,
     "geometry_shapes": [
-      "rectangle",
-      "circle",
       "i",
       "channel",
-      "tee",
       "angle",
+      "tee",
       "rectangular_hollow",
-      "circular_hollow"
-    ]
+      "circular_hollow",
+      "rectangle",
+      "circle",
+      "double_angle"
+    ],
+    "registry": "section-properties/section-registry.json",
+    "formula_report_required": true,
+    "core": "shared_typescript_canonical"
   }
 }

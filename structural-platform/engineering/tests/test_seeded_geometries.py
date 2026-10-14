@@ -142,17 +142,18 @@ def test_thin_circular_hollow_area_avoids_outer_minus_inner_cancellation():
 
 
 @pytest.mark.parametrize("shape", [RECTANGULAR_HOLLOW, CHANNEL, TEE, ANGLE])
-def test_unavailable_advanced_properties_are_explicit_and_required_ones_raise(shape):
+def test_advanced_properties_are_computed_for_all_seeded_composite_sections(shape):
     result = calculate(validate_geometry_definition(shape), CalculationOptions(include_advanced=True))
-    assert result.advanced.torsion_constant_j.status == "not_computed"
-    assert result.advanced.torsion_constant_j.value is None
-    assert result.advanced.torsion_constant_j.reason == "solver_not_implemented"
-    assert result.advanced.warping_constant_cw.reason == "solver_not_implemented"
-    assert result.advanced.shear_center.reason == "solver_not_implemented"
-    assert result.advanced.effective_shear_area.reason == "solver_not_implemented"
-    with pytest.raises(CalculationError) as error:
-        calculate(validate_geometry_definition(shape), CalculationOptions(required_properties=("torsion_constant_j",)))
-    assert error.value.code == "UNSUPPORTED_PROPERTY"
+    assert result.advanced.torsion_constant_j.status == "computed"
+    assert result.advanced.torsion_constant_j.value > 0
+    assert result.advanced.warping_constant_cw.status == "computed"
+    assert result.advanced.warping_constant_cw.value >= 0
+    assert result.advanced.shear_center.status == "computed"
+    assert result.advanced.effective_shear_area.status == "computed"
+    assert result.advanced.effective_shear_area.value.x > 0
+    assert result.advanced.effective_shear_area.value.y > 0
+    required = calculate(validate_geometry_definition(shape), CalculationOptions(required_properties=("torsion_constant_j",)))
+    assert required.advanced.torsion_constant_j.status == "computed"
 
 
 @pytest.mark.parametrize(

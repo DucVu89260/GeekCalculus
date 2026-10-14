@@ -4,6 +4,7 @@
     "lib": ["ES2022", "DOM"], "strict": true, "allowJs": true,
     "checkJs": false, "skipLibCheck": true, "noEmit": true,
     "esModuleInterop": true, "resolveJsonModule": true,
+    "baseUrl": ".", "paths": { "decimal.js": ["node_modules/decimal.js/decimal.d.ts"] },
     "types": ["vite/client"]
   },
   "include": ["src/**/*.ts", "src/**/*.vue", "src/**/*.js"]

@@ -1,193 +1,120 @@
-# SectionalProperties v1 — engine và giao diện thử nghiệm
+# Section Properties — API và benchmark
 
-Lõi Python tính đặc trưng hình học của RECTANGLE, CIRCLE, I_SECTION,
-RECTANGULAR_HOLLOW, CIRCULAR_HOLLOW, CHANNEL, TEE và ANGLE (solver 1.2.0).
-Không cần vật liệu, Laravel, HTTP, database hoặc FEM để chạy phép tính.
-Mã lõi nằm trong `structural_engine/sectional_properties/`.
+Production dùng một bộ tính TypeScript tại
+[../section-properties](../section-properties/README.md). FastAPI gọi Node bundle
+của package này; Laravel và demo trình duyệt nhận cùng kết quả/công thức.
+Solver hiện tại 1.3.0, formula library 1.0.0. Python analytical solver được giữ
+độc lập để kiểm chứng, không được dùng làm fallback khi production core lỗi.
 
-## Chạy thử Python
+Có 10 profile: Rectangle, Circle, CHS, SHS/RHS, Symmetric I/H, Asymmetric I/H,
+Channel, Angle, Tee, Double Angle. Hai profile I/H dùng một geometry model,
+nên API có 9 type và registry có 10 profile. Double Angle nhận `distance` g ≥ 0.
+Tất cả loại có gross/elastic/plastic/principal, J/Cw/tâm cắt/Ax/Ay; phương pháp
+và giới hạn của các mô hình nâng cao được công bố trong package README/registry.
 
-Python >= 3.11. Trong thư mục `structural-platform/engineering`:
+## Local và nghiệm thu
+
+Cần Node 24, Python >= 3.11. Từ `structural-platform`:
 
 ```sh
+cd frontend/vue
+npm ci
+node ../../scripts/build-section-properties-core.cjs
+cd ../../engineering
 python -m venv .venv
-# Linux/macOS/WSL
 source .venv/bin/activate
-# Windows PowerShell: .venv\Scripts\Activate.ps1
 python -m pip install -r requirements-test.lock
 python -m pip install --no-deps .
 python -m pytest -q
-python -m structural_engine.sectional_properties < examples/i-asymmetric.json
+python -m uvicorn structural_engine.sectional_properties.api.main:app --host 127.0.0.1 --port 8001
 ```
 
-PowerShell có thể dùng:
-
-```powershell
-Get-Content -Raw examples/i-asymmetric.json | python -m structural_engine.sectional_properties
-```
-
-Tệp mẫu: `examples/rectangle.json`, `circle.json`, `i-asymmetric.json`.
-CLI trả JSON và exit code 0 khi thành công, JSON lỗi + exit code 2 khi từ chối.
-CLI không tạo/sửa dữ liệu thư viện trên website. Khóa kích thước bắt buộc không
-được đoán hoặc điền bằng số 0. Các trường không có trong schema bị từ chối.
-
-## Docker độc lập
-
-Từ `structural-platform`, build image dành cho nghiệm thu lõi:
+Windows PowerShell dùng `.venv\Scripts\Activate.ps1`. Build core trước khi cài
+Python wheel để các file `data/section-core.mjs` và registry được đóng gói.
+Có thể chạy production CLI trực tiếp:
 
 ```sh
-docker build -t geekcalculus-sectional-properties:1.2.0 engineering
-docker run --rm geekcalculus-sectional-properties:1.2.0 python -m pytest -q
-docker run --rm -i geekcalculus-sectional-properties:1.2.0 < engineering/examples/i-asymmetric.json
+node structural_engine/sectional_properties/data/section-core.mjs < examples/i-asymmetric.json
 ```
 
-Trên PowerShell, thay dòng cuối bằng:
+`python -m structural_engine.sectional_properties < examples/i-asymmetric.json`
+chạy oracle Python cho benchmark (không có `formula_report`). Cả hai CLI trả
+JSON, exit 0 khi thành công và exit 2 khi input bị từ chối. Không ghi database.
 
-```powershell
-Get-Content -Raw engineering/examples/i-asymmetric.json | docker run --rm -i geekcalculus-sectional-properties:1.2.0
+## Docker
+
+Build context là **structural-platform**, bao gồm shared package và frontend lock:
+
+```sh
+docker build -f engineering/Dockerfile -t geekcalculus-sectional-properties:1.3.0 .
+docker run --rm geekcalculus-sectional-properties:1.3.0 python -m pytest -q
+docker run --rm -i geekcalculus-sectional-properties:1.3.0 node structural_engine/sectional_properties/data/section-core.mjs < engineering/examples/i-asymmetric.json
 ```
 
-Image có CLI/test và FastAPI adapter; Compose khởi động API nội bộ ở port 8001.
-Không mount database Laravel vào engine. Dependencies Python
-đã pin trong `pyproject.toml` và `requirements-test.lock`; mpmath/Hypothesis/
-pytest chỉ phục vụ nghiệm thu, không được import trong production solver.
+Docker build Node stage bundle cùng source, rồi đóng gói Node runtime và Python
+adapter vào image. Compose chạy FastAPI nội bộ, không public port engine.
+Không mount database Laravel vào engine. Khi cập nhật package/formulas, build
+lại engine và UI cùng lúc để manifest hash khớp:
 
-## Dùng trong Python
-
-```python
-from structural_engine.sectional_properties import (
-    CalculationOptions, calculate, validate_geometry_definition,
-)
-
-geometry = validate_geometry_definition({
-    "type": "i_section", "geometry_variant": "sharp_corner",
-    "dimensions": {
-        "depth": 400, "top_flange_width": 200,
-        "bottom_flange_width": 250, "web_thickness": 8,
-        "top_flange_thickness": 12, "bottom_flange_thickness": 16,
-    },
-})
-result = calculate(geometry, CalculationOptions(include_advanced=True))
-print(result.properties.geometric.area)  # 9376
-print(result.properties.plastic.pna_y)   # 102
-print(result.model_dump_json(indent=2))
+```sh
+docker compose up -d --build --wait
 ```
 
-`calculate` chỉ nhận model đã validation, không đọc JSON thô. Geometry và
-options được kiểm tra lại khi vào engine, kể cả model được dựng bằng
-`model_construct`. Mỗi hình học có version và hash chuẩn hóa riêng.
+Laravel `SECTION_ENGINE_URL` trỏ tới FastAPI; ngoài Compose đặt
+`http://127.0.0.1:8001`. Engine lỗi thì tính/lưu trả 503; snapshot đã lưu vẫn đọc
+được. Không chuyển sang một bộ công thức khác để tránh lệch kết quả.
 
-## Kết quả và phạm vi
+## Contract và lưu trữ
 
-| Đại lượng | Rectangle đặc | Circle đặc | I/H cánh độc lập |
-| --- | --- | --- | --- |
-| A, perimeter, centroid, Ix/Iy/Ixy | Có | Có | Có |
-| Sx+/Sx−/Sy+/Sy−, rx/ry | Có | Có | Có |
-| PNA X/Y, Zx/Zy, principal inertias | Có | Có | Có |
-| Saint-Venant J | Chuỗi có kiểm soát hội tụ | Công thức giải tích | `not_computed` |
-| Cw, shear center, effective shear areas | `not_computed` | `not_computed` | Có · xấp xỉ thành mỏng |
+API tính nhanh: `/v1/sections/calculate` (proxy Laravel authenticated tại
+`/api/v1/sections/calculate`). `/v1/section-types` trả geometry schemas, registry
+profiles và formula-library version. Input bắt buộc theo type; `profile_id`
+tùy chọn xác định profile/symmetric I, `options.include_advanced=true` yêu cầu
+đặc trưng nâng cao. Catalog luôn yêu cầu plastic và advanced.
 
-Quy ước: mặt phẳng XY, X sang phải, Y lên trên, gốc O ở góc dưới trái
-bounding box; moment quán tính quanh trục qua trọng tâm. Không đồng nhất
-Ix/Iy với trục local CSI 1–2–3. Không có xoay, fillet hoặc composite/material
-checks. RHS có góc vuông, CHS có bề dày đồng đều. Channel mở về phải, tee
-có cánh trên, angle có chân dưới/trái; các mô hình không cần nhập polygon.
-Chưa hỗ trợ polygon tùy ý. Cả 8 dạng có đầy đủ đặc trưng gross/elastic/plastic/
-principal; J CHS = 2Ix chính xác. Các đặc trưng nâng cao RHS/U/C/T/L chưa
-có solver sẽ trả `not_computed` với giá trị null và lý do.
+Output canonical mm, gồm `properties`, `advanced`, normalized input, geometry
+hash, solver version/config hash, diagnostics và `formula_report`. Report có
+25 mục đặc trưng, công thức, ký hiệu, giá trị thay số, inputs, assumptions và
+reference IDs. Coordinate system là XY từ góc dưới trái bounding box; không
+tự chuyển Iy/Iz của catalog nguồn sang Ix/Iy. Cw 0 và tọa độ tâm cắt âm có thể
+hợp lệ. Ax cho Vx, Ay cho Vy. Result unit mm/cm/m chỉ đổi hiển thị.
 
-Đơn vị mm/mm²/mm³/mm⁴/mm⁶; `Sx+` và `Sx−` luôn là hai trường riêng.
-Principal inertias sắp theo lớn/nhỏ; góc của trục có moment lớn nhất đo từ X
-ngược chiều kim đồng hồ, chuẩn hóa về (−90°, 90°]. Angle có Ixy khác 0
-và góc trục chính tổng quát. Nếu Ix = Iy và Ixy = 0, góc không duy nhất,
-nên trả `null` và `orientation_status=indeterminate`.
+Thành mỏng dùng median-wall geometry. `diagnostics.advanced_model` ghi số liệu
+chuẩn hóa với `normalization_length_mm`; các thuộc tính trả về vẫn là mm/mm²/
+mm⁴/mm⁶. Rectangle J/Cw có kiểm tra hội tụ. Giá trị tùy chọn không tính được
+là null với lý do; không dùng số 0 giả. Catalog từ chối lưu nếu thiếu thuộc tính.
+Double Angle nâng cao giả thiết liên kết gót cứng lý tưởng để hai L làm việc
+tổng hợp; g = 0 không tự giả định bụng hàn liên tục.
 
-Mặc định tính plastic, không tính advanced. Bật `include_advanced=true` để
-tính J Rectangle/Circle/CHS và Cw/tâm cắt/diện tích cắt hữu hiệu I/H; hoặc yêu cầu
-các đại lượng qua `required_properties`. J của I/H vẫn chưa có solver.
-`include_plastic=false` trả `properties.plastic=null`, có lý do `not_requested`
-trong diagnostics. Đại lượng nâng cao có `status,value,reason,method`.
-Cw là số với đơn vị mm⁶; tâm cắt là `{x,y,offset_x,offset_y}` theo mm,
-diện tích cắt hữu hiệu là `{x,y}` theo mm². Ax ứng với Vx, Ay ứng với Vy.
-Tọa độ tâm cắt dùng gốc hộp bao; offset tính từ trọng tâm tiết diện nguyên.
-Các thuộc tính I/H mới là xấp xỉ theo đường trung bình thành mỏng Vlasov và
-năng lượng cắt, không phải nghiệm đàn hồi 2D của tiết diện thành dày.
-Phương pháp/giả thiết nằm trong `diagnostics.i_section_advanced`; xem công
-thức và benchmark tại [đặc tả](docs/sectional-properties-v1.md).
-Nếu riêng kết quả nâng cao tùy chọn vượt dải số, trả `not_computed` với
-`reason=numerical_range` và giữ các đặc trưng tiết diện nguyên hợp lệ. Nếu
-đại lượng đó được yêu cầu bắt buộc, trả `CALCULATION_ERROR`.
-Không dùng J/Cw = 0 để biểu diễn thiếu solver. Nếu yêu cầu đại lượng bắt buộc
-chưa hỗ trợ, engine ném `UnsupportedPropertyError` với code
-`UNSUPPORTED_PROPERTY`; kết quả tùy chọn không hội tụ có value `null`.
+Admin tạo/sửa/sao chép/import tính lại trên server và lưu toàn bộ result vào
+`sections.section_properties` + timestamp. GET đọc snapshot lịch sử không tính
+lại. `$section->calculatedProperties()` và `$section->formulaReport()` dùng cho
+các module sau. Import không tin các snapshot/công thức trong tệp người dùng.
+Bản ghi thủ công cũ được giữ tới khi người dùng sửa/lưu. Chưa có immutable
+revision/history hoặc PostgreSQL; database website hiện vẫn là SQLite.
 
-J Rectangle dùng chuỗi Saint-Venant, không dùng Ix+Iy hoặc công thức gần đúng
-không công bố độ chính xác. Tolerance mặc định 1e-10, tối đa 10.000 số hạng;
-diagnostics có số hạng, chặn trên phần dư, ước lượng roundoff và trạng thái
-hội tụ. Tolerance vượt khả năng float64 trả `numerical_precision_limit`.
-Chặn sai số phần dư là giải tích; roundoff là ước lượng, chưa phải chứng nhận
-interval arithmetic. Hình học có kích thước quá lớn/nhỏ làm kết quả ngoài
-dải float64 bị từ chối bằng `CALCULATION_ERROR`.
+## Kiểm chứng
 
-PNA I/H/RHS/U/C/T/L dùng bisection diện tích, rồi refinement theo đoạn tuyến tính;
-arithmetic Decimal 80 chữ số tránh triệt tiêu diện tích cánh gần bằng nhau.
-Kiểm tra cân bằng diện tích tại chính tọa độ float64 được xuất. Zx/Zy tích phân
-chính xác từng khối không chồng nhau quanh PNA tương ứng. Diagnostics có diện tích
-hai cánh/bụng, clear web depth và PNA. Không lưu compact/noncompact/slender.
+Python tests gồm benchmarks độc lập, monomial/polygon references, mpmath cho
+Saint-Venant J, property-based scaling/mirror/PNA và regression nâng cao.
+`tests/test_advanced_models.py` kiểm tra đủ advanced cho 9 geometry models,
+rectangle Fourier Cw, CHS A/2, RHS square/near-square, channel/torsion,
+T/L zero warping và Double Angle gap/connection model.
 
-## Kiểm chứng và các mốc tiếp theo
+```sh
+# từ structural-platform
+ENGINE_PYTHON=/path/to/venv/bin/python node tests/demo-engine-parity.cjs
+# trong frontend/vue
+npm test
+npm run typecheck
+# backend feature tests
+# từ structural-platform
+docker compose exec -T backend php artisan test --compact
+```
 
-Đặc tả, diễn giải công thức và nguồn kiểm chứng độc lập:
+Browser tests: `catalog-shapes-smoke.cjs` lưu/reload đủ 10 profile ở demo và
+native; `catalog-section-smoke.cjs` kiểm tra snapshot/import/tự tính;
+`sectional-ui-smoke.cjs` và `modules-smoke.cjs` kiểm tra UI, units và module.
+Xem [../README.md](../README.md) cho cấu hình Playwright và tài khoản riêng.
+Đặc tả công thức gross và benchmark lịch sử:
 [docs/sectional-properties-v1.md](docs/sectional-properties-v1.md).
-
-- **Package 01 hoàn tất:** models, validation, geometry version/hash.
-- **Package 02 hoàn tất:** analytical engine, benchmarks, property-based tests,
-  CLI và công cụ nghiệm thu.
-- **Lưu catalog:** Laravel CRUD đã tính trên server và lưu snapshot JSON
-  `sections.section_properties`, timestamp, hình học chuẩn hóa và provenance
-  trong SQLite. GET trả snapshot đã lưu; import và cập nhật tính lại. Dữ liệu
-  cũ không bị tự chuyển hệ trục. Lịch sử immutable revision/cache và
-  PostgreSQL/JSONB vẫn là phần nâng cấp riêng chưa triển khai.
-- **Package 04 tính nhanh hoàn tất:** FastAPI adapter và Laravel authenticated
-  `/api/v1/sections/calculate`, `/api/v1/section-types`; có OpenAPI, error mapping
-  và integration tests. CRUD lưu snapshot hiện dùng `/api/sections`;
-  `/api/v1/sections/calculate` vẫn là phép tính không ghi database.
-- **Package 05 tính nhanh hoàn tất:** Vue 3 + TypeScript, tab Section properties
-  trong Steel Design và Concrete Design, ví dụ TC-001/002/003, hình vẽ theo tỷ lệ,
-  bảng kết quả và export JSON. Lưu definition/history còn chờ Package 03.
-
-Database website hiện là SQLite, users/projects dùng ID số; chưa có
-calculation_runs/model_sections. Package 03 phải xử lý UUID và migration
-PostgreSQL có đối chiếu/backup trước khi đổi kết nối. Snapshot mới là nguồn duy nhất của đặc trưng tự tính; các cột JSON
-legacy chỉ giữ lại trên bản ghi chưa sửa. Không tự thay thế bản ghi cũ hoặc
-map trục CSI chưa thống nhất.
-
-## Chạy trên website
-
-Từ `structural-platform`: `bash scripts/setup.sh` rồi `docker compose up -d --build`.
-Đăng nhập, vào **Steel Design → Section properties** (tab bên cạnh Component và
-Connection) hoặc **Concrete Design → Section properties**. Chọn ví dụ, nhấn
-**Calculate / Tính toán**. Không cần chọn vật liệu để tính hình học.
-
-Trong Admin → Thư viện → Tiết diện → Thêm/Sửa/Sao chép, nhóm kích thước có
-minh họa tiết diện. Khi nhập đủ kích thước, form tự tính đầy đủ đặc trưng XY
-cho cả 8 hình dạng. Tạo/sửa/sao chép/import lưu snapshot và thời điểm tính
-trong database; A/I/S/Z/r/PNA và các đặc trưng nâng cao không nhập tay.
-Bản ghi legacy chưa sửa vẫn giữ Iy/Iz/J và hệ trục nguồn.
-
-Vue → Laravel (session, CSRF, throttle) → FastAPI → engine Python. Engine là
-dịch vụ stateless, không ghi database. Nếu engine dừng, API tính trả 503 và
-thư viện đã lưu vẫn đọc được. FastAPI không mở port public trong Compose.
-Đặt SECTION_ENGINE_URL trong backend/laravel/.env khi chạy ngoài Compose.
-
-Bản GitHub Pages dùng calculator TypeScript riêng để tính trong trình duyệt;
-được đối chiếu với Python bằng `tests/demo-engine-parity.cjs`. Bản Docker dùng
-Python. Demo giữ nguyên khóa localStorage và dữ liệu thư viện hiện có;
-CRUD lưu snapshot trong localStorage, phép tính nhanh ngoài CRUD không tự lưu. Có thể export JSON kết quả. Chưa có PostgreSQL persistence
-hoặc immutable revision/history cho definition; các phần đó vẫn ở Package 03.
-
-Kiểm tra frontend: `npm run typecheck` và `npm run build` trong frontend/vue.
-Kiểm tra engine: `docker compose exec -T section-engine python -m pytest -q`.
-Kiểm tra parity: `ENGINE_PYTHON=/path/to/venv/bin/python node tests/demo-engine-parity.cjs`
-(từ structural-platform). Kiểm tra browser: `tests/sectional-ui-smoke.cjs`,
-AUTH_BASE_URL, PLAYWRIGHT_MODULE và AUTH_FIXTURES hoặc TEST_DEMO=1.

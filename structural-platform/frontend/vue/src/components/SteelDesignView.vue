@@ -400,7 +400,7 @@ onMounted(loadLibrary)
     </section>
 
     <div v-show="activeTab === 'section-properties'" class="steel-design-properties-panel" role="tabpanel">
-      <SectionPropertiesPanel :locale="locale" asymmetric-only />
+      <SectionPropertiesPanel :locale="locale" />
     </div>
   </section>
 </template>

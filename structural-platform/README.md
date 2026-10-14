@@ -65,7 +65,7 @@ Admin quản lý ba tab; user mở **Engineering Library / Thư viện kỹ thu�
 
 - **Vật liệu**: thép kết cấu, bê tông, thép cốt; mã, tên VI/EN, nguồn và thông số.
 - **Loại tiết diện**: mẫu hình học I/H, U/C, L, T, hộp chữ nhật, ống tròn,
-  BTCT chữ nhật và BTCT tròn. Mỗi loại hiển thị các trường thông số tương ứng.
+  BTCT chữ nhật, BTCT tròn và Double Angle. Mỗi loại hiển thị các trường thông số tương ứng.
 - **Tiết diện cụ thể**: kích thước, vật liệu, loại tiết diện, nguồn dữ liệu và
   kích thước hình học để tự tính đặc trưng. Loại tiết diện định nghĩa mẫu; các giá trị A/I/J
   thuộc từng tiết diện cụ thể, không gán một giá trị chung cho mọi kích thước.
@@ -122,7 +122,7 @@ fc/ft/εcu với bê tông; cường độ thiết kế bê tông tùy chọn. G
 
 Thông số tiết diện nhập: h/b/D/t/tw/tf theo hình dạng; I/H có chế độ cánh
 trên/dưới độc lập. Khi nhập đủ kích thước, form tự tính và hiển thị Section
-Properties. Khi tạo/sửa, Laravel gọi Python engine và lưu kết quả chính thức
+Properties. Khi tạo/sửa, Laravel gọi API sử dụng bộ logic Section Properties chung và lưu kết quả chính thức
 vào `sections.section_properties` (JSON), cùng
 `section_properties_calculated_at`; không nhận A/I/S/Z/r/PNA nhập tay.
 Chuẩn ký hiệu là XY của package: A, P, x̄, ȳ, Ix/Iy/Ixy, Sx+/Sx−/Sy+/Sy−,
@@ -130,11 +130,21 @@ Zx/Zy, rx/ry, PNAx/PNAy, Imax/Imin, J, Cw, tâm cắt và Ax/Ay.
 Kết quả gross chưa áp dụng hệ số hiệu chỉnh hoặc cốt thép. Các hệ số, lớp
 bảo vệ, diện tích cốt thép, đường kính thanh/đai và bước đai vẫn là input phụ.
 
-Solver 1.2.0 hỗ trợ đủ 8 hình dạng catalog: chữ nhật, tròn đặc, I/H, U/C,
-T, L, SHS/RHS và CHS. Mô hình có góc vuông, chưa xét bán kính lượn. U/C mở
-về phải, T có cánh trên, L có hai chân dưới/trái. Cw/tâm cắt/Ax/Ay của I/H
-là xấp xỉ thành mỏng; J có cho chữ nhật/tròn đặc/CHS. Thuộc tính chưa hỗ trợ
-lưu `status: "not_computed"`, `value: null`, kèm lý do; không thay bằng 0.
+Solver 1.3.0 dùng một package [section-properties](section-properties/README.md)
+cho trình duyệt, Admin CRUD và API native. Danh sách chung có 10 lựa chọn:
+Rectangle, Circle, CHS, SHS/RHS, Symmetric I/H, Asymmetric I/H, Channel,
+Angle, Tee và Double Angle. Hai loại I/H dùng cùng geometry model; catalog
+cũ giữ nguyên các khóa `i`, `rectangular_hollow`, `circular_hollow` qua alias.
+SHS là trường hợp b = h; RHS vẫn được hỗ trợ trong cùng lựa chọn.
+
+Mọi loại đều có J, Cw, tâm cắt và Ax/Ay. Đặc trưng gross được tích phân
+chính xác theo mô hình góc vuông; đặc trưng nâng cao của tiết diện thành mỏng
+có phương pháp/giả thiết riêng. Cw bằng 0 của circle/CHS và T/L trong mô hình
+thành mỏng là kết quả hợp lệ. Thuộc tính không hội tụ hoặc ngoài dải số trả
+`not_computed` với lý do; catalog từ chối lưu nếu thiếu đặc trưng bắt buộc.
+Double Angle gồm hai L đối lưng, chân ngang dưới hướng ra ngoài, khoảng cách
+thông thủy g ≥ 0. Phần nâng cao giả thiết liên kết gót cứng lý tưởng để làm
+việc tổng hợp; không tự giả định đường hàn liên tục khi g = 0.
 
 Snapshot giữ đơn vị mm và các lũy thừa tương ứng, hình học chuẩn hóa,
 geometry hash, solver version/config hash và giả thiết. GET thư viện trả lại
@@ -142,7 +152,10 @@ snapshot đã lưu, không tính lại khi đọc. Ví dụ dùng trong tính k�
 `section.section_properties.properties.elastic.ix`,
 `section.section_properties.properties.plastic.zx`,
 `section.section_properties.advanced.warping_constant_cw` (kiểm tra `status`
-trước khi dùng). Trong Laravel, `$section->calculatedProperties()` trả nhóm
+trước khi dùng). Snapshot có `formula_report`: công thức theo ký hiệu dimension, giá trị thay
+số, phương pháp, giả thiết, nguồn tham khảo và version/hash thư viện công thức.
+Trong Laravel, `$section->formulaReport()` lấy báo cáo này;
+`$section->calculatedProperties()` trả nhóm
 đặc trưng chuẩn hoặc `null` với dữ liệu cũ chưa có snapshot. Không tự ánh xạ
 Ix/Iy sang các khóa catalog y/z vì quy ước trục nguồn có thể khác.
 
@@ -159,55 +172,37 @@ chưa có bố trí từng thanh, phân tích nứt/phi tuyến hoặc kiểm to
 
 ### Geometry Models / Analytical Engine
 
-Mô hình kiểm thử hình học nằm trong **Section Properties / Đặc trưng tiết diện**.
-Tab **Section properties** trong **Steel design** và **RC design** dùng chung
-component với trang này: cùng 5 mô hình hình học, kiểm tra kích thước, hình
-minh họa và đổi đơn vị kết quả mm/cm/m. Chuyển tab thiết kế giữ kết quả trong
-phiên hiện tại. Mục mở rộng **I/H bất đối xứng và đặc trưng nâng cao** giữ bộ
-tính dùng chung Python/demo với tính xoắn và xuất JSON. Trong Steel/RC, mục
-nâng cao chỉ chọn I/H không đối xứng (cánh trên/dưới nhập độc lập). Có bộ chọn
-**Result unit** mm/cm/m cho toàn bộ kết quả, gồm Cw (L⁶), tọa độ/độ lệch tâm
-cắt (L) và diện tích cắt hữu hiệu Ax/Ay (L²). Ba thuộc tính I/H nâng cao dùng
-xấp xỉ thành mỏng được ghi rõ trên UI và trong metadata. JSON xuất giữ đơn
-vị gốc mm, kèm `display_unit` để xác định đơn vị hiển thị.
-Package 01 định nghĩa input schema phiên bản 1 và `GeometryDefinition`; Package 02 tính A, chu vi,
-trọng tâm, Ix/Iy/Ixy, mô đun chống uốn đàn hồi Sx/Sy theo phía dương/âm, mô đun
-dẻo Zx/Zy, rx/ry, trục trung hòa dẻo và mô men/trục quán tính chính.
-Entrypoint public của hai package là `frontend/vue/src/geometry-models.js` và
-`frontend/vue/src/analytical-engine.js`.
+**Section Properties**, **Steel Design**, **Concrete Design** và Admin editor
+đều dùng cùng component, registry và bộ tính. Chọn một trong 10 loại, nhập
+kích thước theo sơ đồ, xem kết quả tự tính và công thức có thể mở rộng/xuất JSON.
+Result unit đổi mm/cm/m cho toàn bộ kết quả, gồm Cw (L⁶), I/J (L⁴), S/Z (L³),
+A/Ax/Ay (L²), tọa độ và độ lệch (L). JSON/database giữ canonical mm;
+`display_unit` chỉ ghi lựa chọn hiển thị, không làm thay đổi số đã lưu.
 
-Input nhận hình chữ nhật đặc (b, h), hình tròn đặc (D), I/H đối xứng góc
-vuông (b, h, tw, tf), CHS — ống tròn (D, t), và SHS/RHS — hộp vuông/chữ nhật
-(b, h, t). D/b/h là kích thước ngoài; t là bề dày thành đồng đều. SHS là trường
-hợp b = h của mô hình hộp. Góc hộp hiện là góc vuông, chưa xét bán kính lượn.
-Tất cả kích thước trong một định nghĩa dùng chung một đơn vị chiều dài: mm, cm,
-m hoặc in. Kết quả giữ đơn vị đó với số mũ tương ứng cho
-diện tích, quán tính và mô đun. Bộ chọn **Đơn vị kết quả / Result unit** đổi
-mm/cm/m ngay sau tính, không đổi kích thước/đơn vị input và không cần tính lại.
-API `convertSectionProperties(properties, targetUnit)` chuyển toàn bộ kết quả
-với số mũ đúng (chiều dài 1, diện tích 2, S/Z 3, I 4), giữ nguyên góc trục
-và không sửa đối tượng gốc. Chu vi tiết diện rỗng là tổng biên ngoài và biên
-trong. Bộ kiểm tra từ chối kích thước không hữu hạn,
-không dương, bụng I/H rộng bằng/rộng hơn cánh, cánh giao nhau, hoặc 2t lớn
-bằng/lớn hơn D (ống tròn) hay min(b, h) (hộp); engine báo lỗi
-khi kết quả vượt phạm vi số máy có thể biểu diễn.
+Entrypoint public: `section-properties/index.ts` → `calculateSectionProperties`.
+Registry/formulas: `section-properties/section-registry.json`. Các entrypoint
+Geometry Models/Analytical Engine trước đây giữ làm facade tương thích, không
+chứa một bộ công thức tính riêng. API native chạy bundle của cùng package;
+Python solver chỉ làm reference độc lập cho benchmark/parity.
 
-Quy ước trục của engine: gốc tại góc dưới trái hộp bao, +x sang phải theo bề
-rộng, +y hướng lên theo chiều cao. Ix là mô men quanh trục ngang x và Iy quanh
-trục đứng y. Góc trục quán tính chính lớn đo ngược chiều kim đồng hồ từ +x,
-theo modulo 180°. Hình tròn và hình vuông có hai mô men chính bằng nhau nên
-hướng trục chính không xác định. Phải kiểm tra quy ước trục của catalog cũ
-trước khi dùng số liệu nguồn; không có phép đổi y/z sang x/y tự động.
+Quy ước: gốc ở góc dưới trái bounding box, +x sang phải, +y lên trên;
+Ix quanh trục ngang qua trọng tâm, Iy quanh trục đứng, Ixy theo tích tọa độ.
+Góc trục chính lớn đo ngược chiều kim đồng hồ từ X, trong (−90°, 90°].
+Hai quán tính chính bằng nhau cho góc `null` với trạng thái indeterminate.
+CHS/hộp dùng kích thước ngoài và bề dày đồng đều; góc hộp vuông lý tưởng.
+Channel mở sang phải, Tee có cánh trên, Angle có chân dưới/trái.
+Không tự chuyển trục catalog Y/Z sang XY. Không xét fillet, cốt thép hoặc
+kiểm toán tiêu chuẩn. Tính nhanh chỉ giữ trong phiên; Admin lưu snapshot.
 
-Các kết quả này là đặc trưng tiết diện nguyên đồng nhất; chưa xét bán kính lượn,
-lỗ bổ sung ngoài lòng rỗng CHS/SHS/RHS, cốt thép,
-mô hình vật liệu, hoặc kiểm tra theo tiêu chuẩn. Workbench không ghi kết quả
-vào thư viện. Benchmark thuần Node nằm tại
-`frontend/vue/tests/geometry/` và chạy bằng `npm test` trong `frontend/vue/`.
+Bộ kiểm tra từ chối dimension không hữu hạn/không dương, thành rỗng kín,
+cánh giao nhau và khoảng cách Double Angle âm. Chu vi rỗng gồm biên ngoài
+và trong; g = 0 của Double Angle dùng chu vi biên hợp hai góc tiếp xúc.
+Các công thức, mô hình cắt/xoắn và cách mở rộng được ghi trong
+[package README](section-properties/README.md).
 
 Schema, giới hạn và đơn vị: `database/seeds/engineering-schema.json`.
 Seed ban đầu: `database/seeds/engineering-data.json`; cấu trúc DB nằm trong
-migrations Laravel. Baseline hiện có 4 vật liệu, 8 loại; không có tiết diện
+migrations Laravel. Baseline hiện có 4 vật liệu, 9 loại (10 profile do I/H có hai chế độ); không có tiết diện
 số mặc định; admin tạo tiết diện từ kích thước thực và ghi nguồn hình học.
 
 Các bảng chính: `users` (role), `materials` (properties JSON), `section_types`,
@@ -345,12 +340,12 @@ Test tạo/xóa chỉ những mã fixture duy nhất do chính lượt chạy t�
 `tests/catalog-section-smoke.cjs` kiểm tra tự tính khi nhập kích thước, bỏ
 trường dẫn xuất nhập tay, lưu/reload snapshot, sửa hình học và import bỏ qua
 snapshot giả. Chạy với `CATALOG_DEMO_URL=<địa chỉ demo>`.
-`tests/catalog-shapes-smoke.cjs` tạo/lưu qua editor đủ 8 hình dạng, gồm I/H
+`tests/catalog-shapes-smoke.cjs` tạo/lưu qua editor đủ 10 profile, gồm I/H
 bất đối xứng và Ixy của L; dùng `AUTH_BASE_URL=<địa chỉ>` và tài khoản test
 riêng, hoặc `TEST_DEMO=1` trên bản demo. Các test này chạy được với build
 GitHub Pages tại `/GeekCalculus/`, không cần đường dẫn source của Vite.
 Laravel feature tests kiểm tra snapshot chính thức, lỗi/rollback, dữ liệu cũ
-và payload của đủ 8 hình dạng; benchmark polygon và parity nằm ở engineering.
+và payload của đủ 10 profile; benchmark polygon và parity nằm ở engineering.
 
 ## Chạy native (không dùng Docker)
 
@@ -365,15 +360,11 @@ CRUD cần engine: cài Python theo `engineering/README.md`, chạy
 127.0.0.1 --port 8001` trong venv và đặt
 `SECTION_ENGINE_URL=http://127.0.0.1:8001` trong `.env` của Laravel.
 
-SectionalProperties v1 đã có engine Python, FastAPI/Laravel API tính nhanh và
-Vue 3 + TypeScript. Mở **Steel Design → Section properties** bên cạnh Component
-và Connection; **Concrete Design** dùng cùng module hình học. Chọn ví dụ và nhấn
-Tính toán để xem A, trọng tâm, Ix/Iy/Ixy, Sx+/Sx−/Sy+/Sy−, r, PNA, Z, trục chính.
-J có cho chữ nhật/tròn đặc/CHS; J I/H trả `not_computed`. Cw/tâm cắt/diện tích
-cắt I/H dùng xấp xỉ thành mỏng, kèm trạng thái/phương pháp trong snapshot.
-Admin editor có sơ đồ kích thước và vùng kết quả XY tự tính, lưu snapshot
-trong catalog khi tạo/sửa. Tính nhanh ngoài CRUD không ghi thư viện; chưa có
-immutable revision/history hoặc PostgreSQL.
+Section Properties 1.3.0 có bộ tính TypeScript dùng chung, FastAPI/Laravel
+adapter và Vue UI; Python giữ vai trò benchmark độc lập. Tất cả 10 profile
+có đặc trưng gross/elastic/plastic/principal và J/Cw/tâm cắt/Ax/Ay theo mô hình
+đã công bố. Form Admin tự tính và lưu kết quả cùng `formula_report` vào catalog.
+Không có immutable revision/history hoặc PostgreSQL trong bước này.
 
 Xem [engineering/README.md](engineering/README.md) để chạy và kiểm chứng.
 
@@ -392,7 +383,7 @@ Steel Design gồm **Component**, **Connection** và **Section properties**:
   Tiết diện lọc theo vật liệu đang chọn; hiển thị thông số và đơn vị đã lưu.
 - Connection: dầm–cột/nối cấu kiện/bản đế/bản mã; bu lông/hàn/hỗn hợp,
   cấp bền 4.6/8.8/10.9 và hàn góc/giáp mối.
-- Section properties: tính hình học Rectangle, Circle và I/H có cánh độc lập;
+- Section properties: tính đủ 10 profile trong danh sách chung;
   dùng chung với Concrete Design, không cần vật liệu.
 
 Các lựa chọn tiêu chuẩn và liên kết là sơ bộ, chưa có tính toán/kiểm tra thiết

@@ -15,4 +15,10 @@ class Section extends Model
     {
         return $this->section_properties['properties'] ?? null;
     }
+
+    /** Formula snapshot belongs to the saved result, not the current formula library. */
+    public function formulaReport(): ?array
+    {
+        return $this->section_properties['formula_report'] ?? null;
+    }
 }

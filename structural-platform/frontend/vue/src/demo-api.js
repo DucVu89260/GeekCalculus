@@ -1,4 +1,4 @@
-import { calculateDemoSection } from './sectional-properties/demo-calculator'
+import { calculateSectionProperties } from '../../../section-properties/index.ts'
 import { buildCatalogSectionCalculationRequest, catalogSectionInputProperties, isCatalogDerivedSectionProperty } from './sectional-properties/catalog-payload.js'
 import catalog from '../../../database/seeds/catalog.json'
 import schema from '../../../database/seeds/engineering-schema.json'
@@ -7,6 +7,7 @@ const DB_KEY = 'geekcalculus-demo-library-v1'
 const PROJECT_KEY = 'geekcalculus-web-demo-projects-v1'
 const SESSION_KEY = 'geekcalculus-demo-session-v1'
 const LEGACY_SESSION_KEY = 'geekcalculus-demo-user'
+const DOUBLE_ANGLE_MIGRATION = 'section-properties-double-angle-v1'
 const fields = { project_type: 'project_types', module: 'modules', standard: 'standards', material: 'materials', unit: 'units' }
 function fail(status, message, errors = {}) { const error = new Error(message); error.status = status; error.errors = errors; throw error }
 async function hash(password, salt) { return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`${salt}:${password}`)))).map(v => v.toString(16).padStart(2, '0')).join('') }
@@ -16,12 +17,38 @@ async function database() {
     const db = JSON.parse(saved)
     // Keep the same storage key and all existing IDs, properties and users.
     for (const resource of ['materials', 'section_types']) db[resource] = db[resource].map(row => withClassification(resource, row))
+    migrateDoubleAngleType(db)
     return db
   }
   const users = []
   for (const role of ['admin', 'user']) { const salt = crypto.randomUUID(); users.push({ id: role, name: role === 'admin' ? 'Demo Admin' : 'Demo User', email: `${role}@demo.geekcalculus.test`, role, salt, passwordHash: await hash('demo', salt) }) }
-  const db = { users, materials: seed.materials.map((row, i) => withClassification('materials', { ...row, id: i + 1 })), section_types: seed.section_types.map((row, i) => withClassification('section_types', { ...row, id: i + 1 })), sections: [] }
+  const db = { users, materials: seed.materials.map((row, i) => withClassification('materials', { ...row, id: i + 1 })), section_types: seed.section_types.map((row, i) => withClassification('section_types', { ...row, id: i + 1 })), sections: [], migrations: [DOUBLE_ANGLE_MIGRATION] }
   localStorage.setItem(DB_KEY, JSON.stringify(db)); return db
+}
+function uniqueSectionTypeCode(rows, requestedCode) {
+  const existing = new Set(rows.map(row => row.code))
+  if (!existing.has(requestedCode)) return requestedCode
+  for (let suffix = 1; suffix < 10000; suffix++) {
+    const tail = `_migrated${suffix === 1 ? '' : `_${suffix}`}`
+    const candidate = `${requestedCode.slice(0, 64 - tail.length)}${tail}`
+    if (!existing.has(candidate)) return candidate
+  }
+  throw new Error('Could not allocate a unique migrated section type code.')
+}
+function migrateDoubleAngleType(db) {
+  const migrations = Array.isArray(db.migrations) ? [...db.migrations] : []
+  if (migrations.includes(DOUBLE_ANGLE_MIGRATION)) return
+  if (!db.section_types.some(row => row.shape === 'double_angle')) {
+    const template = seed.section_types.find(row => row.shape === 'double_angle')
+    if (template) {
+      const id = Math.max(0, ...db.section_types.map(row => Number(row.id) || 0)) + 1
+      const code = uniqueSectionTypeCode(db.section_types, template.code)
+      db.section_types.push(withClassification('section_types', { ...template, id, code }))
+    }
+  }
+  migrations.push(DOUBLE_ANGLE_MIGRATION)
+  db.migrations = migrations
+  save(db)
 }
 function withClassification(resource, row) { return { ...row, design_code: row.design_code ?? null, ...(resource === 'section_types' ? { region_type: row.region_type ?? null } : {}) } }
 function optionalText(value) { return typeof value === 'string' ? value.trim() || null : value }
@@ -112,7 +139,7 @@ const libraryResources = ['materials', 'section_types', 'sections']
 async function sectionSnapshot(shape, properties) {
   const request = buildCatalogSectionCalculationRequest(shape, properties)
   if (!request) fail(422, 'Complete valid geometry dimensions are required to calculate section properties.', { properties: ['Complete valid geometry dimensions are required.'] })
-  try { return await calculateDemoSection(request) } catch (error) {
+  try { return await calculateSectionProperties(request) } catch (error) {
     const errors = {}
     for (const item of error?.errors ?? []) {
       const path = String(item.path ?? 'geometry').replace(/^geometry\.dimensions\./, 'properties.')
@@ -210,7 +237,7 @@ export async function demoRequest(path, options = {}) {
   if (!user) fail(401, 'Please sign in.')
   if (url.pathname === '/api/v1/sections/calculate') {
     if (method !== 'POST') fail(405, 'Method not allowed.')
-    try { return await calculateDemoSection(body) } catch (error) { error.status = 422; throw error }
+    try { return await calculateSectionProperties(body) } catch (error) { error.status = 422; throw error }
   }
   if (url.pathname === '/api/v1/section-types' && method === 'GET') return { data: ['rectangle', 'circle', 'i_section'].map(type => ({ type, geometry_variant: type === 'i_section' ? 'sharp_corner' : 'solid' })) }
   const locale = url.searchParams.get('locale') || body.locale || 'vi'

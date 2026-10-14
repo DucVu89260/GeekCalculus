@@ -56,9 +56,11 @@ function successfulCases() {
     ['circular hollow section with exact polar moment', request('circular_hollow', 'uniform_wall', { diameter: 100, thickness: 5 }, { include_advanced: true })],
     ['thin circular hollow section', request('circular_hollow', 'uniform_wall', { diameter: 100, thickness: 1e-12 }, { include_advanced: true })],
     ['channel with left web', request('channel', 'sharp_corner', { depth: 200, width: 75, web_thickness: 8, flange_thickness: 10 }, { include_advanced: true })],
-    ['tee with centered web', request('tee', 'sharp_corner', { depth: 200, width: 100, web_thickness: 8, flange_thickness: 12 })],
+    ['tee with centered web', request('tee', 'sharp_corner', { depth: 200, width: 100, web_thickness: 8, flange_thickness: 12 }, { include_advanced: true })],
     ['angle with signed product inertia', request('angle', 'sharp_corner', { depth: 200, width: 100, thickness: 10 }, { include_advanced: true })],
     ['scaled angle', request('angle', 'sharp_corner', { depth: 600, width: 300, thickness: 30 })],
+    ['back-to-back double angle with ideal heel link', request('double_angle', 'back_to_back', { depth: 200, width: 100, thickness: 10, distance: 40 }, { include_advanced: true })],
+    ['double angle zero-gap perimeter union', request('double_angle', 'back_to_back', { depth: 200, width: 100, thickness: 10, distance: 0 }, { include_advanced: true })],
     ['square rectangle torsion', request('rectangle', 'solid', { width: 1, height: 1 }, { include_advanced: true })],
     ['explicit optional torsion non-convergence', request('rectangle', 'solid', { width: 10, height: 10 }, { include_advanced: true, rectangle_j_max_terms: 1 })],
     ['tiny rectangle torsion precision limit', request('rectangle', 'solid', { width: 1, height: 1e-103 }, { include_advanced: true, rectangle_j_relative_tolerance: 1e-300 })],
@@ -82,11 +84,9 @@ function errorCases() {
     ['impossible rectangular hollow proportions', request('rectangular_hollow', 'sharp_corner', { width: 100, height: 200, thickness: 50 }), 'INVALID_GEOMETRY'],
     ['impossible channel proportions', request('channel', 'sharp_corner', { depth: 100, width: 40, web_thickness: 40, flange_thickness: 10 }), 'INVALID_GEOMETRY'],
     ['wrong circular hollow variant', request('circular_hollow', 'sharp_corner', { diameter: 100, thickness: 5 }), 'UNSUPPORTED_VARIANT'],
-    ['unsupported required property', request('rectangle', 'solid', { width: 20, height: 10 }, { required_properties: ['shear_center'] }), 'UNSUPPORTED_PROPERTY'],
-    ['I/H required unsupported torsion', request('i_section', 'sharp_corner', {
-      depth: 400, top_flange_width: 200, bottom_flange_width: 250, web_thickness: 8,
-      top_flange_thickness: 12, bottom_flange_thickness: 16,
-    }, { required_properties: ['torsion_constant_j'] }), 'UNSUPPORTED_PROPERTY'],
+    ['unknown required property', request('rectangle', 'solid', { width: 20, height: 10 }, { required_properties: ['not_a_property'] }), 'UNSUPPORTED_PROPERTY'],
+    ['negative double-angle clear gap', request('double_angle', 'back_to_back', { depth: 200, width: 100, thickness: 10, distance: -1 }), 'INVALID_DIMENSION'],
+    ['wrong double-angle variant', request('double_angle', 'sharp_corner', { depth: 200, width: 100, thickness: 10, distance: 40 }), 'UNSUPPORTED_VARIANT'],
     ['I/H required Cw numerical range', request('i_section', 'sharp_corner', {
       depth: 400e52, top_flange_width: 200e52, bottom_flange_width: 250e52, web_thickness: 8e52,
       top_flange_thickness: 12e52, bottom_flange_thickness: 16e52,
@@ -181,7 +181,8 @@ async function main() {
   const bundlePath = path.join(tempDirectory, 'demo-calculator.cjs')
   try {
     esbuild.buildSync({
-      entryPoints: [path.join(root, 'frontend/vue/src/sectional-properties/demo-calculator.ts')],
+      entryPoints: [path.join(root, 'section-properties/core/calculator.ts')],
+      nodePaths: [path.join(root, 'frontend/vue/node_modules')],
       bundle: true,
       platform: 'node',
       format: 'cjs',
@@ -231,7 +232,7 @@ async function main() {
         `${name}: browser error code`,
       )
     }
-    console.log('Demo sectional calculator parity passed: all eight geometry types, polygonal PNA cases, advanced-property availability, scaling, torsion status, normalized results, and validation codes.')
+    console.log('Demo sectional calculator parity passed: all nine geometry types, polygonal PNA cases, advanced-property availability, scaling, torsion status, normalized results, and validation codes.')
   } finally {
     fs.rmSync(tempDirectory, { recursive: true, force: true })
   }

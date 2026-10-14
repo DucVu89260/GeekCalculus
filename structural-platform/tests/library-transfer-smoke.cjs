@@ -128,7 +128,11 @@ const localBase = process.env.TRANSFER_LOCAL_URL || 'http://127.0.0.1:5173'
     await source.screenshot({ path: '/tmp/geek-library-transfer-mobile.png', fullPage: true })
     await source.setViewportSize({ width: 1440, height: 1100 })
     const restored = await open(demoBase, true)
-    await importArchive(restored, exported, { expected: [3, 0, 12] })
+    const restoredBefore = await exportArchive(restored)
+    const existingRecords = ['materials', 'section_types', 'sections'].reduce((count, resource) =>
+      count + exported[resource].filter(row => restoredBefore[resource].some(existing => existing.code === row.code)).length, 0)
+    const incomingRecords = ['materials', 'section_types', 'sections'].reduce((count, resource) => count + exported[resource].length, 0)
+    await importArchive(restored, exported, { expected: [incomingRecords - existingRecords, 0, existingRecords] })
     assert.deepEqual(customRecords(await exportArchive(restored)), customRecords(exported), 'Another browser must recover all engineering values')
     const changed = structuredClone(fixture); changed.materials[0].name_en = 'Updated verified steel'; changed.materials[0].properties.elastic_modulus = 205000
     await importArchive(restored, changed, { expected: [0, 0, 3] })

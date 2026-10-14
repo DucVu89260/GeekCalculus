@@ -1,12 +1,12 @@
 <script setup>
-import { computed, onBeforeUnmount, onMounted, reactive, ref, useId, watch } from 'vue'
+import { computed, onMounted, reactive, ref, useId, watch } from 'vue'
 import { request, demoMode } from '../api'
 import { copy } from '../i18n'
-import { buildCatalogSectionCalculationRequest, CATALOG_GEOMETRY_KEYS, catalogGeometryMode, catalogSectionInputProperties, isCatalogDerivedSectionProperty } from '../sectional-properties/catalog-payload.js'
+import { CATALOG_GEOMETRY_KEYS, SECTION_REGISTRY, catalogPropertiesForProfile, catalogSectionInputProperties, isCatalogDerivedSectionProperty, profileForCatalogShape, resolveSectionProfile, sectionInputFingerprint, sectionProfileDimensions, sectionProfilesForCatalogShape } from '../sectional-properties/catalog.js'
 import DesignCodeIcon from './DesignCodeIcon.vue'
 import DesignCodeSelect from './DesignCodeSelect.vue'
 import SectionCalculatedProperties from './SectionCalculatedProperties.vue'
-import SectionGeometrySketch from './SectionGeometrySketch.vue'
+import SectionPropertiesPanel from './SectionPropertiesPanel.vue'
 
 const props = defineProps({ locale: { type: String, required: true }, canEdit: { type: Boolean, default: false } })
 const t = (key) => copy[props.locale]?.[key] ?? copy.en[key] ?? key
@@ -65,7 +65,6 @@ const transferErrorStatus = ref(null)
 const transferMessageKey = ref('')
 const transferResult = ref(null)
 let listRequestId = 0
-let sectionEngineDebounce = null
 
 const transferCopy = {
   vi: {
@@ -113,43 +112,14 @@ const editForm = reactive({
   id: null, code: '', name_vi: '', name_en: '', category: '', shape: '', design_code: '', region_type: '', source: '',
   section_type_id: '', material_id: '', properties: {},
 })
-const sectionGeometryMode = ref('symmetric')
+const sectionCatalogProfileId = ref('')
+const sectionPanelState = ref({ status: 'invalid', fingerprint: '', error: null })
 
 const sectionEditorCopy = {
-  vi: {
-    geometry: 'Hình học tiết diện', geometryHint: 'Sơ đồ dùng kích thước tiết diện theo mm; khi thiếu kích thước, sơ đồ hiển thị theo tỷ lệ minh họa.', geometryTypeHint: 'Sơ đồ minh họa theo loại tiết diện. Nhập kích thước chính xác khi tạo tiết diện.', dimensionsHeader: 'Kích thước hình học', manualProperties: 'Thông số phụ do người dùng nhập',
-    engine: 'Section Properties', engineAxes: 'XY · mm', calculating: 'Đang tính…', calculated: 'Đã cập nhật bản xem trước.',
-    iGeometryMode: 'Dạng cánh tiết diện I', iSymmetric: 'Đối xứng', iAsymmetric: 'Không đối xứng',
-    enterDimensions: 'Nhập đủ kích thước hình học hợp lệ để tự động tính Section Properties.', unsupported: 'Hình dạng này chưa được bộ máy hỗ trợ.',
-    result: 'Đặc trưng đã tính', geometric: 'Hình học', elastic: 'Đàn hồi', plastic: 'Dẻo', principal: 'Trục chính', advanced: 'Đặc trưng nâng cao',
-    area: 'Diện tích A', perimeter: 'Chu vi P', centroid: 'Trọng tâm', sx: 'Mô đun đàn hồi Sx', sy: 'Mô đun đàn hồi Sy', radii: 'Bán kính quán tính',
-    angle: 'Góc trục chính', orientation: 'Trạng thái phương', determinate: 'Xác định', indeterminate: 'Không xác định',
-    pnaX: 'Tọa độ PNA x', pnaY: 'Tọa độ PNA y', zx: 'Mô đun dẻo Zx', zy: 'Mô đun dẻo Zy',
-    torsion: 'Hằng số xoắn J', warping: 'Hằng số vênh Cw', shearCenter: 'Tâm cắt', effectiveShear: 'Diện tích chịu cắt hữu hiệu',
-    computed: 'Đã tính', unavailable: 'Chưa tính', failed: 'Không thể tính đặc trưng với kích thước hiện tại.', status: 'Trạng thái HTTP', errorCode: 'Mã lỗi', errorFields: 'Trường kích thước cần kiểm tra',
-    reason_not_requested: 'Chưa yêu cầu', reason_solver_not_implemented: 'Chưa triển khai', reason_convergence_not_achieved: 'Chưa đạt độ chính xác yêu cầu', reason_numerical_precision_limit: 'Giới hạn độ chính xác số', reason_default: 'Không có giá trị với cấu hình hiện tại',
-  },
-  en: {
-    geometry: 'Section geometry', geometryHint: 'The sketch uses section dimensions in mm. Missing dimensions use schematic proportions.', geometryTypeHint: 'Schematic for this section type. Enter exact dimensions when creating a section record.', dimensionsHeader: 'Geometry dimensions', manualProperties: 'User supplied auxiliary inputs',
-    engine: 'Section Properties', engineAxes: 'XY · mm', calculating: 'Calculating…', calculated: 'Preview updated.',
-    iGeometryMode: 'I-section flange geometry', iSymmetric: 'Symmetric', iAsymmetric: 'Asymmetric',
-    enterDimensions: 'Enter complete, valid geometry dimensions to calculate Section Properties automatically.', unsupported: 'This shape is not supported by the calculation engine.',
-    result: 'Calculated properties', geometric: 'Geometric', elastic: 'Elastic', plastic: 'Plastic', principal: 'Principal axes', advanced: 'Advanced properties',
-    area: 'Area A', perimeter: 'Perimeter P', centroid: 'Centroid', sx: 'Elastic modulus Sx', sy: 'Elastic modulus Sy', radii: 'Radii of gyration',
-    angle: 'Major-axis angle', orientation: 'Orientation status', determinate: 'Determinate', indeterminate: 'Indeterminate',
-    pnaX: 'PNA coordinate x', pnaY: 'PNA coordinate y', zx: 'Plastic modulus Zx', zy: 'Plastic modulus Zy',
-    torsion: 'Torsion constant J', warping: 'Warping constant Cw', shearCenter: 'Shear center', effectiveShear: 'Effective shear area',
-    computed: 'Computed', unavailable: 'Not computed', failed: 'Could not calculate properties for these dimensions.', status: 'HTTP status', errorCode: 'Error code', errorFields: 'Dimension fields to review',
-    reason_not_requested: 'Not requested', reason_solver_not_implemented: 'Not implemented', reason_convergence_not_achieved: 'Requested tolerance was not met', reason_numerical_precision_limit: 'Numerical precision limit', reason_default: 'No value is available for the current configuration',
-  },
+  vi: { manualProperties: 'Thông số phụ do người dùng nhập' },
+  en: { manualProperties: 'User supplied auxiliary inputs' },
 }
 const sectionEditorT = (key) => sectionEditorCopy[props.locale]?.[key] ?? sectionEditorCopy.en[key] ?? key
-const sectionEngineResult = ref(null)
-const sectionEngineResultFingerprint = ref('')
-const sectionEngineError = ref(null)
-const sectionEngineLoading = ref(false)
-let sectionEngineSequence = 0
-
 const activeRecords = computed(() => records.value[activeResource.value] ?? [])
 const categories = computed(() => schema.value?.categories?.[activeResource.value === 'sections' ? 'section_types' : activeResource.value] ?? [])
 const visibleShapes = computed(() => (schema.value?.shapes ?? []).filter((shape) => !categoryFilter.value || shape.category === categoryFilter.value))
@@ -204,99 +174,31 @@ const propertyFields = computed(() => {
   })
 })
 const editorSectionShape = computed(() => editorResource.value === 'section_types' ? editForm.shape : selectedSectionType.value?.shape ?? '')
-const editorSectionDimensions = computed(() => editorResource.value === 'sections' ? editForm.properties : {})
 const sectionAllGeometryKeys = computed(() => new Set(CATALOG_GEOMETRY_KEYS[editorSectionShape.value] ?? []))
-const sectionDimensionKeys = computed(() => ({
-  i: sectionGeometryMode.value === 'asymmetric'
-    ? ['depth', 'top_flange_width', 'bottom_flange_width', 'web_thickness', 'top_flange_thickness', 'bottom_flange_thickness']
-    : ['depth', 'width', 'web_thickness', 'flange_thickness'],
-  channel: ['depth', 'width', 'web_thickness', 'flange_thickness'],
-  angle: ['depth', 'width', 'thickness'],
-  tee: ['depth', 'width', 'web_thickness', 'flange_thickness'],
-  rectangular_hollow: ['depth', 'width', 'thickness'],
-  circular_hollow: ['diameter', 'thickness'],
-  rectangle: ['depth', 'width'],
-  circle: ['diameter'],
-}[editorSectionShape.value] ?? []))
-const sectionDimensionFields = computed(() => propertyFields.value.filter((field) => sectionDimensionKeys.value.includes(field.key)))
 const sectionManualPropertyFields = computed(() => propertyFields.value.filter((field) => !sectionAllGeometryKeys.value.has(field.key) && field.read_only !== true && !isCatalogDerivedSectionProperty(field.key)))
-const sectionDimensionFingerprint = computed(() => JSON.stringify({
-  shape: editorSectionShape.value,
-  mode: editorSectionShape.value === 'i' ? sectionGeometryMode.value : null,
-  dimensions: Object.fromEntries(sectionDimensionKeys.value.map((key) => [key, editForm.properties[key] ?? ''])),
-}))
-const sectionEngineRequest = computed(() => {
-  if (editorResource.value !== 'sections') return null
-  return buildCatalogSectionCalculationRequest(editorSectionShape.value, editForm.properties)
-})
-const sectionEngineCanCalculate = computed(() => Boolean(sectionEngineRequest.value))
-const sectionEngineSupportsShape = computed(() => ['rectangle', 'circle', 'i', 'channel', 'tee', 'angle', 'rectangular_hollow', 'circular_hollow'].includes(editorSectionShape.value))
-const sectionPreviewReady = computed(() => Boolean(sectionEngineResult.value && sectionEngineResultFingerprint.value === sectionDimensionFingerprint.value && !sectionEngineLoading.value && !sectionEngineError.value))
+const sectionPanelDimensions = computed(() => sectionProfileDimensions(sectionCatalogProfileId.value, editForm.properties, { includeDefaults: false }))
+const sectionDimensionFingerprint = computed(() => sectionInputFingerprint(sectionCatalogProfileId.value, sectionPanelDimensions.value))
+const sectionPreviewReady = computed(() => sectionPanelState.value.status === 'ready' && sectionPanelState.value.fingerprint === sectionDimensionFingerprint.value)
 const canSaveSection = computed(() => editorResource.value !== 'sections' || sectionPreviewReady.value)
 
-function clearSectionEngineResult() {
-  if (sectionEngineDebounce !== null) window.clearTimeout(sectionEngineDebounce)
-  sectionEngineDebounce = null
-  sectionEngineSequence += 1
-  sectionEngineResult.value = null
-  sectionEngineResultFingerprint.value = ''
-  sectionEngineError.value = null
-  sectionEngineLoading.value = false
+function clearSectionPanelState() { sectionPanelState.value = { status: 'invalid', fingerprint: '', error: null } }
+function setSectionPanelState(state) { sectionPanelState.value = state }
+function setSectionPanelProfile(profileId) {
+  const next = resolveSectionProfile(profileId)
+  if (!next) return
+  const active = new Set(next.dimensions.map(catalogDimensionKey))
+  for (const key of sectionAllGeometryKeys.value) if (!active.has(key)) delete editForm.properties[key]
+  sectionCatalogProfileId.value = next.id
+  clearSectionPanelState()
 }
-
-watch([editorOpen, editorResource, sectionDimensionFingerprint], () => {
-  clearSectionEngineResult()
-  if (!editorOpen.value || editorResource.value !== 'sections' || !sectionEngineRequest.value) return
-  sectionEngineDebounce = window.setTimeout(() => calculateSectionProperties(), 250)
-}, { flush: 'sync' })
-
-function sectionEngineErrorDetails(error) {
-  const errorText = `${String(error?.message ?? '')} ${JSON.stringify(error?.errors ?? {})}`
-  const fieldAliases = { depth: ['height'] }
-  const fields = sectionDimensionFields.value
-    .filter((field) => errorText.includes(field.key) || (fieldAliases[field.key] ?? []).some((alias) => errorText.includes(alias)))
-    .map((field) => propertyLabel(field))
-  const messageCode = String(error?.message ?? '').match(/\b[A-Z][A-Z0-9]+(?:_[A-Z0-9]+)+\b/)?.[0]
-  return {
-    code: error?.code ?? error?.error_code ?? messageCode ?? null,
-    status: typeof error?.status === 'number' ? error.status : null,
-    fields: [...new Set(fields)],
-  }
+function setSectionPanelDimensions(dimensions) {
+  const profile = resolveSectionProfile(sectionCatalogProfileId.value)
+  if (!profile) return
+  const nextCatalogProperties = catalogPropertiesForProfile(profile, dimensions)
+  for (const key of sectionAllGeometryKeys.value) delete editForm.properties[key]
+  Object.assign(editForm.properties, nextCatalogProperties)
 }
-
-async function calculateSectionProperties() {
-  const payload = sectionEngineRequest.value
-  if (!payload) return
-  const sequence = ++sectionEngineSequence
-  const fingerprint = sectionDimensionFingerprint.value
-  sectionEngineLoading.value = true
-  sectionEngineResult.value = null
-  sectionEngineResultFingerprint.value = ''
-  sectionEngineError.value = null
-  try {
-    const result = await request('/api/v1/sections/calculate', {
-      method: 'POST',
-      body: JSON.stringify(payload),
-    })
-    if (sequence !== sectionEngineSequence || fingerprint !== sectionDimensionFingerprint.value) return
-    sectionEngineResult.value = result?.data ?? result
-    sectionEngineResultFingerprint.value = fingerprint
-  } catch (error) {
-    if (sequence !== sectionEngineSequence || fingerprint !== sectionDimensionFingerprint.value) return
-    sectionEngineError.value = sectionEngineErrorDetails(error)
-  } finally {
-    if (sequence === sectionEngineSequence) sectionEngineLoading.value = false
-  }
-}
-
-function setISectionGeometryMode(mode) {
-  if (!['symmetric', 'asymmetric'].includes(mode) || mode === sectionGeometryMode.value) return
-  sectionGeometryMode.value = mode
-  const keys = mode === 'symmetric'
-    ? ['top_flange_width', 'bottom_flange_width', 'top_flange_thickness', 'bottom_flange_thickness']
-    : ['width', 'flange_thickness']
-  for (const key of keys) delete editForm.properties[key]
-}
+function catalogDimensionKey(key) { return SECTION_REGISTRY.dimensions[key]?.catalog_key ?? key }
 
 const filteredRecords = computed(() => {
   const query = search.value.trim().toLocaleLowerCase()
@@ -694,7 +596,7 @@ function nextCopyCode(code) {
 
 function openEditor(record = null, mode = record ? 'edit' : 'create') {
   if (!props.canEdit) return
-  clearSectionEngineResult()
+  clearSectionPanelState()
   errorKey.value = ''
   validationFieldKeys.value = []
   messageKey.value = ''
@@ -719,17 +621,15 @@ function openEditor(record = null, mode = record ? 'edit' : 'create') {
     material_id: record?.material_id ?? '',
     properties: { ...(record?.properties ?? {}) },
   })
-  sectionGeometryMode.value = catalogGeometryMode(editorSectionShape.value, editForm.properties) ?? 'symmetric'
+  sectionCatalogProfileId.value = editorResource.value === 'sections'
+    ? profileForCatalogShape(editorSectionShape.value, editForm.properties)?.id ?? ''
+    : ''
   editorOpen.value = true
 }
 
 function updateEditorCategory() {
   const shapes = (schema.value?.shapes ?? []).filter((shape) => shape.category === editForm.category)
   if (!shapes.some((shape) => shape.code === editForm.shape)) editForm.shape = shapes[0]?.code ?? ''
-}
-
-function sectionDimensionRequired(field) {
-  return sectionDimensionKeys.value.includes(field.key)
 }
 
 function makePayload() {
@@ -747,7 +647,7 @@ function makePayload() {
     payload.section_type_id = editForm.section_type_id
     payload.material_id = editForm.material_id
     payload.source = editForm.source.trim()
-    payload.properties = catalogSectionInputProperties(editorSectionShape.value, editForm.properties, propertyFields.value)
+    payload.properties = catalogSectionInputProperties(sectionCatalogProfileId.value || editorSectionShape.value, editForm.properties, propertyFields.value)
   }
   if (editorResource.value === 'materials') {
     payload.properties = Object.fromEntries(propertyFields.value
@@ -809,6 +709,17 @@ async function deleteRecord(record) {
 
 watch(selectedSectionType, (type) => {
   if (!type) return
+  if (editorOpen.value && editorResource.value === 'sections') {
+    const activeProfile = resolveSectionProfile(sectionCatalogProfileId.value)
+    const allowedProfiles = sectionProfilesForCatalogShape(type.shape)
+    if (!activeProfile || !allowedProfiles.some((profile) => profile.id === activeProfile.id)) {
+      const oldGeometryKeys = CATALOG_GEOMETRY_KEYS[activeProfile?.catalog_shape ?? ''] ?? []
+      const newGeometryKeys = CATALOG_GEOMETRY_KEYS[type.shape] ?? []
+      for (const key of new Set([...oldGeometryKeys, ...newGeometryKeys])) delete editForm.properties[key]
+      sectionCatalogProfileId.value = profileForCatalogShape(type.shape)?.id ?? ''
+      clearSectionPanelState()
+    }
+  }
   const selectedMaterial = records.value.materials.find((item) => String(item.id) === String(editForm.material_id))
   const requiredCategory = type.category === 'rc' ? 'concrete' : 'steel'
   if (selectedMaterial && selectedMaterial.category !== requiredCategory) editForm.material_id = ''
@@ -823,7 +734,6 @@ watch(activeResource, () => loadRecords())
 onMounted(async () => {
   await Promise.all([loadSchema(), loadRecords()])
 })
-onBeforeUnmount(clearSectionEngineResult)
 </script>
 
 <template>
@@ -968,48 +878,19 @@ onBeforeUnmount(clearSectionEngineResult)
             <p v-else class="property-placeholder">{{ t('noProperties') }}</p>
           </div>
 
-          <div v-else-if="editorResource === 'sections'" class="property-editor full-field">
-            <div class="property-editor-heading"><h3>{{ sectionEditorT('dimensionsHeader') }}</h3><span>XY · mm</span></div>
-            <div v-if="!selectedSectionType" class="property-placeholder">{{ t('selectSectionTypeFirst') }}</div>
-            <div v-else-if="sectionDimensionFields.length" class="editor-form-grid">
-              <div v-if="editorSectionShape === 'i'" class="section-geometry-mode full-field" role="group" :aria-label="sectionEditorT('iGeometryMode')">
-                <span>{{ sectionEditorT('iGeometryMode') }}</span>
-                <button type="button" :aria-pressed="sectionGeometryMode === 'symmetric'" @click="setISectionGeometryMode('symmetric')">{{ sectionEditorT('iSymmetric') }}</button>
-                <button type="button" :aria-pressed="sectionGeometryMode === 'asymmetric'" @click="setISectionGeometryMode('asymmetric')">{{ sectionEditorT('iAsymmetric') }}</button>
-              </div>
-              <label v-for="field in sectionDimensionFields" :key="field.key" class="field">
-                <span>{{ propertyLabel(field) }} <small v-if="field.unit">{{ field.unit }}</small><b v-if="sectionDimensionRequired(field)">*</b></span>
-                <input v-model="editForm.properties[field.key]" :name="`property-${field.key}`" type="number" inputmode="decimal" step="any" :min="field.min" :max="field.max" :required="sectionDimensionRequired(field)" />
-              </label>
-            </div>
-            <p v-else class="property-placeholder">{{ t('noProperties') }}</p>
-          </div>
-
-          <section v-if="editorSectionShape" class="section-geometry-editor full-field" :aria-label="sectionEditorT('geometry')">
-            <header class="section-geometry-editor-heading">
-              <div><h3>{{ sectionEditorT('geometry') }}</h3><p>{{ sectionEditorT('geometryHint') }}</p></div>
-              <span>XY · mm</span>
-            </header>
-            <div class="section-geometry-editor-body">
-              <SectionGeometrySketch :shape="editorSectionShape" :dimensions="editorSectionDimensions" :locale="locale" />
-              <div v-if="editorResource === 'sections' && sectionEngineSupportsShape" class="section-engine-controls">
-                <div class="section-engine-controls-heading"><h4>{{ sectionEditorT('engine') }}</h4><span>{{ sectionEditorT('engineAxes') }}</span></div>
-                <p v-if="sectionEngineLoading" class="section-engine-status" role="status"><span class="section-engine-spinner" aria-hidden="true"></span>{{ sectionEditorT('calculating') }}</p>
-                <p v-else-if="sectionPreviewReady" class="section-engine-status" role="status">{{ sectionEditorT('calculated') }}</p>
-                <p v-if="!sectionEngineCanCalculate" class="section-engine-dimensions-hint">{{ sectionEditorT('enterDimensions') }}</p>
-                <p v-if="sectionEngineError" class="section-engine-error" role="alert">
-                  {{ sectionEditorT('failed') }}
-                  <span v-if="sectionEngineError.code"> {{ sectionEditorT('errorCode') }}: {{ sectionEngineError.code }}</span>
-                  <span v-if="sectionEngineError.status"> {{ sectionEditorT('status') }}: {{ sectionEngineError.status }}</span>
-                  <span v-if="sectionEngineError.fields.length"><br /><strong>{{ sectionEditorT('errorFields') }}:</strong> {{ sectionEngineError.fields.join(', ') }}</span>
-                </p>
-              </div>
-              <p v-else-if="editorResource === 'sections'" class="section-engine-unsupported">{{ sectionEditorT('unsupported') }}</p>
-              <p v-else class="section-engine-unsupported">{{ sectionEditorT('geometryTypeHint') }}</p>
-            </div>
-
-            <SectionCalculatedProperties v-if="sectionEngineResult" :result="sectionEngineResult" :locale="locale" />
-          </section>
+          <SectionPropertiesPanel
+            v-if="editorResource === 'sections' && selectedSectionType"
+            class="full-field"
+            :key="`${selectedSectionType.id}-${sectionCatalogProfileId}`"
+            mode="catalog"
+            :locale="locale"
+            :catalog-shape="editorSectionShape"
+            :profile-id="sectionCatalogProfileId"
+            :dimensions="sectionPanelDimensions"
+            @update:profile-id="setSectionPanelProfile"
+            @update:dimensions="setSectionPanelDimensions"
+            @state="setSectionPanelState"
+          />
 
           <div v-if="editorResource === 'sections' && selectedSectionType" class="property-editor full-field">
             <div class="property-editor-heading"><h3>{{ sectionEditorT('manualProperties') }}</h3><span>{{ t('basisUnits') }}</span></div>
@@ -1071,45 +952,7 @@ onBeforeUnmount(clearSectionEngineResult)
 .library-transfer-result dl > div { display: flex; align-items: center; gap: 5px; padding: 5px 7px; border-radius: 6px; background: #eaf6ee; }
 .library-transfer-result dt { color: #587765; font-size: 13px; }
 .library-transfer-result dd { margin: 0; color: #366b4b; font-size: 14px; font-weight: 750; font-variant-numeric: tabular-nums; }
-.section-geometry-editor { margin-top: 2px; padding: 13px; border: 1px solid #dce6ee; border-radius: 9px; background: var(--soft-bg); }
-.section-geometry-editor-heading, .section-engine-controls-heading, .section-engine-results-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
-.section-geometry-editor-heading h3 { margin: 0; color: #304f6c; font-size: 15px; }
-.section-geometry-editor-heading p { margin: 4px 0 0; color: #7b8c9c; font-size: 14px; line-height: 1.5; }
-.section-geometry-editor-heading > span, .section-engine-controls-heading > span, .section-engine-results-heading > span { flex: 0 0 auto; color: #6c87a0; font-size: 14px; font-weight: 700; }
-.section-geometry-editor-body { display: grid; grid-template-columns: minmax(210px, .9fr) minmax(220px, 1fr); align-items: start; gap: 12px; margin-top: 10px; }
-.section-engine-controls { min-width: 0; padding: 10px; border: 1px solid #e3ebf1; border-radius: 7px; background: var(--surface-bg); }
-.section-engine-controls-heading { align-items: center; }
-.section-engine-controls-heading h4, .section-engine-results-heading h4 { margin: 0; color: #456681; font-size: 14px; font-weight: 750; }
-.section-geometry-mode { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
-.section-geometry-mode > span { flex: 1 0 100%; color: #5b7790; font-size: 13px; font-weight: 650; }
-.section-geometry-mode button { padding: 5px 8px; border: 1px solid var(--surface-border); border-radius: 6px; background: var(--surface-bg); color: #55728d; font: inherit; font-size: 12px; cursor: pointer; }
-.section-geometry-mode button[aria-pressed="true"] { border-color: #477da5; background: #eaf3fa; color: #294968; font-weight: 700; }
-.section-engine-status { display: flex; align-items: center; gap: 7px; margin: 8px 0 0; color: #5d7c96; font-size: 13px; line-height: 1.5; }
-.section-engine-calculate { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 33px; margin-top: 9px; padding: 7px 10px; border: 1px solid #3d6f96; border-radius: 6px; background: #477da5; color: #fff; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
-.section-engine-calculate:hover:not(:disabled) { background: #23395d; border-color: #23395d; color: white; }
-.section-engine-calculate:disabled { border-color: #c7d3dd; background: #e7edf2; color: #8b9aa8; cursor: not-allowed; }
-.section-engine-calculate:focus-visible { outline: 3px solid #a8c7e2; outline-offset: 2px; }
-.section-engine-note, .section-engine-dimensions-hint, .section-engine-unsupported { margin: 7px 0 0; color: var(--muted-ink); font-size: 14px; line-height: 1.55; }
-.section-engine-unsupported { align-self: center; padding: 10px; border: 1px dashed #d8e2eb; border-radius: 7px; }
-.section-engine-error { margin: 8px 0 0; padding: 7px 8px; border: 1px solid #efd5d5; border-radius: 6px; background: #fff8f8; color: #884d51; font-size: 14px; line-height: 1.5; }
-.section-engine-results { margin-top: 11px; padding-top: 10px; border-top: 1px solid #e7edf2; }
-.section-engine-results-heading { align-items: center; margin-bottom: 8px; }
-.section-engine-result-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-.section-engine-result-card { min-width: 0; padding: 9px; border: 1px solid #e3ebf1; border-radius: 7px; background: var(--surface-bg); }
-.section-engine-result-card h5 { margin: 0 0 6px; color: #52738f; font-size: 14px; font-weight: 750; letter-spacing: .035em; text-transform: uppercase; }
-.section-engine-values { display: grid; gap: 0; margin: 0; }
-.section-engine-values > div { display: flex; align-items: flex-start; justify-content: space-between; gap: 7px; padding: 5px 0; border-bottom: 1px solid #eef2f5; }
-.section-engine-values > div:last-child { border-bottom: 0; }
-.section-engine-values dt { color: var(--muted-ink); font-size: 14px; line-height: 1.45; }
-.section-engine-values dd { margin: 0; color: #344f69; font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; text-align: right; overflow-wrap: anywhere; }
-.section-engine-values .section-engine-unavailable, .section-engine-unavailable { color: var(--muted-ink); font-weight: 550; }
-.section-engine-advanced-card { grid-column: 1 / -1; }
-.section-engine-advanced-card .section-engine-values { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 12px; }
-.section-engine-spinner { width: 12px; height: 12px; border: 2px solid #b9d0e1; border-top-color: currentColor; border-radius: 50%; animation: section-engine-spin .8s linear infinite; }
-@keyframes section-engine-spin { to { transform: rotate(360deg); } }
 @media (max-width: 760px) { .library-transfer-controls { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }.library-transfer-import { grid-column: 1 / -1; }.library-transfer-export { align-self: flex-start; } }
-@media (max-width: 600px) { .section-geometry-editor-body { grid-template-columns: minmax(0, 1fr); }.section-geometry-editor-heading { flex-direction: column; gap: 5px; }.section-engine-result-grid { grid-template-columns: minmax(0, 1fr); }.section-engine-advanced-card { grid-column: auto; } }
-@media (max-width: 520px) { .library-transfer { padding: 12px; }.library-transfer-header { flex-direction: column; }.library-transfer-controls { grid-template-columns: 1fr; }.library-transfer-import { grid-column: auto; }.library-transfer-export { width: 100%; }.library-transfer-choose { flex: 1; }.section-engine-advanced-card .section-engine-values { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 520px) { .library-transfer { padding: 12px; }.library-transfer-header { flex-direction: column; }.library-transfer-controls { grid-template-columns: 1fr; }.library-transfer-import { grid-column: auto; }.library-transfer-export { width: 100%; }.library-transfer-choose { flex: 1; } }
 @media (max-width: 760px) { .library-browser .library-filters { align-items: stretch; flex-direction: column; }.library-browser .library-search, .library-browser .filter-select { width: 100%; flex: initial; } }
-@media (prefers-reduced-motion: reduce) { .section-engine-spinner { animation-duration: 2s; } }
 </style>

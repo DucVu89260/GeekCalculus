@@ -6,9 +6,13 @@
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "build": "vite build",
-    "test": "node --test tests/geometry/*.test.js",
+    "test": "node --test tests/geometry/*.test.js ../../tests/section-properties-core.test.cjs",
     "preview": "vite preview --host 0.0.0.0",
-    "typecheck": "vue-tsc --noEmit"
+    "typecheck": "vue-tsc --noEmit",
+    "predev": "node ../../scripts/build-section-properties-core.cjs",
+    "prebuild": "node ../../scripts/build-section-properties-core.cjs",
+    "pretest": "node ../../scripts/build-section-properties-core.cjs",
+    "pretypecheck": "node ../../scripts/build-section-properties-core.cjs"
   },
   "dependencies": {
     "decimal.js": "10.6.0",

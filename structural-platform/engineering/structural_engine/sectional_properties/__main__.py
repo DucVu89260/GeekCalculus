@@ -28,6 +28,8 @@ def main() -> int:
         code = "INVALID_DIMENSION"
         if any("geometry_variant" in item["path"] for item in errors):
             code = "UNSUPPORTED_VARIANT"
+        elif any("required_properties" in item["path"] for item in errors):
+            code = "UNSUPPORTED_PROPERTY"
         elif any(item["type"] in ("invalid_geometry", "union_tag_invalid", "union_tag_not_found", "extra_forbidden") for item in errors):
             code = "INVALID_GEOMETRY"
         elif any(item["path"] == "units" for item in errors):

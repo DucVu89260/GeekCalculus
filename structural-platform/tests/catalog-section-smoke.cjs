@@ -45,8 +45,8 @@ const derivedKeys = schema.fields.sections.filter(field => field.read_only === t
     }
     const save = dialog.getByRole('button', { name: 'Create record', exact: true })
     assert.equal(await save.isDisabled(), true, 'A section cannot save before geometry has a calculated preview')
-    await dialog.locator('input[name="property-depth"]').fill('240')
-    await dialog.locator('input[name="property-width"]').fill('120')
+    await dialog.locator('input[name="dimension-height"]').fill('240')
+    await dialog.locator('input[name="dimension-width"]').fill('120')
     await dialog.locator('.section-calculated-properties').waitFor()
     const previewArea = dialog.locator('.section-calculated-group').filter({ has: page.getByRole('heading', { name: 'Geometric', exact: true }) }).locator('dl > div').filter({ hasText: 'A · Area' }).locator('dd')
     await page.waitForFunction(() => document.querySelector('.section-calculated-group dl > div dd')?.textContent?.trim() !== '')
@@ -87,7 +87,7 @@ const derivedKeys = schema.fields.sections.filter(field => field.read_only === t
     await reloadedRow.getByRole('button', { name: 'Edit', exact: true }).click()
     const edit = page.getByRole('dialog')
     for (const key of derivedKeys) assert.equal(await edit.locator(`input[name="property-${key}"]`).count(), 0)
-    await edit.locator('input[name="property-width"]').fill('130')
+    await edit.locator('input[name="dimension-width"]').fill('130')
     const editedPreviewArea = edit.locator('.section-calculated-properties dl > div').filter({ hasText: 'A · Area' }).locator('dd')
     await page.waitForFunction((previous) => {
       const dialog = document.querySelector('[role="dialog"]')
@@ -114,21 +114,29 @@ const derivedKeys = schema.fields.sections.filter(field => field.read_only === t
     const steelMaterial = asymmetricDialog.getByLabel(/^Material/)
     const steelMaterialId = await steelMaterial.locator('option').filter({ hasText: /^steel_s235/ }).getAttribute('value')
     await steelMaterial.selectOption(steelMaterialId)
-    await asymmetricDialog.getByRole('button', { name: 'Asymmetric', exact: true }).click()
-    assert.equal(await asymmetricDialog.locator('input[name="property-width"]').count(), 0)
-    assert.equal(await asymmetricDialog.locator('input[name="property-flange_thickness"]').count(), 0)
-    await asymmetricDialog.getByRole('button', { name: 'Symmetric', exact: true }).click()
-    assert.equal(await asymmetricDialog.locator('input[name="property-top_flange_width"]').count(), 0)
-    await asymmetricDialog.getByRole('button', { name: 'Asymmetric', exact: true }).click()
+    const iProfileSelect = asymmetricDialog.locator('.section-properties-panel-inputs select')
+    await iProfileSelect.selectOption('asymmetric_i')
+    assert.equal(await asymmetricDialog.locator('input[name="dimension-width"]').count(), 0)
+    assert.equal(await asymmetricDialog.locator('input[name="dimension-flange_thickness"]').count(), 0)
+    await iProfileSelect.selectOption('symmetric_i')
+    assert.equal(await asymmetricDialog.locator('input[name="dimension-top_flange_width"]').count(), 0)
+    await iProfileSelect.selectOption('asymmetric_i')
     for (const [key, value] of Object.entries({ depth: 400, web_thickness: 8, top_flange_width: 180, bottom_flange_width: 160, top_flange_thickness: 14, bottom_flange_thickness: 12 })) {
-      await asymmetricDialog.locator(`input[name="property-${key}"]`).fill(String(value))
+      await asymmetricDialog.locator(`input[name="dimension-${key}"]`).fill(String(value))
     }
-    await asymmetricDialog.locator('.section-calculated-properties').waitFor()
+    try { await asymmetricDialog.locator('.section-calculated-properties').waitFor({ timeout: 10000 }) } catch (error) {
+      console.error('Asymmetric I preview did not calculate:', await page.locator('[role="dialog"]').count(), await page.locator('body').innerText())
+      console.error('Dimension inputs:', await page.locator('[role="dialog"] .section-properties-panel input[name^="dimension-"]').evaluateAll(inputs => Object.fromEntries(inputs.map(input => [input.name, input.value]))))
+      throw error
+    }
     await asymmetricDialog.getByRole('button', { name: 'Create record', exact: true }).click()
     await asymmetricDialog.waitFor({ state: 'detached' })
     const asymmetricRecord = await page.evaluate(code => JSON.parse(localStorage.getItem('geekcalculus-demo-library-v1')).sections.find(section => section.code === code), asymmetricCode)
     assert.deepEqual(asymmetricRecord.properties, { depth: 400, web_thickness: 8, top_flange_width: 180, bottom_flange_width: 160, top_flange_thickness: 14, bottom_flange_thickness: 12 })
-    assert.deepEqual(asymmetricRecord.section_properties.normalized_input.geometry.dimensions, asymmetricRecord.properties)
+    assert.deepEqual(asymmetricRecord.section_properties.normalized_input.geometry.dimensions, {
+      depth: 400, web_thickness: 8, top_flange_width: 180, bottom_flange_width: 160,
+      top_flange_thickness: 14, bottom_flange_thickness: 12,
+    })
     assert.equal(asymmetricRecord.section_properties.advanced.shear_center.status, 'computed')
 
     await page.waitForTimeout(1100)

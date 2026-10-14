@@ -2,7 +2,7 @@
 
 Nguồn yêu cầu: nội dung người dùng gửi lại từ cuộc trò chuyện
 “Định hướng nền tảng kết cấu”. Các quyết định dưới đây được cố định cho
-schema 1.0, geometry model 1.0.0 và analytical solver 1.2.0 (mở rộng đủ 8 hình dạng catalog).
+schema 1.0, geometry model 1.0.0 và analytical solver 1.3.0 (9 geometry models, 10 profile trong registry).
 
 ## Geometry → validation → analytical result
 
@@ -82,7 +82,7 @@ underflow của absolute error tạo báo cáo convergence giả.
 Kahan summation, ước lượng roundoff riêng và ulp(base) được xét;
 đây là error estimate float64 cộng tail bound giải tích, không phải
 interval-arithmetic certificate. Không trả estimate chưa hội tụ dưới nhãn
-computed. Không thay J bằng polar moment; I/H chưa tính J; Cw dùng xấp xỉ Vlasov thành mỏng như mô tả dưới đây.
+computed. Không thay J bằng polar moment; J I/H và mọi tiết diện hở dùng Σ L t³/3; Cw dùng xấp xỉ Vlasov thành mỏng như mô tả dưới đây.
 
 Nguồn phương pháp: lời giải thanh chữ nhật của Saint-Venant/Prandtl trong
 S. P. Timoshenko & J. N. Goodier, *Theory of Elasticity*, 3rd edition.
@@ -182,14 +182,17 @@ subnormal torsion, precision limit và không hội tụ.
 
 Output nhóm geometric, elastic, plastic, principal, advanced; kèm units,
 normalized_input, schema/solver/geometry_model versions, hashes và diagnostics.
-Unsupported advanced properties: status=not_computed, value=null,
-reason=solver_not_implemented. Optional J không được yêu cầu: not_requested;
-required unsupported: UNSUPPORTED_PROPERTY. I/H Cw/center/area tùy chọn ngoài
-dải số: numerical_range; nếu bắt buộc: CALCULATION_ERROR. Required J không hội tụ:
-CALCULATION_ERROR/ConvergenceError. Domain errors không gắn với HTTP layer.
+Mọi geometry hiện có đủ J/Cw/tâm cắt/Ax/Ay theo các mô hình công bố.
+Kết quả tùy chọn không yêu cầu: `not_requested`; ngoài dải số: `numerical_range`.
+Đại lượng bắt buộc không hội tụ/ngoài dải số: `CALCULATION_ERROR`.
+Tên thuộc tính không hỗ trợ: `UNSUPPORTED_PROPERTY`.
+Native API thực thi cùng package TypeScript với demo; Python là oracle nghiệm thu.
+Báo cáo công thức/version/hash được lưu cùng snapshot. Xem
+[shared package](../../section-properties/README.md) cho mô hình advanced của
+Rectangle/CHS/RHS/Channel/Tee/Angle/Double Angle và quy ước diagnostics chuẩn hóa.
 
 - [x] Geometry input/schema và validation.
-- [x] Tám analytical solvers, PNA theo dải và benchmark polygon độc lập.
+- [x] Chín geometry solvers, PNA theo dải và benchmark polygon độc lập.
 - [x] J Rectangle/Circle có báo cáo phương pháp/độ chính xác.
 - [x] Unsupported properties không dùng giá trị 0 giả.
 - [x] Benchmarks, independent references và property-based tests.

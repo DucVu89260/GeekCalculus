@@ -123,6 +123,13 @@
       "name_en": "RC circle",
       "category": "rc",
       "shape": "circle"
+    },
+    {
+      "code": "double_angle",
+      "name_vi": "DOUBLE ANGLE — Hai thép góc",
+      "name_en": "DOUBLE ANGLE",
+      "category": "steel",
+      "shape": "double_angle"
     }
   ]
 }

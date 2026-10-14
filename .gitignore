@@ -12,3 +12,5 @@
 **/.hypothesis/
 **/*.egg-info/
 **/.venv/
+structural-platform/engineering/structural_engine/sectional_properties/data/section-core.mjs
+structural-platform/engineering/structural_engine/sectional_properties/data/section-registry.json

@@ -31,7 +31,7 @@ const base = process.env.MODULE_BASE_URL || 'http://127.0.0.1:5173'
     assert.equal(digest(await response.body()), digest(fs.readFileSync('frontend/vue/public/structural-hero.jpg')))
     await page.screenshot({ path: '/tmp/geekcalculus-new-cover.png', fullPage: true })
     await signIn(page, { demo })
-    assert.equal(await page.locator('.module-card').count(), 6)
+    assert.equal(await page.locator('.module-card').count(), 5)
     const steelLink = page.getByRole('link', { name: /Steel design/i })
     await navyHover(steelLink, steelLink.locator('strong'))
     assert.equal(await steelLink.getAttribute('target'), '_blank')
@@ -40,9 +40,26 @@ const base = process.env.MODULE_BASE_URL || 'http://127.0.0.1:5173'
     const moduleTab = await newPage
     await moduleTab.getByRole('tab', { name: /^Component/ }).waitFor()
     assert.equal(await moduleTab.evaluate(() => window.opener), null)
-    assert.equal(await moduleTab.locator('.module-navigation a').count(), 6)
-    await moduleTab.getByLabel(/^Member type/).selectOption('column')
-    await moduleTab.getByLabel(/^Steel material/).selectOption({ index: 1 })
+    assert.equal(await moduleTab.locator('.module-navigation a').count(), 5)
+    assert.equal(await moduleTab.locator('.module-navigation a[href$="/modules/analysis"]').count(), 0)
+    assert.equal(await page.locator('.module-card[href$="/modules/analysis"]').count(), 0)
+    const componentNames = ['Symmetric I/H', 'Asymmetric I/H', 'Channel', 'Angle', 'Tee', 'Double Angle', 'Circle', 'CHS', 'RHS/SHS']
+    const componentCards = moduleTab.locator('.steel-component-card')
+    assert.deepEqual(await componentCards.locator('strong').allTextContents(), componentNames)
+    assert.equal(await componentCards.locator('svg[role="img"]').count(), 9)
+    const imagePaths = await componentCards.locator('.section-geometry-thumbnail svg').evaluateAll(images => images.map(image => image.querySelector('path.section-geometry-outline')?.getAttribute('d') ?? image.querySelector('circle.section-geometry-outline')?.outerHTML))
+    assert.equal(new Set(imagePaths).size, 8, 'Circle and CHS share the outer circle; other illustrations must be distinct')
+    assert.equal(await componentCards.nth(7).locator('circle.section-geometry-hole').count(), 1, 'CHS illustration has a hollow core')
+    assert.equal(await componentCards.nth(8).locator('rect.section-geometry-hole').count(), 1, 'RHS/SHS illustration has a hollow core')
+    for (const name of componentNames) {
+      await moduleTab.getByRole('button', { name, exact: true }).click()
+      await moduleTab.locator('.steel-component-workspace').getByRole('heading', { name, exact: true }).waitFor()
+      assert.equal(await moduleTab.locator('.steel-component-card[aria-pressed="true"]').count(), 1)
+    }
+    await navyHover(componentCards.first(), componentCards.first().locator('strong'))
+    await moduleTab.getByRole('button', { name: 'Double Angle', exact: true }).focus()
+    await moduleTab.keyboard.press('Enter')
+    await moduleTab.locator('.steel-component-workspace').getByRole('heading', { name: 'Double Angle', exact: true }).waitFor()
     await moduleTab.getByRole('tab', { name: /^Connection/ }).click()
     await navyHover(moduleTab.getByRole('tab', { name: /^Connection/ }), moduleTab.getByRole('tab', { name: /^Connection/ }).locator('strong'))
     await moduleTab.getByLabel(/^Connection type/).selectOption('base_plate')
@@ -51,7 +68,8 @@ const base = process.env.MODULE_BASE_URL || 'http://127.0.0.1:5173'
     await moduleTab.getByLabel(/^Weld type/).selectOption('butt')
     await moduleTab.getByRole('button', { name: 'VI', exact: true }).click()
     await moduleTab.getByRole('tab', { name: /^Component/ }).click()
-    assert.equal(await moduleTab.getByLabel(/^Loại cấu kiện/).inputValue(), 'column')
+    assert.equal(await moduleTab.getByRole('button', { name: 'Double Angle', exact: true }).getAttribute('aria-pressed'), 'true')
+    await moduleTab.locator('.steel-component-workspace').getByText('Chức năng này đang được phát triển.', { exact: true }).waitFor()
     await moduleTab.getByRole('button', { name: 'EN', exact: true }).click()
     await moduleTab.evaluate(async () => { await Promise.all(document.getAnimations().filter(animation => animation.constructor.name === 'CSSTransition').map(animation => animation.finished.catch(() => {}))) })
     await moduleTab.screenshot({ path: '/tmp/geekcalculus-steel-design.png', fullPage: true })
@@ -64,7 +82,7 @@ const base = process.env.MODULE_BASE_URL || 'http://127.0.0.1:5173'
       await moduleTab.getByRole('status').filter({ hasText: 'awaiting implementation' }).waitFor()
     }
     const profileIds = ['rectangle', 'circle', 'chs', 'shs_rhs', 'symmetric_i', 'asymmetric_i', 'channel', 'angle', 'tee', 'double_angle']
-    for (const code of ['analysis', 'steel', 'concrete']) {
+    for (const code of ['steel', 'concrete']) {
       await moduleTab.locator(`.module-navigation a[href$="/modules/${code}"]`).click()
       if (code === 'steel') await moduleTab.getByRole('tab', { name: /^Section properties/ }).click()
       if (code === 'concrete') await moduleTab.getByRole('tab', { name: 'Section properties', exact: true }).click()
@@ -87,6 +105,9 @@ const base = process.env.MODULE_BASE_URL || 'http://127.0.0.1:5173'
       assert.ok(await moduleTab.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${code} Section Properties overflows on mobile`)
       await moduleTab.setViewportSize({ width: 1440, height: 1100 })
     }
+    await moduleTab.goto(new URL('#/modules/analysis', base).href)
+    await moduleTab.locator('.section-properties-panel').waitFor({ state: 'visible' })
+    assert.equal(await moduleTab.locator('.module-navigation a[href$="/modules/analysis"]').count(), 0, 'Legacy bookmark stays usable without restoring a navigation item')
     await moduleTab.locator('.module-navigation a[href$="/modules/library"]').click()
     await moduleTab.getByText('Read only', { exact: true }).waitFor()
     await moduleTab.reload()
@@ -100,6 +121,6 @@ const base = process.env.MODULE_BASE_URL || 'http://127.0.0.1:5173'
     await navyHover(page.getByRole('tab', { name: 'Materials', exact: true }))
     await navyHover(page.getByRole('tab', { name: 'Users', exact: true }))
     assert.equal(errors.length, 0, errors.join('\n'))
-    console.log(`${demo ? 'Demo' : 'Laravel'} module checks passed: uploaded cover bytes/MIME, navy/white hover in both interfaces, new browser tab with shared login and no opener, six-module navigation, Component/Connection dropdowns, VI/EN state, placeholders, read-only library, direct reload, cross-tab logout, mobile.`)
+    console.log(`${demo ? 'Demo' : 'Laravel'} module checks passed: uploaded cover bytes/MIME, navy/white hover in both interfaces, new browser tab with shared login and no opener, five-module navigation, nine illustrated Component buttons and keyboard/selection state, Connection dropdowns, VI/EN state, placeholders, read-only library, direct reload, cross-tab logout, mobile.`)
   } finally { await browser.close() }
 })().catch(error => { console.error(error); process.exitCode = 1 })

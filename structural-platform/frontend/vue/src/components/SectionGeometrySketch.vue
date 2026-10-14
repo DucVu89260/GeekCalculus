@@ -4,6 +4,7 @@ import { resolveSectionProfile, sectionProfileDimensions, SECTION_REGISTRY } fro
 
 const props = defineProps({
   profileId: { type: String, default: '' },
+  thumbnail: { type: Boolean, default: false },
   shape: { type: String, default: '' },
   dimensions: { type: Object, default: () => ({}) },
   locale: { type: String, default: 'en' },
@@ -127,9 +128,9 @@ const drawing = computed(() => {
 </script>
 
 <template>
-  <div class="section-geometry-sketch">
-    <svg viewBox="0 0 360 220" role="img" :aria-label="t('title')">
-      <title>{{ t('title') }}</title>
+  <div class="section-geometry-sketch" :class="{ 'section-geometry-thumbnail': thumbnail }">
+    <svg :viewBox="thumbnail ? '100 8 164 148' : '0 0 360 220'" role="img" :aria-label="thumbnail ? profile?.label : t('title')">
+      <title>{{ thumbnail ? profile?.label : t('title') }}</title>
       <defs><marker :id="markerId" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto-start-reverse"><path d="M 0 0 L 7 3.5 L 0 7 z" fill="#6b86a0" /></marker></defs>
       <path v-if="drawing.outline" :d="drawing.outline" class="section-geometry-outline" fill-rule="evenodd" />
       <circle v-for="(circle, index) in drawing.circles" :key="`circle-${index}`" v-bind="circle" class="section-geometry-outline" />
@@ -137,6 +138,7 @@ const drawing = computed(() => {
         <rect v-if="'width' in hole" v-bind="hole" class="section-geometry-hole" />
         <circle v-else v-bind="hole" class="section-geometry-hole" />
       </template>
+      <g v-if="!thumbnail">
       <text v-for="(label, index) in drawing.featureLabels" :key="`feature-${index}`" :x="label.x" :y="label.y" class="section-geometry-feature-label">{{ label.text }}</text>
       <line x1="83" :x2="drawing.left" :y1="drawing.top" :y2="drawing.top" class="section-geometry-extension" />
       <line x1="83" :x2="drawing.left" :y1="drawing.bottom" :y2="drawing.bottom" class="section-geometry-extension" />
@@ -148,14 +150,16 @@ const drawing = computed(() => {
       <text :x="drawing.centerX" y="194" class="section-geometry-dimension-label section-geometry-horizontal-label">{{ drawing.horizontalLabel }}</text>
       <line x1="296" y1="160" x2="326" y2="160" class="section-geometry-axis" /><line x1="296" y1="160" x2="296" y2="132" class="section-geometry-axis" />
       <text x="332" y="163" class="section-geometry-axis-label">X</text><text x="293" y="126" class="section-geometry-axis-label">Y</text>
+      </g>
     </svg>
-    <p v-if="!drawing.hasDimensions" class="section-geometry-sketch-note">{{ t('schematic') }}</p>
+    <p v-if="!thumbnail && !drawing.hasDimensions" class="section-geometry-sketch-note">{{ t('schematic') }}</p>
   </div>
 </template>
 
 <style scoped>
 .section-geometry-sketch { min-width: 0; }
 .section-geometry-sketch svg { display: block; width: 100%; min-height: 180px; max-height: 220px; }
+.section-geometry-thumbnail svg { min-height: 0; height: 112px; max-height: none; }
 .section-geometry-outline { fill: #dce9f4; stroke: #375f83; stroke-width: 1.6; }
 .section-geometry-hole { fill: var(--soft-bg); stroke: #375f83; stroke-width: 1.2; }
 .section-geometry-dimension { stroke: #6b86a0; stroke-width: 1; }

@@ -1,7 +1,7 @@
 <script setup>
 import { computed, reactive, ref } from 'vue'
 import { copy } from '../i18n'
-import { moduleGroups, moduleHref } from '../modules'
+import { moduleGroups, moduleHref, legacySectionPropertiesGroup } from '../modules'
 import { demoMode } from '../api'
 import SteelDesignView from './SteelDesignView.vue'
 import SectionPropertiesPanel from './SectionPropertiesPanel.vue'
@@ -16,7 +16,7 @@ const words = {
   en: { navigation: 'Main modules', home: 'Home', tool: 'Select a tool', choose: 'Choose an option…', pending: 'Preliminary options. This tool is awaiting implementation; calculation results are not available.', beam: 'RC beam', column: 'RC column', slab: 'RC slab', foundation: 'RC foundation', sap: 'Import SAP2000 data', etabs: 'Import ETABS data', cases: 'Load cases', combinations: 'Load combinations', wind: 'Wind loads', research: 'Model research', nonlinear: 'Nonlinear analysis', optimization: 'Structural optimization', concreteSetup: 'Design setup', sectionProperties: 'Section properties' },
 }
 const t = key => words[locale.value][key] ?? copy[locale.value][key] ?? copy.en[key] ?? key
-const currentGroup = computed(() => moduleGroups.find(group => group.code === props.moduleCode))
+const currentGroup = computed(() => moduleGroups.find(group => group.code === props.moduleCode) ?? legacySectionPropertiesGroup)
 const selectedTools = reactive({ concrete: '', analysis: '', loads: '', future: '' })
 const concreteView = ref('design')
 const tools = { concrete: ['beam', 'column', 'slab', 'foundation'], analysis: ['sap', 'etabs'], loads: ['cases', 'combinations', 'wind'], future: ['research', 'nonlinear', 'optimization'] }
@@ -38,7 +38,7 @@ function navigate(code) { window.location.hash = `/modules/${code}` }
       <a v-for="group in moduleGroups" :key="group.code" :href="moduleHref(group.code)" :aria-current="moduleCode === group.code ? 'page' : undefined">{{ t(group.title) }}</a>
     </nav>
     <header class="module-heading"><h1>{{ t(currentGroup.title) }}</h1><p>{{ t(currentGroup.description) }}</p></header>
-    <SteelDesignView v-if="moduleCode === 'steel'" :locale="locale" @open-library="navigate('library')" />
+    <SteelDesignView v-if="moduleCode === 'steel'" :locale="locale" />
     <SectionPropertiesPanel v-else-if="moduleCode === 'analysis'" :locale="locale" />
     <section v-else-if="moduleCode === 'library'" class="module-panel"><LibraryBrowser :locale="locale" :can-edit="false" /></section>
     <section v-else-if="moduleCode === 'concrete'" class="module-panel concrete-module-panel">
@@ -66,7 +66,7 @@ function navigate(code) { window.location.hash = `/modules/${code}` }
 .module-page { width: calc(100% - 32px); max-width: 1280px; min-height: calc(100vh - 40px); padding: 0 28px 40px; margin: 16px auto 24px; border: 1px solid var(--surface-border); border-radius: 16px; background: var(--workspace-bg); box-shadow: 0 8px 24px #243b570a; }
 .module-topbar { min-height: 84px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
 .module-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.module-navigation { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 5px; padding: 6px; border: 1px solid var(--surface-border); background: var(--surface-bg); border-radius: 10px; }
+.module-navigation { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 5px; padding: 6px; border: 1px solid var(--surface-border); background: var(--surface-bg); border-radius: 10px; }
 .module-navigation a { text-align: center; display: flex; justify-content: center; align-items: center; padding: 13px 9px; border-radius: 6px; color: #547491; font-size: 16px; line-height: 1.5; text-decoration: none; transition: background .15s, color .15s; }
 .module-navigation a[aria-current="page"], .module-navigation a:hover, .module-navigation a:focus-visible { color: white; background: #23395d; }
 .module-heading { padding: 32px 0 22px; }.module-heading h1 { font-size: 29px; }.module-heading p { font-size: 17px; margin: 10px 0 0; color: var(--muted-ink); }

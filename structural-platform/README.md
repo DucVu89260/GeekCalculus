@@ -1,7 +1,7 @@
 # GeekCalculus · Structural Platform
 
 Laravel 12 + SQLite + Vue 3/Vite. Trang đăng nhập có ảnh nền kết cấu, nút VI/EN
-và phân quyền **admin/user**. Trang sử dụng gồm sáu nhóm chức năng trên nền xanh
+và phân quyền **admin/user**. Trang sử dụng gồm năm nhóm chức năng trên nền xanh
 xám dịu; trang quản trị có thư viện kỹ thuật và quản lý tài khoản.
 
 ## Chạy local
@@ -370,17 +370,19 @@ Xem [engineering/README.md](engineering/README.md) để chạy và kiểm chứ
 
 ## Các trang chức năng và Steel Design
 
-Sáu thẻ chức năng trên trang chính mở **tab trình duyệt mới**. Các trang dùng
-hash URL `#/modules/steel`, `concrete`, `analysis`, `loads`, `library`, `future`
+Năm thẻ chức năng trên trang chính mở **tab trình duyệt mới**. Các trang dùng
+hash URL `#/modules/steel`, `concrete`, `loads`, `library`, `future`
 để chạy được trên GitHub Pages mà không cần server routing. Tab mới có thanh
-điều hướng đủ sáu nhóm; các liên kết trên thanh này chuyển trang trong cùng tab.
+điều hướng đủ năm nhóm; các liên kết trên thanh này chuyển trang trong cùng tab.
 Đăng nhập được chia sẻ giữa các tab; đăng xuất/đổi tài khoản đồng bộ các tab.
 Với Laravel, session vẫn là cookie HttpOnly; không lưu token đăng nhập thật vào
 localStorage. Demo chỉ chia sẻ ID tài khoản mô phỏng trong browser.
 
 Steel Design gồm **Component**, **Connection** và **Section properties**:
-- Component: dầm/cột/giằng, tiêu chuẩn, vật liệu và tiết diện thép từ database.
-  Tiết diện lọc theo vật liệu đang chọn; hiển thị thông số và đơn vị đã lưu.
+- Component: 9 nút có hình minh họa SVG từ registry hình học chung: Symmetric I/H,
+  Asymmetric I/H, Channel, Angle, Tee, Double Angle, Circle, CHS, RHS/SHS.
+  Chọn nút sẽ mở workspace tương ứng đang chờ phát triển. Lựa chọn được giữ khi
+  chuyển tab Component/Connection/Section properties hoặc đổi VI/EN.
 - Connection: dầm–cột/nối cấu kiện/bản đế/bản mã; bu lông/hàn/hỗn hợp,
   cấp bền 4.6/8.8/10.9 và hàn góc/giáp mối.
 - Section properties: tính đủ 10 profile trong danh sách chung;
@@ -417,3 +419,5 @@ Button có hover và dropdown có viền navy `#23395d`, kể cả menu Design C
 Font Calibri, nền sáng bên trong/navy nhạt bên ngoài và hover navy giữ nguyên.
 
 Bộ dữ liệu cơ học mở rộng được lưu tại `section_properties.mechanics`: đặc trưng quanh trục chính, mô đun uốn có liên kết Ixy, tích phân bậc ba, Wagner, mô đun xoắn/vênh/cắt và hệ số phân bố ứng suất. Xem [package Section Properties](section-properties/README.md) cho định nghĩa/giả thiết; không chứa quy tắc tiêu chuẩn thiết kế.
+
+Section Properties đã bỏ khỏi thanh điều hướng chính và các thẻ trang chủ; dùng tab trong Steel/Concrete Design. URL cũ `#/modules/analysis` vẫn đọc được để giữ bookmark. Minh họa Component được render SVG từ cùng registry/sketch của Section Properties; không phụ thuộc ảnh tải ngoài hoặc CDN.

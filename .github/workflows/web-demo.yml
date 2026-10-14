@@ -1,0 +1,53 @@
+name: Build and publish GeekCalculus demo
+
+on:
+  pull_request:
+    paths:
+      - 'structural-platform/frontend/vue/**'
+      - 'structural-platform/scripts/build-web-demo.sh'
+      - '.github/workflows/web-demo.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'structural-platform/frontend/vue/**'
+      - 'structural-platform/scripts/build-web-demo.sh'
+      - '.github/workflows/web-demo.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: structural-platform/frontend/vue
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: structural-platform/frontend/vue/package-lock.json
+      - run: npm ci
+      - name: Type-check Vue components
+        run: npm run typecheck
+      - name: Build GitHub Pages demo
+        run: npm run build -- --outDir ../../../docs --emptyOutDir
+        env:
+          VITE_DEMO_MODE: 'true'
+          VITE_BASE_PATH: /GeekCalculus/
+      - name: Publish built demo to docs directory
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        working-directory: .
+        run: |
+          touch docs/.nojekyll docs/.geekcalculus-demo-build
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs
+          if ! git diff --cached --quiet; then
+            git commit -m "build(demo): publish Vue interface [skip ci]"
+            git push
+          fi

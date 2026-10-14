@@ -1,11 +1,13 @@
 :root
   {
-    --page-bg: #cbd5e1;
-    --workspace-bg: #faf9f6;
+    --page-bg: #edf1f6;
+    --workspace-bg: #fbfcfe;
     --surface-bg: #eae5dd;
     --soft-bg: #e3ddd4;
-    --field-bg: #f1ede6;
-    --surface-border: #e1e7ef;
+    --field-bg: #fffefb;
+    --surface-border: #dce3ec;
+    --navigation-bg: #e6edf5;
+    --accent-bg: #365579;
     --navy-border: #23395d;
     --muted-ink: #4d5966;
     font-family: Calibri, "Segoe UI", Arial, sans-serif;
@@ -323,17 +325,81 @@ button[role="tab"]:hover:not(:disabled),
 
 button[role="tab"]:hover:not(:disabled) :is(strong, small, span) { color: #fff; }
 
-/* Warm gray-beige surfaces reduce glare across both workspaces and dialogs. */
+/* Paper-colored inner panels retain warmth within the light workspaces. */
 .platform-card, .project-workspace, .chooser-card, .admin-panel, .library-editor, .library-table-wrap { border-color: var(--surface-border); }
 :is(.platform-heading, .section-heading, .login-heading, .admin-heading, .user-admin-heading) p,
 .demo-notice, .service-status, .chooser-subtitle, .signed-in-label, .field, .auth-field,
 .library-caveat, .read-only-hint, .field-hint, .library-table th, .library-related small,
 .property-details dt, .property-source, .property-placeholder, .source-help { color: var(--muted-ink); }
-.library-table tbody tr:nth-child(even) { background: var(--soft-bg); }
+.library-table tbody tr:nth-child(even) { background: #f7f5f0; }
 .library-table td { border-bottom-color: var(--surface-border); }
 input::placeholder { color: var(--muted-ink); }
 
 /* Persistent navy outlines on interactive controls, including scoped component styles. */
 #app button:not(:disabled), #app select, #app .module-card, #app .module-navigation a {
   border: 1px solid var(--navy-border);
+}
+
+/* Shared presentation layer: white fields, soft navy navigation, paper panels.
+   Keep scoped feature components and their behavior independent of the theme. */
+#app :is(.language-switch, .library-tabs, .module-navigation, .steel-design-tabs, .concrete-module-tabs) {
+  background: var(--navigation-bg);
+}
+#app :is(.admin-tabs, .library-tabs, .language-switch) button {
+  border-radius: 6px;
+}
+#app :is(.admin-tabs, .library-tabs) button.active {
+  background: var(--navy-border);
+  color: #fff;
+}
+#app .language-switch button[aria-pressed="true"] {
+  background: var(--workspace-bg);
+  color: var(--navy-border);
+  box-shadow: 0 1px 4px #23395d12;
+}
+#app .primary-button {
+  background: var(--accent-bg);
+  color: #fff;
+}
+#app .quiet-button {
+  background: var(--workspace-bg);
+}
+#app :is(.primary-button, .quiet-button, .language-switch button):hover:not(:disabled) {
+  background: var(--navy-border);
+  color: #fff;
+}
+#app :is(input:where(:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]):not([type="hidden"]):not([type="button"]):not([type="submit"]):not([type="reset"])), select, textarea, .design-code-select-trigger) {
+  background: var(--field-bg);
+  border: 1px solid var(--navy-border);
+  color: #2e4f72;
+}
+#app :is(input, select, textarea):focus,
+#app .design-code-select-trigger:focus-visible {
+  border-color: var(--navy-border);
+  outline: 2px solid #23395d26;
+  outline-offset: 2px;
+}
+#app :is(input, select, textarea):disabled {
+  background: var(--navigation-bg);
+  color: var(--muted-ink);
+}
+#app select option, .design-code-select-listbox {
+  background: var(--field-bg);
+}
+#app .library-table-wrap {
+  background: var(--field-bg);
+}
+#app .library-table th {
+  background: var(--navigation-bg);
+  color: #365579;
+}
+#app .library-table tbody tr:hover {
+  background: #edf2f8;
+}
+#app .interface-option {
+  background: var(--navigation-bg);
+}
+#app .interface-option:hover {
+  background: var(--navy-border);
+  color: #fff;
 }

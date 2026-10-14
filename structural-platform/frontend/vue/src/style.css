@@ -224,6 +224,7 @@ input::placeholder { color: var(--muted-ink); }
 .property-source strong { color: #637e95; }
 .editor-backdrop { position: fixed; inset: 0; z-index: 30; display: flex; align-items: center; justify-content: center; padding: 18px; overflow-y: auto; background: #1d354d6e; }
 .library-editor { width: min(750px, 100%); max-height: min(92vh, 920px); padding: 24px; overflow-y: auto; border: 1px solid var(--surface-border); border-radius: 12px; background: var(--workspace-bg); box-shadow: 0 22px 70px #17365342; }
+.library-editor-sections { width: min(1360px, 100%); }
 .user-editor { width: min(510px, 100%); }
 .editor-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 15px; padding-bottom: 16px; border-bottom: 1px solid var(--surface-border); }
 .editor-heading h2 { margin: 5px 0 0; color: #31577a; font-size: 22px; }

@@ -842,7 +842,7 @@ onMounted(async () => {
     </div>
 
     <div v-if="editorOpen" class="editor-backdrop" @click.self="editorOpen = false">
-      <section class="library-editor" role="dialog" aria-modal="true" :aria-label="t(editorMode === 'copy' ? 'copyRecordTitle' : editorMode === 'edit' ? 'editRecord' : resourceDefinitions[editorResource].addKey)">
+      <section class="library-editor" :class="{ 'library-editor-sections': editorResource === 'sections' }" role="dialog" aria-modal="true" :aria-label="t(editorMode === 'copy' ? 'copyRecordTitle' : editorMode === 'edit' ? 'editRecord' : resourceDefinitions[editorResource].addKey)">
         <header class="editor-heading"><div><span class="auth-eyebrow">{{ t('databaseTitle') }}</span><h2>{{ t(editorMode === 'copy' ? 'copyRecordTitle' : editorMode === 'edit' ? 'editRecord' : resourceDefinitions[editorResource].addKey) }}</h2></div><button type="button" class="quiet-button editor-close" :aria-label="t('cancel')" @click="editorOpen = false">×</button></header>
         <p v-if="editorMode === 'copy'" class="library-copy-hint">{{ t('copyFrom') }} <strong>{{ copySourceCode }}</strong>. {{ t('copyRecordHint') }}</p>
         <form class="editor-form" @submit.prevent="saveRecord">

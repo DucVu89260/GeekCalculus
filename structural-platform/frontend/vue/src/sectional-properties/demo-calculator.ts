@@ -1,7 +1,7 @@
 import Decimal from 'decimal.js'
 import type { CalculationRequest, CalculationResult, GeometryDefinition } from './types'
 
-const SOLVER_VERSION = '1.1.0'
+const SOLVER_VERSION = '1.2.0'
 const GEOMETRY_MODEL_VERSION = '1.0.0'
 const Decimal80 = Decimal.clone({ precision: 80, rounding: Decimal.ROUND_HALF_EVEN })
 const REQUIRED_PROPERTIES = new Set([
@@ -10,10 +10,15 @@ const REQUIRED_PROPERTIES = new Set([
   'shear_center',
   'effective_shear_area',
 ])
-const DIMENSIONS: Record<string, string[]> = {
+const DIMENSIONS: Record<GeometryDefinition['type'], string[]> = {
   rectangle: ['width', 'height'],
   circle: ['diameter'],
   i_section: ['depth', 'top_flange_width', 'bottom_flange_width', 'web_thickness', 'top_flange_thickness', 'bottom_flange_thickness'],
+  rectangular_hollow: ['width', 'height', 'thickness'],
+  circular_hollow: ['diameter', 'thickness'],
+  channel: ['depth', 'width', 'web_thickness', 'flange_thickness'],
+  tee: ['depth', 'width', 'web_thickness', 'flange_thickness'],
+  angle: ['depth', 'width', 'thickness'],
 }
 
 type ErrorItem = { path: string; type: string; message: string }
@@ -106,11 +111,15 @@ function validateRequest(request: unknown): { geometry: GeometryDefinition; opti
       errors.push({ path: 'geometry.type', type: typeof type === 'string' ? 'union_tag_invalid' : 'union_tag_not_found', message: 'Input tag does not match any expected tag' })
     }
     const variant = inputGeometry.geometry_variant
-    if (typeof variant !== 'string' || !['solid', 'sharp_corner'].includes(variant)) {
+    if (typeof variant !== 'string' || !['solid', 'sharp_corner', 'uniform_wall'].includes(variant)) {
       errors.push({ path: 'geometry.geometry_variant', type: 'literal_error', message: 'Input should be a supported geometry variant' })
     } else if ((type === 'rectangle' || type === 'circle') && variant !== 'solid') {
       errors.push({ path: 'geometry.geometry_variant', type: 'literal_error', message: "Input should be 'solid'" })
     } else if (type === 'i_section' && variant !== 'sharp_corner') {
+      errors.push({ path: 'geometry.geometry_variant', type: 'literal_error', message: "Input should be 'sharp_corner'" })
+    } else if (type === 'circular_hollow' && variant !== 'uniform_wall') {
+      errors.push({ path: 'geometry.geometry_variant', type: 'literal_error', message: "Input should be 'uniform_wall'" })
+    } else if (typeof type === 'string' && ['rectangular_hollow', 'channel', 'tee', 'angle'].includes(type) && variant !== 'sharp_corner') {
       errors.push({ path: 'geometry.geometry_variant', type: 'literal_error', message: "Input should be 'sharp_corner'" })
     }
     const modelVersion = inputGeometry.geometry_model_version === undefined ? GEOMETRY_MODEL_VERSION : inputGeometry.geometry_model_version
@@ -118,7 +127,7 @@ function validateRequest(request: unknown): { geometry: GeometryDefinition; opti
     const dimensionsRaw = requireRecord(inputGeometry.dimensions, 'geometry.dimensions', errors)
     const dimensions: Record<string, number> = {}
     if (dimensionsRaw && typeof type === 'string' && Object.prototype.hasOwnProperty.call(DIMENSIONS, type)) {
-      const names = DIMENSIONS[type]
+      const names = DIMENSIONS[type as GeometryDefinition['type']]
       for (const key of keysOutside(dimensionsRaw, names)) errors.push({ path: `geometry.dimensions.${key}`, type: 'extra_forbidden', message: 'Extra inputs are not permitted' })
       for (const name of names) {
         if (!Object.prototype.hasOwnProperty.call(dimensionsRaw, name)) {
@@ -135,6 +144,31 @@ function validateRequest(request: unknown): { geometry: GeometryDefinition; opti
         }
         if (web_thickness > Math.min(top_flange_width, bottom_flange_width)) {
           errors.push({ path: 'geometry', type: 'invalid_geometry', message: 'web_thickness must not exceed either flange width' })
+        }
+      }
+      if (type === 'rectangular_hollow' && names.every((key) => dimensions[key] !== undefined)) {
+        const { width, height, thickness } = dimensions
+        if (!(width - 2 * thickness > 0 && width - 2 * thickness < width && height - 2 * thickness > 0 && height - 2 * thickness < height)) {
+          errors.push({ path: 'geometry', type: 'invalid_geometry', message: '2 * thickness must be representably less than width and height' })
+        }
+      }
+      if (type === 'circular_hollow' && names.every((key) => dimensions[key] !== undefined)) {
+        const { diameter, thickness } = dimensions
+        if (!(diameter - 2 * thickness > 0 && diameter - 2 * thickness < diameter)) {
+          errors.push({ path: 'geometry', type: 'invalid_geometry', message: '2 * thickness must be representably less than diameter' })
+        }
+      }
+      if ((type === 'channel' || type === 'tee') && names.every((key) => dimensions[key] !== undefined)) {
+        const { depth, width, web_thickness, flange_thickness } = dimensions
+        const clearDepth = type === 'channel' ? depth - 2 * flange_thickness : depth - flange_thickness
+        if (!(clearDepth > 0 && clearDepth < depth && width - web_thickness > 0 && width - web_thickness < width)) {
+          errors.push({ path: 'geometry', type: 'invalid_geometry', message: `${type} needs representable clear web depth and flange projection` })
+        }
+      }
+      if (type === 'angle' && names.every((key) => dimensions[key] !== undefined)) {
+        const { depth, width, thickness } = dimensions
+        if (!(depth - thickness > 0 && depth - thickness < depth && width - thickness > 0 && width - thickness < width)) {
+          errors.push({ path: 'geometry', type: 'invalid_geometry', message: 'angle thickness must be representably less than width and depth' })
         }
       }
       if (errors.length === 0) {
@@ -347,14 +381,125 @@ function fsum(values: number[]): number {
 }
 
 function components(g: GeometryDefinition): Component[] {
-  const { depth, top_flange_width: top, bottom_flange_width: bottom, web_thickness: web, top_flange_thickness: topT, bottom_flange_thickness: bottomT } = g.dimensions
-  const width = Math.max(top, bottom)
-  const webHeight = depth - topT - bottomT
-  return [
-    { width: bottom, height: bottomT, x: (width - bottom) / 2, y: 0, area: bottom * bottomT },
-    { width: web, height: webHeight, x: (width - web) / 2, y: bottomT, area: web * webHeight },
-    { width: top, height: topT, x: (width - top) / 2, y: depth - topT, area: top * topT },
-  ]
+  const d = g.dimensions
+  if (g.type === 'i_section') {
+    const { depth, top_flange_width: top, bottom_flange_width: bottom, web_thickness: web, top_flange_thickness: topT, bottom_flange_thickness: bottomT } = d
+    const width = Math.max(top, bottom)
+    const webHeight = depth - topT - bottomT
+    return [
+      { width: bottom, height: bottomT, x: (width - bottom) / 2, y: 0, area: bottom * bottomT },
+      { width: web, height: webHeight, x: (width - web) / 2, y: bottomT, area: web * webHeight },
+      { width: top, height: topT, x: (width - top) / 2, y: depth - topT, area: top * topT },
+    ]
+  }
+  if (g.type === 'rectangular_hollow') {
+    const { width, height, thickness } = d
+    const innerHeight = height - 2 * thickness
+    return [
+      { width, height: thickness, x: 0, y: 0, area: width * thickness },
+      { width, height: thickness, x: 0, y: height - thickness, area: width * thickness },
+      { width: thickness, height: innerHeight, x: 0, y: thickness, area: thickness * innerHeight },
+      { width: thickness, height: innerHeight, x: width - thickness, y: thickness, area: thickness * innerHeight },
+    ]
+  }
+  if (g.type === 'channel') {
+    const { depth, width, web_thickness: web, flange_thickness: flange } = d
+    const clearDepth = depth - 2 * flange
+    return [
+      { width, height: flange, x: 0, y: 0, area: width * flange },
+      { width: web, height: clearDepth, x: 0, y: flange, area: web * clearDepth },
+      { width, height: flange, x: 0, y: depth - flange, area: width * flange },
+    ]
+  }
+  if (g.type === 'tee') {
+    const { depth, width, web_thickness: web, flange_thickness: flange } = d
+    const clearDepth = depth - flange
+    return [
+      { width: web, height: clearDepth, x: (width - web) / 2, y: 0, area: web * clearDepth },
+      { width, height: flange, x: 0, y: depth - flange, area: width * flange },
+    ]
+  }
+  if (g.type === 'angle') {
+    const { depth, width, thickness } = d
+    const clearDepth = depth - thickness
+    return [
+      { width, height: thickness, x: 0, y: 0, area: width * thickness },
+      { width: thickness, height: clearDepth, x: 0, y: thickness, area: thickness * clearDepth },
+    ]
+  }
+  throw calculationError('Composite components are not defined for this geometry.', { geometry_type: g.type })
+}
+
+function decimalPlasticAxisForComponents(parts: Component[], axis: 'x' | 'y'): { pna: number; z: number; diagnostics: Record<string, unknown> } {
+  const blocks: Array<[Decimal, Decimal, Decimal]> = parts.map((part) => axis === 'y'
+    ? [new Decimal80(String(part.width)), new Decimal80(String(part.y)), new Decimal80(String(part.y + part.height))]
+    : [new Decimal80(String(part.height)), new Decimal80(String(part.x)), new Decimal80(String(part.x + part.width))])
+  const area = blocks.reduce((sum, [span, start, end]) => sum.plus(span.times(end.minus(start))), new Decimal80(0))
+  if (!area.gt(0)) throw new ArithmeticError()
+  const target = area.div(2)
+  const below = (cut: Decimal) => blocks.reduce((sum, [span, start, end]) => {
+    const interval = end.minus(start)
+    const length = Decimal80.max(new Decimal80(0), Decimal80.min(interval, cut.minus(start)))
+    return sum.plus(span.times(length))
+  }, new Decimal80(0))
+  let low = Decimal80.min(...blocks.map(([, start]) => start))
+  let high = Decimal80.max(...blocks.map(([, , end]) => end))
+  let cut = new Decimal80(0), iteration = 0
+  for (iteration = 1; iteration <= 256; iteration++) {
+    cut = low.plus(high).div(2)
+    const currentArea = below(cut)
+    if (currentArea.times(2).minus(area).abs().div(area).lte('1e-24')) break
+    if (currentArea.lt(target)) {
+      if (low.eq(cut)) break
+      low = cut
+    } else {
+      if (high.eq(cut)) break
+      high = cut
+    }
+  }
+  const slope = blocks.reduce((sum, [span, start, end]) => start.lte(cut) && cut.lt(end) ? sum.plus(span) : sum, new Decimal80(0))
+  if (!slope.isZero()) cut = cut.plus(target.minus(below(cut)).div(slope))
+  const pna = cut.toNumber()
+  const actualCut = new Decimal80(String(pna))
+  const actualBelow = below(actualCut)
+  const balance = actualBelow.times(2).minus(area).abs().div(area)
+  const min = Decimal80.min(...blocks.map(([, start]) => start)).toNumber()
+  const max = Decimal80.max(...blocks.map(([, , end]) => end)).toNumber()
+  if (!Number.isFinite(pna) || !(pna > min && pna < max) || balance.gt('1e-10')) {
+    throw calculationError('Plastic neutral axis did not meet the area-balance tolerance.', { axis, relative_area_imbalance: balance.toNumber() })
+  }
+  const moments = blocks.map(([span, start, end]) => {
+    const interval = end.minus(start)
+    if (actualCut.lte(start)) return span.times(interval).times(start.plus(end).div(2).minus(actualCut))
+    if (actualCut.gte(end)) return span.times(interval).times(actualCut.minus(start.plus(end).div(2)))
+    return span.times(actualCut.minus(start).pow(2).plus(end.minus(actualCut).pow(2))).div(2)
+  })
+  return {
+    pna,
+    z: Decimal80.sum(...moments).toNumber(),
+    diagnostics: {
+      method: 'component_area_bisection_with_piecewise_linear_refinement',
+      arithmetic: 'decimal_80_then_float64',
+      iterations: Math.min(iteration, 256),
+      relative_area_imbalance: balance.toNumber(),
+    },
+  }
+}
+
+function principalProperties(ix: number, iy: number, ixy: number): CalculationResult['properties']['principal'] {
+  if (ix === iy && ixy === 0) {
+    return { i_major: ix, i_minor: iy, major_axis_angle_degrees: null, orientation_status: 'indeterminate' }
+  }
+  const scale = Math.max(Math.abs(ix), Math.abs(iy), Math.abs(ixy))
+  const mean = (ix / scale + iy / scale) / 2
+  const radius = Math.hypot((ix / scale - iy / scale) / 2, ixy / scale)
+  const major = scale * (mean + radius)
+  const determinant = new Decimal80(String(ix)).times(String(iy)).minus(new Decimal80(String(ixy)).pow(2))
+  const minor = determinant.div(String(major)).toNumber()
+  if (![major, minor].every(Number.isFinite) || major <= 0 || minor <= 0) throw new ArithmeticError()
+  let angle = ((0.5 * Math.atan2(-2 * ixy, ix - iy) * 180 / Math.PI) % 180 + 180) % 180
+  if (angle >= 180 - 1e-12) angle = 0
+  return { i_major: major, i_minor: minor, major_axis_angle_degrees: angle, orientation_status: 'determinate' }
 }
 
 function decimalPlasticAxis(g: GeometryDefinition): { pna: number; zx: number; diagnostics: Record<string, unknown> } {
@@ -619,11 +764,13 @@ function assertFiniteTree(value: unknown): boolean {
 /** Calculate a sectional-properties result entirely in the browser. */
 export async function calculateDemoSection(request: CalculationRequest): Promise<CalculationResult> {
   const { geometry, options } = validateRequest(request)
-  const supported = new Set(['torsion_constant_j'])
+  const supported = new Set<string>()
   if (geometry.type === 'i_section') {
     supported.add('warping_constant_cw')
     supported.add('shear_center')
     supported.add('effective_shear_area')
+  } else if (['rectangle', 'circle', 'circular_hollow'].includes(geometry.type)) {
+    supported.add('torsion_constant_j')
   }
   const unsupported = Array.from(new Set(options.required_properties.filter((name) => !supported.has(name)))).sort()
   if (geometry.type === 'i_section' && options.required_properties.includes('torsion_constant_j') && !unsupported.includes('torsion_constant_j')) unsupported.push('torsion_constant_j')
@@ -632,7 +779,7 @@ export async function calculateDemoSection(request: CalculationRequest): Promise
   }
 
   try {
-    let width: number, height: number, area: number, perimeter: number, centroidX: number, centroidY: number, ix: number, iy: number
+    let width: number, height: number, area: number, perimeter: number, centroidX: number, centroidY: number, ix: number, iy: number, ixy = 0
     let plastic: { pna_x: number; pna_y: number; zx: number; zy: number } | null = null
     const intermediates: Record<string, number> = {}
     const diagnostics: { plastic: Record<string, unknown> } & Record<string, unknown> = { plastic: { status: 'not_computed', reason: 'not_requested' } }
@@ -657,36 +804,93 @@ export async function calculateDemoSection(request: CalculationRequest): Promise
         plastic = { pna_x: centroidX, pna_y: centroidY, zx: width ** 3 / 6, zy: width ** 3 / 6 }
         diagnostics.plastic = { status: 'computed', method: 'symmetric_closed_form', relative_area_imbalance: 0 }
       }
+    } else if (geometry.type === 'circular_hollow') {
+      width = d.diameter; height = d.diameter
+      const innerDiameter = width - 2 * d.thickness
+      area = Math.PI * d.thickness * (width - d.thickness)
+      centroidX = width / 2; centroidY = height / 2
+      perimeter = Math.PI * (width + innerDiameter)
+      ix = area * (width ** 2 + innerDiameter ** 2) / 16; iy = ix
+      if (options.include_plastic) {
+        const plasticZ = 2 * d.thickness * (width ** 2 + width * innerDiameter + innerDiameter ** 2) / 6
+        plastic = { pna_x: centroidX, pna_y: centroidY, zx: plasticZ, zy: plasticZ }
+        diagnostics.plastic = { status: 'computed', method: 'annulus_symmetric_closed_form', relative_area_imbalance: 0 }
+      }
     } else {
       const parts = components(geometry)
-      width = Math.max(d.top_flange_width, d.bottom_flange_width); height = d.depth
+      if (geometry.type === 'i_section') width = Math.max(d.top_flange_width, d.bottom_flange_width)
+      else if (geometry.type === 'rectangular_hollow') width = d.width
+      else width = d.width
+      height = geometry.type === 'rectangular_hollow' ? d.height : d.depth
       area = fsum(parts.map((part) => part.area))
       if (!Number.isFinite(area) || area <= 0) throw new ArithmeticError()
-      centroidX = width / 2
+      centroidX = geometry.type === 'i_section' ? width / 2 : fsum(parts.map((part) => part.area * (part.x + part.width / 2))) / area
       centroidY = fsum(parts.map((part) => part.area * (part.y + part.height / 2))) / area
       ix = fsum(parts.map((part) => part.width * part.height ** 3 / 12 + part.area * (part.y + part.height / 2 - centroidY) ** 2))
-      iy = fsum(parts.map((part) => part.height * part.width ** 3 / 12))
-      perimeter = 2 * (d.top_flange_width + d.bottom_flange_width + height - d.web_thickness)
-      intermediates.web_clear_depth = parts[1].height
-      intermediates.bottom_flange_area = parts[0].area
-      intermediates.web_area = parts[1].area
-      intermediates.top_flange_area = parts[2].area
+      iy = fsum(parts.map((part) => part.height * part.width ** 3 / 12 + part.area * (part.x + part.width / 2 - centroidX) ** 2))
+      ixy = fsum(parts.map((part) => part.area * (part.x + part.width / 2 - centroidX) * (part.y + part.height / 2 - centroidY)))
+      if (geometry.type !== 'angle') ixy = 0
+      if (geometry.type === 'i_section') {
+        perimeter = 2 * (d.top_flange_width + d.bottom_flange_width + height - d.web_thickness)
+        intermediates.web_clear_depth = parts[1].height
+        intermediates.bottom_flange_area = parts[0].area
+        intermediates.web_area = parts[1].area
+        intermediates.top_flange_area = parts[2].area
+      } else if (geometry.type === 'rectangular_hollow') {
+        const innerWidth = width - 2 * d.thickness
+        const innerHeight = height - 2 * d.thickness
+        perimeter = 2 * (width + height) + 2 * (innerWidth + innerHeight)
+        intermediates.inner_width = innerWidth
+        intermediates.inner_height = innerHeight
+        intermediates.wall_thickness = d.thickness
+      } else if (geometry.type === 'channel') {
+        perimeter = 2 * height + 4 * width - 2 * d.web_thickness
+        intermediates.clear_web_depth = parts[1].height
+        intermediates.web_area = parts[1].area
+        intermediates.flange_area_each = parts[0].area
+      } else if (geometry.type === 'tee') {
+        perimeter = 2 * (width + height)
+        intermediates.clear_web_depth = parts[0].height
+        intermediates.web_area = parts[0].area
+        intermediates.flange_area = parts[1].area
+      } else {
+        perimeter = 2 * (width + height)
+        intermediates.clear_vertical_leg_depth = parts[1].height
+        intermediates.horizontal_leg_area = parts[0].area
+        intermediates.vertical_leg_area = parts[1].area
+      }
       if (options.include_plastic) {
-        const axis = decimalPlasticAxis(geometry)
-        const zy = fsum(parts.map((part) => part.height * part.width ** 2 / 4))
-        plastic = { pna_x: centroidX, pna_y: axis.pna, zx: axis.zx, zy }
-        intermediates.pna_x = centroidX
-        intermediates.pna_y = axis.pna
-        diagnostics.plastic = { status: 'computed', ...axis.diagnostics }
+        if (geometry.type === 'i_section') {
+          const axis = decimalPlasticAxis(geometry)
+          const pnaX = width / 2
+          const zy = fsum(parts.map((part) => part.height * part.width ** 2 / 4))
+          plastic = { pna_x: pnaX, pna_y: axis.pna, zx: axis.zx, zy }
+          intermediates.pna_x = pnaX
+          intermediates.pna_y = axis.pna
+          diagnostics.plastic = { status: 'computed', ...axis.diagnostics }
+        } else {
+          const xAxis = decimalPlasticAxisForComponents(parts, 'x')
+          const yAxis = decimalPlasticAxisForComponents(parts, 'y')
+          plastic = { pna_x: xAxis.pna, pna_y: yAxis.pna, zx: yAxis.z, zy: xAxis.z }
+          intermediates.pna_x = xAxis.pna
+          intermediates.pna_y = yAxis.pna
+          diagnostics.plastic = {
+            status: 'computed',
+            method: 'component_area_bisection_with_piecewise_linear_refinement',
+            x_axis: xAxis.diagnostics,
+            y_axis: yAxis.diagnostics,
+          }
+        }
       }
     }
 
     if (![area, ix, iy].every((value) => Number.isFinite(value) && value > 0)) throw new ArithmeticError()
+    if (!Number.isFinite(perimeter) || perimeter <= 0 || !Number.isFinite(ixy)) throw new ArithmeticError()
     if (!(centroidX > 0 && centroidX < width && centroidY > 0 && centroidY < height)) throw new ArithmeticError()
     const elastic = {
       ix,
       iy,
-      ixy: 0,
+      ixy,
       sx_positive: ix / (height - centroidY),
       sx_negative: ix / centroidY,
       sy_positive: iy / (width - centroidX),
@@ -694,20 +898,18 @@ export async function calculateDemoSection(request: CalculationRequest): Promise
       rx: Math.sqrt(ix / area),
       ry: Math.sqrt(iy / area),
     }
-    const principal = {
-      i_major: Math.max(ix, iy),
-      i_minor: Math.min(ix, iy),
-      major_axis_angle_degrees: ix === iy ? null : ix > iy ? 0 : 90,
-      orientation_status: ix === iy ? 'indeterminate' as const : 'determinate' as const,
-    }
+    const principal = principalProperties(ix, iy, ixy)
     const wantJ = options.include_advanced || options.required_properties.includes('torsion_constant_j')
     let torsionConstantJ: CalculationResult['advanced']['torsion_constant_j'] = unavailable('not_requested')
-    if (geometry.type === 'i_section') {
+    if (geometry.type === 'i_section' || !['rectangle', 'circle', 'circular_hollow'].includes(geometry.type)) {
       torsionConstantJ = unavailable('solver_not_implemented')
     } else if (wantJ && geometry.type === 'circle') {
-      torsionConstantJ = { status: 'computed', value: Math.PI * geometry.dimensions.diameter ** 4 / 32, reason: null, method: null }
+      torsionConstantJ = { status: 'computed', value: Math.PI * geometry.dimensions.diameter ** 4 / 32, reason: null, method: 'solid_circle_closed_form' }
       diagnostics.torsion = { method: 'solid_circle_closed_form' }
-    } else if (wantJ) {
+    } else if (wantJ && geometry.type === 'circular_hollow') {
+      torsionConstantJ = { status: 'computed', value: 2 * ix, reason: null, method: 'circular_hollow_exact_polar_moment' }
+      diagnostics.torsion = { method: 'circular_hollow_exact_polar_moment' }
+    } else if (wantJ && geometry.type === 'rectangle') {
       const torsion = rectangleTorsion(width, height, options.rectangle_j_relative_tolerance, options.rectangle_j_max_terms)
       diagnostics.torsion = torsion.diagnostics
       if (torsion.converged) {

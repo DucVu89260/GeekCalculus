@@ -41,6 +41,14 @@
         "width",
         "web_thickness",
         "flange_thickness"
+      ],
+      "asymmetric_geometry_fields": [
+        "depth",
+        "web_thickness",
+        "top_flange_width",
+        "bottom_flange_width",
+        "top_flange_thickness",
+        "bottom_flange_thickness"
       ]
     },
     {
@@ -330,12 +338,66 @@
         ]
       },
       {
+        "key": "top_flange_width",
+        "label_vi": "Bề rộng cánh trên bt",
+        "label_en": "Top flange width bt",
+        "unit": "mm",
+        "min": 0.001,
+        "required": false,
+        "shapes": [
+          "i"
+        ],
+        "geometry_field": true,
+        "asymmetric_only": true
+      },
+      {
+        "key": "bottom_flange_width",
+        "label_vi": "Bề rộng cánh dưới bb",
+        "label_en": "Bottom flange width bb",
+        "unit": "mm",
+        "min": 0.001,
+        "required": false,
+        "shapes": [
+          "i"
+        ],
+        "geometry_field": true,
+        "asymmetric_only": true
+      },
+      {
+        "key": "top_flange_thickness",
+        "label_vi": "Bề dày cánh trên tt",
+        "label_en": "Top flange thickness tt",
+        "unit": "mm",
+        "min": 0.001,
+        "required": false,
+        "shapes": [
+          "i"
+        ],
+        "geometry_field": true,
+        "asymmetric_only": true
+      },
+      {
+        "key": "bottom_flange_thickness",
+        "label_vi": "Bề dày cánh dưới tb",
+        "label_en": "Bottom flange thickness tb",
+        "unit": "mm",
+        "min": 0.001,
+        "required": false,
+        "shapes": [
+          "i"
+        ],
+        "geometry_field": true,
+        "asymmetric_only": true
+      },
+      {
         "key": "area",
         "label_vi": "Diện tích A",
         "label_en": "Area A",
         "unit": "mm²",
         "min": 1e-06,
-        "required": true
+        "required": false,
+        "read_only": true,
+        "legacy_axis_convention": true
       },
       {
         "key": "inertia_y",
@@ -343,7 +405,9 @@
         "label_en": "Second moment Iy",
         "unit": "mm⁴",
         "min": 1e-06,
-        "required": true
+        "required": false,
+        "read_only": true,
+        "legacy_axis_convention": true
       },
       {
         "key": "inertia_z",
@@ -351,7 +415,9 @@
         "label_en": "Second moment Iz",
         "unit": "mm⁴",
         "min": 1e-06,
-        "required": true
+        "required": false,
+        "read_only": true,
+        "legacy_axis_convention": true
       },
       {
         "key": "torsion_constant",
@@ -359,7 +425,9 @@
         "label_en": "Saint-Venant torsion J",
         "unit": "mm⁴",
         "min": 1e-06,
-        "required": true
+        "required": false,
+        "read_only": true,
+        "legacy_axis_convention": true
       },
       {
         "key": "elastic_modulus_y",
@@ -367,7 +435,9 @@
         "label_en": "Elastic section modulus Wy",
         "unit": "mm³",
         "min": 1e-06,
-        "required": true
+        "required": false,
+        "read_only": true,
+        "legacy_axis_convention": true
       },
       {
         "key": "elastic_modulus_z",
@@ -375,7 +445,9 @@
         "label_en": "Elastic section modulus Wz",
         "unit": "mm³",
         "min": 1e-06,
-        "required": true
+        "required": false,
+        "read_only": true,
+        "legacy_axis_convention": true
       },
       {
         "key": "shear_area_y",
@@ -383,7 +455,9 @@
         "label_en": "Shear area Ay",
         "unit": "mm²",
         "min": 1e-06,
-        "required": true
+        "required": false,
+        "read_only": true,
+        "legacy_axis_convention": true
       },
       {
         "key": "shear_area_z",
@@ -391,7 +465,9 @@
         "label_en": "Shear area Az",
         "unit": "mm²",
         "min": 1e-06,
-        "required": true
+        "required": false,
+        "read_only": true,
+        "legacy_axis_convention": true
       },
       {
         "key": "warping_constant",
@@ -402,7 +478,9 @@
         "required": false,
         "categories": [
           "steel"
-        ]
+        ],
+        "read_only": true,
+        "legacy_axis_convention": true
       },
       {
         "key": "plastic_modulus_y",
@@ -413,7 +491,9 @@
         "required": false,
         "categories": [
           "steel"
-        ]
+        ],
+        "read_only": true,
+        "legacy_axis_convention": true
       },
       {
         "key": "plastic_modulus_z",
@@ -424,7 +504,9 @@
         "required": false,
         "categories": [
           "steel"
-        ]
+        ],
+        "read_only": true,
+        "legacy_axis_convention": true
       },
       {
         "key": "shear_center_y",
@@ -435,7 +517,9 @@
         "required": false,
         "categories": [
           "steel"
-        ]
+        ],
+        "read_only": true,
+        "legacy_axis_convention": true
       },
       {
         "key": "shear_center_z",
@@ -446,7 +530,9 @@
         "required": false,
         "categories": [
           "steel"
-        ]
+        ],
+        "read_only": true,
+        "legacy_axis_convention": true
       },
       {
         "key": "concrete_cover",
@@ -577,8 +663,8 @@
       }
     ]
   },
-  "property_basis_vi": "Đơn vị chuẩn: MPa, mm, kg/m³. Nhập đặc trưng tiết diện từ catalog hoặc nguồn đã kiểm chứng; chưa tự tính hoặc kiểm chứng đặc trưng hình học. Iy/Iz phải theo trục địa phương của nguồn dữ liệu.",
-  "property_basis_en": "Canonical units: MPa, mm, kg/m³. Enter section properties from a verified catalog/source; geometry properties are not automatically calculated or certified. Iy/Iz must follow the source local-axis convention.",
+  "property_basis_vi": "Đặc trưng được tự tính khi lưu từ hình học theo package Section Properties: gốc hộp bao, X sang phải, Y lên trên, mm/mm²/mm³/mm⁴/mm⁶. Thông số cốt thép và hệ số hiệu chỉnh là input bổ sung, chưa làm thay đổi đặc trưng tiết diện nguyên. Dữ liệu cũ chưa có snapshot giữ quy ước trục nguồn.",
+  "property_basis_en": "Properties are calculated on save by Section Properties: bounding-box origin, X right, Y up, canonical mm/mm²/mm³/mm⁴/mm⁶. Reinforcement and modifiers are auxiliary inputs and do not change gross geometric properties. Legacy records without a calculation retain source-axis conventions.",
   "design_codes": [
     {
       "code": "EN",
@@ -812,5 +898,22 @@
       "name_vi": "CHS",
       "name_en": "CHS"
     }
-  ]
+  ],
+  "section_calculation": {
+    "storage_key": "section_properties",
+    "calculated_at_key": "section_properties_calculated_at",
+    "units": "mm",
+    "coordinate_system": "XY; origin at lower-left bounding box",
+    "authoritative_on_save": true,
+    "geometry_shapes": [
+      "rectangle",
+      "circle",
+      "i",
+      "channel",
+      "tee",
+      "angle",
+      "rectangular_hollow",
+      "circular_hollow"
+    ]
+  }
 }

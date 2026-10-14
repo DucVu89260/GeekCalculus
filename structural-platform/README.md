@@ -67,7 +67,7 @@ Admin quản lý ba tab; user mở **Engineering Library / Thư viện kỹ thu�
 - **Loại tiết diện**: mẫu hình học I/H, U/C, L, T, hộp chữ nhật, ống tròn,
   BTCT chữ nhật và BTCT tròn. Mỗi loại hiển thị các trường thông số tương ứng.
 - **Tiết diện cụ thể**: kích thước, vật liệu, loại tiết diện, nguồn dữ liệu và
-  đặc trưng tiết diện bằng số. Loại tiết diện định nghĩa mẫu; các giá trị A/I/J
+  kích thước hình học để tự tính đặc trưng. Loại tiết diện định nghĩa mẫu; các giá trị A/I/J
   thuộc từng tiết diện cụ thể, không gán một giá trị chung cho mọi kích thước.
 
 **Design Code:** cột thị trường của vật liệu và loại tiết diện, dropdown
@@ -120,14 +120,40 @@ Thông số vật liệu: E, ν, ρ, giãn nở nhiệt α, tỷ số cản ξ; 
 fc/ft/εcu với bê tông; cường độ thiết kế bê tông tùy chọn. G được suy ra bằng
 `E / (2 × (1 + ν))` và hiển thị chỉ đọc.
 
-Thông số tiết diện: h/b/D/t/tw/tf theo hình dạng; A, Iy, Iz, J, Wy, Wz, Ay, Az;
-tùy chọn Iw, Wpy/Wpz, tọa độ tâm cắt, hệ số hiệu chỉnh diện tích/quán tính/xoắn,
-khối lượng/trọng lượng. Với BTCT: lớp bảo vệ, diện tích cốt thép dọc, đường kính
-thanh/đai và bước đai tùy chọn. Bán kính quán tính ry/rz được suy ra từ I/A.
+Thông số tiết diện nhập: h/b/D/t/tw/tf theo hình dạng; I/H có chế độ cánh
+trên/dưới độc lập. Khi nhập đủ kích thước, form tự tính và hiển thị Section
+Properties. Khi tạo/sửa, Laravel gọi Python engine và lưu kết quả chính thức
+vào `sections.section_properties` (JSON), cùng
+`section_properties_calculated_at`; không nhận A/I/S/Z/r/PNA nhập tay.
+Chuẩn ký hiệu là XY của package: A, P, x̄, ȳ, Ix/Iy/Ixy, Sx+/Sx−/Sy+/Sy−,
+Zx/Zy, rx/ry, PNAx/PNAy, Imax/Imin, J, Cw, tâm cắt và Ax/Ay.
+Kết quả gross chưa áp dụng hệ số hiệu chỉnh hoặc cốt thép. Các hệ số, lớp
+bảo vệ, diện tích cốt thép, đường kính thanh/đai và bước đai vẫn là input phụ.
 
-Nhập các đặc trưng tiết diện theo catalog/nguồn đã kiểm chứng và thống nhất
-trục địa phương y/z của nguồn. Thư viện lưu các số liệu tiết diện người dùng
-nhập; seed S235/B25/B30/CB400 là ví dụ có ghi nguồn minh họa.
+Solver 1.2.0 hỗ trợ đủ 8 hình dạng catalog: chữ nhật, tròn đặc, I/H, U/C,
+T, L, SHS/RHS và CHS. Mô hình có góc vuông, chưa xét bán kính lượn. U/C mở
+về phải, T có cánh trên, L có hai chân dưới/trái. Cw/tâm cắt/Ax/Ay của I/H
+là xấp xỉ thành mỏng; J có cho chữ nhật/tròn đặc/CHS. Thuộc tính chưa hỗ trợ
+lưu `status: "not_computed"`, `value: null`, kèm lý do; không thay bằng 0.
+
+Snapshot giữ đơn vị mm và các lũy thừa tương ứng, hình học chuẩn hóa,
+geometry hash, solver version/config hash và giả thiết. GET thư viện trả lại
+snapshot đã lưu, không tính lại khi đọc. Ví dụ dùng trong tính kết cấu:
+`section.section_properties.properties.elastic.ix`,
+`section.section_properties.properties.plastic.zx`,
+`section.section_properties.advanced.warping_constant_cw` (kiểm tra `status`
+trước khi dùng). Trong Laravel, `$section->calculatedProperties()` trả nhóm
+đặc trưng chuẩn hoặc `null` với dữ liệu cũ chưa có snapshot. Không tự ánh xạ
+Ix/Iy sang các khóa catalog y/z vì quy ước trục nguồn có thể khác.
+
+Migration chỉ bổ sung cột, giữ nguyên bản ghi cũ. Dữ liệu cũ có số nhập tay
+được hiển thị theo quy ước nguồn cho đến lần sửa/lưu tiếp theo; lần đó hệ
+thống tính từ hình học. Tạo/sửa/sao chép/import đều tính lại. Import nhận tệp
+v1 cũ và bỏ qua snapshot đính kèm khi ghi, chống kết quả giả hoặc lỗi thời.
+Nếu engine lỗi/kết quả không hợp lệ, bản ghi không thay đổi; import lỗi sẽ
+rollback toàn bộ lượt nhập. Demo tính cùng công thức và lưu snapshot trong
+localStorage, còn Laravel lưu SQLite.
+
 Các trường BTCT hiện mô tả tiết diện gross đàn hồi và thông tin cốt thép cơ bản;
 chưa có bố trí từng thanh, phân tích nứt/phi tuyến hoặc kiểm toán tiêu chuẩn.
 
@@ -170,12 +196,11 @@ Quy ước trục của engine: gốc tại góc dưới trái hộp bao, +x san
 rộng, +y hướng lên theo chiều cao. Ix là mô men quanh trục ngang x và Iy quanh
 trục đứng y. Góc trục quán tính chính lớn đo ngược chiều kim đồng hồ từ +x,
 theo modulo 180°. Hình tròn và hình vuông có hai mô men chính bằng nhau nên
-hướng trục chính không xác định. Nếu nguồn dùng trục y theo chiều cao và z theo
-bề rộng thì Ix tương ứng Iz nguồn, Iy tương ứng Iy nguồn; cần kiểm tra quy ước
-trục của từng catalog trước khi sao chép số liệu vào thư viện.
+hướng trục chính không xác định. Phải kiểm tra quy ước trục của catalog cũ
+trước khi dùng số liệu nguồn; không có phép đổi y/z sang x/y tự động.
 
 Các kết quả này là đặc trưng tiết diện nguyên đồng nhất; chưa xét bán kính lượn,
-lỗ bổ sung ngoài lòng rỗng CHS/SHS/RHS, tiết diện bất đối xứng, cốt thép,
+lỗ bổ sung ngoài lòng rỗng CHS/SHS/RHS, cốt thép,
 mô hình vật liệu, hoặc kiểm tra theo tiêu chuẩn. Workbench không ghi kết quả
 vào thư viện. Benchmark thuần Node nằm tại
 `frontend/vue/tests/geometry/` và chạy bằng `npm test` trong `frontend/vue/`.
@@ -183,7 +208,7 @@ vào thư viện. Benchmark thuần Node nằm tại
 Schema, giới hạn và đơn vị: `database/seeds/engineering-schema.json`.
 Seed ban đầu: `database/seeds/engineering-data.json`; cấu trúc DB nằm trong
 migrations Laravel. Baseline hiện có 4 vật liệu, 8 loại; không có tiết diện
-số mặc định vì đặc trưng cần được nhập từ nguồn phù hợp.
+số mặc định; admin tạo tiết diện từ kích thước thực và ghi nguồn hình học.
 
 Các bảng chính: `users` (role), `materials` (properties JSON), `section_types`,
 `sections` (khóa ngoại vật liệu/loại), `projects` (user_id), `locales`,
@@ -195,7 +220,8 @@ Nhãn vật liệu/tiết diện có `name_vi`/`name_en`; UI và schema đều s
 Trong **Quản trị dữ liệu → Thư viện kỹ thuật → Sao lưu và chuyển thư viện**,
 admin có thể **Xuất JSON** và **Nhập thư viện** trên cả demo web lẫn Laravel.
 Xuất toàn bộ vật liệu, loại tiết diện, tiết diện cụ thể, thông số, nguồn và
-tên VI/EN. Tệp không chứa tài khoản, mật khẩu, dự án hoặc kết quả tính toán.
+tên VI/EN. Tệp bao gồm snapshot Section Properties đã lưu (nếu có); không chứa tài khoản,
+mật khẩu hoặc dự án. Khi nhập, snapshot được tính lại từ hình học.
 Đơn vị giữ nguyên theo schema; không chuyển đổi đơn vị tự động.
 Tệp phiên bản 1 nay mang thêm `materials.design_code`,
 `section_types.design_code` và `section_types.region_type`. Tệp cũ thiếu các
@@ -255,7 +281,9 @@ Client lấy CSRF token, gửi cookie và header `X-CSRF-TOKEN` cho thao tác gh
 POST/PATCH thư viện gửi `code,name_vi,name_en` và:
 - materials: `category,source,properties`, tùy chọn `design_code`.
 - section-types: `category,shape`, tùy chọn `design_code,region_type`.
-- sections: `material_id,section_type_id,source,properties`.
+- sections: `material_id,section_type_id,source,properties` (geometry + input phụ).
+  Server trả và lưu `section_properties` + `section_properties_calculated_at`.
+  Snapshot hoặc đặc trưng dẫn xuất do client gửi không được dùng để ghi.
 
 GET danh sách trả `{data:[...]}`; POST/PATCH `{data:record}`; DELETE `{data:null}`.
 Lỗi 401 chưa đăng nhập, 403 sai quyền, 409 tham chiếu/xung đột, 422 dữ liệu sai.
@@ -314,6 +342,15 @@ và Laravel, giữ thông số/tham chiếu, backup trước nhập, trùng mã,
 VI/EN và mobile; cần demo server qua `TRANSFER_DEMO_URL` và backend/Vite
 qua `TRANSFER_LOCAL_URL`, cùng `AUTH_FIXTURES` riêng cho hai tài khoản test.
 Test tạo/xóa chỉ những mã fixture duy nhất do chính lượt chạy tạo.
+`tests/catalog-section-smoke.cjs` kiểm tra tự tính khi nhập kích thước, bỏ
+trường dẫn xuất nhập tay, lưu/reload snapshot, sửa hình học và import bỏ qua
+snapshot giả. Chạy với `CATALOG_DEMO_URL=<địa chỉ demo>`.
+`tests/catalog-shapes-smoke.cjs` tạo/lưu qua editor đủ 8 hình dạng, gồm I/H
+bất đối xứng và Ixy của L; dùng `AUTH_BASE_URL=<địa chỉ>` và tài khoản test
+riêng, hoặc `TEST_DEMO=1` trên bản demo. Các test này chạy được với build
+GitHub Pages tại `/GeekCalculus/`, không cần đường dẫn source của Vite.
+Laravel feature tests kiểm tra snapshot chính thức, lỗi/rollback, dữ liệu cũ
+và payload của đủ 8 hình dạng; benchmark polygon và parity nằm ở engineering.
 
 ## Chạy native (không dùng Docker)
 
@@ -323,14 +360,20 @@ chưa có, tạo APP_KEY nếu trống, tạo SQLite nếu thiếu rồi `php ar
 --seed`. Tạo tài khoản bằng `php artisan app:create-user ...`; chạy `php artisan
 serve --host=127.0.0.1 --port=8000`. Trong terminal khác, ở `frontend/vue`,
 chạy `npm ci` và `npm run dev -- --host 127.0.0.1 --port 5173`.
+CRUD cần engine: cài Python theo `engineering/README.md`, chạy
+`python -m uvicorn structural_engine.sectional_properties.api.main:app --host
+127.0.0.1 --port 8001` trong venv và đặt
+`SECTION_ENGINE_URL=http://127.0.0.1:8001` trong `.env` của Laravel.
 
 SectionalProperties v1 đã có engine Python, FastAPI/Laravel API tính nhanh và
 Vue 3 + TypeScript. Mở **Steel Design → Section properties** bên cạnh Component
 và Connection; **Concrete Design** dùng cùng module hình học. Chọn ví dụ và nhấn
 Tính toán để xem A, trọng tâm, Ix/Iy/Ixy, Sx+/Sx−/Sy+/Sy−, r, PNA, Z, trục chính.
-J có cho chữ nhật/tròn đặc; J I/H và Cw/tâm cắt/diện tích cắt trả `not_computed`.
-Admin editor có sơ đồ kích thước và vùng kết quả XY riêng, giữ nguyên catalog
-nhập tay. Tính nhanh chưa lưu definition/revision vào PostgreSQL.
+J có cho chữ nhật/tròn đặc/CHS; J I/H trả `not_computed`. Cw/tâm cắt/diện tích
+cắt I/H dùng xấp xỉ thành mỏng, kèm trạng thái/phương pháp trong snapshot.
+Admin editor có sơ đồ kích thước và vùng kết quả XY tự tính, lưu snapshot
+trong catalog khi tạo/sửa. Tính nhanh ngoài CRUD không ghi thư viện; chưa có
+immutable revision/history hoặc PostgreSQL.
 
 Xem [engineering/README.md](engineering/README.md) để chạy và kiểm chứng.
 

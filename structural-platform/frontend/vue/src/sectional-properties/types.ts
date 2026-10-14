@@ -1,7 +1,7 @@
-export type GeometryType = 'rectangle' | 'circle' | 'i_section'
+export type GeometryType = 'rectangle' | 'circle' | 'i_section' | 'rectangular_hollow' | 'circular_hollow' | 'channel' | 'tee' | 'angle'
 export interface GeometryDefinition {
   type: GeometryType
-  geometry_variant: 'solid' | 'sharp_corner'
+  geometry_variant: 'solid' | 'sharp_corner' | 'uniform_wall'
   geometry_model_version?: '1.0.0'
   dimensions: Record<string, number>
 }

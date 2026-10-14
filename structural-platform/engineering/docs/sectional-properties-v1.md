@@ -2,7 +2,7 @@
 
 Nguồn yêu cầu: nội dung người dùng gửi lại từ cuộc trò chuyện
 “Định hướng nền tảng kết cấu”. Các quyết định dưới đây được cố định cho
-schema 1.0, geometry model 1.0.0 và analytical solver 1.1.0.
+schema 1.0, geometry model 1.0.0 và analytical solver 1.2.0 (mở rộng đủ 8 hình dạng catalog).
 
 ## Geometry → validation → analytical result
 
@@ -10,11 +10,17 @@ schema 1.0, geometry model 1.0.0 và analytical solver 1.1.0.
 - Circle đặc: diameter > 0, variant `solid`.
 - I/H: depth, top/bottom flange widths, top/bottom flange thicknesses,
   web thickness > 0; variant bắt buộc `sharp_corner`.
-- h > tt + tb; tw <= min(bt, bb); mọi dimension hữu hạn, không bool/string.
+- RHS: width/height/thickness, variant `sharp_corner`, 2t < min(b,h).
+- CHS: diameter/thickness, variant `uniform_wall`, 2t < D.
+- U/C và T: depth/width/web_thickness/flange_thickness, `sharp_corner`;
+  tw < b, h > 2tf (U/C), h > tf (T).
+- L: depth/width/thickness, `sharp_corner`, t < min(b,h).
+- I/H: h > tt + tb; tw <= min(bt, bb); mọi dimension hữu hạn, không bool/string.
 - Không xoay. I/H đối xứng qua đường giữa đứng, không ép đối xứng trên/dưới.
 - Plane XY, X phải/Y lên; O tại góc dưới trái bounding box; Ix/Iy centroidal.
-  Ixy = integral((x-xc)(y-yc)dA), bằng 0 do đối xứng trong v1.
-- mm bắt buộc ở CLI; future HTTP API cũng chỉ nhận mm ở v1.
+  Ixy = integral((x-xc)(y-yc)dA). I/H/U/C/T đối xứng một trục có Ixy=0;
+  L có Ixy khác 0. U/C mở phải; T có cánh trên; L có chân dưới/trái.
+- mm bắt buộc ở CLI và HTTP API.
 
 Các input không được thay đổi sau validation. Canonical definition chứa
 type, variant, geometry_model_version và dimensions; hash SHA-256 bao gồm
@@ -44,8 +50,18 @@ cánh trên; refinement tuyến tính trên band chứa PNA. Zx là tổng tích
 Zy=(tt*bt²+hw*tw²+tb*bb²)/4. Plastic là geometric cho vật liệu đồng nhất;
 không tính composite hoặc tương tác lực dọc.
 
-Principal moments là max/min của Ix/Iy ở v1 vì Ixy=0. Góc axis-major
-0°/90°; với Ix=Iy góc không xác định và được trả null.
+RHS lấy hiệu hình chữ nhật ngoài và trong để có A/I, chu vi là tổng hai
+biên; Z được tích phân từ các dải chữ nhật không chồng nhau. CHS với
+d=D−2t có A=π(D²−d²)/4, Ix=Iy=π(D⁴−d⁴)/64, Zx=Zy=(D³−d³)/6,
+P=π(D+d), J=2Ix chính xác. U/C/T/L phân rã thành các hình chữ nhật không
+chồng nhau, dùng định lý trục song song cho Ix/Iy/Ixy, giải PNA theo diện
+tích và tích phân Z quanh từng PNA. Perimeter dùng biên toàn tiết diện.
+
+Principal moments = (Ix+Iy)/2 ± hypot((Ix−Iy)/2,Ixy). Tensor quán tính
+dùng off-diagonal −Ixy; góc axis-major chuẩn hóa về (−90°,90°]. Với
+Ix=Iy và Ixy=0 góc không xác định và được trả null. Tham chiếu polygon
+shoelace, clipping theo PNA và kiểm tra residual tensor độc lập tại
+`tests/test_seeded_geometries.py`.
 
 ### Rectangle J và độ chính xác
 
@@ -173,7 +189,7 @@ dải số: numerical_range; nếu bắt buộc: CALCULATION_ERROR. Required J k
 CALCULATION_ERROR/ConvergenceError. Domain errors không gắn với HTTP layer.
 
 - [x] Geometry input/schema và validation.
-- [x] Ba analytical solvers, PNA trong cả ba bands.
+- [x] Tám analytical solvers, PNA theo dải và benchmark polygon độc lập.
 - [x] J Rectangle/Circle có báo cáo phương pháp/độ chính xác.
 - [x] Unsupported properties không dùng giá trị 0 giả.
 - [x] Benchmarks, independent references và property-based tests.
@@ -182,10 +198,14 @@ CALCULATION_ERROR/ConvergenceError. Domain errors không gắn với HTTP layer.
 - [ ] UUID migration/backfill tương thích users/projects hiện tại, backup/import thư viện.
 - [ ] Cache persistent theo geometry/solver/config version.
 - [ ] Laravel authentication/ownership: private/project/public và revision conflict.
-- [ ] FastAPI/Laravel API, OpenAPI và integration tests khi service tắt.
+- [x] FastAPI/Laravel API, OpenAPI và integration tests khi service tắt.
+- [x] CRUD SQLite lưu snapshot canonical XY, timestamp, hash/solver/config;
+  GET không tính lại, import tính trên server, lỗi rollback; giữ legacy chưa sửa.
 - [ ] Vue 3 TypeScript, dynamic inputs, hình tiết diện, units/signs S+/S−,
   history/export và module references đến immutable revisions.
 
 Các mục database/API/UI trong checklist người dùng cung cấp là yêu cầu nghiệm
 thu tương lai, không được coi là đã pass chỉ vì đánh dấu trong tài liệu tham
-khảo. Packages 01–02 không sửa schema/data thư viện website hiện tại.
+khảo. CRUD snapshot hiện bổ sung hai cột nullable vào SQLite mà không
+backfill/đổi trục dữ liệu cũ; lịch sử immutable revision và PostgreSQL vẫn
+chưa triển khai.

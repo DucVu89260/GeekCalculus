@@ -10,7 +10,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from .. import CalculationError, CalculationOptions, calculate, validate_geometry_definition
-from ..models import CircleGeometry, ISectionGeometry, RectangleGeometry
+from ..models import AngleGeometry, ChannelGeometry, CircleGeometry, CircularHollowGeometry, ISectionGeometry, RectangleGeometry, RectangularHollowGeometry, TeeGeometry
 
 
 app = FastAPI(title="Sectional Properties API", version="1.0.0")
@@ -140,6 +140,36 @@ def section_types() -> dict[str, list[dict[str, Any]]]:
                     "bottom_flange_thickness",
                 ),
             ),
+        },
+        {
+            "type": "rectangular_hollow",
+            "name": "Rectangular hollow section",
+            "geometry_variant": "sharp_corner",
+            "input_schema": _dimension_input_schema(RectangularHollowGeometry, "rectangular_hollow", "sharp_corner", ("width", "height", "thickness")),
+        },
+        {
+            "type": "circular_hollow",
+            "name": "Circular hollow section",
+            "geometry_variant": "uniform_wall",
+            "input_schema": _dimension_input_schema(CircularHollowGeometry, "circular_hollow", "uniform_wall", ("diameter", "thickness")),
+        },
+        {
+            "type": "channel",
+            "name": "Channel",
+            "geometry_variant": "sharp_corner",
+            "input_schema": _dimension_input_schema(ChannelGeometry, "channel", "sharp_corner", ("depth", "width", "web_thickness", "flange_thickness")),
+        },
+        {
+            "type": "tee",
+            "name": "Tee",
+            "geometry_variant": "sharp_corner",
+            "input_schema": _dimension_input_schema(TeeGeometry, "tee", "sharp_corner", ("depth", "width", "web_thickness", "flange_thickness")),
+        },
+        {
+            "type": "angle",
+            "name": "Angle",
+            "geometry_variant": "sharp_corner",
+            "input_schema": _dimension_input_schema(AngleGeometry, "angle", "sharp_corner", ("depth", "width", "thickness")),
         },
     ]
     return {"data": types}

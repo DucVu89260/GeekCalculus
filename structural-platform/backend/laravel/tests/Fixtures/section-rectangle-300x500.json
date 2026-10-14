@@ -1,0 +1,134 @@
+{
+  "schema_version": "1.0",
+  "geometry_model_version": "1.0.0",
+  "geometry_type": "rectangle",
+  "geometry_hash": "bdd857552bfa4d0df1c246c6ef7b10825a470a2fd055ad47cc443b171ed620d8",
+  "solver": {
+    "method": "analytical",
+    "version": "1.2.0",
+    "config_hash": "640fd9df4c86e8fbce4f0fcae9e2eab88a0314e94bba23c83d9cf269f4cb7ef1"
+  },
+  "units": {
+    "length": "mm",
+    "area": "mm2",
+    "section_modulus": "mm3",
+    "second_moment": "mm4",
+    "torsion_constant": "mm4",
+    "warping_constant": "mm6",
+    "shear_center": "mm",
+    "effective_shear_area": "mm2",
+    "angle": "deg"
+  },
+  "normalized_input": {
+    "geometry": {
+      "type": "rectangle",
+      "geometry_variant": "solid",
+      "geometry_model_version": "1.0.0",
+      "dimensions": {
+        "width": 300.0,
+        "height": 500.0
+      }
+    },
+    "units": "mm",
+    "options": {
+      "solver": "analytical",
+      "include_plastic": true,
+      "include_advanced": true,
+      "rectangle_j_relative_tolerance": 1e-10,
+      "rectangle_j_max_terms": 10000,
+      "required_properties": []
+    }
+  },
+  "properties": {
+    "geometric": {
+      "area": 150000.0,
+      "perimeter": 1600.0,
+      "centroid_x": 150.0,
+      "centroid_y": 250.0
+    },
+    "elastic": {
+      "ix": 3125000000.0,
+      "iy": 1125000000.0,
+      "ixy": 0.0,
+      "sx_positive": 12500000.0,
+      "sx_negative": 12500000.0,
+      "sy_positive": 7500000.0,
+      "sy_negative": 7500000.0,
+      "rx": 144.33756729740642,
+      "ry": 86.60254037844386
+    },
+    "plastic": {
+      "pna_x": 150.0,
+      "pna_y": 250.0,
+      "zx": 18750000.0,
+      "zy": 11250000.0
+    },
+    "principal": {
+      "i_major": 3125000000.0,
+      "i_minor": 1125000000.0,
+      "major_axis_angle_degrees": 0.0,
+      "orientation_status": "determinate"
+    }
+  },
+  "advanced": {
+    "torsion_constant_j": {
+      "status": "computed",
+      "value": 2816262154.9596443,
+      "reason": null,
+      "method": null
+    },
+    "warping_constant_cw": {
+      "status": "not_computed",
+      "value": null,
+      "reason": "solver_not_implemented",
+      "method": null
+    },
+    "shear_center": {
+      "status": "not_computed",
+      "value": null,
+      "reason": "solver_not_implemented",
+      "method": null
+    },
+    "effective_shear_area": {
+      "status": "not_computed",
+      "value": null,
+      "reason": "solver_not_implemented",
+      "method": null
+    }
+  },
+  "diagnostics": {
+    "plastic": {
+      "status": "computed",
+      "method": "symmetric_closed_form",
+      "relative_area_imbalance": 0.0
+    },
+    "torsion": {
+      "method": "saint_venant_odd_series",
+      "terms": 84,
+      "requested_relative_tolerance": 1e-10,
+      "truncation_abs_error_bound": 0.2722449031355851,
+      "floating_point_abs_error_estimate": 4.5845448689194915e-05,
+      "relative_error_bound_with_roundoff_estimate": 9.668515700183546e-11,
+      "scaled_tail_bound": 6.049886736346334e-11,
+      "scaled_roundoff_estimate": 1.0187877486487757e-14,
+      "converged": true
+    },
+    "intermediate": {},
+    "bounding_box": {
+      "x_min": 0.0,
+      "y_min": 0.0,
+      "x_max": 300.0,
+      "y_max": 500.0
+    },
+    "assumptions": [
+      "dimensions_in_mm",
+      "xy_plane_x_right_y_up",
+      "bbox_origin_bottom_left",
+      "centroidal_unrotated_inertias",
+      "positive_coordinate_product_ixy",
+      "sharp_corners",
+      "homogeneous_geometric_plastic_properties"
+    ]
+  },
+  "status": "success"
+}

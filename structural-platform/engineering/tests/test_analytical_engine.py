@@ -264,7 +264,7 @@ def test_core_is_deterministic_versioned_serializable_and_does_not_mutate_input(
     assert geometry.model_dump() == before
     assert first.geometry_hash == geometry_hash(geometry)
     assert first.schema_version == "1.0"
-    assert first.solver.version == "1.1.0"
+    assert first.solver.version == "1.2.0"
     assert first.geometry_model_version == "1.0.0"
     assert first.units.length == "mm"
     assert first.units.section_modulus == "mm3"

@@ -3,16 +3,20 @@
 namespace Tests\Feature;
 
 use App\Models\Material;
+use App\Models\Section;
 use App\Models\SectionType;
 use App\Models\User;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
+use Tests\Feature\Concerns\SectionPropertyTestSupport;
 use Tests\TestCase;
 
 class AuthLibraryTest extends TestCase
 {
     use RefreshDatabase;
+    use SectionPropertyTestSupport;
 
     protected function setUp(): void
     {
@@ -32,7 +36,7 @@ class AuthLibraryTest extends TestCase
 
     private function section(array $changes = []): array
     {
-        return array_replace(['code' => 'test-rc', 'name_vi' => 'Cột thử', 'name_en' => 'Test column', 'section_type_id' => SectionType::where('shape', 'rectangle')->first()->id, 'material_id' => Material::where('category', 'concrete')->first()->id, 'properties' => ['width' => 300, 'depth' => 500, 'area' => 150000, 'inertia_y' => 3125000000, 'inertia_z' => 1125000000, 'torsion_constant' => 1000000000, 'elastic_modulus_y' => 12500000, 'elastic_modulus_z' => 7500000, 'shear_area_y' => 125000, 'shear_area_z' => 125000]], $changes);
+        return array_replace(['code' => 'test-rc', 'name_vi' => 'Cột thử', 'name_en' => 'Test column', 'section_type_id' => SectionType::where('shape', 'rectangle')->first()->id, 'material_id' => Material::where('category', 'concrete')->first()->id, 'properties' => ['width' => 300, 'depth' => 500, 'concrete_cover' => 30, 'area_modifier' => .9]], $changes);
     }
 
     public function test_guests_cannot_access_projects_library_or_admin(): void
@@ -103,10 +107,56 @@ class AuthLibraryTest extends TestCase
     public function test_sections_support_full_crud_and_computed_radii(): void
     {
         $this->actingAs($this->admin());
+        $fixture = $this->sectionPropertyFixture();
+        $changedGeometryFixture = $this->sectionPropertyFixture('section-rectangle-400x500.json');
+        $this->fakeSectionPropertyCalculations([$fixture, $changedGeometryFixture]);
         $data = $this->section();
-        $id = $this->postJson('/api/sections', $data)->assertCreated()->json('data.id');
+        $data['properties'] += [
+            // Known derived fields are compatibility inputs only and never override the solver.
+            'area' => 999999,
+            'inertia_y' => 999999,
+            'inertia_z' => 888888,
+            'torsion_constant' => 777777,
+            'elastic_modulus_y' => 666666,
+            'elastic_modulus_z' => 555555,
+            'shear_area_y' => 444444,
+            'shear_area_z' => 333333,
+            'warping_constant' => 222222,
+            'plastic_modulus_y' => 111111,
+            'shear_center_y' => -100,
+        ];
+        $data['section_properties'] = ['status' => 'tampered'];
+        $data['section_properties_calculated_at'] = '2000-01-01T00:00:00Z';
+        $response = $this->postJson('/api/sections', $data)->assertCreated()
+            ->assertJsonPath('data.computed.rx', $fixture['properties']['elastic']['rx'])
+            ->assertJsonPath('data.computed.ry', $fixture['properties']['elastic']['ry'])
+            ->assertJsonMissingPath('data.computed.radius_y')
+            ->assertJsonMissingPath('data.computed.radius_z');
+        $id = $response->json('data.id');
+        $this->assertEquals($fixture['properties']['geometric']['area'], $response->json('data.section_properties.properties.geometric.area'));
+        $section = Section::findOrFail($id);
+        $this->assertEquals($fixture, $section->section_properties);
+        $this->assertNotNull($section->section_properties_calculated_at);
+        $this->assertEquals(['width' => 300.0, 'depth' => 500.0, 'concrete_cover' => 30.0, 'area_modifier' => .9], $section->properties);
         $this->getJson('/api/sections')->assertJsonFragment(['code' => 'test-rc']);
-        $this->patchJson('/api/sections/'.$id, array_replace($data, ['name_en' => 'Edited section']))->assertOk()->assertJsonPath('data.name_en', 'Edited section')->assertJsonStructure(['data' => ['computed' => ['radius_y', 'radius_z']]]);
+        $section->section_properties_calculated_at = now()->subYear();
+        $section->save();
+        $previousCalculationTime = $section->section_properties_calculated_at;
+        $changedInput = $this->section(['name_en' => 'Edited section']);
+        $changedInput['properties']['width'] = 400;
+        $updated = $this->patchJson('/api/sections/'.$id, $changedInput)
+            ->assertOk()->assertJsonPath('data.name_en', 'Edited section')
+            ->assertJsonPath('data.computed.rx', $changedGeometryFixture['properties']['elastic']['rx'])
+            ->assertJsonPath('data.computed.ry', $changedGeometryFixture['properties']['elastic']['ry'])
+            ->assertJsonStructure(['data' => ['section_properties' => ['properties' => ['elastic' => ['rx', 'ry']]]]]);
+        $this->assertEquals(200000, $updated->json('data.section_properties.properties.geometric.area'));
+        $savedAfterGeometryChange = Section::findOrFail($id);
+        $this->assertEquals(400.0, $savedAfterGeometryChange->properties['width']);
+        $this->assertEquals($changedGeometryFixture, $savedAfterGeometryChange->section_properties);
+        $this->assertTrue($savedAfterGeometryChange->section_properties_calculated_at->greaterThan($previousCalculationTime));
+        Http::assertSent(fn ($request) => $request->data()['geometry']['dimensions'] == ['width' => 400, 'height' => 500]);
+        Http::assertSentCount(2);
+        $this->assertEquals($changedGeometryFixture, Section::findOrFail($id)->section_properties);
         $this->deleteJson('/api/sections/'.$id)->assertOk();
         $this->assertDatabaseCount('sections', 0);
     }
@@ -114,6 +164,7 @@ class AuthLibraryTest extends TestCase
     public function test_referenced_materials_and_types_cannot_be_deleted_or_retyped(): void
     {
         $this->actingAs($this->admin());
+        $this->fakeSectionPropertyCalculations([$this->sectionPropertyFixture()]);
         $data = $this->section();
         $this->postJson('/api/sections', $data)->assertCreated();
         $this->deleteJson('/api/materials/'.$data['material_id'])->assertStatus(409);
@@ -127,8 +178,8 @@ class AuthLibraryTest extends TestCase
         $this->actingAs($this->admin());
         $this->postJson('/api/sections', $this->section(['material_id' => Material::where('category', 'steel')->first()->id]))->assertUnprocessable()->assertJsonValidationErrors('material_id');
         $data = $this->section();
-        unset($data['properties']['inertia_y']);
-        $this->postJson('/api/sections', $data)->assertUnprocessable()->assertJsonValidationErrors('properties.inertia_y');
+        unset($data['properties']['width']);
+        $this->postJson('/api/sections', $data)->assertUnprocessable()->assertJsonValidationErrors('properties.width');
         $data = $this->section();
         $data['properties']['concrete_cover'] = 200;
         $this->postJson('/api/sections', $data)->assertUnprocessable()->assertJsonValidationErrors('properties.concrete_cover');

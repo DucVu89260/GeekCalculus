@@ -3,7 +3,9 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { request } from '../api'
 import DesignCodeIcon from './DesignCodeIcon.vue'
 import DesignCodeSelect from './DesignCodeSelect.vue'
+import SectionCalculatedProperties from './SectionCalculatedProperties.vue'
 import SectionPropertiesPanel from './SectionPropertiesPanel.vue'
+import { isCatalogDerivedSectionProperty } from '../sectional-properties/catalog-payload.js'
 
 const props = defineProps({ locale: { type: String, required: true } })
 const emit = defineEmits(['open-library'])
@@ -29,6 +31,7 @@ const text = {
     component: 'Cấu kiện', connection: 'Liên kết', noDescription: 'Không có mô tả',
     sectionCalculator: 'Đặc trưng tiết diện', sectionCalculatorSubtitle: 'Tính chất hình học · Không lưu vào dự án',
     computedShearModulus: 'Mô đun trượt G', computedGyrationY: 'Bán kính quán tính ry', computedGyrationZ: 'Bán kính quán tính rz',
+    legacySourceAxes: 'Giá trị tiết diện cũ · giữ nguyên trục nguồn', legacyDerivedSourceAxes: 'Giá trị dẫn xuất cũ · theo trục nguồn',
   },
   en: {
     title: 'Steel design', subtitle: 'Set up preliminary steel members and connections.',
@@ -50,6 +53,7 @@ const text = {
     component: 'Member setup', connection: 'Connection setup', noDescription: 'No description',
     sectionCalculator: 'Section properties', sectionCalculatorSubtitle: 'Geometric calculator · Not saved to a project',
     computedShearModulus: 'Shear modulus G', computedGyrationY: 'Radius of gyration ry', computedGyrationZ: 'Radius of gyration rz',
+    legacySourceAxes: 'Legacy catalog values · source axes retained', legacyDerivedSourceAxes: 'Legacy derived values · source axes retained',
   },
 }
 
@@ -127,6 +131,11 @@ const weldTypes = ['fillet', 'butt']
 
 const materialFields = computed(() => fieldsFor('materials', selectedMaterial.value?.category, null, selectedMaterial.value?.properties))
 const sectionFields = computed(() => fieldsFor('sections', selectedSectionType.value?.category, selectedSectionType.value?.shape, selectedSection.value?.properties))
+const sectionInputFields = computed(() => sectionFields.value.filter((field) => field.read_only !== true && !isCatalogDerivedSectionProperty(field.key)))
+const sectionLegacyFields = computed(() => selectedSection.value?.section_properties
+  ? []
+  : sectionFields.value.filter((field) => field.read_only === true || isCatalogDerivedSectionProperty(field.key)))
+const sectionLegacyComputedEntries = computed(() => selectedSection.value?.section_properties ? [] : Object.entries(selectedSection.value?.computed ?? {}))
 
 function unwrapRows(payload) {
   const data = payload?.data ?? payload
@@ -336,14 +345,19 @@ onMounted(loadLibrary)
           </article>
           <article v-if="selectedSection" class="steel-design-record-card">
             <header><div><span class="steel-design-card-kicker">{{ t('sectionProperties') }}</span><h3>{{ localizedName(selectedSection) }}</h3><p>{{ selectedSection.code }}<span v-if="selectedSectionType"> · {{ selectedSectionType.code }} · {{ sectionTypeName(selectedSection.section_type_id) }} · <span class="steel-design-classification"><DesignCodeIcon v-if="selectedSectionType.design_code" :code="selectedSectionType.design_code" aria-hidden="true" />{{ sectionTypeClassification(selectedSectionType) }}</span></span></p></div><span class="steel-design-chip">{{ t('section') }}</span></header>
-            <dl v-if="sectionFields.length" class="steel-design-property-list">
-              <div v-for="field in sectionFields" :key="field.key"><dt>{{ localizedField(field) }}<small v-if="field.unit">{{ field.unit }}</small></dt><dd>{{ formatValue(selectedSection.properties?.[field.key]) }}</dd></div>
+            <dl v-if="sectionInputFields.length" class="steel-design-property-list">
+              <div v-for="field in sectionInputFields" :key="field.key"><dt>{{ localizedField(field) }}<small v-if="field.unit">{{ field.unit }}</small></dt><dd>{{ formatValue(selectedSection.properties?.[field.key]) }}</dd></div>
             </dl>
-            <div v-if="Object.keys(selectedSection.computed ?? {}).length" class="steel-design-computed">
-              <span>{{ t('computedProperties') }}</span>
-              <dl class="steel-design-property-list"><div v-for="(value, key) in selectedSection.computed" :key="key"><dt>{{ computedLabel(key) }}</dt><dd>{{ computedValue(key, value) }}</dd></div></dl>
+            <SectionCalculatedProperties v-if="selectedSection.section_properties" :result="selectedSection.section_properties" :calculated-at="selectedSection.section_properties_calculated_at" :locale="locale" />
+            <div v-if="sectionLegacyFields.length" class="steel-design-computed">
+              <span>{{ t('legacySourceAxes') }}</span>
+              <dl class="steel-design-property-list"><div v-for="field in sectionLegacyFields" :key="field.key"><dt>{{ localizedField(field) }}<small v-if="field.unit">{{ field.unit }}</small></dt><dd>{{ formatValue(selectedSection.properties?.[field.key]) }}</dd></div></dl>
             </div>
-            <p v-if="!propertyCount(selectedSection, sectionFields)" class="steel-design-no-properties">{{ t('emptyProperties') }}</p>
+            <div v-if="sectionLegacyComputedEntries.length" class="steel-design-computed">
+              <span>{{ t('legacyDerivedSourceAxes') }}</span>
+              <dl class="steel-design-property-list"><div v-for="[key, value] in sectionLegacyComputedEntries" :key="key"><dt>{{ computedLabel(key) }}</dt><dd>{{ computedValue(key, value) }}</dd></div></dl>
+            </div>
+            <p v-if="!sectionInputFields.length && !selectedSection.section_properties && !sectionLegacyFields.length && !sectionLegacyComputedEntries.length" class="steel-design-no-properties">{{ t('emptyProperties') }}</p>
           </article>
         </div>
       </template>

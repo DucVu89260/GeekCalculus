@@ -17,7 +17,7 @@ const localBase = process.env.TRANSFER_LOCAL_URL || 'http://127.0.0.1:5173'
     format: 'geekcalculus-engineering-library', version: 1, exported_at: new Date().toISOString(),
     materials: [{ ...seed.materials[0], code: materialCode, design_code: 'VN', name_vi: 'Thép thư viện đã xác minh', name_en: 'Verified library steel', source: 'Browser test fixture; not design values' }],
     section_types: [{ ...seed.section_types[0], code: typeCode, design_code: 'VN', region_type: 'IPE', name_vi: 'Tiết diện I thử', name_en: 'Test I type' }],
-    sections: [{ code: sectionCode, name_vi: 'I400 thử', name_en: 'Test I400', source: 'Test fixture', material_code: materialCode, section_type_code: typeCode, properties: { depth: 400, width: 200, web_thickness: 8, flange_thickness: 13, area: 9000, inertia_y: 2e8, inertia_z: 2e7, torsion_constant: 350000, elastic_modulus_y: 1e6, elastic_modulus_z: 2e5, shear_area_y: 5000, shear_area_z: 4500, warping_constant: 1e12 } }],
+    sections: [{ code: sectionCode, name_vi: 'I400 thử', name_en: 'Test I400', source: 'Test fixture', material_code: materialCode, section_type_code: typeCode, properties: { depth: 400, width: 200, web_thickness: 8, flange_thickness: 13, area: 9000, inertia_y: 2e8, inertia_z: 2e7, torsion_constant: 350000, elastic_modulus_y: 1e6, elastic_modulus_z: 2e5, shear_area_y: 5000, shear_area_z: 4500, warping_constant: 1e12 }, section_properties: { geometry_hash: 'forged-snapshot', properties: { geometric: { area: 1 } } }, section_properties_calculated_at: '2000-01-01T00:00:00.000Z' }],
   }
   let localPage
   async function open(base, demo, role = 'admin') {
@@ -67,7 +67,18 @@ const localBase = process.env.TRANSFER_LOCAL_URL || 'http://127.0.0.1:5173'
     return before
   }
   function withoutTime(archive) { const clone = structuredClone(archive); delete clone.exported_at; return clone }
-  function customRecords(archive) { return Object.fromEntries(['materials', 'section_types', 'sections'].map(resource => [resource, archive[resource].filter(row => [materialCode, typeCode, sectionCode].includes(row.code))])) }
+  function customRecords(archive) {
+    const derived = ['area', 'inertia_x', 'inertia_y', 'inertia_z', 'torsion_constant', 'elastic_modulus_x', 'elastic_modulus_y', 'elastic_modulus_z', 'shear_area_x', 'shear_area_y', 'shear_area_z', 'warping_constant', 'plastic_modulus_x', 'plastic_modulus_y', 'plastic_modulus_z', 'shear_center_x', 'shear_center_y', 'shear_center_z', 'section_modulus_x', 'section_modulus_y', 'section_modulus_z', 'radius_gyration_x', 'radius_gyration_y', 'radius_gyration_z']
+    return Object.fromEntries(['materials', 'section_types', 'sections'].map(resource => [resource, archive[resource].filter(row => [materialCode, typeCode, sectionCode].includes(row.code)).map(row => {
+      const copy = structuredClone(row)
+      if (resource === 'sections') {
+        delete copy.section_properties; delete copy.section_properties_calculated_at
+        for (const key of derived) delete copy.properties[key]
+      }
+      return copy
+    })]))
+  }
+  function savedSection(archive) { return archive.sections.find(row => row.code === sectionCode) }
   async function realApi(page, endpoint, method = 'GET', body) {
     return page.evaluate(async ({ endpoint, method, body }) => {
       const token = method === 'GET' ? null : (await (await fetch('/api/auth/csrf', { headers: { Accept: 'application/json' } })).json()).csrf_token
@@ -97,7 +108,12 @@ const localBase = process.env.TRANSFER_LOCAL_URL || 'http://127.0.0.1:5173'
     assert.equal((await exportArchive(source)).materials.some(row => row.code === materialCode), false, 'File selection must not mutate data')
     await importArchive(source, fixture, { expected: [3, 0, 0] })
     const exported = await exportArchive(source)
-    assert.deepEqual(customRecords(exported), { materials: fixture.materials, section_types: fixture.section_types, sections: fixture.sections })
+    assert.deepEqual(customRecords(exported), customRecords(fixture))
+    const saved = savedSection(exported)
+    assert.ok(saved.section_properties?.geometry_hash)
+    assert.notEqual(saved.section_properties.geometry_hash, 'forged-snapshot', 'Imports must recalculate rather than trust the uploaded result')
+    assert.notEqual(saved.section_properties_calculated_at, fixture.sections[0].section_properties_calculated_at)
+    assert.deepEqual(saved.properties, { depth: 400, width: 200, web_thickness: 8, flange_thickness: 13 }, 'New section records must keep geometry inputs only')
     for (const key of ['users', 'projects', 'password']) assert.equal(key in exported, false)
     for (const resource of ['materials', 'section_types', 'sections']) for (const row of exported[resource]) for (const key of ['id', 'computed', 'material_id', 'section_type_id']) assert.equal(key in row, false)
     await source.reload(); await source.getByRole('button', { name: /Admin interface/ }).click()
@@ -118,15 +134,15 @@ const localBase = process.env.TRANSFER_LOCAL_URL || 'http://127.0.0.1:5173'
     await importArchive(restored, changed, { expected: [0, 0, 3] })
     assert.deepEqual(customRecords(await exportArchive(restored)), customRecords(exported), 'Skip must preserve matching records')
     await importArchive(restored, changed, { mode: 'overwrite', expected: [0, 3, 0] })
-    assert.deepEqual(customRecords(await exportArchive(restored)), { materials: changed.materials, section_types: changed.section_types, sections: changed.sections })
+    assert.deepEqual(customRecords(await exportArchive(restored)), customRecords(changed))
     const legacyArchive = structuredClone(changed)
     for (const row of legacyArchive.materials) delete row.design_code
     for (const row of legacyArchive.section_types) { delete row.design_code; delete row.region_type }
     await importArchive(restored, legacyArchive, { mode: 'overwrite', expected: [0, 3, 0] })
-    assert.deepEqual(customRecords(await exportArchive(restored)), { materials: changed.materials, section_types: changed.section_types, sections: changed.sections }, 'Old archives must preserve newer classification when omitted')
-    const bad = structuredClone(changed); bad.materials[0].name_en = 'Must roll back'; bad.materials.push({ ...bad.materials[0], code: rejectedCode }); bad.sections[0].properties.shear_area_y = 9001
+    assert.deepEqual(customRecords(await exportArchive(restored)), customRecords(changed), 'Old archives must preserve newer classification when omitted')
+    const bad = structuredClone(changed); bad.materials[0].name_en = 'Must roll back'; bad.materials.push({ ...bad.materials[0], code: rejectedCode }); bad.sections[0].properties.depth = 0
     const beforeFailure = await importArchive(restored, bad, { mode: 'overwrite', failure: true })
-    await restored.getByText('archive.sections.0.properties', { exact: true }).waitFor()
+    await restored.getByText('archive.sections.0.properties.depth', { exact: true }).waitFor()
     assert.deepEqual(withoutTime(await exportArchive(restored)), withoutTime(beforeFailure), 'Demo batch failure must roll back')
     await restored.locator('.library-transfer input[type=file]').setInputFiles({ name: 'bad.json', mimeType: 'application/json', buffer: Buffer.from('{broken') })
     await restored.getByText('The file is not valid JSON.', { exact: true }).waitFor()
@@ -152,7 +168,7 @@ const localBase = process.env.TRANSFER_LOCAL_URL || 'http://127.0.0.1:5173'
     await importArchive(localPage, changed, { expected: [0, 0, 3] })
     await importArchive(localPage, changed, { mode: 'overwrite', expected: [0, 3, 0] })
     const localFailureBefore = await importArchive(localPage, bad, { mode: 'overwrite', failure: true })
-    await localPage.getByText('archive.sections.0.properties.shear_area_y', { exact: true }).waitFor()
+    await localPage.getByText('archive.sections.0.properties.depth', { exact: true }).waitFor()
     assert.deepEqual(withoutTime(await exportArchive(localPage)), withoutTime(localFailureBefore), 'Laravel batch failure must roll back')
     await preview(localPage, fixture)
     await localPage.route('**/api/library/export', route => route.fulfill({ status: 500, contentType: 'application/json', body: '{}' }))

@@ -1,6 +1,7 @@
 # SectionalProperties v1 — engine và giao diện thử nghiệm
 
-Lõi Python tính đặc trưng hình học của RECTANGLE, CIRCLE và I_SECTION.
+Lõi Python tính đặc trưng hình học của RECTANGLE, CIRCLE, I_SECTION,
+RECTANGULAR_HOLLOW, CIRCULAR_HOLLOW, CHANNEL, TEE và ANGLE (solver 1.2.0).
 Không cần vật liệu, Laravel, HTTP, database hoặc FEM để chạy phép tính.
 Mã lõi nằm trong `structural_engine/sectional_properties/`.
 
@@ -35,15 +36,15 @@ CLI không tạo/sửa dữ liệu thư viện trên website. Khóa kích thư�
 Từ `structural-platform`, build image dành cho nghiệm thu lõi:
 
 ```sh
-docker build -t geekcalculus-sectional-properties:1.1.0 engineering
-docker run --rm geekcalculus-sectional-properties:1.1.0 python -m pytest -q
-docker run --rm -i geekcalculus-sectional-properties:1.1.0 < engineering/examples/i-asymmetric.json
+docker build -t geekcalculus-sectional-properties:1.2.0 engineering
+docker run --rm geekcalculus-sectional-properties:1.2.0 python -m pytest -q
+docker run --rm -i geekcalculus-sectional-properties:1.2.0 < engineering/examples/i-asymmetric.json
 ```
 
 Trên PowerShell, thay dòng cuối bằng:
 
 ```powershell
-Get-Content -Raw engineering/examples/i-asymmetric.json | docker run --rm -i geekcalculus-sectional-properties:1.1.0
+Get-Content -Raw engineering/examples/i-asymmetric.json | docker run --rm -i geekcalculus-sectional-properties:1.2.0
 ```
 
 Image có CLI/test và FastAPI adapter; Compose khởi động API nội bộ ở port 8001.
@@ -88,17 +89,21 @@ options được kiểm tra lại khi vào engine, kể cả model được dự
 
 Quy ước: mặt phẳng XY, X sang phải, Y lên trên, gốc O ở góc dưới trái
 bounding box; moment quán tính quanh trục qua trọng tâm. Không đồng nhất
-Ix/Iy với trục local CSI 1–2–3. Không xoay, fillet, hollow, channel/tee hoặc
-composite/material checks ở v1. User-defined nghĩa là người dùng chọn các
-kích thước hợp lệ của ba dạng v1; chưa hỗ trợ polygon tùy ý.
+Ix/Iy với trục local CSI 1–2–3. Không có xoay, fillet hoặc composite/material
+checks. RHS có góc vuông, CHS có bề dày đồng đều. Channel mở về phải, tee
+có cánh trên, angle có chân dưới/trái; các mô hình không cần nhập polygon.
+Chưa hỗ trợ polygon tùy ý. Cả 8 dạng có đầy đủ đặc trưng gross/elastic/plastic/
+principal; J CHS = 2Ix chính xác. Các đặc trưng nâng cao RHS/U/C/T/L chưa
+có solver sẽ trả `not_computed` với giá trị null và lý do.
 
 Đơn vị mm/mm²/mm³/mm⁴/mm⁶; `Sx+` và `Sx−` luôn là hai trường riêng.
 Principal inertias sắp theo lớn/nhỏ; góc của trục có moment lớn nhất đo từ X
-ngược chiều kim đồng hồ: 0° hoặc 90° trong v1. Nếu Ix = Iy, góc không duy nhất,
+ngược chiều kim đồng hồ, chuẩn hóa về (−90°, 90°]. Angle có Ixy khác 0
+và góc trục chính tổng quát. Nếu Ix = Iy và Ixy = 0, góc không duy nhất,
 nên trả `null` và `orientation_status=indeterminate`.
 
 Mặc định tính plastic, không tính advanced. Bật `include_advanced=true` để
-tính J Rectangle/Circle và Cw/tâm cắt/diện tích cắt hữu hiệu I/H; hoặc yêu cầu
+tính J Rectangle/Circle/CHS và Cw/tâm cắt/diện tích cắt hữu hiệu I/H; hoặc yêu cầu
 các đại lượng qua `required_properties`. J của I/H vẫn chưa có solver.
 `include_plastic=false` trả `properties.plastic=null`, có lý do `not_requested`
 trong diagnostics. Đại lượng nâng cao có `status,value,reason,method`.
@@ -124,10 +129,10 @@ Chặn sai số phần dư là giải tích; roundoff là ước lượng, chưa
 interval arithmetic. Hình học có kích thước quá lớn/nhỏ làm kết quả ngoài
 dải float64 bị từ chối bằng `CALCULATION_ERROR`.
 
-PNA I/H dùng bisection diện tích, rồi refinement theo đoạn tuyến tính;
+PNA I/H/RHS/U/C/T/L dùng bisection diện tích, rồi refinement theo đoạn tuyến tính;
 arithmetic Decimal 80 chữ số tránh triệt tiêu diện tích cánh gần bằng nhau.
-Kiểm tra cân bằng diện tích tại chính tọa độ float64 được xuất. Zx tích phân
-chính xác từng khối quanh PNA; Zy dùng đối xứng đứng. Diagnostics có diện tích
+Kiểm tra cân bằng diện tích tại chính tọa độ float64 được xuất. Zx/Zy tích phân
+chính xác từng khối không chồng nhau quanh PNA tương ứng. Diagnostics có diện tích
 hai cánh/bụng, clear web depth và PNA. Không lưu compact/noncompact/slender.
 
 ## Kiểm chứng và các mốc tiếp theo
@@ -138,20 +143,24 @@ hai cánh/bụng, clear web depth và PNA. Không lưu compact/noncompact/slende
 - **Package 01 hoàn tất:** models, validation, geometry version/hash.
 - **Package 02 hoàn tất:** analytical engine, benchmarks, property-based tests,
   CLI và công cụ nghiệm thu.
-- **Package 03:** PostgreSQL/JSONB, definition → immutable revision → property
-  set, quyền sở hữu, lịch sử, cache và chuyển dữ liệu hiện có an toàn.
+- **Lưu catalog:** Laravel CRUD đã tính trên server và lưu snapshot JSON
+  `sections.section_properties`, timestamp, hình học chuẩn hóa và provenance
+  trong SQLite. GET trả snapshot đã lưu; import và cập nhật tính lại. Dữ liệu
+  cũ không bị tự chuyển hệ trục. Lịch sử immutable revision/cache và
+  PostgreSQL/JSONB vẫn là phần nâng cấp riêng chưa triển khai.
 - **Package 04 tính nhanh hoàn tất:** FastAPI adapter và Laravel authenticated
   `/api/v1/sections/calculate`, `/api/v1/section-types`; có OpenAPI, error mapping
-  và integration tests. Endpoint lưu/versioning còn chờ Package 03.
+  và integration tests. CRUD lưu snapshot hiện dùng `/api/sections`;
+  `/api/v1/sections/calculate` vẫn là phép tính không ghi database.
 - **Package 05 tính nhanh hoàn tất:** Vue 3 + TypeScript, tab Section properties
   trong Steel Design và Concrete Design, ví dụ TC-001/002/003, hình vẽ theo tỷ lệ,
   bảng kết quả và export JSON. Lưu definition/history còn chờ Package 03.
 
 Database website hiện là SQLite, users/projects dùng ID số; chưa có
 calculation_runs/model_sections. Package 03 phải xử lý UUID và migration
-PostgreSQL có đối chiếu/backup trước khi đổi kết nối. Không ghi computed
-properties vào bảng sections nhập tay cũ như một nguồn sự thật thứ hai;
-không tự thay thế thư viện người dùng đã nhập hoặc map trục CSI chưa thống nhất.
+PostgreSQL có đối chiếu/backup trước khi đổi kết nối. Snapshot mới là nguồn duy nhất của đặc trưng tự tính; các cột JSON
+legacy chỉ giữ lại trên bản ghi chưa sửa. Không tự thay thế bản ghi cũ hoặc
+map trục CSI chưa thống nhất.
 
 ## Chạy trên website
 
@@ -161,9 +170,10 @@ Connection) hoặc **Concrete Design → Section properties**. Chọn ví dụ, 
 **Calculate / Tính toán**. Không cần chọn vật liệu để tính hình học.
 
 Trong Admin → Thư viện → Tiết diện → Thêm/Sửa/Sao chép, nhóm kích thước có
-minh họa tiết diện. Nhấn **Tính đặc trưng XY** để xem kết quả cho chữ nhật đặc,
-tròn đặc hoặc I/H đối xứng của catalog cũ. Dữ liệu Iy/Iz/J nhập tay của catalog
-không bị ghi đè; solver dùng XY. Các hình khác có minh họa và thông báo phạm vi.
+minh họa tiết diện. Khi nhập đủ kích thước, form tự tính đầy đủ đặc trưng XY
+cho cả 8 hình dạng. Tạo/sửa/sao chép/import lưu snapshot và thời điểm tính
+trong database; A/I/S/Z/r/PNA và các đặc trưng nâng cao không nhập tay.
+Bản ghi legacy chưa sửa vẫn giữ Iy/Iz/J và hệ trục nguồn.
 
 Vue → Laravel (session, CSRF, throttle) → FastAPI → engine Python. Engine là
 dịch vụ stateless, không ghi database. Nếu engine dừng, API tính trả 503 và
@@ -172,8 +182,8 @@ thư viện đã lưu vẫn đọc được. FastAPI không mở port public tro
 
 Bản GitHub Pages dùng calculator TypeScript riêng để tính trong trình duyệt;
 được đối chiếu với Python bằng `tests/demo-engine-parity.cjs`. Bản Docker dùng
-Python. Demo giữ nguyên khóa localStorage và dữ liệu thư viện hiện có; tính
-nhanh không tự lưu. Có thể export JSON kết quả. Chưa có PostgreSQL persistence
+Python. Demo giữ nguyên khóa localStorage và dữ liệu thư viện hiện có;
+CRUD lưu snapshot trong localStorage, phép tính nhanh ngoài CRUD không tự lưu. Có thể export JSON kết quả. Chưa có PostgreSQL persistence
 hoặc immutable revision/history cho definition; các phần đó vẫn ở Package 03.
 
 Kiểm tra frontend: `npm run typecheck` và `npm run build` trong frontend/vue.

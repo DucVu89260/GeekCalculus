@@ -1,0 +1,173 @@
+{
+  "schema_version": "1.0",
+  "geometry_model_version": "1.0.0",
+  "geometry_type": "i_section",
+  "geometry_hash": "9461667105767081dcb8d832063299a842921cf96f9b624cd1772c896f0c1dd7",
+  "solver": {
+    "method": "analytical",
+    "version": "1.2.0",
+    "config_hash": "640fd9df4c86e8fbce4f0fcae9e2eab88a0314e94bba23c83d9cf269f4cb7ef1"
+  },
+  "units": {
+    "length": "mm",
+    "area": "mm2",
+    "section_modulus": "mm3",
+    "second_moment": "mm4",
+    "torsion_constant": "mm4",
+    "warping_constant": "mm6",
+    "shear_center": "mm",
+    "effective_shear_area": "mm2",
+    "angle": "deg"
+  },
+  "normalized_input": {
+    "geometry": {
+      "type": "i_section",
+      "geometry_variant": "sharp_corner",
+      "geometry_model_version": "1.0.0",
+      "dimensions": {
+        "depth": 400.0,
+        "top_flange_width": 180.0,
+        "bottom_flange_width": 220.0,
+        "web_thickness": 8.0,
+        "top_flange_thickness": 12.0,
+        "bottom_flange_thickness": 16.0
+      }
+    },
+    "units": "mm",
+    "options": {
+      "solver": "analytical",
+      "include_plastic": true,
+      "include_advanced": true,
+      "rectangle_j_relative_tolerance": 1e-10,
+      "rectangle_j_max_terms": 10000,
+      "required_properties": []
+    }
+  },
+  "properties": {
+    "geometric": {
+      "area": 8656.0,
+      "perimeter": 1584.0,
+      "centroid_x": 110.0,
+      "centroid_y": 171.0203327171904
+    },
+    "elastic": {
+      "ix": 238217697.7547751,
+      "iy": 20045205.333333336,
+      "ixy": 0.0,
+      "sx_positive": 1040344.32655785,
+      "sx_negative": 1392920.3268988277,
+      "sy_positive": 182229.1393939394,
+      "sy_negative": 182229.1393939394,
+      "rx": 165.8931247923509,
+      "ry": 48.12232820599494
+    },
+    "plastic": {
+      "pna_x": 110.0,
+      "pna_y": 117.0,
+      "zx": 1316568.0,
+      "zy": 296752.0
+    },
+    "principal": {
+      "i_major": 238217697.7547751,
+      "i_minor": 20045205.333333336,
+      "major_axis_angle_degrees": 0.0,
+      "orientation_status": "determinate"
+    }
+  },
+  "advanced": {
+    "torsion_constant_j": {
+      "status": "not_computed",
+      "value": null,
+      "reason": "solver_not_implemented",
+      "method": null
+    },
+    "warping_constant_cw": {
+      "status": "computed",
+      "value": 615931491642.6575,
+      "reason": null,
+      "method": "vlasov_thin_wall_i_section"
+    },
+    "shear_center": {
+      "status": "computed",
+      "value": {
+        "x": 110.0,
+        "y": 120.39275728930902,
+        "offset_x": 0.0,
+        "offset_y": -50.62757542788139
+      },
+      "reason": null,
+      "method": "vlasov_thin_wall_i_section"
+    },
+    "effective_shear_area": {
+      "status": "computed",
+      "value": {
+        "x": 4579.050937621878,
+        "y": 2963.5292434026965
+      },
+      "reason": null,
+      "method": "thin_wall_shear_energy_i_section"
+    }
+  },
+  "diagnostics": {
+    "plastic": {
+      "status": "computed",
+      "method": "area_bisection_with_piecewise_linear_refinement",
+      "arithmetic": "decimal_80_then_float64",
+      "iterations": 78,
+      "area_below": 4328.0,
+      "area_above": 4328.0,
+      "relative_area_imbalance": 0.0
+    },
+    "i_section_advanced": {
+      "status": "computed",
+      "model": "sharp_corner_centerline_thin_wall",
+      "assumptions": [
+        "uniform_homogeneous_material",
+        "flanges_reduced_to_centerlines_for_warping_and_shear_flow",
+        "web_retains_uniform_thickness_over_centerline_depth",
+        "no_fillets_or_local_thick_wall_elasticity",
+        "shear_center_offsets_from_gross_geometric_centroid",
+        "effective_shear_area_is_an_energy_equivalent_thin_wall_estimate"
+      ],
+      "range_failures": [],
+      "centerline_depth": 386.0,
+      "flange_centroidal_inertias_about_y": {
+        "bottom": 14197333.333333334,
+        "top": 5832000.0
+      },
+      "line_area_centroid_y": 171.06386861313868,
+      "line_area_second_moment_ix": 242058321.56690997,
+      "effective_shear_area_energy": {
+        "x_flange_denominator": 87610773333.33333,
+        "y_web_denominator": 19103741293139.79,
+        "y_flange_denominator": 667358037236.4982,
+        "y_total_denominator": 19771099330376.285,
+        "web_quadrature": "three_point_gauss_legendre_exact_for_quartic"
+      }
+    },
+    "intermediate": {
+      "web_clear_depth": 372.0,
+      "bottom_flange_area": 3520.0,
+      "web_area": 2976.0,
+      "top_flange_area": 2160.0,
+      "pna_x": 110.0,
+      "pna_y": 117.0
+    },
+    "bounding_box": {
+      "x_min": 0.0,
+      "y_min": 0.0,
+      "x_max": 220.0,
+      "y_max": 400.0
+    },
+    "assumptions": [
+      "dimensions_in_mm",
+      "xy_plane_x_right_y_up",
+      "bbox_origin_bottom_left",
+      "centroidal_unrotated_inertias",
+      "positive_coordinate_product_ixy",
+      "sharp_corners",
+      "homogeneous_geometric_plastic_properties"
+    ]
+  },
+  "status": "success"
+}

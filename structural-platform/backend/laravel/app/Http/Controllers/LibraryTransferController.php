@@ -29,7 +29,7 @@ class LibraryTransferController extends Controller
                 'exported_at' => now()->toIso8601String(),
                 'materials' => $materials->map(fn ($row) => $row->only(['code', 'name_vi', 'name_en', 'category', 'design_code', 'source', 'properties']))->all(),
                 'section_types' => $types->map(fn ($row) => $row->only(['code', 'name_vi', 'name_en', 'category', 'shape', 'design_code', 'region_type']))->all(),
-                'sections' => Section::orderBy('code')->get()->map(fn ($row) => $row->only(['code', 'name_vi', 'name_en', 'source', 'properties']) + ['material_code' => $materialCodes[$row->material_id], 'section_type_code' => $typeCodes[$row->section_type_id]])->all(),
+                'sections' => Section::orderBy('code')->get()->map(fn ($row) => $row->only(['code', 'name_vi', 'name_en', 'source', 'properties', 'section_properties', 'section_properties_calculated_at']) + ['material_code' => $materialCodes[$row->material_id], 'section_type_code' => $typeCodes[$row->section_type_id]])->all(),
             ];
         });
 
@@ -47,7 +47,7 @@ class LibraryTransferController extends Controller
             'archive.exported_at' => 'sometimes|date',
         ];
         foreach (self::MODELS as $resource => $model) {
-            $keys = $resource === 'section_types' ? 'category,shape,design_code,region_type' : ($resource === 'materials' ? 'category,design_code,source,properties' : 'material_code,section_type_code,source,properties');
+            $keys = $resource === 'section_types' ? 'category,shape,design_code,region_type' : ($resource === 'materials' ? 'category,design_code,source,properties' : 'material_code,section_type_code,source,properties,section_properties,section_properties_calculated_at');
             $rules['archive.'.$resource] = 'present|array|list|max:20000';
             $rules['archive.'.$resource.'.*'] = 'required|array:code,name_vi,name_en,'.$keys;
             $rules['archive.'.$resource.'.*.code'] = ['required', 'string', 'max:64', 'regex:/^[A-Za-z0-9_-]+$/', 'distinct:strict'];

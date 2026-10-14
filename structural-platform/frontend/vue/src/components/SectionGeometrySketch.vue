@@ -37,13 +37,20 @@ const drawing = computed(() => {
   const d = props.dimensions ?? {}
   const shape = props.shape
   const diameter = positive(d.diameter, 160)
-  const width = shape === 'circle' || shape === 'circular_hollow' ? diameter : positive(d.width, 160)
+  const legacyWidth = positive(d.width, 160)
+  const topFlangeWidth = positive(d.top_flange_width, legacyWidth)
+  const bottomFlangeWidth = positive(d.bottom_flange_width, legacyWidth)
+  const width = shape === 'circle' || shape === 'circular_hollow' ? diameter : shape === 'i' ? Math.max(topFlangeWidth, bottomFlangeWidth) : legacyWidth
   const height = shape === 'circle' || shape === 'circular_hollow' ? diameter : positive(d.depth, 300)
   const rawTw = positive(d.web_thickness, 12)
-  const rawTf = positive(d.flange_thickness, 14)
+  const rawTf = positive(d.flange_thickness, positive(d.top_flange_thickness, 14))
+  const rawTopTf = positive(d.top_flange_thickness, rawTf)
+  const rawBottomTf = positive(d.bottom_flange_thickness, rawTf)
   const rawThickness = positive(d.thickness, 12)
   const tw = Math.min(rawTw, width * 0.42)
   const tf = Math.min(rawTf, height * 0.35)
+  const topTf = Math.min(rawTopTf, height * 0.35)
+  const bottomTf = Math.min(rawBottomTf, height * 0.35)
   const thickness = Math.min(rawThickness, width * 0.4, height * 0.4)
   const scale = Math.min(138 / width, 126 / height)
   const drawWidth = width * scale
@@ -51,7 +58,7 @@ const drawing = computed(() => {
   const left = 112 + (138 - drawWidth) / 2
   const top = 23 + (128 - drawHeight) / 2
   const x = (value) => left + value * scale
-  const y = (value) => top + value * scale
+  const y = (value) => top + (height - value) * scale
   const center = width / 2
   const pointsPath = (points) => `M ${points.map(([px, py]) => `${x(px)} ${y(py)}`).join(' L ')} Z`
   let outline = ''
@@ -60,10 +67,13 @@ const drawing = computed(() => {
   let innerCircle = null
   let webLabel = null
   let flangeLabel = null
+  let bottomFlangeLabel = null
   let thicknessLabel = null
+  const hasAsymmetricFlangeDimensions = ['top_flange_width', 'bottom_flange_width', 'top_flange_thickness', 'bottom_flange_thickness'].some((key) => Number.isFinite(Number(d[key])) && Number(d[key]) > 0)
   const requiredDimensions = shape === 'circle' ? ['diameter']
     : shape === 'circular_hollow' ? ['diameter', 'thickness']
-      : ['i', 'channel', 'tee'].includes(shape) ? ['depth', 'width', 'web_thickness', 'flange_thickness']
+      : shape === 'i' && hasAsymmetricFlangeDimensions ? ['depth', 'web_thickness', 'top_flange_width', 'bottom_flange_width', 'top_flange_thickness', 'bottom_flange_thickness']
+        : ['i', 'channel', 'tee'].includes(shape) ? ['depth', 'width', 'web_thickness', 'flange_thickness']
         : ['angle', 'rectangular_hollow'].includes(shape) ? ['depth', 'width', 'thickness']
           : shape === 'rectangle' ? ['depth', 'width'] : []
   const allDimensionsPresent = requiredDimensions.length > 0 && requiredDimensions.every((key) => Number.isFinite(Number(d[key])) && Number(d[key]) > 0)
@@ -72,9 +82,10 @@ const drawing = computed(() => {
     : shape === 'circular_hollow' ? rawThickness * 2 < diameter
       : shape === 'rectangular_hollow' ? rawThickness * 2 < Math.min(width, height)
         : shape === 'angle' ? rawThickness < Math.min(width, height)
-          : ['i', 'channel'].includes(shape) ? rawTw < width && rawTf * 2 < height
+      : shape === 'i' ? rawTw <= Math.min(topFlangeWidth, bottomFlangeWidth) && rawTopTf + rawBottomTf < height
+        : shape === 'channel' ? rawTw < width && rawTf * 2 < height
             : shape === 'tee' ? rawTw < width && rawTf < height : false
-  const thicknessWasClamped = (['i', 'channel', 'tee'].includes(shape) && (rawTw > width * 0.42 || rawTf > height * 0.35))
+  const thicknessWasClamped = (['i', 'channel', 'tee'].includes(shape) && (rawTw > width * 0.42 || rawTf > height * 0.35 || rawTopTf > height * 0.35 || rawBottomTf > height * 0.35))
     || (['angle', 'rectangular_hollow', 'circular_hollow'].includes(shape) && rawThickness > Math.min(width * 0.4, height * 0.4))
 
   if (shape === 'circle') {
@@ -88,31 +99,35 @@ const drawing = computed(() => {
     outline = `M ${x(0)} ${y(0)} H ${x(width)} V ${y(height)} H ${x(0)} Z`
   } else if (shape === 'rectangular_hollow') {
     outline = `M ${x(0)} ${y(0)} H ${x(width)} V ${y(height)} H ${x(0)} Z`
-    inner = { x: x(thickness), y: y(thickness), width: drawWidth - 2 * thickness * scale, height: drawHeight - 2 * thickness * scale }
+    inner = { x: x(thickness), y: y(height - thickness), width: drawWidth - 2 * thickness * scale, height: drawHeight - 2 * thickness * scale }
     thicknessLabel = featureText('t', d.thickness)
   } else if (shape === 'i') {
-    const topWidth = positive(d.top_flange_width, width)
-    const bottomWidth = positive(d.bottom_flange_width, width)
-    const centerX = width / 2
+    const topWidth = topFlangeWidth
+    const bottomWidth = bottomFlangeWidth
+    const centerX = center
     outline = pointsPath([
-      [centerX - bottomWidth / 2, 0], [centerX + bottomWidth / 2, 0], [centerX + bottomWidth / 2, tf],
-      [centerX + tw / 2, tf], [centerX + tw / 2, height - tf], [centerX + topWidth / 2, height - tf],
-      [centerX + topWidth / 2, height], [centerX - topWidth / 2, height], [centerX - topWidth / 2, height - tf],
-      [centerX - tw / 2, height - tf], [centerX - tw / 2, tf], [centerX - bottomWidth / 2, tf],
+      [centerX - bottomWidth / 2, 0], [centerX + bottomWidth / 2, 0], [centerX + bottomWidth / 2, bottomTf],
+      [centerX + tw / 2, bottomTf], [centerX + tw / 2, height - topTf], [centerX + topWidth / 2, height - topTf],
+      [centerX + topWidth / 2, height], [centerX - topWidth / 2, height], [centerX - topWidth / 2, height - topTf],
+      [centerX - tw / 2, height - topTf], [centerX - tw / 2, bottomTf], [centerX - bottomWidth / 2, bottomTf],
     ])
     webLabel = featureText('tw', d.web_thickness)
-    flangeLabel = featureText('tf', d.flange_thickness)
+    if (Math.abs(rawTopTf - rawBottomTf) < 1e-9) flangeLabel = featureText('tf', d.flange_thickness ?? d.top_flange_thickness)
+    else {
+      flangeLabel = featureText('tft', d.top_flange_thickness)
+      bottomFlangeLabel = featureText('tfb', d.bottom_flange_thickness)
+    }
   } else if (shape === 'channel') {
     outline = pointsPath([[0, 0], [width, 0], [width, tf], [tw, tf], [tw, height - tf], [width, height - tf], [width, height], [0, height]])
     webLabel = featureText('tw', d.web_thickness)
     flangeLabel = featureText('tf', d.flange_thickness)
   } else if (shape === 'tee') {
     const centerX = width / 2
-    outline = pointsPath([[0, 0], [width, 0], [width, tf], [centerX + tw / 2, tf], [centerX + tw / 2, height], [centerX - tw / 2, height], [centerX - tw / 2, tf], [0, tf]])
+    outline = pointsPath([[0, height], [width, height], [width, height - tf], [centerX + tw / 2, height - tf], [centerX + tw / 2, 0], [centerX - tw / 2, 0], [centerX - tw / 2, height - tf], [0, height - tf]])
     webLabel = featureText('tw', d.web_thickness)
     flangeLabel = featureText('tf', d.flange_thickness)
   } else if (shape === 'angle') {
-    outline = pointsPath([[0, 0], [thickness, 0], [thickness, height - thickness], [width, height - thickness], [width, height], [0, height]])
+    outline = pointsPath([[0, 0], [width, 0], [width, thickness], [thickness, thickness], [thickness, height], [0, height]])
     thicknessLabel = featureText('t', d.thickness)
   } else {
     outline = `M ${x(0)} ${y(0)} H ${x(width)} V ${y(height)} H ${x(0)} Z`
@@ -122,8 +137,8 @@ const drawing = computed(() => {
   return {
     left, top, right: left + drawWidth, bottom: top + drawHeight,
     centerX: left + drawWidth / 2, centerY: top + drawHeight / 2,
-    outline, inner, circle, innerCircle, webLabel, flangeLabel, thicknessLabel,
-    horizontalLabel: dimensionText(isCircular ? 'D' : 'b', isCircular ? d.diameter : d.width),
+    outline, inner, circle, innerCircle, webLabel, flangeLabel, bottomFlangeLabel, thicknessLabel,
+    horizontalLabel: dimensionText(isCircular ? 'D' : 'b', isCircular ? d.diameter : width),
     verticalLabel: dimensionText(isCircular ? 'D' : 'h', isCircular ? d.diameter : d.depth),
     hasDimensions: allDimensionsPresent && proportionsValid && !thicknessWasClamped,
   }
@@ -146,6 +161,7 @@ const drawing = computed(() => {
 
       <text v-if="drawing.webLabel" :x="drawing.centerX + 5" :y="drawing.centerY + 3" class="section-geometry-feature-label">{{ drawing.webLabel }}</text>
       <text v-if="drawing.flangeLabel" :x="drawing.right + 6" :y="drawing.top + 15" class="section-geometry-feature-label">{{ drawing.flangeLabel }}</text>
+      <text v-if="drawing.bottomFlangeLabel" :x="drawing.right + 6" :y="drawing.bottom - 7" class="section-geometry-feature-label">{{ drawing.bottomFlangeLabel }}</text>
       <text v-if="drawing.thicknessLabel" :x="drawing.centerX + 7" :y="drawing.centerY + 3" class="section-geometry-feature-label">{{ drawing.thicknessLabel }}</text>
 
       <line x1="83" :x2="drawing.left" :y1="drawing.top" :y2="drawing.top" class="section-geometry-extension" />

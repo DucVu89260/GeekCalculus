@@ -8,11 +8,14 @@ use App\Models\SectionType;
 use App\Models\User;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
+use Tests\Feature\Concerns\SectionPropertyTestSupport;
 use Tests\TestCase;
 
 class LibraryTransferTest extends TestCase
 {
     use RefreshDatabase;
+    use SectionPropertyTestSupport;
 
     protected function setUp(): void
     {
@@ -28,7 +31,7 @@ class LibraryTransferTest extends TestCase
 
     private function section(): array
     {
-        return ['code' => 'verified-rc', 'name_vi' => 'Tiết diện thử 300×500', 'name_en' => 'Test section 300×500', 'material_code' => 'concrete_b25', 'section_type_code' => 'rectangle', 'source' => 'Fixture, not design data', 'properties' => ['width' => 300, 'depth' => 500, 'area' => 150000, 'inertia_y' => 3125000000, 'inertia_z' => 1125000000, 'torsion_constant' => 1000000000, 'elastic_modulus_y' => 12500000, 'elastic_modulus_z' => 7500000, 'shear_area_y' => 125000, 'shear_area_z' => 125000]];
+        return ['code' => 'verified-rc', 'name_vi' => 'Tiết diện thử 300×500', 'name_en' => 'Test section 300×500', 'material_code' => 'concrete_b25', 'section_type_code' => 'rectangle', 'source' => 'Fixture, not design data', 'properties' => ['width' => 300, 'depth' => 500, 'concrete_cover' => 30, 'area_modifier' => .9]];
     }
 
     public function test_transfer_is_admin_only_and_export_excludes_accounts_projects_and_ids(): void
@@ -54,14 +57,24 @@ class LibraryTransferTest extends TestCase
 
     public function test_round_trip_restores_values_and_remaps_foreign_keys_on_another_database(): void
     {
+        $fixture = $this->sectionPropertyFixture();
+        $this->fakeSectionPropertyCalculations([$fixture, $fixture]);
         $archive = $this->archive();
-        $archive['sections'][] = $this->section();
+        $section = $this->section();
+        $section['section_properties'] = ['status' => 'tampered'];
+        $section['section_properties_calculated_at'] = '2000-01-01T00:00:00Z';
+        $section['properties']['area'] = 999999;
+        $section['properties']['inertia_y'] = 888888;
+        $archive['sections'][] = $section;
         $this->postJson('/api/library/import', ['mode' => 'skip', 'archive' => $archive])->assertOk()->assertJsonPath('data.created', 1)->assertJsonPath('data.skipped', 12);
         $archive = $this->archive();
         $originalId = Section::first()->material_id;
         $this->assertSame('concrete_b25', $archive['sections'][0]['material_code']);
         $this->assertArrayNotHasKey('material_id', $archive['sections'][0]);
         $this->assertArrayNotHasKey('computed', $archive['sections'][0]);
+        $this->assertEquals($fixture, $archive['sections'][0]['section_properties']);
+        $this->assertNotSame('2000-01-01T00:00:00Z', $archive['sections'][0]['section_properties_calculated_at']);
+        $this->assertEquals(['width' => 300.0, 'depth' => 500.0, 'concrete_cover' => 30.0, 'area_modifier' => .9], Section::first()->properties);
         Section::query()->delete();
         Material::query()->delete();
         SectionType::query()->delete();
@@ -71,8 +84,10 @@ class LibraryTransferTest extends TestCase
         $this->assertSame(SectionType::where('code', 'rectangle')->value('id'), Section::first()->section_type_id);
         $roundTrip = $this->archive();
         unset($roundTrip['exported_at'], $archive['exported_at']);
+        unset($roundTrip['sections'][0]['section_properties_calculated_at'], $archive['sections'][0]['section_properties_calculated_at']);
         $this->assertEquals($archive, $roundTrip);
-        $this->getJson('/api/sections')->assertJsonStructure(['data' => [['computed' => ['radius_y', 'radius_z']]]]);
+        $this->getJson('/api/sections')->assertJsonStructure(['data' => [['computed' => ['rx', 'ry']]]]);
+        Http::assertSentCount(2);
         $this->getJson('/api/catalog?locale=vi')->assertJsonFragment(['name' => 'Bê tông B25']);
     }
 
@@ -102,9 +117,11 @@ class LibraryTransferTest extends TestCase
         $new['code'] = 'new-but-rolled-back';
         $archive['materials'][] = $new;
         $section = $this->section();
-        $section['properties']['shear_area_y'] = 160000;
+        $section['section_type_code'] = 'channel';
+        $section['material_code'] = 'steel_s235';
+        $section['properties'] = ['depth' => 100, 'width' => 40, 'web_thickness' => 40, 'flange_thickness' => 10];
         $archive['sections'][] = $section;
-        $this->postJson('/api/library/import', ['mode' => 'overwrite', 'archive' => $archive])->assertUnprocessable()->assertJsonValidationErrors('archive.sections.0.properties.shear_area_y');
+        $this->postJson('/api/library/import', ['mode' => 'overwrite', 'archive' => $archive])->assertUnprocessable()->assertJsonValidationErrors('archive.sections.0.properties');
         $after = $this->archive();
         unset($before['exported_at'], $after['exported_at']);
         $this->assertEquals($before, $after);
@@ -112,8 +129,37 @@ class LibraryTransferTest extends TestCase
         $this->assertDatabaseMissing('catalog_option_translations', ['name' => 'Should roll back']);
     }
 
+    public function test_engine_error_on_second_imported_section_rolls_back_prior_section_and_catalog_changes(): void
+    {
+        $before = $this->archive();
+        $archive = $before;
+        $archive['materials'][0]['name_en'] = 'Must roll back after engine error';
+        $archive['sections'][] = array_replace($this->section(), ['code' => 'first-valid-import']);
+        $archive['sections'][] = array_replace($this->section(), ['code' => 'second-engine-failure']);
+
+        config(['sectional.engine_url' => 'http://section-engine.test']);
+        Http::preventStrayRequests();
+        Http::fake([
+            'http://section-engine.test/v1/sections/calculate' => Http::sequence()
+                ->push($this->sectionPropertyFixture(), 200)
+                ->push(['error' => 'solver process failed'], 500),
+        ]);
+
+        $this->postJson('/api/library/import', ['mode' => 'overwrite', 'archive' => $archive])
+            ->assertStatus(503);
+
+        $after = $this->archive();
+        unset($before['exported_at'], $after['exported_at']);
+        $this->assertEquals($before, $after);
+        $this->assertDatabaseMissing('sections', ['code' => 'first-valid-import']);
+        $this->assertDatabaseMissing('sections', ['code' => 'second-engine-failure']);
+        $this->assertDatabaseMissing('materials', ['name_en' => 'Must roll back after engine error']);
+        Http::assertSentCount(2);
+    }
+
     public function test_retyping_referenced_type_is_a_conflict_and_rolls_back_the_batch(): void
     {
+        $this->fakeSectionPropertyCalculations([$this->sectionPropertyFixture()]);
         $archive = $this->archive();
         $archive['sections'][] = $this->section();
         $this->postJson('/api/library/import', ['mode' => 'skip', 'archive' => $archive])->assertOk();

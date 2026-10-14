@@ -12,9 +12,12 @@ def test_health_and_section_type_schemas_are_available():
     response = client.get("/v1/section-types")
     assert response.status_code == 200
     types = response.json()["data"]
-    assert [item["type"] for item in types] == ["rectangle", "circle", "i_section"]
+    assert [item["type"] for item in types] == ["rectangle", "circle", "i_section", "rectangular_hollow", "circular_hollow", "channel", "tee", "angle"]
     rectangle = types[0]["input_schema"]
     assert rectangle["properties"]["dimensions"]["required"] == ["width", "height"]
+    circular_hollow = next(item for item in types if item["type"] == "circular_hollow")
+    assert circular_hollow["geometry_variant"] == "uniform_wall"
+    assert circular_hollow["input_schema"]["properties"]["dimensions"]["required"] == ["diameter", "thickness"]
 
 
 def test_calculate_returns_the_engine_result_directly():

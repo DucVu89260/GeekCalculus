@@ -133,7 +133,16 @@ class ResultUnits(ResultModel):
 class CalculationResult(ResultModel):
     schema_version: Literal["1.0"] = "1.0"
     geometry_model_version: Literal["1.0.0"] = "1.0.0"
-    geometry_type: Literal["rectangle", "circle", "i_section"]
+    geometry_type: Literal[
+        "rectangle",
+        "circle",
+        "i_section",
+        "rectangular_hollow",
+        "circular_hollow",
+        "channel",
+        "tee",
+        "angle",
+    ]
     geometry_hash: str
     solver: SolverIdentity
     units: ResultUnits = Field(default_factory=ResultUnits)

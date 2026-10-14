@@ -9,11 +9,11 @@ import math
 from pydantic import ValidationError
 
 from .errors import CalculationError, ConvergenceError, UnsupportedPropertyError
-from .models import CalculationOptions, CircleGeometry, Geometry, ISectionGeometry, RectangleGeometry, geometry_definition, geometry_hash, validate_geometry
+from .models import AngleGeometry, CalculationOptions, ChannelGeometry, CircleGeometry, CircularHollowGeometry, Geometry, ISectionGeometry, RectangleGeometry, RectangularHollowGeometry, TeeGeometry, geometry_definition, geometry_hash, validate_geometry
 from .results import AdvancedProperties, AdvancedProperty, CalculationResult, EffectiveShearAreaProperty, EffectiveShearAreaValue, ElasticProperties, GeometricProperties, PlasticProperties, PrincipalProperties, Properties, ShearCenterProperty, ShearCenterValue, SolverIdentity
 from .torsion import rectangle_torsion
 
-SOLVER_VERSION = "1.1.0"
+SOLVER_VERSION = "1.2.0"
 
 
 @dataclass(frozen=True)
@@ -37,6 +37,116 @@ def i_components(geometry: ISectionGeometry) -> tuple[RectangleComponent, ...]:
         RectangleComponent(geometry.web_thickness, web_height, (width - geometry.web_thickness) / 2, geometry.bottom_flange_thickness),
         RectangleComponent(geometry.top_flange_width, geometry.top_flange_thickness, (width - geometry.top_flange_width) / 2, geometry.depth - geometry.top_flange_thickness),
     )
+
+
+def composite_components(geometry: Geometry) -> tuple[RectangleComponent, ...]:
+    """Non-overlapping rectangles for sharp-corner composite sections."""
+    if isinstance(geometry, ISectionGeometry):
+        return i_components(geometry)
+    if isinstance(geometry, RectangularHollowGeometry):
+        inner_height = geometry.height - 2 * geometry.thickness
+        return (
+            RectangleComponent(geometry.width, geometry.thickness, 0.0, 0.0),
+            RectangleComponent(geometry.width, geometry.thickness, 0.0, geometry.height - geometry.thickness),
+            RectangleComponent(geometry.thickness, inner_height, 0.0, geometry.thickness),
+            RectangleComponent(geometry.thickness, inner_height, geometry.width - geometry.thickness, geometry.thickness),
+        )
+    if isinstance(geometry, ChannelGeometry):
+        clear_depth = geometry.depth - 2 * geometry.flange_thickness
+        return (
+            RectangleComponent(geometry.width, geometry.flange_thickness, 0.0, 0.0),
+            RectangleComponent(geometry.web_thickness, clear_depth, 0.0, geometry.flange_thickness),
+            RectangleComponent(geometry.width, geometry.flange_thickness, 0.0, geometry.depth - geometry.flange_thickness),
+        )
+    if isinstance(geometry, TeeGeometry):
+        clear_depth = geometry.depth - geometry.flange_thickness
+        return (
+            RectangleComponent(geometry.web_thickness, clear_depth, (geometry.width - geometry.web_thickness) / 2, 0.0),
+            RectangleComponent(geometry.width, geometry.flange_thickness, 0.0, geometry.depth - geometry.flange_thickness),
+        )
+    if isinstance(geometry, AngleGeometry):
+        clear_depth = geometry.depth - geometry.thickness
+        return (
+            RectangleComponent(geometry.width, geometry.thickness, 0.0, 0.0),
+            RectangleComponent(geometry.thickness, clear_depth, 0.0, geometry.thickness),
+        )
+    raise TypeError("geometry is not a composite rectangle section")
+
+
+def _plastic_axis(parts: tuple[RectangleComponent, ...], *, axis: str) -> tuple[float, float, dict]:
+    """Find one half-area cut and absolute first moment from exact rectangle bands."""
+    with localcontext() as context:
+        context.prec = 80
+        if axis == "y":
+            blocks = [(Decimal(str(part.width)), Decimal(str(part.y)), Decimal(str(part.y + part.height))) for part in parts]
+        else:
+            blocks = [(Decimal(str(part.height)), Decimal(str(part.x)), Decimal(str(part.x + part.width))) for part in parts]
+        total_area = sum((span * (end - start) for span, start, end in blocks), Decimal(0))
+        if total_area <= 0:
+            raise ArithmeticError("section area is outside the numerical range")
+        target = total_area / 2
+
+        def area_below(cut: Decimal) -> Decimal:
+            return sum((span * max(Decimal(0), min(end - start, cut - start)) for span, start, end in blocks), Decimal(0))
+
+        low = min(start for _, start, _ in blocks)
+        high = max(end for _, _, end in blocks)
+        for iteration in range(1, 257):
+            cut = (low + high) / 2
+            below = area_below(cut)
+            if abs(2 * below - total_area) / total_area <= Decimal("1e-24"):
+                break
+            if below < target:
+                if low == cut:
+                    break
+                low = cut
+            else:
+                if high == cut:
+                    break
+                high = cut
+        slope = sum((span for span, start, end in blocks if start <= cut < end), Decimal(0))
+        if slope:
+            cut += (target - area_below(cut)) / slope
+        exported_cut = float(cut)
+        actual_cut = Decimal(str(exported_cut))
+        below = area_below(actual_cut)
+        balance = abs(2 * below - total_area) / total_area
+        if not math.isfinite(exported_cut) or not float(min(start for _, start, _ in blocks)) < exported_cut < float(max(end for _, _, end in blocks)) or balance > Decimal("1e-10"):
+            raise ConvergenceError("Plastic neutral axis did not meet the area-balance tolerance.", details={"axis": axis, "relative_area_imbalance": float(balance)})
+        moments = []
+        for span, start, end in blocks:
+            if actual_cut <= start:
+                moment = span * (end - start) * ((start + end) / 2 - actual_cut)
+            elif actual_cut >= end:
+                moment = span * (end - start) * (actual_cut - (start + end) / 2)
+            else:
+                moment = span * ((actual_cut - start) ** 2 + (end - actual_cut) ** 2) / 2
+            moments.append(moment)
+        return exported_cut, float(sum(moments, Decimal(0))), {
+            "method": "component_area_bisection_with_piecewise_linear_refinement",
+            "arithmetic": "decimal_80_then_float64",
+            "iterations": iteration,
+            "relative_area_imbalance": float(balance),
+        }
+
+
+def _principal_properties(ix: float, iy: float, ixy: float) -> PrincipalProperties:
+    if ix == iy and ixy == 0:
+        return PrincipalProperties(i_major=ix, i_minor=ix, major_axis_angle_degrees=None, orientation_status="indeterminate")
+    scale = max(abs(ix), abs(iy), abs(ixy))
+    mean = (ix / scale + iy / scale) / 2
+    radius = math.hypot((ix / scale - iy / scale) / 2, ixy / scale)
+    major = scale * (mean + radius)
+    with localcontext() as context:
+        context.prec = 80
+        determinant = Decimal(str(ix)) * Decimal(str(iy)) - Decimal(str(ixy)) ** 2
+        minor = float(determinant / Decimal(str(major))) if major > 0 else 0.0
+    if not math.isfinite(major) or not math.isfinite(minor) or major <= 0 or minor <= 0:
+        raise ArithmeticError("principal inertias are outside the numerical range")
+    angle = math.degrees(0.5 * math.atan2(-2 * ixy, ix - iy)) % 180.0
+    if angle >= 180.0 - 1e-12:
+        angle = 0.0
+    return PrincipalProperties(i_major=major, i_minor=minor, major_axis_angle_degrees=angle, orientation_status="determinate")
 
 
 def _plastic_x(geometry: ISectionGeometry) -> tuple[float, float, dict]:
@@ -258,11 +368,16 @@ def calculate(geometry: Geometry, options: CalculationOptions | None = None) -> 
     Raw JSON belongs to validate_geometry/validate_geometry_definition first.
     A quick calculation returns a value only; nothing is persisted or mutated.
     """
-    if not isinstance(geometry, (RectangleGeometry, CircleGeometry, ISectionGeometry)):
+    if not isinstance(geometry, (RectangleGeometry, CircleGeometry, ISectionGeometry, RectangularHollowGeometry, CircularHollowGeometry, ChannelGeometry, TeeGeometry, AngleGeometry)):
         raise TypeError("calculate requires a validated geometry model, not raw JSON")
     geometry = validate_geometry(geometry.model_dump())
     options = CalculationOptions() if options is None else CalculationOptions.model_validate(options)
-    supported = {"warping_constant_cw", "shear_center", "effective_shear_area"} if isinstance(geometry, ISectionGeometry) else {"torsion_constant_j"}
+    if isinstance(geometry, ISectionGeometry):
+        supported = {"warping_constant_cw", "shear_center", "effective_shear_area"}
+    elif isinstance(geometry, (RectangleGeometry, CircleGeometry, CircularHollowGeometry)):
+        supported = {"torsion_constant_j"}
+    else:
+        supported = set()
     unsupported = set(options.required_properties) - supported
     if unsupported:
         raise UnsupportedPropertyError("A required advanced property has no v1 solver.", details={"properties": sorted(unsupported), "reason": "solver_not_implemented"})
@@ -278,6 +393,7 @@ def _calculate_validated(geometry: Geometry, options: CalculationOptions) -> Cal
     intermediates = {}
     diagnostics = {"plastic": {"status": "not_computed", "reason": "not_requested"}}
     plastic = None
+    ixy = 0.0
     if isinstance(geometry, RectangleGeometry):
         width, height = geometry.width, geometry.height
         area = width * height
@@ -296,40 +412,93 @@ def _calculate_validated(geometry: Geometry, options: CalculationOptions) -> Cal
         if options.include_plastic:
             plastic = PlasticProperties(pna_x=centroid_x, pna_y=centroid_y, zx=width**3 / 6, zy=width**3 / 6)
             diagnostics["plastic"] = {"status": "computed", "method": "symmetric_closed_form", "relative_area_imbalance": 0.0}
+    elif isinstance(geometry, CircularHollowGeometry):
+        width = height = geometry.diameter
+        inner_diameter = width - 2 * geometry.thickness
+        area = math.pi * geometry.thickness * (width - geometry.thickness)
+        centroid_x = centroid_y = width / 2
+        perimeter = math.pi * (width + inner_diameter)
+        ix = iy = area * (width**2 + inner_diameter**2) / 16
+        if options.include_plastic:
+            plastic_z = 2 * geometry.thickness * (width**2 + width * inner_diameter + inner_diameter**2) / 6
+            plastic = PlasticProperties(pna_x=centroid_x, pna_y=centroid_y, zx=plastic_z, zy=plastic_z)
+            diagnostics["plastic"] = {"status": "computed", "method": "annulus_symmetric_closed_form", "relative_area_imbalance": 0.0}
     else:
-        parts = i_components(geometry)
-        width, height = max(geometry.top_flange_width, geometry.bottom_flange_width), geometry.depth
+        parts = composite_components(geometry)
+        if isinstance(geometry, ISectionGeometry):
+            width, height = max(geometry.top_flange_width, geometry.bottom_flange_width), geometry.depth
+        elif isinstance(geometry, RectangularHollowGeometry):
+            width, height = geometry.width, geometry.height
+        else:
+            width, height = geometry.width, geometry.depth
         area = math.fsum(part.area for part in parts)
         if not math.isfinite(area) or area <= 0:
             raise ArithmeticError("section area is outside the numerical range")
-        centroid_x = width / 2
+        centroid_x = width / 2 if isinstance(geometry, ISectionGeometry) else math.fsum(part.area * (part.x + part.width / 2) for part in parts) / area
         centroid_y = math.fsum(part.area * (part.y + part.height / 2) for part in parts) / area
         ix = math.fsum(part.width * part.height**3 / 12 + part.area * (part.y + part.height / 2 - centroid_y)**2 for part in parts)
-        iy = math.fsum(part.height * part.width**3 / 12 for part in parts)
-        perimeter = 2 * (geometry.top_flange_width + geometry.bottom_flange_width + height - geometry.web_thickness)
-        intermediates = {"web_clear_depth": parts[1].height, "bottom_flange_area": parts[0].area, "web_area": parts[1].area, "top_flange_area": parts[2].area}
+        iy = math.fsum(part.height * part.width**3 / 12 + part.area * (part.x + part.width / 2 - centroid_x)**2 for part in parts)
+        ixy = math.fsum(part.area * (part.x + part.width / 2 - centroid_x) * (part.y + part.height / 2 - centroid_y) for part in parts)
+        if not isinstance(geometry, AngleGeometry):
+            # The supported non-angle composite definitions are symmetric
+            # about at least one global axis, so their exact product inertia is zero.
+            ixy = 0.0
+        if isinstance(geometry, ISectionGeometry):
+            perimeter = 2 * (geometry.top_flange_width + geometry.bottom_flange_width + height - geometry.web_thickness)
+            intermediates = {"web_clear_depth": parts[1].height, "bottom_flange_area": parts[0].area, "web_area": parts[1].area, "top_flange_area": parts[2].area}
+        elif isinstance(geometry, RectangularHollowGeometry):
+            inner_width = width - 2 * geometry.thickness
+            inner_height = height - 2 * geometry.thickness
+            perimeter = 2 * (width + height) + 2 * (inner_width + inner_height)
+            intermediates = {"inner_width": inner_width, "inner_height": inner_height, "wall_thickness": geometry.thickness}
+        elif isinstance(geometry, ChannelGeometry):
+            perimeter = 2 * height + 4 * width - 2 * geometry.web_thickness
+            intermediates = {"clear_web_depth": parts[1].height, "web_area": parts[1].area, "flange_area_each": parts[0].area}
+        elif isinstance(geometry, TeeGeometry):
+            perimeter = 2 * (width + height)
+            intermediates = {"clear_web_depth": parts[0].height, "web_area": parts[0].area, "flange_area": parts[1].area}
+        else:
+            perimeter = 2 * (width + height)
+            intermediates = {"clear_vertical_leg_depth": parts[1].height, "horizontal_leg_area": parts[0].area, "vertical_leg_area": parts[1].area}
         if options.include_plastic:
-            pna_y, zx, plastic_diagnostics = _plastic_x(geometry)
-            zy = math.fsum(part.height * part.width**2 / 4 for part in parts)
-            plastic = PlasticProperties(pna_x=centroid_x, pna_y=pna_y, zx=zx, zy=zy)
-            intermediates.update(pna_x=centroid_x, pna_y=pna_y)
-            diagnostics["plastic"] = {"status": "computed", **plastic_diagnostics}
+            if isinstance(geometry, ISectionGeometry):
+                pna_y, zx, plastic_diagnostics = _plastic_x(geometry)
+                pna_x = width / 2
+                zy = math.fsum(part.height * part.width**2 / 4 for part in parts)
+                intermediates.update(pna_x=pna_x, pna_y=pna_y)
+                diagnostics["plastic"] = {"status": "computed", **plastic_diagnostics}
+            else:
+                pna_x, zy, plastic_x_diagnostics = _plastic_axis(parts, axis="x")
+                pna_y, zx, plastic_y_diagnostics = _plastic_axis(parts, axis="y")
+                intermediates.update(pna_x=pna_x, pna_y=pna_y)
+                diagnostics["plastic"] = {
+                    "status": "computed",
+                    "method": "component_area_bisection_with_piecewise_linear_refinement",
+                    "x_axis": plastic_x_diagnostics,
+                    "y_axis": plastic_y_diagnostics,
+                }
+            plastic = PlasticProperties(pna_x=pna_x, pna_y=pna_y, zx=zx, zy=zy)
     # Reject an invalid A/I before division, radii, and result serialization.
     if not all(math.isfinite(value) and value > 0 for value in (area, ix, iy)):
         raise ArithmeticError("section area or inertia is outside the numerical range")
     if not 0 < centroid_x < width or not 0 < centroid_y < height:
         raise ArithmeticError("centroid is outside the bounding box")
+    if not math.isfinite(perimeter) or perimeter <= 0:
+        raise ArithmeticError("section perimeter is outside the numerical range")
     geometric = GeometricProperties(area=area, perimeter=perimeter, centroid_x=centroid_x, centroid_y=centroid_y)
-    elastic = ElasticProperties(ix=ix, iy=iy, ixy=0.0, sx_positive=ix / (height - centroid_y), sx_negative=ix / centroid_y, sy_positive=iy / (width - centroid_x), sy_negative=iy / centroid_x, rx=math.sqrt(ix / area), ry=math.sqrt(iy / area))
-    principal = PrincipalProperties(i_major=max(ix, iy), i_minor=min(ix, iy), major_axis_angle_degrees=None if ix == iy else 0.0 if ix > iy else 90.0, orientation_status="indeterminate" if ix == iy else "determinate")
+    elastic = ElasticProperties(ix=ix, iy=iy, ixy=ixy, sx_positive=ix / (height - centroid_y), sx_negative=ix / centroid_y, sy_positive=iy / (width - centroid_x), sy_negative=iy / centroid_x, rx=math.sqrt(ix / area), ry=math.sqrt(iy / area))
+    principal = _principal_properties(ix, iy, ixy)
     want_j = options.include_advanced or "torsion_constant_j" in options.required_properties
     j = _unavailable("not_requested")
     if isinstance(geometry, ISectionGeometry):
         j = _unavailable("solver_not_implemented")
     elif want_j and isinstance(geometry, CircleGeometry):
-        j = AdvancedProperty(status="computed", value=math.pi * geometry.diameter**4 / 32)
+        j = AdvancedProperty(status="computed", value=math.pi * geometry.diameter**4 / 32, method="solid_circle_closed_form")
         diagnostics["torsion"] = {"method": "solid_circle_closed_form"}
-    elif want_j:
+    elif want_j and isinstance(geometry, CircularHollowGeometry):
+        j = AdvancedProperty(status="computed", value=2 * ix, method="circular_hollow_exact_polar_moment")
+        diagnostics["torsion"] = {"method": "circular_hollow_exact_polar_moment"}
+    elif want_j and isinstance(geometry, RectangleGeometry):
         torsion = rectangle_torsion(width, height, relative_tolerance=options.rectangle_j_relative_tolerance, max_terms=options.rectangle_j_max_terms)
         diagnostics["torsion"] = torsion.diagnostics
         if torsion.converged:
@@ -360,6 +529,8 @@ def _calculate_validated(geometry: Geometry, options: CalculationOptions) -> Cal
         cw = _unavailable("solver_not_implemented")
         shear_center = _unavailable_shear_center("solver_not_implemented")
         effective_shear = _unavailable_effective_shear_area("solver_not_implemented")
+        if not isinstance(geometry, (RectangleGeometry, CircleGeometry, CircularHollowGeometry)):
+            j = _unavailable("solver_not_implemented")
     advanced = AdvancedProperties(torsion_constant_j=j, warping_constant_cw=cw, shear_center=shear_center, effective_shear_area=effective_shear)
     diagnostics["intermediate"] = intermediates
     diagnostics["bounding_box"] = {"x_min": 0.0, "y_min": 0.0, "x_max": width, "y_max": height}

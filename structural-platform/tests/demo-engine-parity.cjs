@@ -51,6 +51,14 @@ function successfulCases() {
       depth: 1000, top_flange_width: 100, bottom_flange_width: 100, web_thickness: 1e-10,
       top_flange_thickness: 9.999999999020002, bottom_flange_thickness: 10,
     })],
+    ['rectangular hollow section', request('rectangular_hollow', 'sharp_corner', { width: 100, height: 200, thickness: 5 }, { include_advanced: true })],
+    ['thin rectangular hollow section', request('rectangular_hollow', 'sharp_corner', { width: 100, height: 200, thickness: 1e-9 })],
+    ['circular hollow section with exact polar moment', request('circular_hollow', 'uniform_wall', { diameter: 100, thickness: 5 }, { include_advanced: true })],
+    ['thin circular hollow section', request('circular_hollow', 'uniform_wall', { diameter: 100, thickness: 1e-12 }, { include_advanced: true })],
+    ['channel with left web', request('channel', 'sharp_corner', { depth: 200, width: 75, web_thickness: 8, flange_thickness: 10 }, { include_advanced: true })],
+    ['tee with centered web', request('tee', 'sharp_corner', { depth: 200, width: 100, web_thickness: 8, flange_thickness: 12 })],
+    ['angle with signed product inertia', request('angle', 'sharp_corner', { depth: 200, width: 100, thickness: 10 }, { include_advanced: true })],
+    ['scaled angle', request('angle', 'sharp_corner', { depth: 600, width: 300, thickness: 30 })],
     ['square rectangle torsion', request('rectangle', 'solid', { width: 1, height: 1 }, { include_advanced: true })],
     ['explicit optional torsion non-convergence', request('rectangle', 'solid', { width: 10, height: 10 }, { include_advanced: true, rectangle_j_max_terms: 1 })],
     ['tiny rectangle torsion precision limit', request('rectangle', 'solid', { width: 1, height: 1e-103 }, { include_advanced: true, rectangle_j_relative_tolerance: 1e-300 })],
@@ -71,6 +79,9 @@ function errorCases() {
       depth: 20, top_flange_width: 30, bottom_flange_width: 30, web_thickness: 5,
       top_flange_thickness: 12, bottom_flange_thickness: 12,
     }), 'INVALID_GEOMETRY'],
+    ['impossible rectangular hollow proportions', request('rectangular_hollow', 'sharp_corner', { width: 100, height: 200, thickness: 50 }), 'INVALID_GEOMETRY'],
+    ['impossible channel proportions', request('channel', 'sharp_corner', { depth: 100, width: 40, web_thickness: 40, flange_thickness: 10 }), 'INVALID_GEOMETRY'],
+    ['wrong circular hollow variant', request('circular_hollow', 'sharp_corner', { diameter: 100, thickness: 5 }), 'UNSUPPORTED_VARIANT'],
     ['unsupported required property', request('rectangle', 'solid', { width: 20, height: 10 }, { required_properties: ['shear_center'] }), 'UNSUPPORTED_PROPERTY'],
     ['I/H required unsupported torsion', request('i_section', 'sharp_corner', {
       depth: 400, top_flange_width: 200, bottom_flange_width: 250, web_thickness: 8,
@@ -220,7 +231,7 @@ async function main() {
         `${name}: browser error code`,
       )
     }
-    console.log('Demo sectional calculator parity passed: Python CLI fixtures, I-section PNA edge cases, scaling, torsion convergence/status, normalized result fields, and validation codes.')
+    console.log('Demo sectional calculator parity passed: all eight geometry types, polygonal PNA cases, advanced-property availability, scaling, torsion status, normalized results, and validation codes.')
   } finally {
     fs.rmSync(tempDirectory, { recursive: true, force: true })
   }

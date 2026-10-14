@@ -12,6 +12,110 @@ from decimal import Decimal, localcontext
 import mpmath as mp
 
 
+def _signed_polygon_moments(vertices):
+    """Signed area and raw monomial moments from the shoelace identities."""
+    area2 = first_x = first_y = raw_x = raw_y = raw_xy = Decimal(0)
+    for (x0, y0), (x1, y1) in zip(vertices, vertices[1:] + vertices[:1]):
+        cross = x0 * y1 - x1 * y0
+        area2 += cross
+        first_x += (x0 + x1) * cross / 6
+        first_y += (y0 + y1) * cross / 6
+        raw_x += (x0**2 + x0 * x1 + x1**2) * cross / 12
+        raw_y += (y0**2 + y0 * y1 + y1**2) * cross / 12
+        raw_xy += (2 * x0 * y0 + x0 * y1 + x1 * y0 + 2 * x1 * y1) * cross / 24
+    return area2 / 2, first_x, first_y, raw_x, raw_y, raw_xy
+
+
+def _clip_polygon(vertices, *, axis, limit, keep_less):
+    def coord(point):
+        return point[0 if axis == "x" else 1]
+
+    if not vertices:
+        return []
+    result = []
+    previous = vertices[-1]
+    previous_inside = coord(previous) <= limit if keep_less else coord(previous) >= limit
+    for current in vertices:
+        current_inside = coord(current) <= limit if keep_less else coord(current) >= limit
+        if current_inside != previous_inside:
+            previous_value, current_value = coord(previous), coord(current)
+            ratio = (limit - previous_value) / (current_value - previous_value)
+            other = 1 if axis == "x" else 0
+            crossing = [Decimal(0), Decimal(0)]
+            crossing[0 if axis == "x" else 1] = limit
+            crossing[other] = previous[other] + ratio * (current[other] - previous[other])
+            result.append(tuple(crossing))
+        if current_inside:
+            result.append(current)
+        previous, previous_inside = current, current_inside
+    return result
+
+
+def independent_polygon_section(polygons):
+    """Shoelace gross moments and clipped-polygon area-bisection plastic refs.
+
+    Polygon loops are signed: outer loops are counterclockwise and void loops
+    clockwise. Clipping and shoelace first moments provide a separate reference
+    to the production rectangle-component integration and its axis bisection.
+    """
+    with localcontext() as context:
+        context.prec = 80
+        loops = [[(Decimal(str(x)), Decimal(str(y))) for x, y in polygon] for polygon in polygons]
+
+        def summed_moments(clipped_loops):
+            parts = [_signed_polygon_moments(loop) for loop in clipped_loops if len(loop) >= 3]
+            return tuple(sum((part[index] for part in parts), Decimal(0)) for index in range(6))
+
+        area, first_x, first_y, raw_x, raw_y, raw_xy = summed_moments(loops)
+        cx, cy = first_x / area, first_y / area
+        ix, iy, ixy = raw_y - area * cy**2, raw_x - area * cx**2, raw_xy - area * cx * cy
+        perimeter = Decimal(0)
+        for loop in loops:
+            for (x0, y0), (x1, y1) in zip(loop, loop[1:] + loop[:1]):
+                perimeter += ((x1 - x0)**2 + (y1 - y0)**2).sqrt()
+
+        def pna_and_z(axis):
+            lower_index = 0 if axis == "x" else 1
+            low = min(Decimal(str(point[lower_index])) for polygon in polygons for point in polygon)
+            high = max(Decimal(str(point[lower_index])) for polygon in polygons for point in polygon)
+
+            def clipped_area(cut, keep_less=True):
+                clipped = [_clip_polygon(loop, axis=axis, limit=cut, keep_less=keep_less) for loop in loops]
+                return summed_moments(clipped)[0]
+
+            for _ in range(256):
+                cut = (low + high) / 2
+                below = clipped_area(cut)
+                if abs(2 * below - area) / area <= Decimal("1e-35"):
+                    break
+                if below < area / 2:
+                    low = cut
+                else:
+                    high = cut
+            cut = (low + high) / 2
+            left = summed_moments([_clip_polygon(loop, axis=axis, limit=cut, keep_less=True) for loop in loops])
+            right = summed_moments([_clip_polygon(loop, axis=axis, limit=cut, keep_less=False) for loop in loops])
+            first_index = 1 if axis == "x" else 2
+            z = cut * left[0] - left[first_index] + right[first_index] - cut * right[0]
+            return float(cut), float(z)
+
+        pna_x, zy = pna_and_z("x")
+        pna_y, zx = pna_and_z("y")
+        return {
+            "area": float(area),
+            "perimeter": float(perimeter),
+            "centroid_x": float(cx),
+            "centroid_y": float(cy),
+            "ix": float(ix),
+            "iy": float(iy),
+            "ixy": float(ixy),
+            "pna_x": pna_x,
+            "pna_y": pna_y,
+            "zx": zx,
+            "zy": zy,
+        }
+
+
 def independent_i_reference(dimensions: dict) -> dict:
     with localcontext() as context:
         context.prec = 60

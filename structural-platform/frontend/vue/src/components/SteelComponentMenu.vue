@@ -2,6 +2,7 @@
 import { computed, nextTick, ref } from 'vue'
 import SectionGeometrySketch from './SectionGeometrySketch.vue'
 import { symmetricIStandardHref } from '../modules'
+import { demoMode } from '../api'
 import { SECTION_PROFILES } from '../sectional-properties/catalog.js'
 
 const props = defineProps({ locale: { type: String, required: true } })
@@ -33,6 +34,12 @@ function closeStandards() {
 function openStandard(code) {
   if (code !== 'aisc-360-10') return
   standardChooserOpen.value = false
+  if (demoMode) {
+    // GitHub Pages has no Laravel calculation API; use the standalone parity preview.
+    const url = new URL(`${import.meta.env.BASE_URL}hi-doubly-symmetric-aisc360-10.html`, window.location.origin)
+    window.location.assign(url.href)
+    return
+  }
   window.location.hash = symmetricIStandardHref(code).split('#')[1]
 }
 const text = {

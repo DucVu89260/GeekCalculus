@@ -8,8 +8,82 @@
     <title>GeekCalculus — Structural workspace</title>
     <script type="module" crossorigin src="/GeekCalculus/assets/index-CRFJ7HlQ.js"></script>
     <link rel="stylesheet" crossorigin href="/GeekCalculus/assets/index-DIR68_zC.css">
+  
+  <style>
+    .geek-standards-backdrop{position:fixed;inset:0;z-index:10000;background:rgba(18,35,57,.63);display:flex;align-items:center;justify-content:center;padding:18px;font-family:Calibri,"Segoe UI",Arial,sans-serif}
+    .geek-standards-dialog{background:#fbfaf7;color:#233b57;border:1px solid #bdc8d2;border-radius:16px;max-width:680px;width:100%;padding:24px;box-shadow:0 30px 80px #13284244}
+    .geek-standards-head{display:flex;justify-content:space-between;gap:14px}
+    .geek-standards-head h2{font-size:24px;margin:9px 0}
+    .geek-standards-head p{font-size:15px;color:#60778e;margin:8px 0 0}
+    .geek-standards-kicker{font-size:12px;font-weight:700;letter-spacing:.05em;color:#46778b}
+    .geek-standards-close{height:40px;width:40px;border:1px solid #cad4df;border-radius:8px;background:#f1f3f5;color:#244968;font-size:26px}
+    .geek-standards-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:24px}
+    .geek-standards-options button{display:flex;justify-content:space-between;align-items:center;min-height:100px;text-align:left;padding:16px;border:1px solid #bbc9d8;border-radius:10px;background:#f4f3f0;color:#344f6b}
+    .geek-standards-options button strong{font-size:18px}
+    .geek-standards-options button small{display:block;margin-top:8px;font-size:12px}
+    .geek-standards-options button[data-ready]{background:#e4f2f3;border-color:#4e969f;cursor:pointer}
+    .geek-standards-options button[data-ready]:hover,.geek-standards-options button[data-ready]:focus-visible{background:#cde8ec}
+    .geek-standards-options button:disabled{opacity:.56;cursor:not-allowed}
+    .geek-standards-warning{font-size:13px;color:#906422;line-height:1.5}
+    @media(max-width:550px){.geek-standards-options{grid-template-columns:1fr}.geek-standards-options button{min-height:70px}.geek-standards-dialog{padding:16px}}
+  </style>
   </head>
   <body>
     <div id="app"></div>
+  
+  <script>
+  /* GitHub Pages demo navigation shim. Native Vue implementation lives in source. */
+  (function(){
+    const destination = new URL('hi-doubly-symmetric-aisc360-10.html', document.baseURI).href;
+    let overlay = null, previousFocus = null;
+    function close(){
+      if(!overlay) return;
+      overlay.remove();overlay=null;previousFocus?.focus?.();
+    }
+    function choose(){
+      previousFocus=document.activeElement;
+      const isEnglish=document.documentElement.lang==='en';
+      overlay=document.createElement('div');
+      overlay.className='geek-standards-backdrop';
+      overlay.innerHTML=`<section class="geek-standards-dialog" role="dialog" aria-modal="true" aria-label="${isEnglish?'Choose design standard':'Chọn tiêu chuẩn thiết kế'}">
+        <header class="geek-standards-head"><div>
+          <span class="geek-standards-kicker">STEEL DESIGN / COMPONENT / SYMMETRIC I/H</span>
+          <h2>${isEnglish?'Choose design standard':'Chọn tiêu chuẩn thiết kế'}</h2>
+          <p>${isEnglish?'Select the design specification for this section.':'Chọn phiên bản tiêu chuẩn để mở bảng tính cấu kiện I/H đối xứng.'}</p>
+        </div><button class="geek-standards-close" type="button" aria-label="Close">×</button></header>
+        <div class="geek-standards-options">
+          <button data-ready type="button"><span><strong>AISC 360-10</strong><small>Phase 1 · Excel Parity (Preview)</small></span><span>→</span></button>
+          <button disabled type="button"><span><strong>AISC 360-16</strong><small>Coming soon</small></span></button>
+          <button disabled type="button"><span><strong>AISC 360-22</strong><small>Coming soon</small></span></button>
+          <button disabled type="button"><span><strong>EN 1993</strong><small>Coming soon</small></span></button>
+        </div>
+        <p class="geek-standards-warning">${isEnglish?'Engineering warning: AISC 360-10 is a navigation label, the current calculation is an AISC 360-05 Excel parity preview and is not design-certified.':'Lưu ý: AISC 360-10 hiện là lựa chọn giao diện; kết quả vẫn đối chiếu Excel AISC 360-05, chưa được xác nhận dùng thiết kế.'}</p>
+      </section>`;
+      document.body.appendChild(overlay);
+      overlay.querySelector('.geek-standards-close').addEventListener('click',close);
+      overlay.querySelector('[data-ready]').addEventListener('click',()=>window.location.assign(destination));
+      overlay.addEventListener('click',e=>{if(e.target===overlay)close()});
+      overlay.addEventListener('keydown',e=>{
+        if(e.key==='Escape'){e.preventDefault();close()}
+        if(e.key==='Tab'){
+          const controls=[...overlay.querySelectorAll('button:not([disabled])')];
+          const idx=controls.indexOf(document.activeElement);
+          if(e.shiftKey && idx===0){e.preventDefault();controls[controls.length-1].focus()}
+          else if(!e.shiftKey && idx===controls.length-1){e.preventDefault();controls[0].focus()}
+        }
+      });
+      overlay.querySelector('.geek-standards-close').focus();
+    }
+    document.addEventListener('click',e=>{
+      const card=e.target.closest?.('.steel-component-card[data-component="symmetric_i"]');
+      if(!card)return;
+      e.preventDefault();e.stopImmediatePropagation();choose();
+    },true);
+    function deepLinkFallback(){
+      if(location.hash==='#/modules/steel/components/symmetric-i/aisc-360-10')window.location.replace(destination);
+    }
+    window.addEventListener('hashchange',deepLinkFallback);deepLinkFallback();
+  })();
+  <\/script>
   </body>
 </html>

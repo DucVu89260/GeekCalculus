@@ -7,6 +7,7 @@ import SteelDesignView from './SteelDesignView.vue'
 import SectionPropertiesPanel from './SectionPropertiesPanel.vue'
 import LibraryBrowser from './LibraryBrowser.vue'
 import StructureIllustration from './StructureIllustration.vue'
+import ComboGeneratorView from './ComboGeneratorView.vue'
 
 const homeHref = import.meta.env.BASE_URL
 const props = defineProps({ moduleCode: { type: String, required: true }, user: { type: Object, required: true }, isAdmin: Boolean })
@@ -52,6 +53,7 @@ const tools = { concrete: ['beam', 'column', 'slab', 'foundation'], future: ['re
         <p class="pending-note" role="status">{{ t('pending') }}</p>
       </div>
     </section>
+    <ComboGeneratorView v-else-if="currentGroup.code === 'loads' && currentTool.code === 'combo'" :locale="locale" :demo-mode="demoMode" />
     <section v-else-if="currentGroup.code === 'loads'" class="module-panel loading-pending-panel" :data-loading-tool="currentTool.code">
       <StructureIllustration group="loads" :label="t(currentTool.title)" />
       <div class="loading-pending-copy">

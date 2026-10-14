@@ -5,6 +5,7 @@ import { request } from '../api'
 const props = defineProps({
   locale: { type: String, default: 'vi' },
   demoMode: { type: Boolean, default: false },
+  user: { type: Object, required: true },
 })
 const frame = ref(null)
 const frameHeight = ref(1420)
@@ -37,7 +38,7 @@ const labels = {
   },
 }
 const t = key => labels[props.locale]?.[key] ?? labels.vi[key] ?? key
-const source = import.meta.env.BASE_URL + 'combo-generator-v5.html?embed=1'
+const source = import.meta.env.BASE_URL + 'combo-generator-v5.html?embed=1&scope=' + encodeURIComponent(props.user.id)
 function toFrame(type, data = {}) {
   if (!ready.value || !frame.value?.contentWindow) return
   frame.value.contentWindow.postMessage({ type, ...data }, window.location.origin)

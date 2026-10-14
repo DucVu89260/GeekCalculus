@@ -91,7 +91,7 @@ function normalizeSeismicParameters(source){
     return {...def,name,value};
   });
 }
-const TEMPLATE_STORAGE_KEY = 'geekcalculus.combo-generator.templates.v2';
+const TEMPLATE_STORAGE_KEY = 'geekcalculus.combo-generator.templates.v2.' + (new URLSearchParams(location.search).get('scope') || 'local');
 const el = id => document.getElementById(id);
 const formatInt = v => Number(v).toLocaleString('vi-VN');
 const escaped = v => String(v ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

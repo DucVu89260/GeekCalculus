@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ComboGeneratorWorkspaceController;
 use App\Http\Controllers\EngineeringController;
 use App\Http\Controllers\LibraryController;
 use App\Http\Controllers\LibraryTransferController;
@@ -18,6 +19,8 @@ Route::middleware('web')->group(function () {
         Route::prefix('v1')->group(function () {
             Route::post('/sections/calculate', [SectionalCalculationController::class, 'calculate'])->middleware('throttle:60,1');
             Route::get('/section-types', [SectionalCalculationController::class, 'sectionTypes'])->middleware('throttle:60,1');
+            Route::get('/combo-generator/workspace', [ComboGeneratorWorkspaceController::class, 'show']);
+            Route::put('/combo-generator/workspace', [ComboGeneratorWorkspaceController::class, 'update'])->middleware('throttle:20,1');
         });
         Route::get('/catalog', [EngineeringController::class, 'catalog']);
         Route::get('/projects', [EngineeringController::class, 'index']);

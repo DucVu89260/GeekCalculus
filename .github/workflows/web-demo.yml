@@ -51,3 +51,24 @@ jobs:
             git commit -m "build(demo): publish Vue interface [skip ci]"
             git push
           fi
+
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: structural-platform/backend/laravel
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, pdo_sqlite, sqlite3
+          coverage: none
+      - name: Install Laravel dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+      - name: Prepare Laravel test environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+      - name: Test Combo Generator Laravel workspace
+        run: php artisan test --filter=ComboGeneratorWorkspaceTest

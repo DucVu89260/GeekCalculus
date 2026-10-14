@@ -7,12 +7,13 @@ import InterfaceChooser from './components/InterfaceChooser.vue'
 import WorkspaceView from './components/WorkspaceView.vue'
 import AdminConsole from './components/AdminConsole.vue'
 import ModuleHub from './components/ModuleHub.vue'
-import { moduleFromHash } from './modules'
+import { moduleFromHash, moduleDetailFromHash } from './modules'
 
 const locale = ref(localStorage.getItem('geekcalculus-locale') === 'en' ? 'en' : 'vi')
 const user = ref(null)
 const surface = ref('chooser')
 const moduleCode = ref(moduleFromHash())
+const moduleDetail = ref(moduleDetailFromHash())
 const authLoading = ref(true)
 const signingIn = ref(false)
 const authErrorKey = ref('')
@@ -100,6 +101,7 @@ async function signOut() {
 
 function syncModuleRoute() {
   moduleCode.value = moduleFromHash()
+  moduleDetail.value = moduleDetailFromHash()
   if (user.value) {
     if (moduleCode.value) surface.value = 'module'
     else if (surface.value === 'module') surface.value = 'usage'
@@ -115,6 +117,7 @@ function selectInterface(selected) {
   if (selected === 'admin' && !isAdmin.value) return
   window.location.hash = ''
   moduleCode.value = null
+  moduleDetail.value = null
   surface.value = selected
 }
 
@@ -178,6 +181,7 @@ onUnmounted(() => {
     v-else-if="surface === 'module' && moduleCode"
     v-model:locale="locale"
     :module-code="moduleCode"
+    :module-detail="moduleDetail"
     :user="user"
     :is-admin="isAdmin"
     @home="selectInterface('usage')"

@@ -1,8 +1,9 @@
 # GeekCalculus · Structural Platform
 
 Laravel 12 + SQLite + Vue 3/Vite. Trang đăng nhập có ảnh nền kết cấu, nút VI/EN
-và phân quyền **admin/user**. Trang sử dụng gồm năm nhóm chức năng trên nền xanh
-xám dịu; trang quản trị có thư viện kỹ thuật và quản lý tài khoản.
+và phân quyền **admin/user**. Trang sử dụng gồm ba không gian **Steel Structure**,
+**RC Structure**, **Loading** với thẻ minh họa; trang quản trị có thư viện kỹ thuật
+và quản lý tài khoản.
 
 ## Chạy local
 
@@ -370,10 +371,23 @@ Xem [engineering/README.md](engineering/README.md) để chạy và kiểm chứ
 
 ## Các trang chức năng và Steel Design
 
-Năm thẻ chức năng trên trang chính mở **tab trình duyệt mới**. Các trang dùng
-hash URL `#/modules/steel`, `concrete`, `loads`, `library`, `future`
-để chạy được trên GitHub Pages mà không cần server routing. Tab mới có thanh
-điều hướng đủ năm nhóm; các liên kết trên thanh này chuyển trang trong cùng tab.
+Ba thẻ minh họa trên trang chính mở **tab trình duyệt mới**. Các trang dùng
+hash URL để chạy được trên GitHub Pages mà không cần server routing. Tab mới
+có thanh chuyển ba không gian và thanh chức năng riêng của từng nhóm;
+các liên kết bên trong chuyển trang trong cùng tab.
+
+| Không gian | Chức năng | URL |
+| --- | --- | --- |
+| Steel Structure | Steel design | `#/modules/steel` |
+| Steel Structure | Section Properties / Steel Library / Future Lab | `#/modules/steel/section-properties`, `steel/library`, `steel/future` |
+| RC Structure | RC design | `#/modules/concrete` |
+| RC Structure | Section Properties / RC Library / Future Lab | `#/modules/concrete/section-properties`, `concrete/library`, `concrete/future` |
+| Loading | Combo Generator / Wind load / Dead load / Seismic load / Snow load / Temperature load | `#/modules/loads/combo`, `loads/wind`, `loads/dead`, `loads/seismic`, `loads/snow`, `loads/temperature` |
+
+`#/modules/loads` mở Combo Generator. Sáu trang Loading hiện chờ tích hợp,
+chưa tính tải trọng. Dead load dành cho tải theo lớp cấu tạo và sàn Deck.
+Steel/RC Library tái sử dụng thư viện chỉ đọc hiện tại, chưa tách dữ liệu catalog.
+Các bookmark cũ `#/modules/analysis`, `library`, `future` vẫn hoạt động.
 Đăng nhập được chia sẻ giữa các tab; đăng xuất/đổi tài khoản đồng bộ các tab.
 Với Laravel, session vẫn là cookie HttpOnly; không lưu token đăng nhập thật vào
 localStorage. Demo chỉ chia sẻ ID tài khoản mô phỏng trong browser.
@@ -402,19 +416,27 @@ nhưng dữ liệu thực là JPEG; lưu nguyên byte với đuôi `.jpg` để 
 `tests/modules-smoke.cjs` kiểm tra ảnh, hover, mở tab, navigation, danh mục Connection,
 VI/EN, mobile và đăng xuất giữa các tab. Dùng `TEST_DEMO=1` với
 `MODULE_BASE_URL` cho demo, hoặc `AUTH_FIXTURES` riêng cho backend thật.
+`tests/structure-groups-smoke.cjs` kiểm tra riêng ba nhóm, URL, sáu trang tải,
+calculator chung, thư viện chỉ đọc, reload/back, VI/EN và màn hình 320/390 px;
+dùng `STRUCTURE_BASE_URL` để chọn bản demo cần kiểm tra.
+
+Preview H/I đã xuất bản vẫn được giữ nguyên tại
+`frontend/vue/public/hi-doubly-symmetric-aisc360-10.html`.
+Bộ chọn tiêu chuẩn đi kèm chỉ bật khi `VITE_DEMO_MODE=true`, mã nguồn nằm ở
+`frontend/vue/src/demo/standards-preview.js`; build lại Pages sẽ giữ các mục này.
 
 ## Màu nền dịu mắt
 
-Nền ngoài của mọi trang dùng navy nhạt `#cbd5e1`, panel/bảng dùng `#eae5dd`,
-trường nhập `#f1ede6`; nền ấm và dịu ở cả admin và giao diện sử dụng.
-Vùng phụ và hàng xen kẽ dùng `#e3ddd4`, đường viền sáng `#e1e7ef`.
-Vùng nội dung chính của tất cả các trang dùng nền trắng xám ấm `#faf9f6`:
+Nền ngoài của mọi trang dùng navy rất nhạt `#EDF1F6`, panel giấy dùng `#eae5dd`,
+trường nhập và dropdown trắng nhẹ `#FFFEFB` để nổi bật trên panel.
+Vùng phụ dùng `#e3ddd4`, đường viền sáng `#dce3ec`, thanh điều hướng `#e6edf5`.
+Vùng nội dung chính của tất cả các trang dùng nền trắng dịu `#FBFCFE`:
 đăng nhập, chọn giao diện, trang chủ/dự án, Admin, các module và hộp chỉnh sửa.
 Khung trang chủ, Admin và module có bo góc và khoảng cách với nền navy nhạt
 bên ngoài để tăng tương phản; các panel bên trong vẫn giữ nền beige dịu.
 Trang đăng nhập có khung form sáng trên nền navy nhạt, giữ nguyên ảnh cover.
 Khung rộng tối đa 1280 px; dropdown (cả menu Design Code) và thẻ thông số
-vật liệu/tiết diện trong Steel Design dùng cùng nền `#faf9f6`.
+vật liệu/tiết diện trong Steel Design dùng nền sáng; form Sections rộng tối đa 1360 px.
 Navy `#23395d` với chữ trắng vẫn dùng cho hover; các tab đang chọn giữ màu navy.
 Chữ phụ `#4d5966` giữ tương phản trên nền mới. Ảnh cover được giữ nguyên.
 
@@ -424,4 +446,4 @@ Font Calibri, nền sáng bên trong/navy nhạt bên ngoài và hover navy gi�
 
 Bộ dữ liệu cơ học mở rộng được lưu tại `section_properties.mechanics`: đặc trưng quanh trục chính, mô đun uốn có liên kết Ixy, tích phân bậc ba, Wagner, mô đun xoắn/vênh/cắt và hệ số phân bố ứng suất. Xem [package Section Properties](section-properties/README.md) cho định nghĩa/giả thiết; không chứa quy tắc tiêu chuẩn thiết kế.
 
-Section Properties đã bỏ khỏi thanh điều hướng chính và các thẻ trang chủ; dùng tab trong Steel/Concrete Design. URL cũ `#/modules/analysis` vẫn đọc được để giữ bookmark. Minh họa Component được render SVG từ cùng registry/sketch của Section Properties; không phụ thuộc ảnh tải ngoài hoặc CDN.
+Section Properties có mục riêng trong cả Steel Structure và RC Structure, cùng dùng một calculator hình học. URL cũ `#/modules/analysis` vẫn đọc được để giữ bookmark. Minh họa Component được render SVG từ cùng registry/sketch của Section Properties; không phụ thuộc ảnh tải ngoài hoặc CDN.

@@ -32,18 +32,21 @@ const base = process.env.MODULE_BASE_URL || 'http://127.0.0.1:5173'
     assert.equal(digest(await response.body()), digest(fs.readFileSync('frontend/vue/public/structural-hero.jpg')))
     await page.screenshot({ path: '/tmp/geekcalculus-new-cover.png', fullPage: true })
     await signIn(page, { demo })
-    assert.equal(await page.locator('.module-card').count(), 5)
-    const steelLink = page.getByRole('link', { name: /Steel design/i })
-    await navyHover(steelLink, steelLink.locator('strong'))
+    assert.equal(await page.locator('.structure-card').count(), 3)
+    const steelLink = page.locator('.structure-card[href$="/modules/steel"]')
+    await navyHover(steelLink, steelLink.locator('.structure-enter'))
     assert.equal(await steelLink.getAttribute('target'), '_blank')
     const newPage = context.waitForEvent('page')
     await steelLink.click()
     const moduleTab = await newPage
     await moduleTab.getByRole('tab', { name: /^Component/ }).waitFor()
     assert.equal(await moduleTab.evaluate(() => window.opener), null)
-    assert.equal(await moduleTab.locator('.module-navigation a').count(), 5)
-    assert.equal(await moduleTab.locator('.module-navigation a[href$="/modules/analysis"]').count(), 0)
-    assert.equal(await page.locator('.module-card[href$="/modules/analysis"]').count(), 0)
+    assert.deepEqual(await moduleTab.locator('.workspace-group-navigation a').evaluateAll(links => links.map(link => new URL(link.href).hash)), [
+      '#/modules/steel', '#/modules/concrete', '#/modules/loads',
+    ])
+    assert.deepEqual(await moduleTab.locator('.module-navigation a').evaluateAll(links => links.map(link => new URL(link.href).hash)), [
+      '#/modules/steel', '#/modules/steel/section-properties', '#/modules/steel/library', '#/modules/steel/future',
+    ])
     const componentNames = ['Symmetric I/H', 'Asymmetric I/H', 'Channel', 'Angle', 'Tee', 'Double Angle', 'Circle', 'CHS', 'RHS/SHS']
     const componentCards = moduleTab.locator('.steel-component-card')
     assert.deepEqual(await componentCards.locator('strong').allTextContents(), componentNames)
@@ -54,8 +57,18 @@ const base = process.env.MODULE_BASE_URL || 'http://127.0.0.1:5173'
     assert.equal(await componentCards.nth(8).locator('rect.section-geometry-hole').count(), 1, 'RHS/SHS illustration has a hollow core')
     for (const name of componentNames) {
       await moduleTab.getByRole('button', { name, exact: true }).click()
-      await moduleTab.locator('.steel-component-workspace').getByRole('heading', { name, exact: true }).waitFor()
-      assert.equal(await moduleTab.locator('.steel-component-card[aria-pressed="true"]').count(), 1)
+      if (demo && name === 'Symmetric I/H') {
+        const chooser = moduleTab.getByRole('dialog', { name: 'Choose design standard', exact: true })
+        await chooser.waitFor()
+        assert.deepEqual(await chooser.locator('.geek-standards-options strong').allTextContents(), ['AISC 360-10', 'AISC 360-16', 'AISC 360-22', 'EN 1993'])
+        assert.equal(await chooser.locator('.geek-standards-options button').count(), 4)
+        await chooser.getByRole('button', { name: 'Close', exact: true }).click()
+        await chooser.waitFor({ state: 'detached' })
+        assert.equal(await moduleTab.locator('.steel-component-card[aria-pressed="true"]').count(), 0, 'The demo picker leaves component selection to the standard preview')
+      } else {
+        await moduleTab.locator('.steel-component-workspace').getByRole('heading', { name, exact: true }).waitFor()
+        assert.equal(await moduleTab.locator('.steel-component-card[aria-pressed="true"]').count(), 1)
+      }
     }
     await navyHover(componentCards.first(), componentCards.first().locator('strong'))
     await moduleTab.getByRole('button', { name: 'Double Angle', exact: true }).focus()
@@ -124,16 +137,26 @@ const base = process.env.MODULE_BASE_URL || 'http://127.0.0.1:5173'
     await moduleTab.setViewportSize({ width: 390, height: 844 })
     assert.ok(await moduleTab.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'Module mobile layout overflows')
     await moduleTab.screenshot({ path: '/tmp/geekcalculus-steel-mobile.png', fullPage: true })
-    for (const code of ['concrete', 'loads', 'future']) {
-      await moduleTab.locator(`.module-navigation a[href$="/modules/${code}"]`).click()
-      await moduleTab.getByLabel(/^Select a tool/).selectOption({ index: 1 })
-      await moduleTab.getByRole('status').filter({ hasText: 'awaiting implementation' }).waitFor()
-    }
+    await moduleTab.locator('.workspace-group-navigation a[href$="/modules/concrete"]').click()
+    await moduleTab.locator('.module-navigation a[href$="/modules/concrete/section-properties"]').waitFor()
+    await moduleTab.getByRole('status').filter({ hasText: 'awaiting implementation' }).waitFor()
+    assert.equal(await moduleTab.locator('.module-navigation a').count(), 4)
+    await moduleTab.locator('.workspace-group-navigation a[href$="/modules/loads"]').click()
+    await moduleTab.locator('.module-navigation a[href$="/modules/loads/combo"]').waitFor()
+    await moduleTab.getByRole('status').filter({ hasText: 'in development' }).waitFor()
+    assert.equal(await moduleTab.locator('.module-navigation a').count(), 6)
+    await moduleTab.locator('.workspace-group-navigation a[href$="/modules/steel"]').click()
+    await moduleTab.locator('.module-navigation a[href$="/modules/steel/future"]').click()
+    await moduleTab.getByRole('status').filter({ hasText: 'awaiting implementation' }).waitFor()
     const profileIds = ['rectangle', 'circle', 'chs', 'shs_rhs', 'symmetric_i', 'asymmetric_i', 'channel', 'angle', 'tee', 'double_angle']
     for (const code of ['steel', 'concrete']) {
-      await moduleTab.locator(`.module-navigation a[href$="/modules/${code}"]`).click()
-      if (code === 'steel') await moduleTab.getByRole('tab', { name: /^Section properties/ }).click()
-      if (code === 'concrete') await moduleTab.getByRole('tab', { name: 'Section properties', exact: true }).click()
+      if (code === 'steel') {
+        await moduleTab.locator('.workspace-group-navigation a[href$="/modules/steel"]').click()
+        await moduleTab.locator('.module-navigation a[href$="/modules/steel/section-properties"]').click()
+      } else {
+        await moduleTab.locator('.workspace-group-navigation a[href$="/modules/concrete"]').click()
+        await moduleTab.locator('.module-navigation a[href$="/modules/concrete/section-properties"]').click()
+      }
       const panel = moduleTab.locator('.section-properties-panel')
       await panel.waitFor({ state: 'visible' })
       assert.equal(await moduleTab.locator('.geometry-workbench').count(), 0, 'Only the shared calculator should be live.')
@@ -156,7 +179,7 @@ const base = process.env.MODULE_BASE_URL || 'http://127.0.0.1:5173'
     await moduleTab.goto(new URL('#/modules/analysis', base).href)
     await moduleTab.locator('.section-properties-panel').waitFor({ state: 'visible' })
     assert.equal(await moduleTab.locator('.module-navigation a[href$="/modules/analysis"]').count(), 0, 'Legacy bookmark stays usable without restoring a navigation item')
-    await moduleTab.locator('.module-navigation a[href$="/modules/library"]').click()
+    await moduleTab.locator('.module-navigation a[href$="/modules/steel/library"]').click()
     await moduleTab.getByText('Read only', { exact: true }).waitFor()
     await moduleTab.reload()
     await moduleTab.getByText('Read only', { exact: true }).waitFor()
@@ -169,6 +192,6 @@ const base = process.env.MODULE_BASE_URL || 'http://127.0.0.1:5173'
     await navyHover(page.getByRole('tab', { name: 'Materials', exact: true }))
     await navyHover(page.getByRole('tab', { name: 'Users', exact: true }))
     assert.equal(errors.length, 0, errors.join('\n'))
-    console.log(`${demo ? 'Demo' : 'Laravel'} module checks passed: uploaded cover bytes/MIME, navy/white hover in both interfaces, new browser tab with shared login and no opener, five-module navigation, nine illustrated Component buttons and keyboard/selection state, 53 illustrated Connection workspaces in two groups, reference integrity, search and keyboard/group memory, VI/EN state, placeholders, read-only library, direct reload, cross-tab logout, mobile.`)
+    console.log(`${demo ? 'Demo' : 'Laravel'} module checks passed: uploaded cover bytes/MIME, home group links, three-group switcher, new browser tab with shared login and no opener, Steel/RC and Loading navigation, nine illustrated Component buttons and keyboard/selection state${demo ? ' and four-choice Symmetric I/H standards picker' : ''}, 53 illustrated Connection workspaces in two groups, reference integrity, search and keyboard/group memory, VI/EN state, Future Lab and Loading placeholders, shared Steel/RC section properties, read-only library, legacy routes, direct reload, cross-tab logout, mobile.`)
   } finally { await browser.close() }
 })().catch(error => { console.error(error); process.exitCode = 1 })

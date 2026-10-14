@@ -2,6 +2,7 @@
 import { nextTick, ref } from 'vue'
 import { useWorkspace } from '../composables/useWorkspace'
 import { moduleGroups as groups, moduleHref } from '../modules'
+import StructureIllustration from './StructureIllustration.vue'
 
 defineProps({ user: { type: Object, required: true }, isAdmin: { type: Boolean, default: false } })
 const emit = defineEmits(['sign-out', 'open-admin'])
@@ -38,13 +39,15 @@ async function showProjects() {
     <section id="home" class="platform-card" :aria-label="t('modulesLabel')">
       <div class="platform-heading">
         <h1>GeekCalculus</h1>
-        <p>{{ t('platformSubtitle') }}</p>
-        <svg class="branch-icon" aria-hidden="true" viewBox="0 0 32 32"><path d="M10 7v16m0-6c10 0 12-3 12-10"/><circle cx="10" cy="24" r="3"/><circle cx="22" cy="7" r="3"/></svg>
+        <p>{{ t('structureIntro') }}</p>
+        <h2 class="structure-heading">{{ t('structureChoose') }}</h2>
       </div>
-      <div class="module-grid">
-        <a v-for="group in groups" :key="group.code" class="module-card" :href="moduleHref(group.code)" target="_blank" rel="noopener noreferrer">
+      <div class="structure-grid">
+        <a v-for="(group, index) in groups" :key="group.code" class="module-card structure-card" :href="moduleHref(group.code)" target="_blank" rel="noopener noreferrer">
+          <span class="structure-number" aria-hidden="true">0{{ index + 1 }} / GEEKCALCULUS</span>
+          <StructureIllustration :group="group.code" :label="t(group.title)" />
           <span class="module-copy"><strong>{{ t(group.title) }}</strong><span>{{ t(group.description) }}</span></span>
-          <svg class="module-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14m-5-5 5 5-5 5"/></svg>
+          <span class="structure-enter">{{ t('structureEnter') }}<svg class="module-arrow" aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></span>
         </a>
       </div>
     </section>
@@ -80,3 +83,24 @@ async function showProjects() {
     <footer class="page-footer">{{ t('footerBrand') }}</footer>
   </main>
 </template>
+
+<style scoped>
+.structure-heading { margin-top: 18px; font-size: 21px; }
+.structure-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; margin-top: 28px; }
+.structure-card { position: relative; display: flex; flex-direction: column; align-items: stretch; gap: 18px; min-width: 0; padding: 22px; background: var(--workspace-bg); border-radius: 16px; box-shadow: 0 3px 12px #23395d08; transition: transform .22s ease, box-shadow .22s ease, background .18s ease, color .18s ease; }
+.structure-number { color: var(--muted-ink); font-size: 12px; font-weight: 700; letter-spacing: .1em; }
+.structure-card .structure-illustration { transition: transform .25s ease; }
+.structure-card .module-copy { flex: 1; gap: 8px; }
+.structure-card .module-copy strong { font-size: 25px; color: #23395d; }
+.structure-card .module-copy > span { font-size: 16px; line-height: 1.65; }
+.structure-enter { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-top: 14px; border-top: 1px solid var(--surface-border); color: #365579; font-size: 15px; font-weight: 700; }
+.structure-enter .module-arrow { transition: transform .2s ease; }
+.structure-card:hover, .structure-card:focus-visible { transform: translateY(-6px); background: #23395d; color: #fff; box-shadow: 0 16px 30px #23395d26; }
+.structure-card:hover .structure-illustration, .structure-card:focus-visible .structure-illustration { transform: scale(1.025); }
+.structure-card:is(:hover, :focus-visible) :is(.structure-number, .structure-enter) { color: #fff; }
+.structure-card:is(:hover, :focus-visible) .structure-enter { border-color: #ffffff30; }
+.structure-card:is(:hover, :focus-visible) .module-arrow { transform: translateX(4px); stroke: #fff; }
+@media (max-width: 950px) { .structure-grid { gap: 12px; }.structure-card { padding: 15px; }.structure-card .module-copy strong { font-size: 22px; } }
+@media (max-width: 760px) { .structure-grid { grid-template-columns: 1fr; gap: 16px; }.structure-card { padding: 20px; gap: 14px; }.structure-card .structure-illustration { max-width: 340px; margin: 0 auto; } }
+@media (prefers-reduced-motion: reduce) { .structure-card, .structure-card .structure-illustration, .structure-enter .module-arrow { transition: none; }.structure-card:is(:hover, :focus-visible), .structure-card:is(:hover, :focus-visible) .structure-illustration, .structure-card:is(:hover, :focus-visible) .module-arrow { transform: none; } }
+</style>

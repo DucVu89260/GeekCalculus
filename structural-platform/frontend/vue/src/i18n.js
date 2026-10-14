@@ -76,6 +76,47 @@ export const copy = {
 }
 
 Object.assign(copy.vi, {
+  structureSteel: 'Steel Structure', structureRC: 'RC Structure', structureLoading: 'Loading',
+  structureSteelDescription: 'Kết cấu thép · Thiết kế, đặc trưng tiết diện và thư viện.',
+  structureRCDescription: 'Kết cấu bê tông cốt thép · Thiết kế, tiết diện và thư viện.',
+  structureLoadingDescription: 'Tải trọng · Tổ hợp, gió, tĩnh tải, động đất, tuyết và nhiệt độ.',
+  structureChoose: 'Chọn không gian kỹ thuật', structureIntro: 'Ba không gian chuyên môn, cùng một nền tảng kết cấu.',
+  structureEnter: 'Mở không gian', structureNavigation: 'Không gian kỹ thuật',
+  toolSteelDesign: 'Steel design', toolRCDesign: 'RC design', toolSectionProperties: 'Section Properties',
+  toolSteelLibrary: 'Steel Library', toolRCLibrary: 'RC Library', toolFutureLab: 'Future Lab',
+  toolCombo: 'Combo Generator', toolWind: 'Wind load', toolDead: 'Dead load',
+  toolSeismic: 'Seismic load', toolSnow: 'Snow load', toolTemperature: 'Temperature load',
+  comboDescription: 'Tạo tổ hợp tải trọng. Module đang được phát triển và chuẩn bị tích hợp.',
+  windDescription: 'Xác định tải trọng gió tác dụng lên công trình.',
+  deadDescription: 'Tính tĩnh tải theo các lớp cấu tạo và tĩnh tải của sàn Deck.',
+  seismicDescription: 'Xác định tác động động đất lên kết cấu.',
+  snowDescription: 'Xác định tải trọng tuyết lên mái và công trình.',
+  temperatureDescription: 'Xác định tác động do thay đổi nhiệt độ.',
+  loadingPending: 'Chức năng đang được phát triển. Trang này chưa thực hiện tính toán tải trọng.',
+  integrationPending: 'Đang chuẩn bị tích hợp', toolPending: 'Đang phát triển',
+})
+Object.assign(copy.en, {
+  structureSteel: 'Steel Structure', structureRC: 'RC Structure', structureLoading: 'Loading',
+  structureSteelDescription: 'Steel structures · Design, section properties and library.',
+  structureRCDescription: 'Reinforced concrete · Design, section properties and library.',
+  structureLoadingDescription: 'Loads · Combinations, wind, dead, seismic, snow and temperature.',
+  structureChoose: 'Choose your engineering workspace', structureIntro: 'Three disciplines, one structural engineering platform.',
+  structureEnter: 'Open workspace', structureNavigation: 'Engineering workspaces',
+  toolSteelDesign: 'Steel design', toolRCDesign: 'RC design', toolSectionProperties: 'Section Properties',
+  toolSteelLibrary: 'Steel Library', toolRCLibrary: 'RC Library', toolFutureLab: 'Future Lab',
+  toolCombo: 'Combo Generator', toolWind: 'Wind load', toolDead: 'Dead load',
+  toolSeismic: 'Seismic load', toolSnow: 'Snow load', toolTemperature: 'Temperature load',
+  comboDescription: 'Generate load combinations. This module is in development and awaiting integration.',
+  windDescription: 'Determine wind loads acting on a structure.',
+  deadDescription: 'Calculate dead loads from construction layers and Deck slab dead loads.',
+  seismicDescription: 'Determine earthquake actions on a structure.',
+  snowDescription: 'Determine snow loads on roofs and structures.',
+  temperatureDescription: 'Determine actions caused by temperature changes.',
+  loadingPending: 'This tool is in development. This page does not calculate loads yet.',
+  integrationPending: 'Awaiting integration', toolPending: 'In development',
+})
+
+Object.assign(copy.vi, {
   authVisualKicker: 'NỀN TẢNG KỸ THUẬT KẾT CẤU', authVisualTitle: 'Từ dữ liệu kỹ thuật đến quyết định thiết kế.',
   authVisualSubtitle: 'Không gian làm việc cho nhóm kết cấu: tiêu chuẩn, vật liệu và tiết diện trong cùng một thư viện.',
   authVisualCaption: 'KỸ THUẬT KẾT CẤU · KẾT NỐI THIẾT KẾ VÀ DỮ LIỆU',

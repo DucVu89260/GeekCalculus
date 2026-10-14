@@ -1,0 +1,14 @@
+(function(){const l=new URL("hi-doubly-symmetric-aisc360-10.html",document.baseURI).href;let n=null,s=null;function o(){var e;n&&(n.remove(),n=null,(e=s==null?void 0:s.focus)==null||e.call(s))}function c(){s=document.activeElement;const e=document.documentElement.lang==="en";n=document.createElement("div"),n.className="geek-standards-backdrop",n.innerHTML=`<section class="geek-standards-dialog" role="dialog" aria-modal="true" aria-label="${e?"Choose design standard":"Chọn tiêu chuẩn thiết kế"}">
+        <header class="geek-standards-head"><div>
+          <span class="geek-standards-kicker">STEEL DESIGN / COMPONENT / SYMMETRIC I/H</span>
+          <h2>${e?"Choose design standard":"Chọn tiêu chuẩn thiết kế"}</h2>
+          <p>${e?"Select the design specification for this section.":"Chọn phiên bản tiêu chuẩn để mở bảng tính cấu kiện I/H đối xứng."}</p>
+        </div><button class="geek-standards-close" type="button" aria-label="Close">×</button></header>
+        <div class="geek-standards-options">
+          <button data-ready type="button"><span><strong>AISC 360-10</strong><small>Phase 1 · Excel Parity (Preview)</small></span><span>→</span></button>
+          <button disabled type="button"><span><strong>AISC 360-16</strong><small>Coming soon</small></span></button>
+          <button disabled type="button"><span><strong>AISC 360-22</strong><small>Coming soon</small></span></button>
+          <button disabled type="button"><span><strong>EN 1993</strong><small>Coming soon</small></span></button>
+        </div>
+        <p class="geek-standards-warning">${e?"Engineering warning: AISC 360-10 is a navigation label, the current calculation is an AISC 360-05 Excel parity preview and is not design-certified.":"Lưu ý: AISC 360-10 hiện là lựa chọn giao diện; kết quả vẫn đối chiếu Excel AISC 360-05, chưa được xác nhận dùng thiết kế."}</p>
+      </section>`,document.body.appendChild(n),n.querySelector(".geek-standards-close").addEventListener("click",o),n.querySelector("[data-ready]").addEventListener("click",()=>window.location.assign(l)),n.addEventListener("click",t=>{t.target===n&&o()}),n.addEventListener("keydown",t=>{if(t.key==="Escape"&&(t.preventDefault(),o()),t.key==="Tab"){const a=[...n.querySelectorAll("button:not([disabled])")],i=a.indexOf(document.activeElement);t.shiftKey&&i===0?(t.preventDefault(),a[a.length-1].focus()):!t.shiftKey&&i===a.length-1&&(t.preventDefault(),a[0].focus())}}),n.querySelector(".geek-standards-close").focus()}document.addEventListener("click",e=>{var a,i;(i=(a=e.target).closest)!=null&&i.call(a,'.steel-component-card[data-component="symmetric_i"]')&&(e.preventDefault(),e.stopImmediatePropagation(),c())},!0);function d(){location.hash==="#/modules/steel/components/symmetric-i/aisc-360-10"&&window.location.replace(l)}window.addEventListener("hashchange",d),d()})();

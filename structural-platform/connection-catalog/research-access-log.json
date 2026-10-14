@@ -1,0 +1,30 @@
+{
+  "checked_on": "2026-10-14",
+  "content_retrieved": false,
+  "attempts": [
+    {
+      "url": "https://www.aisc.org/publications/design-guides/",
+      "result": "HTTPS proxy tunnel 403 Forbidden"
+    },
+    {
+      "url": "https://www.aisc.org/globalassets/aisc/publications/standards/a360-22w.pdf",
+      "result": "HTTPS proxy tunnel 403 Forbidden"
+    },
+    {
+      "url": "https://www.aisc.org/globalassets/aisc/publications/standards/a358-22w.pdf",
+      "result": "HTTPS proxy tunnel 403 Forbidden"
+    },
+    {
+      "url": "https://www.aisc.org/steel-solutions-center/engineering-faqs/9-connections/",
+      "result": "HTTPS proxy tunnel 403 Forbidden"
+    },
+    {
+      "url": "https://www.steelconstruction.info/Connections",
+      "result": "HTTPS proxy tunnel 403 Forbidden"
+    },
+    {
+      "url": "https://www.concrete.org/topicsinconcrete/topicdetail/anchoring%20to%20concrete",
+      "result": "HTTPS proxy tunnel 403 Forbidden"
+    }
+  ]
+}

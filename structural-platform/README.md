@@ -379,23 +379,27 @@ Với Laravel, session vẫn là cookie HttpOnly; không lưu token đăng nhậ
 localStorage. Demo chỉ chia sẻ ID tài khoản mô phỏng trong browser.
 
 Steel Design gồm **Component**, **Connection** và **Section properties**:
+
 - Component: 9 nút có hình minh họa SVG từ registry hình học chung: Symmetric I/H,
   Asymmetric I/H, Channel, Angle, Tee, Double Angle, Circle, CHS, RHS/SHS.
   Chọn nút sẽ mở workspace tương ứng đang chờ phát triển. Lựa chọn được giữ khi
   chuyển tab Component/Connection/Section properties hoặc đổi VI/EN.
-- Connection: dầm–cột/nối cấu kiện/bản đế/bản mã; bu lông/hàn/hỗn hợp,
-  cấp bền 4.6/8.8/10.9 và hàn góc/giáp mối.
+- Connection: tách **Bu-lông neo & chân cột** (12 mục) và **Liên kết kết cấu thép**
+  (41 mục), có hình SVG, tìm kiếm VI/EN và workspace chờ phát triển. Danh mục
+  dùng chung tại `connection-catalog/connection-registry.json`; xem
+  [phạm vi, danh sách và nguồn ứng viên](connection-catalog/README.md).
+  Việc rà soát toàn văn Design Guides còn chờ truy cập nguồn; danh mục có trạng thái draft.
 - Section properties: tính đủ 10 profile trong danh sách chung;
   dùng chung với Concrete Design, không cần vật liệu.
 
-Các lựa chọn tiêu chuẩn và liên kết là sơ bộ, chưa có tính toán/kiểm tra thiết
+Các workspace liên kết đang chờ phát triển, chưa có tính toán/kiểm tra thiết
 kế. Những nhóm chưa triển khai có dropdown để chuẩn bị chức năng. Engineering
 Library tiếp tục cho người dùng xem database; sửa dữ liệu trong giao diện admin.
 Hover các tab và thẻ điều hướng dùng nền `#23395d`, chữ trắng ở cả hai giao diện.
 
 Ảnh nền đăng nhập là ảnh cầu do người dùng cung cấp. Tệp tải lên có tên `.svg`
 nhưng dữ liệu thực là JPEG; lưu nguyên byte với đuôi `.jpg` để đúng MIME.
-`tests/modules-smoke.cjs` kiểm tra ảnh, hover, mở tab, navigation, dropdown,
+`tests/modules-smoke.cjs` kiểm tra ảnh, hover, mở tab, navigation, danh mục Connection,
 VI/EN, mobile và đăng xuất giữa các tab. Dùng `TEST_DEMO=1` với
 `MODULE_BASE_URL` cho demo, hoặc `AUTH_FIXTURES` riêng cho backend thật.
 

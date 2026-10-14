@@ -1,0 +1,1439 @@
+{
+  "schema_version": "1.0",
+  "catalog_version": "0.1.0",
+  "review_status": "draft_pending_primary_source_review",
+  "review_note": "Primary AISC/ACI/reference sites returned proxy HTTP 403 in the research environment. This catalog is an engineering planning taxonomy, not a completed all-Design-Guides audit or code-qualified design catalog. Source titles are topic labels; editions, exact titles, clauses and licensed full text require verification.",
+  "groups": [
+    {
+      "id": "anchorage",
+      "name_vi": "Bu-lông neo & chân cột",
+      "name_en": "Anchorage & column bases",
+      "description_vi": "Liên kết thép với bê tông, hệ neo và truyền lực tại chân cột.",
+      "description_en": "Steel-to-concrete connections, anchor systems and column-base load transfer."
+    },
+    {
+      "id": "steel",
+      "name_vi": "Liên kết kết cấu thép",
+      "name_en": "Structural steel connections",
+      "description_vi": "Liên kết thép–thép cho dầm, cột, giằng, giàn và cấu kiện phụ.",
+      "description_en": "Steel-to-steel joints for beams, columns, braces, trusses and secondary members."
+    }
+  ],
+  "families": [
+    {
+      "id": "anchor_fasteners",
+      "group": "anchorage",
+      "name_vi": "Các hệ bu-lông neo",
+      "name_en": "Anchor systems"
+    },
+    {
+      "id": "column_bases",
+      "group": "anchorage",
+      "name_vi": "Chân cột & truyền lực cắt",
+      "name_en": "Column bases & shear transfer"
+    },
+    {
+      "id": "embedded_interfaces",
+      "group": "anchorage",
+      "name_vi": "Chi tiết chôn sẵn",
+      "name_en": "Embedded interfaces"
+    },
+    {
+      "id": "simple_shear",
+      "group": "steel",
+      "name_vi": "Liên kết chịu cắt",
+      "name_en": "Simple shear connections"
+    },
+    {
+      "id": "moment",
+      "group": "steel",
+      "name_vi": "Liên kết mô men",
+      "name_en": "Moment connections"
+    },
+    {
+      "id": "splices",
+      "group": "steel",
+      "name_vi": "Nối cấu kiện",
+      "name_en": "Member splices"
+    },
+    {
+      "id": "bracing_trusses",
+      "group": "steel",
+      "name_vi": "Liên kết giằng & giàn",
+      "name_en": "Bracing & truss connections"
+    },
+    {
+      "id": "hss",
+      "group": "steel",
+      "name_vi": "Liên kết HSS",
+      "name_en": "HSS connections"
+    },
+    {
+      "id": "seismic",
+      "group": "steel",
+      "name_vi": "Cấu hình khung chịu động đất",
+      "name_en": "Seismic moment-frame configurations"
+    },
+    {
+      "id": "secondary",
+      "group": "steel",
+      "name_vi": "Liên kết cấu kiện phụ",
+      "name_en": "Secondary-member attachments"
+    }
+  ],
+  "sources": [
+    {
+      "id": "aisc360",
+      "title": "AISC 360 — Specification for Structural Steel Buildings",
+      "url": "https://www.aisc.org/standards/steel-standards/",
+      "scope": "Steel connections, bolts/welds, connecting elements, HSS connections; edition/clause mapping pending.",
+      "kind": "reference",
+      "full_text_review": "pending",
+      "access_status": "network_access_blocked_or_not_yet_verified"
+    },
+    {
+      "id": "aisc_dg1",
+      "title": "AISC Design Guide 1 — Base connection design",
+      "url": "https://www.aisc.org/publications/design-guides/",
+      "scope": "Base plates, anchor rods, shear transfer and steel-to-concrete interfaces.",
+      "kind": "design_guide",
+      "full_text_review": "pending",
+      "access_status": "network_access_blocked_or_not_yet_verified"
+    },
+    {
+      "id": "aisc_dg4",
+      "title": "AISC Design Guide 4 — Extended end-plate moment connections",
+      "url": "https://www.aisc.org/publications/design-guides/",
+      "scope": "Historical end-plate reference; check alongside DG39.",
+      "kind": "design_guide",
+      "full_text_review": "pending",
+      "access_status": "network_access_blocked_or_not_yet_verified"
+    },
+    {
+      "id": "aisc_dg7",
+      "title": "AISC Design Guide 7 — Industrial buildings",
+      "url": "https://www.aisc.org/publications/design-guides/",
+      "scope": "Industrial framing, secondary supports and anchorage.",
+      "kind": "design_guide",
+      "full_text_review": "pending",
+      "access_status": "network_access_blocked_or_not_yet_verified"
+    },
+    {
+      "id": "aisc_dg8",
+      "title": "AISC Design Guide 8 — Partially restrained composite connections",
+      "url": "https://www.aisc.org/publications/design-guides/",
+      "scope": "PR/composite moment connections; slab participation is a later design input.",
+      "kind": "design_guide",
+      "full_text_review": "pending",
+      "access_status": "network_access_blocked_or_not_yet_verified"
+    },
+    {
+      "id": "aisc_dg12",
+      "title": "AISC Design Guide 12 — Modification of existing welded moment-frame connections",
+      "url": "https://www.aisc.org/publications/design-guides/",
+      "scope": "Seismic retrofit details; not every retrofit is prequalified.",
+      "kind": "design_guide",
+      "full_text_review": "pending",
+      "access_status": "network_access_blocked_or_not_yet_verified"
+    },
+    {
+      "id": "aisc_dg13",
+      "title": "AISC Design Guide 13 — Stiffening wide-flange columns at moment connections",
+      "url": "https://www.aisc.org/publications/design-guides/",
+      "scope": "Continuity plates, column stiffeners and panel-zone details; details within a connection.",
+      "kind": "design_guide",
+      "full_text_review": "pending",
+      "access_status": "network_access_blocked_or_not_yet_verified"
+    },
+    {
+      "id": "aisc_dg16",
+      "title": "AISC Design Guide 16 — Flush and extended multiple-row moment end-plates",
+      "url": "https://www.aisc.org/publications/design-guides/",
+      "scope": "Historical end-plate reference; check alongside DG39.",
+      "kind": "design_guide",
+      "full_text_review": "pending",
+      "access_status": "network_access_blocked_or_not_yet_verified"
+    },
+    {
+      "id": "aisc_dg17",
+      "title": "AISC Design Guide 17 — High-strength bolts",
+      "url": "https://www.aisc.org/publications/design-guides/",
+      "scope": "Bolted connection fundamentals and execution.",
+      "kind": "design_guide",
+      "full_text_review": "pending",
+      "access_status": "network_access_blocked_or_not_yet_verified"
+    },
+    {
+      "id": "aisc_dg21",
+      "title": "AISC Design Guide 21 — Welded connections",
+      "url": "https://www.aisc.org/publications/design-guides/",
+      "scope": "Welded joint details and design fundamentals.",
+      "kind": "design_guide",
+      "full_text_review": "pending",
+      "access_status": "network_access_blocked_or_not_yet_verified"
+    },
+    {
+      "id": "aisc_dg22",
+      "title": "AISC Design Guide 22 — Facade attachments to steel-framed buildings",
+      "url": "https://www.aisc.org/publications/design-guides/",
+      "scope": "Secondary attachment interfaces and support brackets.",
+      "kind": "design_guide",
+      "full_text_review": "pending",
+      "access_status": "network_access_blocked_or_not_yet_verified"
+    },
+    {
+      "id": "aisc_dg24",
+      "title": "AISC Design Guide 24 — HSS connections",
+      "url": "https://www.aisc.org/publications/design-guides/",
+      "scope": "Hollow-section welded nodes and plate/bolt interfaces.",
+      "kind": "design_guide",
+      "full_text_review": "pending",
+      "access_status": "network_access_blocked_or_not_yet_verified"
+    },
+    {
+      "id": "aisc_dg29",
+      "title": "AISC Design Guide 29 — Vertical bracing connections",
+      "url": "https://www.aisc.org/publications/design-guides/",
+      "scope": "Gussets, bracing joints and detailing.",
+      "kind": "design_guide",
+      "full_text_review": "pending",
+      "access_status": "network_access_blocked_or_not_yet_verified"
+    },
+    {
+      "id": "aisc_dg39",
+      "title": "AISC Design Guide 39 — End-plate moment connections",
+      "url": "https://www.aisc.org/publications/design-guides/",
+      "scope": "Current-edition end-plate candidate reference; exact edition and coverage pending.",
+      "kind": "design_guide",
+      "full_text_review": "pending",
+      "access_status": "network_access_blocked_or_not_yet_verified"
+    },
+    {
+      "id": "aisc341",
+      "title": "AISC 341 — Seismic Provisions",
+      "url": "https://www.aisc.org/standards/steel-standards/",
+      "scope": "Seismic requirements; applies only when the selected design scope requires it.",
+      "kind": "reference",
+      "full_text_review": "pending",
+      "access_status": "network_access_blocked_or_not_yet_verified"
+    },
+    {
+      "id": "aisc358",
+      "title": "AISC 358 — Prequalified Connections for Special and Intermediate Steel Moment Frames",
+      "url": "https://www.aisc.org/standards/steel-standards/",
+      "scope": "Prequalified connection configurations and limits; listing here does not establish qualification.",
+      "kind": "reference",
+      "full_text_review": "pending",
+      "access_status": "network_access_blocked_or_not_yet_verified"
+    },
+    {
+      "id": "rcsc",
+      "title": "RCSC Specification for Structural Joints Using High-Strength Bolts",
+      "url": "https://www.boltcouncil.org/",
+      "scope": "Bolt installation, pretension and slip-critical/bearing joint requirements.",
+      "kind": "reference",
+      "full_text_review": "pending",
+      "access_status": "network_access_blocked_or_not_yet_verified"
+    },
+    {
+      "id": "aws_d11",
+      "title": "AWS D1.1 — Structural Welding Code — Steel",
+      "url": "https://www.aws.org/",
+      "scope": "Welding details, procedures and acceptance; edition pending.",
+      "kind": "reference",
+      "full_text_review": "pending",
+      "access_status": "network_access_blocked_or_not_yet_verified"
+    },
+    {
+      "id": "aci318",
+      "title": "ACI 318 — Anchoring to Concrete (Chapter 17)",
+      "url": "https://www.concrete.org/topicsinconcrete/topicdetail/anchoring%20to%20concrete",
+      "scope": "Concrete-side anchorage limit states, not covered solely by AISC 360.",
+      "kind": "reference",
+      "full_text_review": "pending",
+      "access_status": "network_access_blocked_or_not_yet_verified"
+    },
+    {
+      "id": "aci355_2",
+      "title": "ACI 355.2 — Qualification of post-installed mechanical anchors",
+      "url": "https://www.concrete.org/",
+      "scope": "Mechanical anchor qualification; product-specific data required.",
+      "kind": "reference",
+      "full_text_review": "pending",
+      "access_status": "network_access_blocked_or_not_yet_verified"
+    },
+    {
+      "id": "aci355_4",
+      "title": "ACI 355.4 — Qualification of post-installed adhesive anchors",
+      "url": "https://www.concrete.org/",
+      "scope": "Adhesive anchor qualification; product-specific data required.",
+      "kind": "reference",
+      "full_text_review": "pending",
+      "access_status": "network_access_blocked_or_not_yet_verified"
+    },
+    {
+      "id": "en1992_4",
+      "title": "EN 1992-4 — Fastenings for use in concrete",
+      "url": "https://eurocodes.jrc.ec.europa.eu/",
+      "scope": "Concrete fastening reference, including applicable channel/anchor systems; edition/NA pending.",
+      "kind": "reference",
+      "full_text_review": "pending",
+      "access_status": "network_access_blocked_or_not_yet_verified"
+    },
+    {
+      "id": "en1993_1_8",
+      "title": "EN 1993-1-8 — Design of joints",
+      "url": "https://eurocodes.jrc.ec.europa.eu/EN-Eurocodes/eurocode-3-design-steel-structures",
+      "scope": "Alternative joint standard; exact edition and National Annex are future selections.",
+      "kind": "reference",
+      "full_text_review": "pending",
+      "access_status": "network_access_blocked_or_not_yet_verified"
+    },
+    {
+      "id": "as5216",
+      "title": "AS 5216 — Concrete fastenings",
+      "url": "https://store.standards.org.au/",
+      "scope": "Australian concrete fastening reference; edition pending.",
+      "kind": "reference",
+      "full_text_review": "pending",
+      "access_status": "network_access_blocked_or_not_yet_verified"
+    },
+    {
+      "id": "as4100",
+      "title": "AS 4100 — Steel structures",
+      "url": "https://store.standards.org.au/",
+      "scope": "Australian structural steel connection reference; edition pending.",
+      "kind": "reference",
+      "full_text_review": "pending",
+      "access_status": "network_access_blocked_or_not_yet_verified"
+    },
+    {
+      "id": "aisi_s100",
+      "title": "AISI S100 — Cold-formed steel members",
+      "url": "https://www.steel.org/steel-markets/construction/",
+      "scope": "Only for applicable cold-formed secondary-member connections; primary-source URL/edition pending.",
+      "kind": "reference",
+      "full_text_review": "pending",
+      "access_status": "network_access_blocked_or_not_yet_verified"
+    },
+    {
+      "id": "aisc_manual",
+      "title": "AISC Steel Construction Manual",
+      "url": "https://www.aisc.org/publications/steel-construction-manual-resources/",
+      "scope": "Bolts, welds, connecting elements, simple/FR/PR joints, braces, bases, splices, hangers, brackets and crane rails; edition and chapter mapping pending.",
+      "kind": "manual",
+      "full_text_review": "pending",
+      "access_status": "network_access_blocked_or_not_yet_verified"
+    },
+    {
+      "id": "aisc_dg25",
+      "title": "AISC Design Guide 25 — Web-tapered frame design",
+      "url": "https://www.aisc.org/publications/design-guides/",
+      "scope": "Frame configuration reference; connection-specific applicability and exact edition/title to be verified.",
+      "kind": "design_guide",
+      "full_text_review": "pending",
+      "access_status": "network_access_blocked_or_not_yet_verified"
+    }
+  ],
+  "connections": [
+    {
+      "id": "headed_anchor",
+      "group": "anchorage",
+      "family": "anchor_fasteners",
+      "name_vi": "Neo chôn sẵn đầu mũ / bản neo",
+      "name_en": "Cast-in headed / plate anchors",
+      "thumbnail": "headed_anchor",
+      "source_ids": [
+        "aisc_dg1",
+        "aci318",
+        "en1992_4",
+        "as5216"
+      ],
+      "variants": [
+        "Headed rod/bolt",
+        "Straight rod with end plate/nut",
+        "Single anchor / anchor group"
+      ],
+      "status": "planned",
+      "reference_review": "pending_primary_sources"
+    },
+    {
+      "id": "hooked_anchor",
+      "group": "anchorage",
+      "family": "anchor_fasteners",
+      "name_vi": "Neo chôn sẵn chữ L / J",
+      "name_en": "Cast-in L / J anchors",
+      "thumbnail": "hooked_anchor",
+      "source_ids": [
+        "aisc_dg1",
+        "aci318",
+        "en1992_4",
+        "as5216"
+      ],
+      "variants": [
+        "L hook",
+        "J hook",
+        "Group configuration; suitability requires later checks"
+      ],
+      "status": "planned",
+      "reference_review": "pending_primary_sources"
+    },
+    {
+      "id": "expansion_anchor",
+      "group": "anchorage",
+      "family": "anchor_fasteners",
+      "name_vi": "Neo nở cơ học",
+      "name_en": "Expansion anchors",
+      "thumbnail": "expansion_anchor",
+      "source_ids": [
+        "aci318",
+        "aci355_2",
+        "en1992_4",
+        "as5216"
+      ],
+      "variants": [
+        "Torque-controlled",
+        "Displacement-controlled",
+        "Qualified product data"
+      ],
+      "status": "planned",
+      "reference_review": "pending_primary_sources"
+    },
+    {
+      "id": "undercut_anchor",
+      "group": "anchorage",
+      "family": "anchor_fasteners",
+      "name_vi": "Neo khóa cơ học dưới đáy",
+      "name_en": "Undercut anchors",
+      "thumbnail": "undercut_anchor",
+      "source_ids": [
+        "aci318",
+        "aci355_2",
+        "en1992_4",
+        "as5216"
+      ],
+      "variants": [
+        "Pre-drilled undercut",
+        "Self-undercutting",
+        "Qualified product data"
+      ],
+      "status": "planned",
+      "reference_review": "pending_primary_sources"
+    },
+    {
+      "id": "screw_anchor",
+      "group": "anchorage",
+      "family": "anchor_fasteners",
+      "name_vi": "Vít neo bê tông",
+      "name_en": "Concrete screw anchors",
+      "thumbnail": "screw_anchor",
+      "source_ids": [
+        "aci318",
+        "aci355_2",
+        "en1992_4",
+        "as5216"
+      ],
+      "variants": [
+        "Screw geometry and qualification",
+        "Single anchor / group"
+      ],
+      "status": "planned",
+      "reference_review": "pending_primary_sources"
+    },
+    {
+      "id": "adhesive_anchor",
+      "group": "anchorage",
+      "family": "anchor_fasteners",
+      "name_vi": "Neo hóa chất",
+      "name_en": "Adhesive anchors",
+      "thumbnail": "adhesive_anchor",
+      "source_ids": [
+        "aci318",
+        "aci355_4",
+        "en1992_4",
+        "as5216"
+      ],
+      "variants": [
+        "Bonded threaded rod",
+        "Qualified adhesive / installation system"
+      ],
+      "status": "planned",
+      "reference_review": "pending_primary_sources"
+    },
+    {
+      "id": "simple_base",
+      "group": "anchorage",
+      "family": "column_bases",
+      "name_vi": "Chân cột danh nghĩa khớp",
+      "name_en": "Nominally pinned column base",
+      "thumbnail": "simple_base",
+      "source_ids": [
+        "aisc_dg1",
+        "aci318",
+        "en1992_4",
+        "as5216"
+      ],
+      "variants": [
+        "I/H or HSS column",
+        "Grouted bearing",
+        "Anchor layout and actual rotational stiffness to be established"
+      ],
+      "status": "planned",
+      "reference_review": "pending_primary_sources"
+    },
+    {
+      "id": "moment_base",
+      "group": "anchorage",
+      "family": "column_bases",
+      "name_vi": "Chân cột chịu mô men",
+      "name_en": "Moment-resisting column base",
+      "thumbnail": "moment_base",
+      "source_ids": [
+        "aisc_dg1",
+        "aci318",
+        "en1992_4",
+        "as5216"
+      ],
+      "variants": [
+        "Tension/compression couple",
+        "Biaxial moment",
+        "Uplift; anchor layout"
+      ],
+      "status": "planned",
+      "reference_review": "pending_primary_sources"
+    },
+    {
+      "id": "stiffened_base",
+      "group": "anchorage",
+      "family": "column_bases",
+      "name_vi": "Chân cột có sườn gia cường",
+      "name_en": "Stiffened column base",
+      "thumbnail": "stiffened_base",
+      "source_ids": [
+        "aisc_dg1",
+        "aci318",
+        "en1992_4",
+        "as5216"
+      ],
+      "variants": [
+        "Ribs / gussets",
+        "Box / built-up base",
+        "Base plate and anchor checks"
+      ],
+      "status": "planned",
+      "reference_review": "pending_primary_sources"
+    },
+    {
+      "id": "shear_lug",
+      "group": "anchorage",
+      "family": "column_bases",
+      "name_vi": "Chân cột có khóa cắt",
+      "name_en": "Base plate with shear lug",
+      "thumbnail": "shear_lug",
+      "source_ids": [
+        "aisc_dg1",
+        "aci318",
+        "en1992_4",
+        "as5216"
+      ],
+      "variants": [
+        "Shear lug / key",
+        "Bearing into concrete",
+        "Combined anchor and lug force transfer"
+      ],
+      "status": "planned",
+      "reference_review": "pending_primary_sources"
+    },
+    {
+      "id": "embedded_plate",
+      "group": "anchorage",
+      "family": "embedded_interfaces",
+      "name_vi": "Bản thép chôn sẵn có neo",
+      "name_en": "Embedded plate with anchors",
+      "thumbnail": "embedded_plate",
+      "source_ids": [
+        "aisc_dg1",
+        "aci318",
+        "en1992_4"
+      ],
+      "variants": [
+        "Headed studs / anchors",
+        "Welded or bolted steel attachment"
+      ],
+      "status": "planned",
+      "reference_review": "pending_primary_sources"
+    },
+    {
+      "id": "anchor_channel",
+      "group": "anchorage",
+      "family": "embedded_interfaces",
+      "name_vi": "Ray neo chôn sẵn",
+      "name_en": "Cast-in anchor channels",
+      "thumbnail": "anchor_channel",
+      "source_ids": [
+        "en1992_4",
+        "as5216"
+      ],
+      "variants": [
+        "Channel with anchors and channel bolts",
+        "Qualified proprietary product; applicability to be verified"
+      ],
+      "status": "planned",
+      "reference_review": "pending_primary_sources"
+    },
+    {
+      "id": "shear_tab",
+      "group": "steel",
+      "family": "simple_shear",
+      "name_vi": "Bản bụng đơn",
+      "name_en": "Shear tab / fin plate",
+      "thumbnail": "shear_tab",
+      "source_ids": [
+        "aisc360",
+        "rcsc",
+        "aisc_dg17",
+        "en1993_1_8",
+        "as4100"
+      ],
+      "variants": [
+        "Conventional / extended plate",
+        "Beam-to-column / beam-to-beam"
+      ],
+      "status": "planned",
+      "reference_review": "pending_primary_sources"
+    },
+    {
+      "id": "double_angle_shear",
+      "group": "steel",
+      "family": "simple_shear",
+      "name_vi": "Hai thép góc chịu cắt",
+      "name_en": "Double-angle shear connection",
+      "thumbnail": "double_angle_shear",
+      "source_ids": [
+        "aisc360",
+        "rcsc",
+        "aisc_dg17",
+        "en1993_1_8",
+        "as4100"
+      ],
+      "variants": [
+        "Bolted / welded support attachment",
+        "Beam web connection"
+      ],
+      "status": "planned",
+      "reference_review": "pending_primary_sources"
+    },
+    {
+      "id": "single_angle_shear",
+      "group": "steel",
+      "family": "simple_shear",
+      "name_vi": "Một thép góc chịu cắt",
+      "name_en": "Single-angle shear connection",
+      "thumbnail": "single_angle_shear",
+      "source_ids": [
+        "aisc360",
+        "rcsc",
+        "aisc_dg17",
+        "en1993_1_8",
+        "as4100"
+      ],
+      "variants": [
+        "Bolted / welded",
+        "Eccentric force path"
+      ],
+      "status": "planned",
+      "reference_review": "pending_primary_sources"
+    },
+    {
+      "id": "shear_end_plate",
+      "group": "steel",
+      "family": "simple_shear",
+      "name_vi": "Bản đầu dầm chịu cắt",
+      "name_en": "Simple shear end plate",
+      "thumbnail": "shear_end_plate",
+      "source_ids": [
+        "aisc360",
+        "rcsc",
+        "aisc_dg17",
+        "en1993_1_8",
+        "as4100"
+      ],
+      "variants": [
+        "Flexible end plate",
+        "Bolted support / welded beam web"
+      ],
+      "status": "planned",
+      "reference_review": "pending_primary_sources"
+    },
+    {
+      "id": "unstiffened_seat",
+      "group": "steel",
+      "family": "simple_shear",
+      "name_vi": "Gối đỡ không sườn",
+      "name_en": "Unstiffened seated connection",
+      "thumbnail": "unstiffened_seat",
+      "source_ids": [
+        "aisc360",
+        "rcsc",
+        "aisc_dg17",
+        "en1993_1_8",
+        "as4100"
+      ],
+      "variants": [
+        "Seat angle",
+        "Top restraint / stabilizing angle"
+      ],
+      "status": "planned",
+      "reference_review": "pending_primary_sources"
+    },
+    {
+      "id": "stiffened_seat",
+      "group": "steel",
+      "family": "simple_shear",
+      "name_vi": "Gối đỡ có sườn",
+      "name_en": "Stiffened seated connection",
+      "thumbnail": "stiffened_seat",
+      "source_ids": [
+        "aisc360",
+        "rcsc",
+        "aisc_dg17",
+        "en1993_1_8",
+        "as4100"
+      ],
+      "variants": [
+        "Stiffened seat",
+        "Bracket / bearing arrangement"
+      ],
+      "status": "planned",
+      "reference_review": "pending_primary_sources"
+    },
+    {
+      "id": "extended_end_plate",
+      "group": "steel",
+      "family": "moment",
+      "name_vi": "Bản đầu dầm mở rộng",
+      "name_en": "Extended end-plate moment connection",
+      "thumbnail": "extended_end_plate",
+      "source_ids": [
+        "aisc_dg39",
+        "aisc_dg4",
+        "aisc_dg16",
+        "aisc358",
+        "en1993_1_8",
+        "as4100"
+      ],
+      "variants": [
+        "Unstiffened / stiffened",
+        "Multiple bolt rows; applicable prequalification is a separate check"
+      ],
+      "status": "planned",
+      "reference_review": "pending_primary_sources"
+    },
+    {
+      "id": "flush_end_plate",
+      "group": "steel",
+      "family": "moment",
+      "name_vi": "Bản đầu dầm bằng cánh",
+      "name_en": "Flush end-plate moment connection",
+      "thumbnail": "flush_end_plate",
+      "source_ids": [
+        "aisc_dg39",
+        "aisc_dg16",
+        "en1993_1_8",
+        "as4100"
+      ],
+      "variants": [
+        "Multiple bolt rows",
+        "Actual rotational stiffness to be established"
+      ],
+      "status": "planned",
+      "reference_review": "pending_primary_sources"
+    },
+    {
+      "id": "bolted_flange_plate",
+      "group": "steel",
+      "family": "moment",
+      "name_vi": "Bản nối cánh bằng bu-lông",
+      "name_en": "Bolted flange-plate connection",
+      "thumbnail": "bolted_flange_plate",
+      "source_ids": [
+        "aisc360",
+        "aisc358",
+        "rcsc",
+        "en1993_1_8",
+        "as4100"
+      ],
+      "variants": [
+        "Flange plates + web shear connection",
+        "Applicable BFP prequalification limits"
+      ],
+      "status": "planned",
+      "reference_review": "pending_primary_sources"
+    },
+    {
+      "id": "welded_flange_plate",
+      "group": "steel",
+      "family": "moment",
+      "name_vi": "Bản nối cánh hàn",
+      "name_en": "Welded flange-plate connection",
+      "thumbnail": "welded_flange_plate",
+      "source_ids": [
+        "aisc360",
+        "aisc_dg21",
+        "aws_d11",
+        "en1993_1_8",
+        "as4100"
+      ],
+      "variants": [
+        "Flange cover plates",
+        "Web shear attachment"
+      ],
+      "status": "planned",
+      "reference_review": "pending_primary_sources"
+    },
+    {
+      "id": "direct_welded_moment",
+      "group": "steel",
+      "family": "moment",
+      "name_vi": "Hàn trực tiếp cánh dầm",
+      "name_en": "Direct welded moment connection",
+      "thumbnail": "direct_welded_moment",
+      "source_ids": [
+        "aisc360",
+        "aisc_dg21",
+        "aisc_dg13",
+        "aws_d11",
+        "en1993_1_8",
+        "as4100"
+      ],
+      "variants": [
+        "CJP/PJP/detail as applicable",
+        "Continuity plates / panel zone are details, not separate connection families"
+      ],
+      "status": "planned",
+      "reference_review": "pending_primary_sources"
+    },
+    {
+      "id": "flange_angle_moment",
+      "group": "steel",
+      "family": "moment",
+      "name_vi": "Thép góc nối cánh chịu mô men",
+      "name_en": "Flange-angle moment connection",
+      "thumbnail": "flange_angle_moment",
+      "source_ids": [
+        "aisc360",
+        "rcsc",
+        "en1993_1_8",
+        "as4100"
+      ],
+      "variants": [
+        "Top-and-seat flange angles",
+        "Web angles; joint stiffness assessment"
+      ],
+      "status": "planned",
+      "reference_review": "pending_primary_sources"
+    },
+    {
+      "id": "partially_restrained",
+      "group": "steel",
+      "family": "moment",
+      "name_vi": "Liên kết mô men bán cứng",
+      "name_en": "Partially restrained moment connection",
+      "thumbnail": "partially_restrained",
+      "source_ids": [
+        "aisc_dg8",
+        "aisc360",
+        "en1993_1_8",
+        "as4100"
+      ],
+      "variants": [
+        "Steel angle/plate configuration",
+        "Composite participation only if modeled later"
+      ],
+      "status": "planned",
+      "reference_review": "pending_primary_sources"
+    },
+    {
+      "id": "bolted_beam_splice",
+      "group": "steel",
+      "family": "splices",
+      "name_vi": "Nối dầm bằng bu-lông",
+      "name_en": "Bolted beam splice",
+      "thumbnail": "bolted_beam_splice",
+      "source_ids": [
+        "aisc360",
+        "rcsc",
+        "aisc_dg17",
+        "en1993_1_8",
+        "as4100",
+        "aisc_dg21",
+        "aisc_dg24"
+      ],
+      "variants": [
+        "Flange + web cover plates",
+        "End-plate splice variant"
+      ],
+      "status": "planned",
+      "reference_review": "pending_primary_sources"
+    },
+    {
+      "id": "welded_beam_splice",
+      "group": "steel",
+      "family": "splices",
+      "name_vi": "Nối dầm hàn",
+      "name_en": "Welded beam splice",
+      "thumbnail": "welded_beam_splice",
+      "source_ids": [
+        "aisc360",
+        "rcsc",
+        "aisc_dg17",
+        "en1993_1_8",
+        "as4100",
+        "aisc_dg21",
+        "aisc_dg24"
+      ],
+      "variants": [
+        "Butt welds",
+        "Welded cover plates"
+      ],
+      "status": "planned",
+      "reference_review": "pending_primary_sources"
+    },
+    {
+      "id": "bolted_column_splice",
+      "group": "steel",
+      "family": "splices",
+      "name_vi": "Nối cột bằng bu-lông",
+      "name_en": "Bolted column splice",
+      "thumbnail": "bolted_column_splice",
+      "source_ids": [
+        "aisc360",
+        "rcsc",
+        "aisc_dg17",
+        "en1993_1_8",
+        "as4100",
+        "aisc_dg21",
+        "aisc_dg24"
+      ],
+      "variants": [
+        "Bearing / nonbearing",
+        "Flange/web cover plates or end plates"
+      ],
+      "status": "planned",
+      "reference_review": "pending_primary_sources"
+    },
+    {
+      "id": "welded_column_splice",
+      "group": "steel",
+      "family": "splices",
+      "name_vi": "Nối cột hàn",
+      "name_en": "Welded column splice",
+      "thumbnail": "welded_column_splice",
+      "source_ids": [
+        "aisc360",
+        "rcsc",
+        "aisc_dg17",
+        "en1993_1_8",
+        "as4100",
+        "aisc_dg21",
+        "aisc_dg24"
+      ],
+      "variants": [
+        "Bearing / nonbearing",
+        "Butt / cover-plate welds"
+      ],
+      "status": "planned",
+      "reference_review": "pending_primary_sources"
+    },
+    {
+      "id": "hss_splice",
+      "group": "steel",
+      "family": "splices",
+      "name_vi": "Nối cấu kiện HSS",
+      "name_en": "HSS member splice",
+      "thumbnail": "hss_splice",
+      "source_ids": [
+        "aisc360",
+        "rcsc",
+        "aisc_dg17",
+        "en1993_1_8",
+        "as4100",
+        "aisc_dg21",
+        "aisc_dg24"
+      ],
+      "variants": [
+        "CHS or RHS/SHS",
+        "End plate / sleeve / welded variant"
+      ],
+      "status": "planned",
+      "reference_review": "pending_primary_sources"
+    },
+    {
+      "id": "brace_gusset",
+      "group": "steel",
+      "family": "bracing_trusses",
+      "name_vi": "Giằng liên kết bản mã",
+      "name_en": "Brace gusset connection",
+      "thumbnail": "brace_gusset",
+      "source_ids": [
+        "aisc360",
+        "aisc_dg29",
+        "aisc_dg24",
+        "en1993_1_8",
+        "as4100"
+      ],
+      "variants": [
+        "Single/double angles, tee, I/H",
+        "Bolted / welded"
+      ],
+      "status": "planned",
+      "reference_review": "pending_primary_sources"
+    },
+    {
+      "id": "hss_slotted_gusset",
+      "group": "steel",
+      "family": "bracing_trusses",
+      "name_vi": "Giằng HSS xẻ rãnh bản mã",
+      "name_en": "Slotted HSS brace-to-gusset",
+      "thumbnail": "hss_slotted_gusset",
+      "source_ids": [
+        "aisc360",
+        "aisc_dg29",
+        "aisc_dg24",
+        "en1993_1_8",
+        "as4100"
+      ],
+      "variants": [
+        "CHS / RHS",
+        "Slotted tube with welded gusset"
+      ],
+      "status": "planned",
+      "reference_review": "pending_primary_sources"
+    },
+    {
+      "id": "clevis_pin",
+      "group": "steel",
+      "family": "bracing_trusses",
+      "name_vi": "Càng nối & chốt",
+      "name_en": "Clevis / pin connection",
+      "thumbnail": "clevis_pin",
+      "source_ids": [
+        "aisc360",
+        "aisc_dg29",
+        "aisc_dg24",
+        "en1993_1_8",
+        "as4100"
+      ],
+      "variants": [
+        "Pin, lug plates and clevis",
+        "Articulated force transfer"
+      ],
+      "status": "planned",
+      "reference_review": "pending_primary_sources"
+    },
+    {
+      "id": "truss_node",
+      "group": "steel",
+      "family": "bracing_trusses",
+      "name_vi": "Nút giàn / nhiều thanh",
+      "name_en": "Multi-member gusset / truss node",
+      "thumbnail": "truss_node",
+      "source_ids": [
+        "aisc360",
+        "aisc_dg29",
+        "aisc_dg24",
+        "en1993_1_8",
+        "as4100"
+      ],
+      "variants": [
+        "Multiple braces meeting a gusset",
+        "Chord and support attachments"
+      ],
+      "status": "planned",
+      "reference_review": "pending_primary_sources"
+    },
+    {
+      "id": "cross_brace",
+      "group": "steel",
+      "family": "bracing_trusses",
+      "name_vi": "Nút giao hai thanh giằng",
+      "name_en": "Cross-brace intersection",
+      "thumbnail": "cross_brace",
+      "source_ids": [
+        "aisc360",
+        "aisc_dg29",
+        "aisc_dg24",
+        "en1993_1_8",
+        "as4100"
+      ],
+      "variants": [
+        "Connected / unconnected crossing",
+        "Intermediate restraint must be modeled explicitly"
+      ],
+      "status": "planned",
+      "reference_review": "pending_primary_sources"
+    },
+    {
+      "id": "hss_t_y",
+      "group": "steel",
+      "family": "hss",
+      "name_vi": "Nút HSS chữ T / Y",
+      "name_en": "HSS T / Y joint",
+      "thumbnail": "hss_t_y",
+      "source_ids": [
+        "aisc360",
+        "aisc_dg24",
+        "en1993_1_8",
+        "as4100"
+      ],
+      "variants": [
+        "CHS / RHS/SHS",
+        "Single perpendicular / inclined branch"
+      ],
+      "status": "planned",
+      "reference_review": "pending_primary_sources"
+    },
+    {
+      "id": "hss_x",
+      "group": "steel",
+      "family": "hss",
+      "name_vi": "Nút HSS chữ X",
+      "name_en": "HSS X / cross joint",
+      "thumbnail": "hss_x",
+      "source_ids": [
+        "aisc360",
+        "aisc_dg24",
+        "en1993_1_8",
+        "as4100"
+      ],
+      "variants": [
+        "Opposing branches",
+        "CHS / RHS/SHS"
+      ],
+      "status": "planned",
+      "reference_review": "pending_primary_sources"
+    },
+    {
+      "id": "hss_k_n",
+      "group": "steel",
+      "family": "hss",
+      "name_vi": "Nút HSS chữ K / N",
+      "name_en": "HSS K / N joint",
+      "thumbnail": "hss_k_n",
+      "source_ids": [
+        "aisc360",
+        "aisc_dg24",
+        "en1993_1_8",
+        "as4100"
+      ],
+      "variants": [
+        "Gap / overlap",
+        "Branch geometry and chord preload"
+      ],
+      "status": "planned",
+      "reference_review": "pending_primary_sources"
+    },
+    {
+      "id": "hss_longitudinal_plate",
+      "group": "steel",
+      "family": "hss",
+      "name_vi": "Bản dọc trên HSS",
+      "name_en": "Longitudinal plate-to-HSS",
+      "thumbnail": "hss_longitudinal_plate",
+      "source_ids": [
+        "aisc360",
+        "aisc_dg24",
+        "en1993_1_8",
+        "as4100"
+      ],
+      "variants": [
+        "Plate parallel to chord axis",
+        "Tension / shear / moment force path"
+      ],
+      "status": "planned",
+      "reference_review": "pending_primary_sources"
+    },
+    {
+      "id": "hss_transverse_plate",
+      "group": "steel",
+      "family": "hss",
+      "name_vi": "Bản ngang trên HSS",
+      "name_en": "Transverse plate-to-HSS",
+      "thumbnail": "hss_transverse_plate",
+      "source_ids": [
+        "aisc360",
+        "aisc_dg24",
+        "en1993_1_8",
+        "as4100"
+      ],
+      "variants": [
+        "Transverse welded plate",
+        "Local chord-wall effects"
+      ],
+      "status": "planned",
+      "reference_review": "pending_primary_sources"
+    },
+    {
+      "id": "hss_through_plate",
+      "group": "steel",
+      "family": "hss",
+      "name_vi": "Bản xuyên / diaphragm HSS",
+      "name_en": "Through-plate / diaphragm HSS joint",
+      "thumbnail": "hss_through_plate",
+      "source_ids": [
+        "aisc360",
+        "aisc_dg24",
+        "en1993_1_8",
+        "as4100"
+      ],
+      "variants": [
+        "Through plate",
+        "Internal / external diaphragm variants"
+      ],
+      "status": "planned",
+      "reference_review": "pending_primary_sources"
+    },
+    {
+      "id": "hss_face_bolted",
+      "group": "steel",
+      "family": "hss",
+      "name_vi": "Bu-lông liên kết mặt HSS",
+      "name_en": "Bolted HSS-face connection",
+      "thumbnail": "hss_face_bolted",
+      "source_ids": [
+        "aisc360",
+        "aisc_dg24",
+        "en1993_1_8",
+        "as4100"
+      ],
+      "variants": [
+        "Through bolts / sleeve",
+        "One-sided proprietary fasteners require product qualification"
+      ],
+      "status": "planned",
+      "reference_review": "pending_primary_sources"
+    },
+    {
+      "id": "rbs",
+      "group": "steel",
+      "family": "seismic",
+      "name_vi": "Liên kết giảm tiết diện dầm RBS",
+      "name_en": "Reduced beam section (RBS)",
+      "thumbnail": "rbs",
+      "source_ids": [
+        "aisc358",
+        "aisc341",
+        "aisc_dg12",
+        "aws_d11"
+      ],
+      "variants": [
+        "Recognized frame configuration",
+        "Qualification and detailing limits must be checked later"
+      ],
+      "status": "planned",
+      "reference_review": "pending_primary_sources"
+    },
+    {
+      "id": "wuf_w",
+      "group": "steel",
+      "family": "seismic",
+      "name_vi": "Hàn cánh và bụng WUF-W",
+      "name_en": "Welded unreinforced flange–welded web",
+      "thumbnail": "wuf_w",
+      "source_ids": [
+        "aisc358",
+        "aisc341",
+        "aisc_dg12",
+        "aws_d11"
+      ],
+      "variants": [
+        "WUF-W configuration",
+        "Demand-critical welding requirements where applicable"
+      ],
+      "status": "planned",
+      "reference_review": "pending_primary_sources"
+    },
+    {
+      "id": "double_tee_moment",
+      "group": "steel",
+      "family": "seismic",
+      "name_vi": "Hai chữ T nối cánh dầm",
+      "name_en": "Double-tee moment connection",
+      "thumbnail": "double_tee_moment",
+      "source_ids": [
+        "aisc358",
+        "aisc341",
+        "aisc_dg12",
+        "aws_d11"
+      ],
+      "variants": [
+        "Bolted tees at beam flanges",
+        "Applicable qualification limits"
+      ],
+      "status": "planned",
+      "reference_review": "pending_primary_sources"
+    },
+    {
+      "id": "slotted_web",
+      "group": "steel",
+      "family": "seismic",
+      "name_vi": "Cấu hình bụng dầm xẻ rãnh",
+      "name_en": "Slotted-web moment configuration",
+      "thumbnail": "slotted_web",
+      "source_ids": [
+        "aisc358",
+        "aisc341",
+        "aisc_dg12",
+        "aws_d11"
+      ],
+      "variants": [
+        "Documented slotted-web system",
+        "Proprietary/qualification conditions where applicable"
+      ],
+      "status": "planned",
+      "reference_review": "pending_primary_sources"
+    },
+    {
+      "id": "special_moment_system",
+      "group": "steel",
+      "family": "seismic",
+      "name_vi": "Hệ liên kết mô men đặc biệt",
+      "name_en": "Special / proprietary moment system",
+      "thumbnail": "special_moment_system",
+      "source_ids": [
+        "aisc358",
+        "aisc341",
+        "aisc_dg12",
+        "aws_d11"
+      ],
+      "variants": [
+        "AISC 358 systems to be verified against the selected edition",
+        "Manufacturer details and authorized data required"
+      ],
+      "status": "planned",
+      "reference_review": "pending_primary_sources"
+    },
+    {
+      "id": "purlin_girt_cleat",
+      "group": "steel",
+      "family": "secondary",
+      "name_vi": "Liên kết xà gồ / girt bằng cleat",
+      "name_en": "Purlin / girt cleat",
+      "thumbnail": "purlin_girt_cleat",
+      "source_ids": [
+        "aisc_dg7",
+        "aisc360",
+        "aisi_s100",
+        "en1993_1_8",
+        "as4100"
+      ],
+      "variants": [
+        "Hot-rolled or cold-formed member",
+        "Lap/cleat/fastener applicability differs"
+      ],
+      "status": "planned",
+      "reference_review": "pending_primary_sources"
+    },
+    {
+      "id": "support_bracket",
+      "group": "steel",
+      "family": "secondary",
+      "name_vi": "Console đỡ dầm / sàn / cầu thang",
+      "name_en": "Beam / platform support bracket",
+      "thumbnail": "support_bracket",
+      "source_ids": [
+        "aisc_dg7",
+        "aisc360",
+        "aisc_dg21",
+        "en1993_1_8",
+        "as4100"
+      ],
+      "variants": [
+        "Bolted / welded bracket",
+        "Bearing and eccentricity"
+      ],
+      "status": "planned",
+      "reference_review": "pending_primary_sources"
+    },
+    {
+      "id": "facade_attachment",
+      "group": "steel",
+      "family": "secondary",
+      "name_vi": "Liên kết cấu kiện mặt dựng vào thép",
+      "name_en": "Facade-to-steel attachment",
+      "thumbnail": "facade_attachment",
+      "source_ids": [
+        "aisc_dg22",
+        "aisc360",
+        "en1993_1_8",
+        "as4100"
+      ],
+      "variants": [
+        "Steel-supported bracket",
+        "Concrete anchorage variant belongs in Anchorage group"
+      ],
+      "status": "planned",
+      "reference_review": "pending_primary_sources"
+    },
+    {
+      "id": "haunched_frame_joint",
+      "group": "steel",
+      "family": "moment",
+      "name_vi": "Nút khung có haunch / đầu gối",
+      "name_en": "Haunched frame / knee joint",
+      "thumbnail": "haunched_frame_joint",
+      "source_ids": [
+        "aisc_dg7",
+        "aisc_dg25",
+        "aisc360",
+        "en1993_1_8",
+        "as4100"
+      ],
+      "variants": [
+        "Eaves/knee and apex application",
+        "Bolted end plate or welded haunch configuration"
+      ],
+      "status": "planned",
+      "reference_review": "pending_primary_sources"
+    },
+    {
+      "id": "hanger_connection",
+      "group": "steel",
+      "family": "secondary",
+      "name_vi": "Liên kết treo chịu kéo",
+      "name_en": "Hanger / tension connection",
+      "thumbnail": "hanger_connection",
+      "source_ids": [
+        "aisc_manual",
+        "aisc360",
+        "rcsc",
+        "en1993_1_8"
+      ],
+      "variants": [
+        "Hanger plate / tension bolts",
+        "Prying and eccentricity are future checks"
+      ],
+      "status": "planned",
+      "reference_review": "pending_primary_sources"
+    },
+    {
+      "id": "crane_rail_attachment",
+      "group": "steel",
+      "family": "secondary",
+      "name_vi": "Liên kết ray cầu trục",
+      "name_en": "Crane-rail attachment",
+      "thumbnail": "crane_rail_attachment",
+      "source_ids": [
+        "aisc_manual",
+        "aisc_dg7",
+        "aisc360"
+      ],
+      "variants": [
+        "Rail clips / clamps",
+        "Rail splice and restraint configuration"
+      ],
+      "status": "planned",
+      "reference_review": "pending_primary_sources"
+    }
+  ]
+}

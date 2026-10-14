@@ -4,11 +4,12 @@ import { copy } from '../i18n'
 import { moduleGroups, moduleHref, legacySectionPropertiesGroup } from '../modules'
 import { demoMode } from '../api'
 import SteelDesignView from './SteelDesignView.vue'
+import HIDoublySymmetricView from './HIDoublySymmetricView.vue'
 import SectionPropertiesPanel from './SectionPropertiesPanel.vue'
 import LibraryBrowser from './LibraryBrowser.vue'
 
 const homeHref = import.meta.env.BASE_URL
-const props = defineProps({ moduleCode: { type: String, required: true }, user: { type: Object, required: true }, isAdmin: Boolean })
+const props = defineProps({ moduleCode: { type: String, required: true }, moduleDetail: { type: String, default: null }, user: { type: Object, required: true }, isAdmin: Boolean })
 const locale = defineModel('locale', { type: String, required: true })
 const emit = defineEmits(['home', 'open-admin', 'sign-out'])
 const words = {
@@ -38,7 +39,23 @@ function navigate(code) { window.location.hash = `/modules/${code}` }
       <a v-for="group in moduleGroups" :key="group.code" :href="moduleHref(group.code)" :aria-current="moduleCode === group.code ? 'page' : undefined">{{ t(group.title) }}</a>
     </nav>
     <header class="module-heading"><h1>{{ t(currentGroup.title) }}</h1><p>{{ t(currentGroup.description) }}</p></header>
-    <SteelDesignView v-if="moduleCode === 'steel'" :locale="locale" />
+    <section v-if="moduleCode === 'steel' && moduleDetail === 'symmetric-i/aisc-360-10'" class="steel-calculation-page">
+      <nav class="steel-calculation-breadcrumb" aria-label="Calculation breadcrumbs">
+        <a :href="moduleHref('steel')">{{ locale === 'vi' ? 'Steel Design · Component' : 'Steel Design · Component' }}</a>
+        <span aria-hidden="true">›</span>
+        <span>Symmetric I/H</span>
+        <span aria-hidden="true">›</span>
+        <strong>AISC 360-10</strong>
+      </nav>
+      <div class="steel-calculation-heading">
+        <div><h2>Symmetric I/H — AISC 360-10</h2>
+          <p>{{ locale === 'vi' ? 'Bản xem trước Phase 1 · đối chiếu công thức Excel, chưa chứng nhận theo tiêu chuẩn.' : 'Phase 1 preview · Excel formula parity, not code-verified.' }}</p>
+        </div>
+        <a class="steel-calculation-back" :href="moduleHref('steel')">← {{ locale === 'vi' ? 'Chọn tiêu chuẩn khác' : 'Choose another standard' }}</a>
+      </div>
+      <HIDoublySymmetricView :locale="locale" />
+    </section>
+    <SteelDesignView v-else-if="moduleCode === 'steel'" :locale="locale" />
     <SectionPropertiesPanel v-else-if="moduleCode === 'analysis'" :locale="locale" />
     <section v-else-if="moduleCode === 'library'" class="module-panel"><LibraryBrowser :locale="locale" :can-edit="false" /></section>
     <section v-else-if="moduleCode === 'concrete'" class="module-panel concrete-module-panel">
@@ -63,6 +80,17 @@ function navigate(code) { window.location.hash = `/modules/${code}` }
 </template>
 
 <style scoped>
+.steel-calculation-page { padding: 4px 0 20px; }
+.steel-calculation-breadcrumb { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-bottom:14px; color:var(--muted-ink); font-size:14px; }
+.steel-calculation-breadcrumb a { color:#2b698b; text-decoration:underline; text-underline-offset:3px; }
+.steel-calculation-breadcrumb strong { color:#203b58; }
+.steel-calculation-heading { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:18px 20px; margin-bottom:12px; border:1px solid var(--surface-border); background:var(--surface-bg); border-radius:12px; }
+.steel-calculation-heading h2 { margin:0; color:#203b58; font-size:24px; }
+.steel-calculation-heading p { margin:6px 0 0; color:var(--muted-ink); font-size:14px; }
+.steel-calculation-back { flex-shrink:0; font-size:14px; font-weight:700; text-decoration:none; color:#285d7e; }
+.steel-calculation-back:hover { text-decoration:underline; }
+@media(max-width:700px){.steel-calculation-heading {flex-direction:column;align-items:flex-start}.steel-calculation-back{flex-shrink:1}}
+
 .module-page { width: calc(100% - 32px); max-width: 1280px; min-height: calc(100vh - 40px); padding: 0 28px 40px; margin: 16px auto 24px; border: 1px solid var(--surface-border); border-radius: 16px; background: var(--workspace-bg); box-shadow: 0 8px 24px #243b570a; }
 .module-topbar { min-height: 84px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
 .module-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }

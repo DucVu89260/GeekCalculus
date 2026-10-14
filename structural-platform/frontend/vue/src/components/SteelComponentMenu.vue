@@ -1,6 +1,7 @@
 <script setup>
 import { computed, ref } from 'vue'
 import SectionGeometrySketch from './SectionGeometrySketch.vue'
+import HIDoublySymmetricView from './HIDoublySymmetricView.vue'
 import { SECTION_PROFILES } from '../sectional-properties/catalog.js'
 
 const props = defineProps({ locale: { type: String, required: true } })
@@ -33,7 +34,8 @@ const selected = computed(() => components.find(component => component.id === se
         <svg class="steel-component-arrow" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14m-5-5 5 5-5 5" /></svg>
       </button>
     </div>
-    <section v-if="selected" class="steel-component-workspace" :data-component="selected.id" :aria-label="selected.title" aria-live="polite">
+    <HIDoublySymmetricView v-if="selected?.id === 'symmetric_i'" :locale="locale" />
+    <section v-else-if="selected" class="steel-component-workspace" :data-component="selected.id" :aria-label="selected.title" aria-live="polite">
       <span class="steel-component-workspace-image" aria-hidden="true"><SectionGeometrySketch :profile-id="selected.id" :dimensions="selected.profile.default_dimensions" :locale="locale" thumbnail /></span>
       <div><h3>{{ selected.title }}</h3><p>{{ t('pending') }}</p></div>
     </section>

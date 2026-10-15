@@ -80,7 +80,12 @@ test('rolled I web gets special G2.1a coefficients only when qualified',()=>{
 test('mode does not change demand inputs or silently certify legacy strength checks',()=>{
  const a=runtime.calculate(runtime.fixture,'ASD'),b=runtime.calculate(runtime.fixture,'LRFD')
  for(const [i,check] of a.limit_states.entries()){
-  assert.equal(check.demand,b.limit_states[i].demand)
+  if(check.id==='axial_flexure_interaction'){
+   // H1 is a derived utilization and must be recalculated from ASD/LRFD capacities.
+   assert.notEqual(check.demand,b.limit_states[i].demand)
+  }else{
+   assert.equal(check.demand,b.limit_states[i].demand)
+  }
  }
  assert.equal(a.target_standard,'AISC360-10_NOT_VALIDATED')
  assert.ok(a.warnings.some(w=>w.code==='LEGACY_WEAK_AXIS_FE'))

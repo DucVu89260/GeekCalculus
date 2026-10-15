@@ -4,7 +4,7 @@ import { request } from '../api'
 
 const props = defineProps({ locale: { type: String, default: 'vi' }, canEdit: Boolean })
 const families = ref([])
-const selected = ref('')
+const selected = ref(new URLSearchParams(window.location.search).get('standard') || '')
 const detail = ref(null)
 const equations = ref([])
 const search = ref('')
@@ -41,7 +41,7 @@ async function loadEdition() {
     detail.value = a.data; equations.value = b.data; activePage.value = null
   } catch(e) { error.value = e.message || 'Could not load edition.' }
 }
-function goTo(c) { activePage.value = c.pdf_page || null; window.location.hash = '#/modules/steel/library'; }
+function goTo(c) { activePage.value = c.pdf_page || (c.printed_page ? c.printed_page + 56 : null) }
 async function upload() {
   if (!file.value || !props.canEdit || !selected.value) return
   uploading.value = true; error.value = ''

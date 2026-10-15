@@ -6,9 +6,10 @@ import { SECTION_PROFILES } from '../sectional-properties/catalog.js'
 
 const props = defineProps({ locale: { type: String, required: true } })
 
-const selectedId = ref('')
+const craneStandalone = new URLSearchParams(window.location.search).get('component') === 'crane-beam' && new URLSearchParams(window.location.search).get('standard') === 'aisc360-10'
+const selectedId = ref(craneStandalone ? 'crane_beam' : '')
 const standardsDialogOpen = ref(false)
-const craneStandardOpen = ref(false)
+const craneStandardOpen = ref(craneStandalone)
 const closeDialogButton = ref(null)
 let originalTrigger = null
 const designStandards = [
@@ -36,7 +37,15 @@ function closeStandardsDialog() {
 function openDesignStandard(code) {
   if (code !== 'aisc360-10') return
   standardsDialogOpen.value = false
-  if (selectedId.value === 'crane_beam') { craneStandardOpen.value = true; return }
+  if (selectedId.value === 'crane_beam') {
+    const url = new URL(window.location.href)
+    url.searchParams.set('component', 'crane-beam')
+    url.searchParams.set('standard', 'aisc360-10')
+    url.hash = '#/modules/steel'
+    const tab = window.open(url.href, '_blank', 'noopener,noreferrer')
+    if (!tab) window.location.assign(url.href)
+    return
+  }
   // This file is also present in Vite public/, so GitHub Pages and local demo builds agree.
   const path = `${import.meta.env.BASE_URL}hi-doubly-symmetric-aisc360-10.html`
   window.location.assign(new URL(path, window.location.origin).href)
@@ -62,8 +71,8 @@ const selected = computed(() => components.find(component => component.id === se
 
 <template>
   <section class="steel-component-menu steel-design-panel" role="tabpanel" :aria-label="t('title')">
-    <header class="steel-component-heading"><h3>{{ t('title') }}</h3><p>{{ t('description') }}</p></header>
-    <div class="steel-component-grid">
+    <header v-if="!craneStandalone" class="steel-component-heading"><h3>{{ t('title') }}</h3><p>{{ t('description') }}</p></header>
+    <div v-if="!craneStandalone" class="steel-component-grid">
       <button v-for="component in components" :key="component.id" type="button" class="steel-component-card"
         :class="{ selected: selectedId === component.id }" :data-component="component.id"
         :aria-label="component.title" :aria-pressed="selectedId === component.id" @click="selectSection(component.id, $event)">

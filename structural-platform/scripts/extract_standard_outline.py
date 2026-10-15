@@ -41,7 +41,18 @@ def extract(pdf_path: Path):
             "parent_code": parent_code, "verification_status": "index_only"
         })
         stack.append((level, code, kind))
+    # Index equation identifiers only, not unreviewed transcriptions.
+    # The PDF includes normative specification on PDF pp. 57-296.
+    candidates = {}
+    for page_num in range(57, min(297, len(doc) + 1)):
+        text = doc[page_num - 1].get_text()
+        for label in re.findall(r"\\(([A-N]\\d{1,2}-\\d+[a-z]?)\\)", text):
+            clause = label.split("-")[0]
+            candidates.setdefault(label, {"label": label, "clause_code": clause,
+                                          "pdf_page": page_num,
+                                          "verification_status": "candidate"})
     return {
+        "equation_candidates": list(candidates.values()),
         "edition_code": "AISC360-10", "source_sha256": hashlib.sha256(pdf_path.read_bytes()).hexdigest(),
         "pdf_page_count": len(doc), "bookmark_count": len(bookmark_rows),
         "bookmarks": bookmark_rows,

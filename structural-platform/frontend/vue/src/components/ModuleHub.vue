@@ -6,6 +6,7 @@ import { demoMode } from '../api'
 import SteelDesignView from './SteelDesignView.vue'
 import SectionPropertiesPanel from './SectionPropertiesPanel.vue'
 import LibraryBrowser from './LibraryBrowser.vue'
+import StandardsExplorer from './StandardsExplorer.vue'
 import StructureIllustration from './StructureIllustration.vue'
 import ComboGeneratorView from './ComboGeneratorView.vue'
 
@@ -40,12 +41,13 @@ const tools = { concrete: ['beam', 'column', 'slab', 'foundation'], future: ['re
     <nav class="workspace-group-navigation" :aria-label="t('structureNavigation')">
       <a v-for="group in moduleGroups" :key="group.code" :href="moduleHref(group.code)" :class="{ active: currentGroup.code === group.code }">{{ t(group.title) }}</a>
     </nav>
-    <nav class="module-navigation" :class="{ 'loading-navigation': currentGroup.code === 'loads' }" :aria-label="t('navigation')">
+    <nav class="module-navigation" :class="{ 'loading-navigation': currentGroup.code === 'loads', 'steel-navigation': currentGroup.code === 'steel' }" :aria-label="t('navigation')">
       <a v-for="tool in navigationTools" :key="tool.code" :href="moduleHref(tool.route)" :aria-current="currentTool.code === tool.code ? 'page' : undefined">{{ t(tool.title) }}</a>
     </nav>
     <header class="module-heading"><span class="workspace-group-label">{{ t(currentGroup.title) }}</span><h1>{{ t(currentTool.title) }}</h1><p>{{ t(currentTool.description) }}</p></header>
     <SteelDesignView v-if="currentGroup.code === 'steel' && currentTool.code === 'design'" :locale="locale" />
     <SectionPropertiesPanel v-else-if="currentTool.code === 'section-properties'" :key="currentGroup.code" :locale="locale" />
+    <section v-else-if="currentTool.code === 'standards'" class="module-panel"><p class="standards-breadcrumb"><a :href="moduleHref('steel')">Steel Design</a> / <a :href="moduleHref('steel/library')">Library</a> / <strong>Standards</strong></p><StandardsExplorer :locale="locale" :can-edit="isAdmin" /></section>
     <section v-else-if="currentTool.code === 'library'" class="module-panel"><LibraryBrowser :key="currentGroup.code" :locale="locale" :can-edit="false" /></section>
     <section v-else-if="currentGroup.code === 'concrete' && currentTool.code === 'design'" class="module-panel concrete-module-panel">
       <div class="concrete-design-setup">
@@ -80,12 +82,12 @@ const tools = { concrete: ['beam', 'column', 'slab', 'foundation'], future: ['re
 .workspace-group-navigation a.active { border-color: #9cb0c6; background: var(--navigation-bg); color: #23395d; }
 .workspace-group-navigation a:hover, .workspace-group-navigation a:focus-visible { background: #23395d; color: #fff; }
 .module-navigation { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 5px; padding: 6px; border: 1px solid var(--surface-border); background: var(--surface-bg); border-radius: 10px; }
-.module-navigation.loading-navigation { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.module-navigation.loading-navigation { grid-template-columns: repeat(6, minmax(0, 1fr)); } .module-navigation.steel-navigation { grid-template-columns: repeat(5, minmax(0, 1fr)); }
 .module-navigation a { text-align: center; display: flex; justify-content: center; align-items: center; padding: 13px 9px; border-radius: 6px; color: #547491; font-size: 16px; line-height: 1.5; text-decoration: none; transition: background .15s, color .15s; }
 .module-navigation a[aria-current="page"], .module-navigation a:hover, .module-navigation a:focus-visible { color: white; background: #23395d; }
 .module-heading { padding: 28px 0 22px; }.module-heading h1 { font-size: 29px; }.module-heading p { font-size: 17px; margin: 10px 0 0; color: var(--muted-ink); }
 .workspace-group-label { display: block; margin-bottom: 6px; color: #647f9b; font-size: 13px; font-weight: 700; letter-spacing: .05em; }
-.module-panel { background: var(--surface-bg); border: 1px solid var(--surface-border); padding: 24px; border-radius: 12px; }
+.standards-breadcrumb { color: #617d97; margin: 0 0 14px; font-size: 14px; }.standards-breadcrumb a { color: #365c81; }.module-panel { background: var(--surface-bg); border: 1px solid var(--surface-border); padding: 24px; border-radius: 12px; }
 .concrete-module-panel { padding: 20px; }
 .pending-selector { display: flex; flex-direction: column; gap: 10px; max-width: 400px; font-size: 17px; color: #4b6a88; }
 .pending-note { font-size: 17px; line-height: 1.8; color: var(--muted-ink); margin: 24px 0 0; }
@@ -93,6 +95,6 @@ const tools = { concrete: ['beam', 'column', 'slab', 'foundation'], future: ['re
 .loading-pending-panel .structure-illustration { width: min(36%, 300px); flex: 0 0 auto; }
 .loading-pending-copy { min-width: 0; }.loading-pending-copy h2 { margin: 15px 0 8px; }.loading-pending-copy > p { font-size: 17px; color: var(--muted-ink); }
 .tool-pending-badge { display: inline-block; padding: 4px 10px; border: 1px solid #c7d3e0; border-radius: 20px; background: var(--navigation-bg); color: #365579; font-size: 14px; font-weight: 650; }
-@media (max-width: 900px) { .module-navigation.loading-navigation { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-@media (max-width: 600px) { .module-page { width: calc(100% - 16px); min-height: calc(100vh - 20px); padding: 0 16px 30px; margin: 8px auto 12px; border-radius: 12px; }.module-topbar { align-items: flex-start; flex-direction: column; padding: 20px 0; gap: 12px; }.module-actions { width: 100%; justify-content: space-between; gap: 4px; }.module-actions .quiet-button { padding: 7px 4px; font-size: 15px; }.workspace-group-navigation { gap: 5px; }.workspace-group-navigation a { padding: 7px 9px; font-size: 14px; }.module-navigation, .module-navigation.loading-navigation { grid-template-columns: repeat(2, minmax(0, 1fr)); }.module-heading h1 { font-size: 26px; }.module-panel { padding: 16px 12px; }.concrete-module-panel { padding: 16px 12px; }.loading-pending-panel { flex-direction: column; align-items: stretch; gap: 18px; }.loading-pending-panel .structure-illustration { width: 100%; max-width: 280px; align-self: center; } }
+@media (max-width: 900px) { .module-navigation.steel-navigation { grid-template-columns: repeat(3, minmax(0, 1fr)); } .module-navigation.loading-navigation { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 600px) { .module-page { width: calc(100% - 16px); min-height: calc(100vh - 20px); padding: 0 16px 30px; margin: 8px auto 12px; border-radius: 12px; }.module-topbar { align-items: flex-start; flex-direction: column; padding: 20px 0; gap: 12px; }.module-actions { width: 100%; justify-content: space-between; gap: 4px; }.module-actions .quiet-button { padding: 7px 4px; font-size: 15px; }.workspace-group-navigation { gap: 5px; }.workspace-group-navigation a { padding: 7px 9px; font-size: 14px; }.module-navigation, .module-navigation.loading-navigation, .module-navigation.steel-navigation { grid-template-columns: repeat(2, minmax(0, 1fr)); }.module-heading h1 { font-size: 26px; }.module-panel { padding: 16px 12px; }.concrete-module-panel { padding: 16px 12px; }.loading-pending-panel { flex-direction: column; align-items: stretch; gap: 18px; }.loading-pending-panel .structure-illustration { width: 100%; max-width: 280px; align-self: center; } }
 </style>

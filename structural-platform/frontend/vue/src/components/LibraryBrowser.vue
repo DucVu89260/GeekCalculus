@@ -3,6 +3,7 @@ import { computed, onMounted, reactive, ref, useId, watch } from 'vue'
 import { request, demoMode } from '../api'
 import { copy } from '../i18n'
 import { CATALOG_GEOMETRY_KEYS, SECTION_REGISTRY, catalogPropertiesForProfile, catalogSectionInputProperties, isCatalogDerivedSectionProperty, profileForCatalogShape, resolveSectionProfile, sectionInputFingerprint, sectionProfileDimensions, sectionProfilesForCatalogShape } from '../sectional-properties/catalog.js'
+import StandardsNavigation from './StandardsNavigation.vue'
 import DesignCodeIcon from './DesignCodeIcon.vue'
 import DesignCodeSelect from './DesignCodeSelect.vue'
 import SectionCalculatedProperties from './SectionCalculatedProperties.vue'
@@ -741,6 +742,7 @@ onMounted(async () => {
     <div class="library-toolbar">
       <div class="library-tabs" role="tablist" :aria-label="t('databaseTitle')">
         <button v-for="resource in resourceKeys" :key="resource" type="button" role="tab" :aria-selected="activeResource === resource" :class="{ active: activeResource === resource }" @click="setResource(resource)">{{ t(resource === 'section_types' ? 'sectionTypes' : resource) }}</button>
+        <StandardsNavigation />
       </div>
       <button v-if="canEdit" type="button" class="primary-button library-add-button" :disabled="schemaLoading || schemaError || (activeResource === 'sections' && (!records.section_types.length || !records.materials.length))" @click="openEditor()">＋ {{ t(resourceDefinitions[activeResource].addKey) }}</button>
       <span v-else class="read-only-badge"><span></span>{{ t('libraryReadOnly') }}</span>

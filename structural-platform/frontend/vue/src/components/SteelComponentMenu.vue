@@ -42,8 +42,9 @@ function openDesignStandard(code) {
     url.searchParams.set('component', 'crane-beam')
     url.searchParams.set('standard', 'aisc360-10')
     url.hash = '#/modules/steel'
-    const tab = window.open(url.href, '_blank', 'noopener,noreferrer')
-    if (!tab) window.location.assign(url.href)
+    const tab = window.open(url.href, '_blank')
+    if (tab) tab.opener = null
+    else window.location.assign(url.href)
     return
   }
   // This file is also present in Vite public/, so GitHub Pages and local demo builds agree.

@@ -47,7 +47,7 @@ const tools = { concrete: ['beam', 'column', 'slab', 'foundation'], future: ['re
     <header class="module-heading"><span class="workspace-group-label">{{ t(currentGroup.title) }}</span><h1>{{ t(currentTool.title) }}</h1><p>{{ t(currentTool.description) }}</p></header>
     <SteelDesignView v-if="currentGroup.code === 'steel' && currentTool.code === 'design'" :locale="locale" />
     <SectionPropertiesPanel v-else-if="currentTool.code === 'section-properties'" :key="currentGroup.code" :locale="locale" />
-    <section v-else-if="currentTool.code === 'standards'" class="module-panel"><StandardsExplorer :locale="locale" :can-edit="isAdmin" /></section>
+    <section v-else-if="currentTool.code === 'standards'" class="module-panel"><p class="standards-breadcrumb"><a :href="moduleHref('steel')">Steel Design</a> / <a :href="moduleHref('steel/library')">Library</a> / <strong>Standards</strong></p><StandardsExplorer :locale="locale" :can-edit="isAdmin" /></section>
     <section v-else-if="currentTool.code === 'library'" class="module-panel"><LibraryBrowser :key="currentGroup.code" :locale="locale" :can-edit="false" /></section>
     <section v-else-if="currentGroup.code === 'concrete' && currentTool.code === 'design'" class="module-panel concrete-module-panel">
       <div class="concrete-design-setup">
@@ -87,7 +87,7 @@ const tools = { concrete: ['beam', 'column', 'slab', 'foundation'], future: ['re
 .module-navigation a[aria-current="page"], .module-navigation a:hover, .module-navigation a:focus-visible { color: white; background: #23395d; }
 .module-heading { padding: 28px 0 22px; }.module-heading h1 { font-size: 29px; }.module-heading p { font-size: 17px; margin: 10px 0 0; color: var(--muted-ink); }
 .workspace-group-label { display: block; margin-bottom: 6px; color: #647f9b; font-size: 13px; font-weight: 700; letter-spacing: .05em; }
-.module-panel { background: var(--surface-bg); border: 1px solid var(--surface-border); padding: 24px; border-radius: 12px; }
+.standards-breadcrumb { color: #617d97; margin: 0 0 14px; font-size: 14px; }.standards-breadcrumb a { color: #365c81; }.module-panel { background: var(--surface-bg); border: 1px solid var(--surface-border); padding: 24px; border-radius: 12px; }
 .concrete-module-panel { padding: 20px; }
 .pending-selector { display: flex; flex-direction: column; gap: 10px; max-width: 400px; font-size: 17px; color: #4b6a88; }
 .pending-note { font-size: 17px; line-height: 1.8; color: var(--muted-ink); margin: 24px 0 0; }

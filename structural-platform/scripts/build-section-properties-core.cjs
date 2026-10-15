@@ -29,3 +29,14 @@ esbuild.buildSync({
   platform: 'neutral', format: 'esm', target: 'es2022',
   nodePaths: [path.join(root, 'frontend/vue/node_modules')], logLevel: 'info',
 })
+
+// Browser ESM adapter: Steel Design consumes the same canonical core, including
+// advanced mechanics and the versioned formula report. Vite copies this asset
+// from public/ into docs/ during the published demo build.
+esbuild.buildSync({
+  entryPoints: [path.join(root, 'frontend/vue/src/steel-design/hi-section-properties.ts')],
+  outfile: path.join(root, 'frontend/vue/public/hi-section-properties-core.mjs'),
+  bundle: true, platform: 'browser', format: 'esm', target: 'es2022',
+  nodePaths: [path.join(root, 'frontend/vue/node_modules')],
+  logLevel: 'info',
+})

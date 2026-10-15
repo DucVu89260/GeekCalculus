@@ -122,6 +122,25 @@ body{background:#f5f6f8;color:#202d3b}
 .shared-table tr[hidden]{display:none}
 @media(max-width:800px){.shared-body{padding:12px}.shared-table{min-width:760px}}
 
+
+.design-method-panel{border:1px solid #c5d7e3;margin:14px 18px 0;padding:12px;border-radius:8px;display:flex;gap:12px;flex-wrap:wrap;background:#f8fbfd}
+.design-method-panel legend{font-size:13px;font-weight:700;color:#254d67;padding:0 8px}
+.design-method-choice{display:flex;align-items:center;gap:8px;min-width:200px;padding:11px;border:1px solid #c3d4de;border-radius:7px;background:white;cursor:pointer}
+.design-method-choice:has(input:checked){background:#e2f0f3;border-color:#187688;box-shadow:inset 3px 0 0 #168395}
+.design-method-choice input{width:16px;height:16px;accent-color:#176c85}
+.design-method-choice span{display:grid;gap:4px}
+.design-method-choice strong{color:#214964;font-size:14px}
+.design-method-choice small{color:#718495;font-size:11px}
+.method-clarification{flex-basis:100%;margin:4px 0;color:#96681c;font-size:12px;line-height:1.5}
+#factor-table{border:1px solid #d2dce7;background:#f8fafc;border-radius:7px;padding:11px;margin-bottom:15px}
+#factor-table h4{font-size:13px;color:#214a65;margin:0 0 10px}
+.factor-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.factor-item{display:grid;gap:4px;padding:10px;border:1px solid #dce3e8;background:#fff;border-radius:7px}
+.factor-item span{color:#627b8d;font-size:11px}
+.factor-item strong{color:#25526d;font-size:14px}
+.factor-item small{color:#7b8c9b;font-size:10px}
+.factor-note{color:#8c641c;font-size:11px;line-height:1.5;margin:10px 0 0}
+@media(max-width:700px){.factor-grid{grid-template-columns:1fr}.design-method-choice{min-width:100%}}
 </style></head><body>
 <div class="shell">
 
@@ -159,6 +178,12 @@ body{background:#f5f6f8;color:#202d3b}
 <main class="page"><div class="intro"><div><h1>H/I Doubly Symmetric</h1><p>Kiểm tra sức kháng cấu kiện I/H đối xứng · LRFD · Reference workbook ↔ Calculation engine</p></div><div class="intro-actions"><button class="btn" id="preset" type="button">↺ &nbsp; Dữ liệu mẫu Excel</button><button class="btn" id="import" type="button">↥ &nbsp; Nhập JSON</button><button class="btn" id="export" type="button">↧ &nbsp; Xuất kết quả</button><input type="file" accept=".json,application/json" id="file" class="hidden"></div></div>
 <div class="warningbar"><div class="alert-icon">!</div><div><strong>Chế độ đối chiếu — chưa được chấp thuận thiết kế</strong>Bảng Excel gốc ghi AISC 360-05. Phiên bản này giữ nguyên một số logic có lỗi để so sánh với Excel (Cb dùng dấu, Fe trục yếu và kiểm tra sườn). <b>Không sử dụng kết quả để thiết kế thi công hoặc khẳng định đạt AISC 360-10.</b></div></div>
 <div class="workspace" id="results-start"><section class="card" id="input-card"><header class="cardhead"><h2>01 &nbsp; Input Parameters</h2><small>Đơn vị: mm / MPa / kN / kN·m</small></header>
+<fieldset class="design-method-panel" aria-label="Design method">
+<legend>Design Method / Phương pháp thiết kế</legend>
+<label class="design-method-choice"><input type="radio" name="design-method" value="LRFD" checked><span><strong>LRFD</strong><small>φ × Rn · Factored demand</small></span></label>
+<label class="design-method-choice"><input type="radio" name="design-method" value="ASD"><span><strong>ASD</strong><small>Rn / Ω · Service-level demand</small></span></label>
+<p class="method-clarification" id="method-explanation">Chọn tổ hợp tải trọng LRFD. Đổi phương pháp không tự chuyển nội lực hoặc tổ hợp.</p>
+</fieldset>
 <div class="tabstrip" role="tablist"><button class="tab active" data-tab="geometry" role="tab" aria-selected="true">Hình học</button><button class="tab" data-tab="member" role="tab" aria-selected="false">Vật liệu & chiều dài</button><button class="tab" data-tab="forces" role="tab" aria-selected="false">Nội lực</button></div>
 <div class="tab-panel" id="geometry" role="tabpanel"><div class="sectiontitle"><h3>Tiết diện I/H đối xứng hai trục</h3><span>Sharp-corner · mm</span></div>
 <div class="shapegrid"><div class="formgrid" data-section="section">
@@ -188,7 +213,7 @@ body{background:#f5f6f8;color:#202d3b}
 <div class="input-actions"><small id="dirtytext">Dữ liệu mẫu đã được nạp.</small><button class="btn primary" id="run" type="button">▹ &nbsp; Tính toán</button></div><div class="errorbox" role="alert" id="error"></div></section>
 <section class="card" id="calculation-results" aria-live="polite"><header class="cardhead"><h2>02 &nbsp; Calculation Results</h2><small id="calc-info">Browser · chưa lưu DB</small></header>
 <div class="result-top"><div class="ring" id="ring"><div class="ring-center"><strong id="h1">—</strong><span>H1 · D/C</span></div></div><div><div class="result-title">Tương tác lực dọc – moment</div><span class="status-line" id="status">REVIEW REQUIRED</span><p class="result-desc" id="overview">Đang nạp mẫu Excel và tính toán...</p></div></div>
-<div id="refline" class="refline"></div><div class="metrics" id="metrics"></div><div class="breakdown"><div class="subheading">Demand / Capacity <span style="font-size:10px;color:#95a4b0">Giá trị từ engine đối chiếu</span></div><div id="bars"></div><small>Các nhánh riêng có thể hiển thị PASS/FAIL theo công thức gốc; trạng thái tổng thể luôn là REVIEW REQUIRED.</small></div>
+<div id="refline" class="refline"></div><div class="metrics" id="metrics"></div><div class="breakdown"><div id="factor-table" aria-live="polite"></div><div class="subheading">Demand / Capacity <span style="font-size:10px;color:#95a4b0">Giá trị từ engine đối chiếu</span></div><div id="bars"></div><small>Các nhánh riêng có thể hiển thị PASS/FAIL theo công thức gốc; trạng thái tổng thể luôn là REVIEW REQUIRED.</small></div>
 <div class="resultsection"><h3>Limit State Checks</h3><div class="tablewrap"><table><thead><tr><th>Điều khoản</th><th>Kiểm tra</th><th>Demand</th><th>Capacity</th><th>D/C</th><th>Check</th></tr></thead><tbody id="checkrows"></tbody></table></div></div>
 <div class="details"><details><summary>⊞ &nbsp; Chi tiết phân loại & công thức trung gian</summary><div class="tracegrid" id="trace"></div></details></div>
 <div class="resultsection"><h3>Engineering warnings <span style="font-weight:400;color:#9aa5af" id="warn-count"></span></h3><div class="warning-list" id="warnings"></div></div>
@@ -567,7 +592,7 @@ function calculate(input, designMethod = 'LRFD') {
 }
 
 
-const latest = { input: structuredClone(fixture), result: null, changed: false }
+const latest = { input: structuredClone(fixture), result: null, changed: false, method:'LRFD' }
 const find = id => document.getElementById(id)
 const format = (value, digits = 3) => typeof value === 'number' && Number.isFinite(value) ? new Intl.NumberFormat('en-US',{maximumFractionDigits:digits}).format(value) : '—'
 function safe(text) { return String(text).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])) }
@@ -604,10 +629,23 @@ function draw(){
   find('diag-h').textContent=`h = ${format(h,0)}`; find('diag-b').textContent=`bf = ${format(bf,0)}`
 }
 const refs = {phi_mnx_kNm:1020.0379893494273,phi_mny_kNm:112.55655515838045,phi_pn_compression_kN:2113.423353366748,lrfd_percent:82.40656143563768,area_mm2:11496}
-function matchingFixture() { return Object.entries(fixture).every(([group,fields]) => Object.entries(fields).every(([key,value]) => latest.input[group]?.[key] === value)) }
+function matchingFixture() { return latest.method==='LRFD' && Object.entries(fixture).every(([group,fields]) => Object.entries(fields).every(([key,value]) => latest.input[group]?.[key] === value)) }
+
+function renderFactorTable(r) {
+ const root=document.getElementById('factor-table')
+ if(!root)return
+ const labels={flexure:'F2–F6 · Flexure',compression:'E3/E7 · Compression',
+  tension_gross:'D2(a) · Gross tensile yield',tension_rupture_not_checked:'D2(b) · Fracture (not checked)',
+  shear_web:'G2 · Web shear',shear_flange:'G7 · Weak-axis shear'}
+ root.innerHTML='<h4>AISC 360-10 · '+safe(r.design_method)+' · φ / Ω</h4><div class="factor-grid">'+
+ Object.entries(r.factors).map(([key,val])=>`<div class="factor-item"><span>${safe(labels[key]||key)}</span>
+   <strong>${safe(val.symbol)} = ${format(val.value,2)}</strong>
+   <small>${safe(val.clause)} · ${safe(val.equation)}</small></div>`).join('')+'</div>'+
+ '<p class="factor-note">Hệ số theo điều khoản AISC 360-10. Công thức nominal của Excel 360-05 vẫn đang chờ thẩm tra.</p>'
+}
 function render(){
   const r=latest.result
-  const percent=r.interaction.lrfd_percent
+  const percent=r.interaction.percent
   find('h1').textContent=format(percent,2)+'%'
   const ratio=Math.min(Math.max(percent,0),100)
   const color=percent>100?'#b84a43':percent>85?'#d5a047':'#067d85'
@@ -615,10 +653,14 @@ function render(){
   find('status').textContent='REVIEW REQUIRED'
   find('overview').textContent=`Nhánh uốn ${r.classification.flexure_chapter} · Cánh ${r.classification.flange} · Bụng ${r.classification.web}. Đây không phải kết luận đạt tiêu chuẩn.`
   const s=r.strengths,p=r.section_properties
-  const cards=[['φMn,x',s.phi_mnx_kNm,'kN·m'],['φMn,y',s.phi_mny_kNm,'kN·m'],['φPn (nén)',s.phi_pn_compression_kN,'kN'],['A',p.area_mm2,'mm²']]
+  const lrfd=r.design_method==='LRFD'
+  const cards=[[lrfd?'φMn,x':'Mn,x/Ω',s.available_mnx_kNm,'kN·m'],
+    [lrfd?'φMn,y':'Mn,y/Ω',s.available_mny_kNm,'kN·m'],
+    [lrfd?'φPn (nén)':'Pn/Ω (nén)',s.available_pn_compression_kN,'kN'],['A',p.area_mm2,'mm²']]
   find('metrics').innerHTML=cards.map(([label,value,unit])=>`<div class="metric"><span>${label}</span><strong>${format(value,3)}</strong><small>${unit}</small></div>`).join('')
   const items=[['H1 · N–M',r.interaction.lrfd_percent],['Uốn Mx',r.interaction.moment_x_ratio*100],['Nén/kéo N',r.interaction.axial_ratio*100],['Cắt bụng',r.shear.web_percent],['Cắt cánh',r.shear.flange_percent]]
   find('bars').innerHTML=items.map(([label,pct])=>`<div class="barrow"><div class="barlabel"><span>${label}</span><strong>${format(pct,2)}%</strong></div><div class="bar ${pct>100?'fail':pct>85?'warn':''}"><div style="width:${Math.max(0,Math.min(pct,100))}%"></div></div></div>`).join('')
+  renderFactorTable(r)
   find('checkrows').innerHTML=r.limit_states.map(row=>`<tr><td>${safe(row.clause)}</td><td>${safe(checknames[row.id]||row.id)}</td><td>${format(row.demand,3)}</td><td>${format(row.capacity,3)}</td><td>${format(row.utilization*100,2)}%</td><td><span class="pill ${row.status==='FAIL'?'fail':''}">${row.status}</span></td></tr>`).join('')
   const traces={
     'Flange classification':r.classification.flange,'Web classification':r.classification.web,
@@ -633,7 +675,7 @@ function render(){
   find('warnings').innerHTML=r.warnings.map(w=>`<div class="warning"><strong>${safe(w.code)}</strong>${safe(w.message)}</div>`).join('')
   find('warn-count').textContent=`(${r.warnings.length})`
   find('refline').innerHTML=matchingFixture()?'<b>✓ Đối chiếu dữ liệu mẫu</b> 5/5 chỉ tiêu chính trùng engine PHP Phase 1 trong dung sai 1e−6.':'<span style="color:#8a9aa7">Dữ liệu đã thay đổi — cần đối chiếu thêm với Excel nếu dùng trường hợp này.</span>'
-  find('calc-info').textContent=`${r.engine_version} · ${new Date().toLocaleTimeString('vi-VN')}`
+  find('calc-info').textContent=`${r.design_method} · ${r.engine_version} · ${new Date().toLocaleTimeString('vi-VN')}`
   latest.changed=false
   find('dirtytext').textContent='Đã tính toán. Các thông số hiện tại đang được hiển thị.'
   find('dirtytext').classList.remove('input-changed')
@@ -733,7 +775,8 @@ function run(){
   document.getElementById('shared-status').textContent='Waiting for canonical Section Properties calculation…';
   try{
     latest.input=readInputs()
-    latest.result=calculate(latest.input)
+    latest.method=document.querySelector('input[name="design-method"]:checked')?.value||'LRFD'
+    latest.result=calculate(latest.input,latest.method)
     const s=latest.result
     // Fail closed if our JS engine produces a non-finite number on the result surface.
     for(const key of ['phi_mnx_kNm','phi_mny_kNm','phi_pn_compression_kN']) if(!Number.isFinite(s.strengths[key]) || s.strengths[key]<=0) throw new Error('Khả năng chịu lực không hợp lệ, vui lòng kiểm tra đầu vào.')
@@ -742,7 +785,12 @@ function run(){
     void refreshCanonicalProperties(latest.input,latest.result,generation)
   }catch(err){find('error').textContent=err.message;find('error').style.display='block';find('dirtytext').textContent='Không tính được — vui lòng chỉnh dữ liệu.';latest.result=null}
 }
-function reset(){ latest.input=structuredClone(fixture); updateInputs();run() }
+function reset(){
+ latest.input=structuredClone(fixture)
+ document.querySelector('input[name="design-method"][value="LRFD"]').checked=true
+ latest.method='LRFD'
+ updateInputs();run()
+}
 function markChanged(){latest.changed=true;find('dirtytext').textContent='Đã thay đổi dữ liệu · Nhấn Tính toán để cập nhật.';find('dirtytext').classList.add('input-changed');try{latest.input=readInputs();draw()}catch(_){}}
 
 // Dynamic engineering calculation notebook. All displayed capacities are read
@@ -907,10 +955,16 @@ document.querySelectorAll('.tab').forEach(button=>button.addEventListener('click
   document.querySelectorAll('.tab-panel').forEach(t=>t.classList.toggle('hidden',t.id!==button.dataset.tab))
 }))
 document.querySelectorAll('[data-key]').forEach(el=>el.addEventListener('input',markChanged))
+document.querySelectorAll('input[name="design-method"]').forEach(el=>el.addEventListener('change',event=>{
+ document.getElementById('method-explanation').textContent=event.target.value==='ASD'
+  ? 'ASD: sử dụng nội lực từ tổ hợp tải trọng ASD/service. KHÔNG tự quy đổi nội lực LRFD.'
+  : 'LRFD: sử dụng nội lực từ tổ hợp tải trọng LRFD/factored. KHÔNG tự quy đổi nội lực ASD.'
+ run()
+}))
 find('run').addEventListener('click',run);find('preset').addEventListener('click',reset)
 find('export').addEventListener('click',()=>{
   if (!latest.result){run();if(!latest.result)return}
-  const content=JSON.stringify({meta:{app:'GeekCalculus',module:'HI_DOUBLY_SYMMETRIC',mode:'LEGACY_EXCEL_PARITY',exported_at:new Date().toISOString()},input:latest.input,result:latest.result,section_properties_shared:sharedResult},null,2)
+  const content=JSON.stringify({meta:{app:'GeekCalculus',module:'HI_DOUBLY_SYMMETRIC',mode:'LEGACY_EXCEL_PARITY',design_method:latest.method,standard_factor_edition:'AISC360-10',exported_at:new Date().toISOString()},input:latest.input,result:latest.result,section_properties_shared:sharedResult},null,2)
   const url=URL.createObjectURL(new Blob([content],{type:'application/json'})), a=document.createElement('a')
   a.href=url;a.download='GeekCalculus_HI_Phase1_Parity_Result.json';a.click();URL.revokeObjectURL(url)
 })

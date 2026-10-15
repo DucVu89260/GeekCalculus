@@ -23,6 +23,7 @@ class StandardsSeeder extends Seeder {
         }
         // Navigation-only clause headings grounded in the AISC 360-10 table of contents.
         $edition = DB::table('standard_editions')->where('code','AISC360-10')->first();
+        $pdfPages = ['A'=>57,'B'=>66,'B4'=>70,'C'=>76,'D'=>82,'D2'=>82,'E'=>87,'E3'=>89,'F'=>100,'G'=>123,'H'=>129,'I'=>137,'J'=>439,'K'=>480,'L'=>495,'M'=>501,'N'=>506];
         foreach ([
             ['A','General Provisions',1],['B','Design Requirements',10],
             ['B4','Member Properties',14],['C','Design for Stability',20],
@@ -37,7 +38,7 @@ class StandardsSeeder extends Seeder {
         ] as [$code,$title,$printedPage]) {
             DB::table('standard_clauses')->updateOrInsert(
                 ['edition_id'=>$edition->id,'kind'=>'normative','code'=>$code],
-                ['title'=>$title,'printed_page'=>$printedPage,'verification_status'=>'index_only','updated_at'=>now()]
+                ['title'=>$title,'printed_page'=>$printedPage,'pdf_page'=>$pdfPages[$code] ?? null,'verification_status'=>'index_only','updated_at'=>now()]
             );
         }
     }

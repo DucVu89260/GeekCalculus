@@ -8,6 +8,7 @@ export const groupTools = {
     { code: 'design', title: 'toolSteelDesign', description: 'steelDescription', route: 'steel' },
     { code: 'section-properties', title: 'toolSectionProperties', description: 'analysisDescription', route: 'steel/section-properties' },
     { code: 'library', title: 'toolSteelLibrary', description: 'libraryDescription', route: 'steel/library' },
+    { code: 'standards', title: 'toolSteelLibrary', description: 'libraryDescription', route: 'steel/standards' },
     { code: 'future', title: 'toolFutureLab', description: 'futureDescription', route: 'steel/future' },
   ],
   concrete: [

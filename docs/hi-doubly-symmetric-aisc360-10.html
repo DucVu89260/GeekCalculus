@@ -122,6 +122,25 @@ body{background:#f5f6f8;color:#202d3b}
 .shared-table tr[hidden]{display:none}
 @media(max-width:800px){.shared-body{padding:12px}.shared-table{min-width:760px}}
 
+
+.design-method-panel{border:1px solid #c5d7e3;margin:14px 18px 0;padding:12px;border-radius:8px;display:flex;gap:12px;flex-wrap:wrap;background:#f8fbfd}
+.design-method-panel legend{font-size:13px;font-weight:700;color:#254d67;padding:0 8px}
+.design-method-choice{display:flex;align-items:center;gap:8px;min-width:200px;padding:11px;border:1px solid #c3d4de;border-radius:7px;background:white;cursor:pointer}
+.design-method-choice:has(input:checked){background:#e2f0f3;border-color:#187688;box-shadow:inset 3px 0 0 #168395}
+.design-method-choice input{width:16px;height:16px;accent-color:#176c85}
+.design-method-choice span{display:grid;gap:4px}
+.design-method-choice strong{color:#214964;font-size:14px}
+.design-method-choice small{color:#718495;font-size:11px}
+.method-clarification{flex-basis:100%;margin:4px 0;color:#96681c;font-size:12px;line-height:1.5}
+#factor-table{border:1px solid #d2dce7;background:#f8fafc;border-radius:7px;padding:11px;margin-bottom:15px}
+#factor-table h4{font-size:13px;color:#214a65;margin:0 0 10px}
+.factor-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.factor-item{display:grid;gap:4px;padding:10px;border:1px solid #dce3e8;background:#fff;border-radius:7px}
+.factor-item span{color:#627b8d;font-size:11px}
+.factor-item strong{color:#25526d;font-size:14px}
+.factor-item small{color:#7b8c9b;font-size:10px}
+.factor-note{color:#8c641c;font-size:11px;line-height:1.5;margin:10px 0 0}
+@media(max-width:700px){.factor-grid{grid-template-columns:1fr}.design-method-choice{min-width:100%}}
 </style></head><body>
 <div class="shell">
 
@@ -156,9 +175,15 @@ body{background:#f5f6f8;color:#202d3b}
  </div>
  <div class="tag"><span class="dot"></span> LEGACY EXCEL PARITY</div>
  </div></header>
-<main class="page"><div class="intro"><div><h1>H/I Doubly Symmetric</h1><p>Kiểm tra sức kháng cấu kiện I/H đối xứng · LRFD · Reference workbook ↔ Calculation engine</p></div><div class="intro-actions"><button class="btn" id="preset" type="button">↺ &nbsp; Dữ liệu mẫu Excel</button><button class="btn" id="import" type="button">↥ &nbsp; Nhập JSON</button><button class="btn" id="export" type="button">↧ &nbsp; Xuất kết quả</button><input type="file" accept=".json,application/json" id="file" class="hidden"></div></div>
+<main class="page"><div class="intro"><div><h1>H/I Doubly Symmetric</h1><p>Kiểm tra sức kháng cấu kiện I/H đối xứng · LRFD / ASD · Reference workbook ↔ Calculation engine</p></div><div class="intro-actions"><button class="btn" id="preset" type="button">↺ &nbsp; Dữ liệu mẫu Excel</button><button class="btn" id="import" type="button">↥ &nbsp; Nhập JSON</button><button class="btn" id="export" type="button">↧ &nbsp; Xuất kết quả</button><input type="file" accept=".json,application/json" id="file" class="hidden"></div></div>
 <div class="warningbar"><div class="alert-icon">!</div><div><strong>Chế độ đối chiếu — chưa được chấp thuận thiết kế</strong>Bảng Excel gốc ghi AISC 360-05. Phiên bản này giữ nguyên một số logic có lỗi để so sánh với Excel (Cb dùng dấu, Fe trục yếu và kiểm tra sườn). <b>Không sử dụng kết quả để thiết kế thi công hoặc khẳng định đạt AISC 360-10.</b></div></div>
 <div class="workspace" id="results-start"><section class="card" id="input-card"><header class="cardhead"><h2>01 &nbsp; Input Parameters</h2><small>Đơn vị: mm / MPa / kN / kN·m</small></header>
+<fieldset class="design-method-panel" aria-label="Design method">
+<legend>Design Method / Phương pháp thiết kế</legend>
+<label class="design-method-choice"><input type="radio" name="design-method" value="LRFD" checked><span><strong>LRFD</strong><small>φ × Rn · Factored demand</small></span></label>
+<label class="design-method-choice"><input type="radio" name="design-method" value="ASD"><span><strong>ASD</strong><small>Rn / Ω · Service-level demand</small></span></label>
+<p class="method-clarification" id="method-explanation">Chọn tổ hợp tải trọng LRFD. Đổi phương pháp không tự chuyển nội lực hoặc tổ hợp.</p>
+</fieldset>
 <div class="tabstrip" role="tablist"><button class="tab active" data-tab="geometry" role="tab" aria-selected="true">Hình học</button><button class="tab" data-tab="member" role="tab" aria-selected="false">Vật liệu & chiều dài</button><button class="tab" data-tab="forces" role="tab" aria-selected="false">Nội lực</button></div>
 <div class="tab-panel" id="geometry" role="tabpanel"><div class="sectiontitle"><h3>Tiết diện I/H đối xứng hai trục</h3><span>Sharp-corner · mm</span></div>
 <div class="shapegrid"><div class="formgrid" data-section="section">
@@ -188,7 +213,7 @@ body{background:#f5f6f8;color:#202d3b}
 <div class="input-actions"><small id="dirtytext">Dữ liệu mẫu đã được nạp.</small><button class="btn primary" id="run" type="button">▹ &nbsp; Tính toán</button></div><div class="errorbox" role="alert" id="error"></div></section>
 <section class="card" id="calculation-results" aria-live="polite"><header class="cardhead"><h2>02 &nbsp; Calculation Results</h2><small id="calc-info">Browser · chưa lưu DB</small></header>
 <div class="result-top"><div class="ring" id="ring"><div class="ring-center"><strong id="h1">—</strong><span>H1 · D/C</span></div></div><div><div class="result-title">Tương tác lực dọc – moment</div><span class="status-line" id="status">REVIEW REQUIRED</span><p class="result-desc" id="overview">Đang nạp mẫu Excel và tính toán...</p></div></div>
-<div id="refline" class="refline"></div><div class="metrics" id="metrics"></div><div class="breakdown"><div class="subheading">Demand / Capacity <span style="font-size:10px;color:#95a4b0">Giá trị từ engine đối chiếu</span></div><div id="bars"></div><small>Các nhánh riêng có thể hiển thị PASS/FAIL theo công thức gốc; trạng thái tổng thể luôn là REVIEW REQUIRED.</small></div>
+<div id="refline" class="refline"></div><div class="metrics" id="metrics"></div><div class="breakdown"><div id="factor-table" aria-live="polite"></div><div class="subheading">Demand / Capacity <span style="font-size:10px;color:#95a4b0">Giá trị từ engine đối chiếu</span></div><div id="bars"></div><small>Các nhánh riêng có thể hiển thị PASS/FAIL theo công thức gốc; trạng thái tổng thể luôn là REVIEW REQUIRED.</small></div>
 <div class="resultsection"><h3>Limit State Checks</h3><div class="tablewrap"><table><thead><tr><th>Điều khoản</th><th>Kiểm tra</th><th>Demand</th><th>Capacity</th><th>D/C</th><th>Check</th></tr></thead><tbody id="checkrows"></tbody></table></div></div>
 <div class="details"><details><summary>⊞ &nbsp; Chi tiết phân loại & công thức trung gian</summary><div class="tracegrid" id="trace"></div></details></div>
 <div class="resultsection"><h3>Engineering warnings <span style="font-weight:400;color:#9aa5af" id="warn-count"></span></h3><div class="warning-list" id="warnings"></div></div>
@@ -220,6 +245,7 @@ body{background:#f5f6f8;color:#202d3b}
 </section>
 
 <div class="footer-note">GeekCalculus · Steel Design / Component · H/I Doubly Symmetric · Phase 1 Browser Preview · © 2026</div></main></div></div>
+<script src="./aisc360-10-resistance.js"></script>
 <script>
 /**
  * GeekCalculus temporary browser parity engine, mirrors PHP legacy v0.1.0.
@@ -348,7 +374,10 @@ function check(clause, id, demand, capacity, unit) {
   return { clause, id, demand, capacity, unit, utilization: demand / capacity,
     status: demand <= capacity ? 'PASS' : 'FAIL' }
 }
-function calculate(input) {
+function calculate(input, designMethod = 'LRFD') {
+  const standardResistance=window.Aisc36010Resistance
+  if(!standardResistance)throw new Error('AISC360-10 phi/Omega coefficient registry unavailable.')
+  const method=standardResistance.selectedMethod(designMethod)
   const { material, section, member, stiffeners, forces } = input
   const fy = positive(material.fy_mpa, 'Fy') / 10
   const e = positive(material.e_mpa, 'E') / 10
@@ -459,8 +488,8 @@ function calculate(input) {
     }
   }
   const mnX = Math.min(nominalLtb, nominalLocal, nominalYield)
-  const phiMnX = .9 * mnX / 100
-  const phiMnY = .9 * mnY / 100
+  const phiMnX=standardResistance.availableStrength(mnX/100,method,'FLEXURE')
+  const phiMnY=standardResistance.availableStrength(mnY/100,method,'FLEXURE')
 
   const qsLimitP = .64 * Math.sqrt(kc * e / fy)
   const qsLimitR = 1.17 * Math.sqrt(kc * e / fy)
@@ -476,8 +505,8 @@ function calculate(input) {
   const fcrX = lx / rx > 4.71 * Math.sqrt(e / (fy * q)) ? .877 * feX : q * .658 ** (q * fy / feX) * fy
   const fcrY = lb / ry > 4.71 * Math.sqrt(e / (fy * q)) ? .877 * feY : q * .658 ** (q * fy / feY) * fy
   const pn = Math.min(fcrX, fcrY) * area
-  const phiPn = .9 * pn
-  const phiPt = .9 * fy * area
+  const phiPn=standardResistance.availableStrength(pn,method,'COMPRESSION')
+  const phiPt=standardResistance.availableStrength(fy*area,method,'TENSION_GROSS')
   const pRatio = Math.abs(n) / (n < 0 ? phiPn : phiPt)
   const ratioMx = mx / phiMnX
   const ratioMy = my / phiMnY
@@ -488,14 +517,14 @@ function calculate(input) {
 
   const aspect = a / hw
   const kv = a === 0 ? 1.2 : 5 + 5 / square(aspect)
-  const webKv = fabrication === 'ROLLED' && ratioW < 2.24 * Math.sqrt(e / fy) ? 1 : shearCv(ratioW, kv, e, fy)
+  const webStrengthKey=standardResistance.webShearFactorKey({fabrication,h_mm:section.h_mm,tf_mm:section.tf_mm,tw_mm:section.tw_mm,e_mpa:material.e_mpa,fy_mpa:material.fy_mpa})
+  const webKv=webStrengthKey==='SHEAR_ROLLED_G21A'?1:shearCv(ratioW,kv,e,fy)
   const awShear = hw * tw
   const vnWeb = .6 * fy * awShear * webKv
-  const phiWeb = fabrication === 'ROLLED' && ratioW < 2.24 * Math.sqrt(e / fy) ? 1 : .9
-  const phiVWeb = phiWeb * vnWeb
+  const phiVWeb=standardResistance.availableStrength(vnWeb,method,webStrengthKey)
   const cvFlange = shearCv(bf / tf, 1.2, e, fy)
   const vnFlange = .6 * fy * (2 * bf * tf) * cvFlange
-  const phiVFlange = .9 * vnFlange
+  const phiVFlange=standardResistance.availableStrength(vnFlange,method,'SHEAR_GENERAL')
   const tensionFieldEligible = !(aspect > 3 || square(260 / ratioW) > 3) && hw * tw / (bf * tf) <= 2.5 && hw / bf <= 6
   const vnTensionField = tensionFieldEligible
     ? .6 * fy * hw * tw * (ratioW > 1.1 * Math.sqrt(kv * e / fy)
@@ -521,26 +550,50 @@ function calculate(input) {
     {code:'LEGACY_CB',message:'Cb dùng moment có dấu tại các vị trí được nhập, chưa kiểm chứng moment cực trị trên đoạn Lb.'},
     {code:'LEGACY_WEAK_AXIS_FE',message:'Excel W194 dùng Fe trục mạnh cho trục yếu; lỗi này được giữ nguyên để đối chiếu Excel.'},
     {code:'INCOMPLETE_TENSION',message:'Chưa có kiểm tra đứt kéo tại tiết diện thực / net section.'},
+    {code:'STIFFENER_PARITY_ONLY',message:'Kiểm tra diện tích sườn tăng cứng vẫn theo biểu thức legacy LRFD; không phải kiểm tra sườn ASD đã được xác minh.'},
     {code:'NO_GLOBAL_PASS',message:'Chế độ parity không xác nhận cấu kiện đạt tiêu chuẩn.'},
+    {code:'LOAD_COMBINATION_METHOD',message:method==='ASD'
+      ? 'ASD phải dùng nội lực từ tổ hợp ASD (service level); không tự chuyển tổ hợp LRFD sang ASD.'
+      : 'LRFD phải dùng nội lực từ tổ hợp LRFD (factored); không tự chuyển tổ hợp ASD sang LRFD.'},
+    ...(webStrengthKey==='SHEAR_ROLLED_G21A'?[{code:'ROLLED_WEB_REVIEW',message:'G2.1(a) cần xác nhận rolled profile, fillet và chiều cao bụng thông thủy thực tế.'}]:[]),
   ]
   if (!stiffenerChecksOk) warnings.push({code:'STIFFENER_REVIEW',message:'Kiểm tra sườn tăng cứng chưa đạt theo workbook. Không chấp thuận tension field enhancement.'})
   const result = {
-    status:'success', mode:'LEGACY_EXCEL_PARITY', source_standard:'AISC360-05_UNVERIFIED',
+    status:'success', mode:'LEGACY_EXCEL_PARITY',design_method:method,
+    factor_source:'AISC360-10 resistance registry',
+    factors:{
+      flexure:standardResistance.factorNotation(method,'FLEXURE'),
+      compression:standardResistance.factorNotation(method,'COMPRESSION'),
+      tension_gross:standardResistance.factorNotation(method,'TENSION_GROSS'),
+      tension_rupture_not_checked:standardResistance.factorNotation(method,'TENSION_RUPTURE'),
+      shear_web:standardResistance.factorNotation(method,webStrengthKey),
+      shear_flange:standardResistance.factorNotation(method,'SHEAR_GENERAL'),
+    },
+    nominal_strengths:{mn_x_kNm:mnX/100,mn_y_kNm:mnY/100,pn_compression_kN:pn,
+      pn_tension_gross_kN:fy*area,vn_web_kN:vnWeb,vn_flange_kN:vnFlange},
+    source_standard:'AISC360-05_UNVERIFIED',
     target_standard:'AISC360-10_NOT_VALIDATED', shape:'HI_DOUBLY_SYMMETRIC', engine_version:'browser-parity-0.1.0', overall_status:'REVIEW_REQUIRED',
     section_properties:{area_mm2:area*100,ix_mm4:ix*10000,iy_mm4:iy*10000,sx_mm3:sx*1000,sy_mm3:sy*1000,zx_mm3:zx*1000,zy_mm3:zy*1000,j_legacy_mm4:j*10000,rx_mm:rx*10,ry_mm:ry*10},
     classification:{flange:flangeClass,web:webClass,flexure_chapter:chapter,lambda_flange:ratioF,lambda_web:ratioW,lambda_p_flange:flangeP,lambda_r_flange:flangeR,lambda_p_web:webP,lambda_r_web:webR},
-    strengths:{phi_mnx_kNm:phiMnX,phi_mny_kNm:phiMnY,phi_pn_compression_kN:phiPn,phi_pn_tension_gross_kN:phiPt,phi_vn_web_kN:phiVWeb,phi_vn_flange_kN:phiVFlange},
-    interaction:{lrfd_utilization:interaction,lrfd_percent:interaction*100,axial_ratio:pRatio,moment_x_ratio:ratioMx,moment_y_ratio_rounded:roundedMinor},
+    strengths:{
+      available_mnx_kNm:phiMnX,available_mny_kNm:phiMnY,available_pn_compression_kN:phiPn,
+      available_pn_tension_gross_kN:phiPt,available_vn_web_kN:phiVWeb,available_vn_flange_kN:phiVFlange,
+      // Compatibility aliases for prior LRFD UI; refer to available ASD strengths when ASD selected.
+      phi_mnx_kNm:phiMnX,phi_mny_kNm:phiMnY,phi_pn_compression_kN:phiPn,
+      phi_pn_tension_gross_kN:phiPt,phi_vn_web_kN:phiVWeb,phi_vn_flange_kN:phiVFlange,
+    },
+    interaction:{utilization:interaction,percent:interaction*100,lrfd_utilization:interaction,lrfd_percent:interaction*100,
+      axial_ratio:pRatio,moment_x_ratio:ratioMx,moment_y_ratio_rounded:roundedMinor},
     shear:{web_percent:100*vy/phiVWeb,flange_percent:100*vx/phiVFlange,tension_field_eligible_legacy:tensionFieldEligible,nominal_tension_field_kN_legacy:vnTensionField,stiffener_width_ok:stiffenerWidthOk,stiffener_area_legacy_ok:stiffenerAreaOk,tension_field_not_approved:!stiffenerChecksOk},
     limit_states:checks, failed_checks:checks.filter(x=>x.status==='FAIL').map(x=>x.id),
-    trace:{cb_signed_legacy:cb,lp_mm:lp*10,lr_mm:lr*10,rpg, mnx_ltb_kNm:nominalLtb/100,mnx_local_kNm:Number.isFinite(nominalLocal)?nominalLocal/100:null,mnx_yield_kNm:nominalYield/100,qs,qa,q,fcrx_mpa:fcrX*10,fcry_mpa:fcrY*10,web_cv:webKv,flange_cv:cvFlange,stiffener_required_area_legacy_cm2:requiredAreaLRFD},
+    trace:{web_factor_key:webStrengthKey,cb_signed_legacy:cb,lp_mm:lp*10,lr_mm:lr*10,rpg, mnx_ltb_kNm:nominalLtb/100,mnx_local_kNm:Number.isFinite(nominalLocal)?nominalLocal/100:null,mnx_yield_kNm:nominalYield/100,qs,qa,q,fcrx_mpa:fcrX*10,fcry_mpa:fcrY*10,web_cv:webKv,flange_cv:cvFlange,stiffener_required_area_legacy_cm2:requiredAreaLRFD},
     warnings,
   }
   return result
 }
 
 
-const latest = { input: structuredClone(fixture), result: null, changed: false }
+const latest = { input: structuredClone(fixture), result: null, changed: false, method:'LRFD' }
 const find = id => document.getElementById(id)
 const format = (value, digits = 3) => typeof value === 'number' && Number.isFinite(value) ? new Intl.NumberFormat('en-US',{maximumFractionDigits:digits}).format(value) : '—'
 function safe(text) { return String(text).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])) }
@@ -577,10 +630,23 @@ function draw(){
   find('diag-h').textContent=`h = ${format(h,0)}`; find('diag-b').textContent=`bf = ${format(bf,0)}`
 }
 const refs = {phi_mnx_kNm:1020.0379893494273,phi_mny_kNm:112.55655515838045,phi_pn_compression_kN:2113.423353366748,lrfd_percent:82.40656143563768,area_mm2:11496}
-function matchingFixture() { return Object.entries(fixture).every(([group,fields]) => Object.entries(fields).every(([key,value]) => latest.input[group]?.[key] === value)) }
+function matchingFixture() { return latest.method==='LRFD' && Object.entries(fixture).every(([group,fields]) => Object.entries(fields).every(([key,value]) => latest.input[group]?.[key] === value)) }
+
+function renderFactorTable(r) {
+ const root=document.getElementById('factor-table')
+ if(!root)return
+ const labels={flexure:'F2–F6 · Flexure',compression:'E3/E7 · Compression',
+  tension_gross:'D2(a) · Gross tensile yield',tension_rupture_not_checked:'D2(b) · Fracture (not checked)',
+  shear_web:'G2 · Web shear',shear_flange:'G7 · Weak-axis shear'}
+ root.innerHTML='<h4>AISC 360-10 · '+safe(r.design_method)+' · φ / Ω</h4><div class="factor-grid">'+
+ Object.entries(r.factors).map(([key,val])=>`<div class="factor-item"><span>${safe(labels[key]||key)}</span>
+   <strong>${safe(val.symbol)} = ${format(val.value,2)}</strong>
+   <small>${safe(val.clause)} · ${safe(val.equation)}</small></div>`).join('')+'</div>'+
+ '<p class="factor-note">Hệ số theo điều khoản AISC 360-10. Công thức nominal của Excel 360-05 vẫn đang chờ thẩm tra.</p>'
+}
 function render(){
   const r=latest.result
-  const percent=r.interaction.lrfd_percent
+  const percent=r.interaction.percent
   find('h1').textContent=format(percent,2)+'%'
   const ratio=Math.min(Math.max(percent,0),100)
   const color=percent>100?'#b84a43':percent>85?'#d5a047':'#067d85'
@@ -588,10 +654,14 @@ function render(){
   find('status').textContent='REVIEW REQUIRED'
   find('overview').textContent=`Nhánh uốn ${r.classification.flexure_chapter} · Cánh ${r.classification.flange} · Bụng ${r.classification.web}. Đây không phải kết luận đạt tiêu chuẩn.`
   const s=r.strengths,p=r.section_properties
-  const cards=[['φMn,x',s.phi_mnx_kNm,'kN·m'],['φMn,y',s.phi_mny_kNm,'kN·m'],['φPn (nén)',s.phi_pn_compression_kN,'kN'],['A',p.area_mm2,'mm²']]
+  const lrfd=r.design_method==='LRFD'
+  const cards=[[lrfd?'φMn,x':'Mn,x/Ω',s.available_mnx_kNm,'kN·m'],
+    [lrfd?'φMn,y':'Mn,y/Ω',s.available_mny_kNm,'kN·m'],
+    [lrfd?'φPn (nén)':'Pn/Ω (nén)',s.available_pn_compression_kN,'kN'],['A',p.area_mm2,'mm²']]
   find('metrics').innerHTML=cards.map(([label,value,unit])=>`<div class="metric"><span>${label}</span><strong>${format(value,3)}</strong><small>${unit}</small></div>`).join('')
   const items=[['H1 · N–M',r.interaction.lrfd_percent],['Uốn Mx',r.interaction.moment_x_ratio*100],['Nén/kéo N',r.interaction.axial_ratio*100],['Cắt bụng',r.shear.web_percent],['Cắt cánh',r.shear.flange_percent]]
   find('bars').innerHTML=items.map(([label,pct])=>`<div class="barrow"><div class="barlabel"><span>${label}</span><strong>${format(pct,2)}%</strong></div><div class="bar ${pct>100?'fail':pct>85?'warn':''}"><div style="width:${Math.max(0,Math.min(pct,100))}%"></div></div></div>`).join('')
+  renderFactorTable(r)
   find('checkrows').innerHTML=r.limit_states.map(row=>`<tr><td>${safe(row.clause)}</td><td>${safe(checknames[row.id]||row.id)}</td><td>${format(row.demand,3)}</td><td>${format(row.capacity,3)}</td><td>${format(row.utilization*100,2)}%</td><td><span class="pill ${row.status==='FAIL'?'fail':''}">${row.status}</span></td></tr>`).join('')
   const traces={
     'Flange classification':r.classification.flange,'Web classification':r.classification.web,
@@ -606,7 +676,7 @@ function render(){
   find('warnings').innerHTML=r.warnings.map(w=>`<div class="warning"><strong>${safe(w.code)}</strong>${safe(w.message)}</div>`).join('')
   find('warn-count').textContent=`(${r.warnings.length})`
   find('refline').innerHTML=matchingFixture()?'<b>✓ Đối chiếu dữ liệu mẫu</b> 5/5 chỉ tiêu chính trùng engine PHP Phase 1 trong dung sai 1e−6.':'<span style="color:#8a9aa7">Dữ liệu đã thay đổi — cần đối chiếu thêm với Excel nếu dùng trường hợp này.</span>'
-  find('calc-info').textContent=`${r.engine_version} · ${new Date().toLocaleTimeString('vi-VN')}`
+  find('calc-info').textContent=`${r.design_method} · ${r.engine_version} · ${new Date().toLocaleTimeString('vi-VN')}`
   latest.changed=false
   find('dirtytext').textContent='Đã tính toán. Các thông số hiện tại đang được hiển thị.'
   find('dirtytext').classList.remove('input-changed')
@@ -706,7 +776,8 @@ function run(){
   document.getElementById('shared-status').textContent='Waiting for canonical Section Properties calculation…';
   try{
     latest.input=readInputs()
-    latest.result=calculate(latest.input)
+    latest.method=document.querySelector('input[name="design-method"]:checked')?.value||'LRFD'
+    latest.result=calculate(latest.input,latest.method)
     const s=latest.result
     // Fail closed if our JS engine produces a non-finite number on the result surface.
     for(const key of ['phi_mnx_kNm','phi_mny_kNm','phi_pn_compression_kN']) if(!Number.isFinite(s.strengths[key]) || s.strengths[key]<=0) throw new Error('Khả năng chịu lực không hợp lệ, vui lòng kiểm tra đầu vào.')
@@ -715,7 +786,12 @@ function run(){
     void refreshCanonicalProperties(latest.input,latest.result,generation)
   }catch(err){find('error').textContent=err.message;find('error').style.display='block';find('dirtytext').textContent='Không tính được — vui lòng chỉnh dữ liệu.';latest.result=null}
 }
-function reset(){ latest.input=structuredClone(fixture); updateInputs();run() }
+function reset(){
+ latest.input=structuredClone(fixture)
+ document.querySelector('input[name="design-method"][value="LRFD"]').checked=true
+ latest.method='LRFD'
+ updateInputs();run()
+}
 function markChanged(){latest.changed=true;find('dirtytext').textContent='Đã thay đổi dữ liệu · Nhấn Tính toán để cập nhật.';find('dirtytext').classList.add('input-changed');try{latest.input=readInputs();draw()}catch(_){}}
 
 // Dynamic engineering calculation notebook. All displayed capacities are read
@@ -728,6 +804,16 @@ function buildCalculationSteps(i, r) {
   const result=(x,unit='',digits=3)=>({value:x,unit,digits})
   const row=(label,formula,subst,value,unit,excel='',remark='',indicator='')=>({label,formula,subst,value,unit,excel,remark,indicator})
   const step=(name,subtitle,excel,rows,note='',open=false)=>({name,subtitle,excel,rows,note,open})
+  const method=r.design_method
+  const factor=(key)=>r.factors[key]
+  const availableFormula=(key,nominal)=>method==='LRFD'
+    ? `φ × (${nominal}); φ = ${num(factor(key).value,2)}`
+    : `(${nominal}) / Ω; Ω = ${num(factor(key).value,2)}`
+  const availableSub=(key,nominal)=>method==='LRFD'
+    ? `${num(factor(key).value,2)} × ${num(nominal,4)}`
+    : `${num(nominal,4)} / ${num(factor(key).value,2)}`
+  const availableSymbol=(text)=>method==='LRFD'?`φ${text}`:`${text}/Ω`
+
   const ratioF=c.lambda_flange,ratioW=c.lambda_web,kc=Math.max(.35,Math.min(.76,4/Math.sqrt(ratioW)))
   const Sy=p.sy_mm3,Zy=p.zy_mm3,Sx=p.sx_mm3,Zx=p.zx_mm3
   const mpY=Math.min(Fy*Zy,1.6*Fy*Sy)/1e6
@@ -790,8 +876,8 @@ function buildCalculationSteps(i, r) {
     step('Sức kháng uốn trục yếu M<sub>y</sub>','Minor-axis bending · điều khoản F6 (legacy)','2.Details!D77:D94',[
       row('Nominal plastic M<sub>p,y</sub>','M<sub>p,y</sub> = min(F<sub>y</sub>Z<sub>y</sub>, 1,6F<sub>y</sub>S<sub>y</sub>)',`min(${num(Fy,2)} × ${num(Zy,2)},1,6 × ${num(Fy,2)} × ${num(Sy,2)}) / 10⁶`,mpY,'kN·m','D81'),
       row('Local buckling M<sub>n,FLB</sub>',c.flange==='NONCOMPACT'?'M<sub>n,FLB</sub> = M<sub>p,y</sub> − (M<sub>p,y</sub> − 0,7F<sub>y</sub>Z<sub>y</sub>)(λ<sub>f</sub>−λ<sub>pf</sub>)/(λ<sub>rf</sub>−λ<sub>pf</sub>)':c.flange==='SLENDER'?'M<sub>n,FLB</sub> = (0,69E/λ<sub>f</sub>²)S<sub>y</sub>':'M<sub>n,FLB</sub> = M<sub>p,y</sub>',`Flange ${c.flange} · λf = ${num(ratioF,4)}`,myLocal,'kN·m','D89','Legacy workbook sử dụng Zᵧ tại nhánh nội suy; cần soát lại theo F6.','caution'),
-      row('Sức kháng thiết kế φM<sub>n,y</sub>','φM<sub>n,y</sub> = 0,90 min(M<sub>p,y</sub>, M<sub>n,FLB</sub>)',`0,90 × min(${num(mpY,4)},${num(myLocal,4)})`,a.phi_mny_kNm,'kN·m','D91'),
-      row('Tỷ lệ sử dụng M<sub>y</sub>','D/C<sub>My</sub> = |M<sub>u,y</sub>|/(φM<sub>n,y</sub>)',`${num(Math.abs(f.moment_y_kNm),4)}/${num(a.phi_mny_kNm,4)}`,Math.abs(f.moment_y_kNm)/a.phi_mny_kNm*100,'%','D92'),
+      row('Sức kháng '+availableSymbol('M<sub>n,y</sub>'),availableFormula('flexure','min(M<sub>p,y</sub>,M<sub>n,FLB</sub>)'),availableSub('flexure',r.nominal_strengths.mn_y_kNm),a.phi_mny_kNm,'kN·m','D91'),
+      row('Tỷ lệ sử dụng M<sub>y</sub>','D/C<sub>My</sub> = |M<sub>u,y</sub>|/('+availableSymbol("M<sub>n,y</sub>")+')',`${num(Math.abs(f.moment_y_kNm),4)}/${num(a.phi_mny_kNm,4)}`,Math.abs(f.moment_y_kNm)/a.phi_mny_kNm*100,'%','D92'),
     ],'Phiên bản Excel chưa có kiểm chứng độc lập toàn bộ nhánh F6. Chỉ sử dụng giá trị trong chế độ đối chiếu.'),
     step('Sức kháng uốn trục mạnh M<sub>x</sub>','Major-axis bending · F2–F5 theo phân loại','2.Details!D96:D157',[
       row('Moment dẻo M<sub>p</sub>','M<sub>p</sub> = F<sub>y</sub>Z<sub>x</sub>',`${num(Fy,2)} × ${num(Zx,3)} / 10⁶`,majorMp,'kN·m','D102'),
@@ -802,13 +888,13 @@ function buildCalculationSteps(i, r) {
       row('Nominal strength — LTB',ml,`Nhánh ${majorRule}; Lb = ${num(l.lb_mm,1)} mm`,t.mnx_ltb_kNm,'kN·m','D110'),
       row('Nominal strength — FLB','M<sub>n,FLB</sub> = f(λ<sub>f</sub>, λ<sub>p</sub>, λ<sub>r</sub>, R<sub>pg</sub>, S<sub>x</sub>)',`Cánh ${c.flange}`,t.mnx_local_kNm===null?'N/A':t.mnx_local_kNm,'kN·m','D132'),
       row('Nominal strength — Yield','M<sub>n,Y</sub> = ' + (majorRule==='F5'?'R<sub>pg</sub>F<sub>y</sub>S<sub>x</sub>':'f(Fy, Zx, web slenderness)'),`Nhánh ${majorRule}`,t.mnx_yield_kNm,'kN·m','D149'),
-      row('Sức kháng thiết kế φM<sub>n,x</sub>','φM<sub>n,x</sub> = 0,90 '+applicableMajorLabel,`0,9 × min(${applicableMajor.map(v=>num(v,3)).join(', ')})`,a.phi_mnx_kNm,'kN·m','D154'),
-      row('Sử dụng uốn M<sub>x</sub>','D/C<sub>Mx</sub> = |M<sub>u,x</sub>|/(φM<sub>n,x</sub>)',`${num(Math.abs(f.moment_x_kNm),4)}/${num(a.phi_mnx_kNm,4)}`,inter.moment_x_ratio*100,'%','D155'),
+      row('Sức kháng '+availableSymbol('M<sub>n,x</sub>'),availableFormula('flexure',applicableMajorLabel),availableSub('flexure',r.nominal_strengths.mn_x_kNm),a.phi_mnx_kNm,'kN·m','D154'),
+      row('Sử dụng uốn M<sub>x</sub>','D/C<sub>Mx</sub> = |M<sub>u,x</sub>|/('+availableSymbol("M<sub>n,x</sub>")+')',`${num(Math.abs(f.moment_x_kNm),4)}/${num(a.phi_mnx_kNm,4)}`,inter.moment_x_ratio*100,'%','D155'),
     ],'Nhánh đang chọn là '+majorRule+'. Công thức hiển thị thuộc đường tính toán legacy; kiểm chứng Cb, LTB, FLB theo phiên bản AISC áp dụng trước khi phát hành.',true),
     step('Sức kháng kéo dọc trục','Gross-section yielding · chương D (chưa đủ phá hoại kéo)','2.Details!D159:D177',[
       row('Sức kháng danh định P<sub>n</sub>','P<sub>n</sub> = F<sub>y</sub>A<sub>g</sub>',`${num(Fy,2)} × ${num(p.area_mm2,2)}/1000`,Fy*p.area_mm2/1000,'kN','D172'),
-      row('Sức kháng thiết kế φP<sub>n,t</sub>','φP<sub>n,t</sub> = 0,90 F<sub>y</sub>A<sub>g</sub>',`0,90 × ${num(Fy,2)} × ${num(p.area_mm2,2)}/1000`,a.phi_pn_tension_gross_kN,'kN','D174'),
-      row('D/C kéo chảy dẻo','D/C<sub>t</sub> = max(N,0)/(φP<sub>n,t</sub>)',`${num(Math.max(0,f.axial_kN),4)}/${num(a.phi_pn_tension_gross_kN,4)}`,Math.max(0,f.axial_kN)/a.phi_pn_tension_gross_kN*100,'%','D175'),
+      row('Sức kháng '+availableSymbol('P<sub>n,t</sub>'),availableFormula('tension_gross','F<sub>y</sub>A<sub>g</sub>'),availableSub('tension_gross',r.nominal_strengths.pn_tension_gross_kN),a.phi_pn_tension_gross_kN,'kN','D174'),
+      row('D/C kéo chảy dẻo','D/C<sub>t</sub> = max(N,0)/('+availableSymbol("P<sub>n,t</sub>")+')',`${num(Math.max(0,f.axial_kN),4)}/${num(a.phi_pn_tension_gross_kN,4)}`,Math.max(0,f.axial_kN)/a.phi_pn_tension_gross_kN*100,'%','D175'),
     ],'Chưa kiểm tra đứt tiết diện hữu hiệu (net-section fracture), lỗ bu lông và các giới hạn khác. Không đánh giá tổng thể khả năng kéo.'),
     step('Sức kháng nén dọc trục','Compression · Qs, Qa, Fe, Fcr, φPn · E3/E7 legacy','2.Details!D179:D205',[
       row('Hệ số Q<sub>s</sub>','Q<sub>s</sub> = f(λ<sub>f</sub>, 0,64√(k<sub>c</sub>E/F<sub>y</sub>), 1,17√(k<sub>c</sub>E/F<sub>y</sub>))',`λf = ${num(ratioF,4)}`,t.qs,'','D190'),
@@ -819,12 +905,12 @@ function buildCalculationSteps(i, r) {
       row('Ứng suất Euler F<sub>e,y</sub> — Excel','F<sub>e,y</sub> = F<sub>e,x</sub> <strong>(giữ lỗi W194=Q194)</strong>',`Fe,x = ${num(feX,4)} MPa`,feX,'MPa','W194','Không phải công thức Euler đúng cho trục y, chỉ để đối chiếu.','problem'),
       row('Ứng suất tới hạn F<sub>cr,x</sub>',`F<sub>cr,x</sub> = ${compBranchX}`,`Lx/rx = ${num(l.lx_mm/p.rx_mm,4)}`,t.fcrx_mpa,'MPa','Q196–Q197'),
       row('Ứng suất tới hạn F<sub>cr,y</sub>',`F<sub>cr,y</sub> = ${compBranchY}`,`Lb/ry = ${num(l.lb_mm/p.ry_mm,4)}`,t.fcry_mpa,'MPa','W196–W197'),
-      row('Sức kháng nén φP<sub>n</sub>','φP<sub>n</sub> = 0,90 × min(F<sub>cr,x</sub>,F<sub>cr,y</sub>) × A / 1000',`0,90 × min(${num(t.fcrx_mpa,4)},${num(t.fcry_mpa,4)}) × ${num(p.area_mm2,2)}/1000`,a.phi_pn_compression_kN,'kN','D202'),
+      row('Sức kháng nén '+availableSymbol('P<sub>n</sub>'),availableFormula('compression','F<sub>cr</sub>A'),availableSub('compression',r.nominal_strengths.pn_compression_kN),a.phi_pn_compression_kN,'kN','D202'),
     ],'Lỗi Fe của Excel được đánh dấu trực tiếp. Đây là phép tính “legacy parity”, không dùng để quyết định thiết kế thực.'),
-    step('Tương tác N–M<sub>x</sub>–M<sub>y</sub>','Chương H1 · LRFD interaction','2.Details!D207:D220',[
-      row('Tỷ số lực dọc','P<sub>r</sub>/P<sub>c</sub> = |N|/(φP<sub>n</sub>)',`${num(axial,4)}/${num(totalP,4)} (${isCompression?'nén':'kéo'})`,pRatio,'','K209'),
-      row('Tỷ số M<sub>x</sub>','M<sub>rx</sub>/M<sub>cx</sub> = |M<sub>x</sub>|/(φM<sub>n,x</sub>)',`${num(Math.abs(f.moment_x_kNm),4)}/${num(a.phi_mnx_kNm,4)}`,mxRatio,'','K210'),
-      row('Tỷ số M<sub>y</sub>','M<sub>ry</sub>/M<sub>cy</sub> = ROUND(100|M<sub>y</sub>|/(φM<sub>n,y</sub>); 2)/100',`ROUND(100 × ${num(Math.abs(f.moment_y_kNm),4)}/${num(a.phi_mny_kNm,4)};2)/100`,myRatio,'','K211','Excel làm tròn tỷ lệ My trước khi tổng hợp.','caution'),
+    step('Tương tác N–M<sub>x</sub>–M<sub>y</sub>','Chương H1 · '+method+' interaction','2.Details!D207:D220',[
+      row('Tỷ số lực dọc','P<sub>r</sub>/P<sub>c</sub> = |N|/('+availableSymbol("P<sub>n</sub>")+')',`${num(axial,4)}/${num(totalP,4)} (${isCompression?'nén':'kéo'})`,pRatio,'','K209'),
+      row('Tỷ số M<sub>x</sub>','M<sub>rx</sub>/M<sub>cx</sub> = |M<sub>x</sub>|/('+availableSymbol("M<sub>n,x</sub>")+')',`${num(Math.abs(f.moment_x_kNm),4)}/${num(a.phi_mnx_kNm,4)}`,mxRatio,'','K210'),
+      row('Tỷ số M<sub>y</sub>','M<sub>ry</sub>/M<sub>cy</sub> = ROUND(100|M<sub>y</sub>|/('+availableSymbol("M<sub>n,y</sub>")+'); 2)/100',`ROUND(100 × ${num(Math.abs(f.moment_y_kNm),4)}/${num(a.phi_mny_kNm,4)};2)/100`,myRatio,'','K211','Excel làm tròn tỷ lệ My trước khi tổng hợp.','caution'),
       row('Phương trình áp dụng',pRatio>=.2?'H1-1a: η = P<sub>r</sub>/P<sub>c</sub> + (8/9)(M<sub>rx</sub>/M<sub>cx</sub> + M<sub>ry</sub>/M<sub>cy</sub>)':'H1-1b: η = P<sub>r</sub>/(2P<sub>c</sub>) + M<sub>rx</sub>/M<sub>cx</sub> + M<sub>ry</sub>/M<sub>cy</sub>',pRatio>=.2?`${num(pRatio,7)} + (8/9) × (${num(mxRatio,7)} + ${num(myRatio,7)})`:`${num(pRatio,7)}/2 + ${num(mxRatio,7)} + ${num(myRatio,7)}`,inter.lrfd_utilization,'',`D213 (${intEq})`),
       row('Demand/Capacity H1','D/C<sub>H1</sub> = 100η',`${num(inter.lrfd_utilization,8)} × 100`,inter.lrfd_percent,'%','D213'),
     ],'D/C H1 dưới 100% chỉ phản ánh một nhánh. Không được kết luận cấu kiện đạt khi còn các phép kiểm tra khác chưa thỏa.',true),
@@ -832,11 +918,11 @@ function buildCalculationSteps(i, r) {
       row('Hệ số a/h<sub>w</sub>','a/h<sub>w</sub>',`${num(st.spacing_mm,2)}/${num(hw,2)}`,st.spacing_mm/hw,'','K234'),
       row('Hệ số k<sub>v</sub>',st.spacing_mm===0?'k<sub>v</sub> = 1,2 (a = 0; legacy)':'k<sub>v</sub> = 5 + 5/(a/h<sub>w</sub>)²',st.spacing_mm===0?'a = 0':`5 + 5/(${num(st.spacing_mm/hw,5)})²`,kv,'','K237'),
       row('Hệ số C<sub>v,web</sub>','C<sub>v</sub> = f(h<sub>w</sub>/t<sub>w</sub>, k<sub>v</sub>, E/F<sub>y</sub>)',`h_w/t_w = ${num(ratioW,3)}; kv = ${num(kv,4)}`,t.web_cv,'','D231'),
-      row('Sức kháng cắt bụng φV<sub>n</sub>','φV<sub>n,w</sub> = φ × 0,6F<sub>y</sub>h<sub>w</sub>t<sub>w</sub>C<sub>v</sub>/1000',`0,6 × ${num(Fy,2)} × ${num(hw,2)} × ${num(tw,2)} × ${num(t.web_cv,5)} × φ /1000`,a.phi_vn_web_kN,'kN','D234'),
-      row('D/C cắt bụng','100|V<sub>y</sub>|/(φV<sub>n,w</sub>)',`100 × ${num(Math.abs(f.shear_y_kN),4)}/${num(a.phi_vn_web_kN,4)}`,sh.web_percent,'%','D235'),
+      row('Sức kháng cắt bụng '+availableSymbol('V<sub>n,w</sub>'),availableFormula('shear_web','0,6F<sub>y</sub>h<sub>w</sub>t<sub>w</sub>C<sub>v</sub>'),availableSub('shear_web',r.nominal_strengths.vn_web_kN),a.phi_vn_web_kN,'kN','D234'),
+      row('D/C cắt bụng','100|V<sub>y</sub>|/('+availableSymbol("V<sub>n,w</sub>")+')',`100 × ${num(Math.abs(f.shear_y_kN),4)}/${num(a.phi_vn_web_kN,4)}`,sh.web_percent,'%','D235'),
       row('Hệ số C<sub>v,flange</sub>','C<sub>v</sub> = f(b<sub>f</sub>/t<sub>f</sub>; k<sub>v</sub>=1,2)',`bf/tf = ${num(b/tf,4)}`,t.flange_cv,'','K277'),
-      row('Sức kháng cắt cánh φV<sub>n</sub>','φV<sub>n,f</sub> = 0,9 × 0,6F<sub>y</sub>(2b<sub>f</sub>t<sub>f</sub>)C<sub>v</sub>/1000',`0,9 × 0,6 × ${num(Fy,2)} × (2 × ${num(b,2)} × ${num(tf,2)}) × ${num(t.flange_cv,4)}/1000`,a.phi_vn_flange_kN,'kN','D275'),
-      row('D/C cắt cánh','100|V<sub>x</sub>|/(φV<sub>n,f</sub>)',`100 × ${num(Math.abs(f.shear_x_kN),4)}/${num(a.phi_vn_flange_kN,4)}`,sh.flange_percent,'%','D276'),
+      row('Sức kháng cắt cánh '+availableSymbol('V<sub>n,f</sub>'),availableFormula('shear_flange','0,6F<sub>y</sub>A<sub>f</sub>C<sub>v</sub>'),availableSub('shear_flange',r.nominal_strengths.vn_flange_kN),a.phi_vn_flange_kN,'kN','D275'),
+      row('D/C cắt cánh','100|V<sub>x</sub>|/('+availableSymbol("V<sub>n,f</sub>")+')',`100 × ${num(Math.abs(f.shear_x_kN),4)}/${num(a.phi_vn_flange_kN,4)}`,sh.flange_percent,'%','D276'),
     ],'Nhãn Vx/Vy phản ánh đúng cách map lực cắt của workbook, cần quy chuẩn lại khi kết nối SAP/ETABS.'),
     step('Kiểm tra sườn tăng cứng & kết luận','Tension-field action và các cảnh báo bắt buộc','2.Details!D244:D266',[
       row('Bề rộng / bề dày sườn','b<sub>s</sub>/t<sub>s</sub> ≤ 0,56√(E/F<sub>y</sub>)',`${num(st.width_mm,2)}/${num(st.thickness_mm,2)} ≤ ${num(stLim,4)}`,`${num(ratioSt,4)} · ${widthLabel}`,'','D258','',''+(sh.stiffener_width_ok?'':'problem')),
@@ -880,10 +966,16 @@ document.querySelectorAll('.tab').forEach(button=>button.addEventListener('click
   document.querySelectorAll('.tab-panel').forEach(t=>t.classList.toggle('hidden',t.id!==button.dataset.tab))
 }))
 document.querySelectorAll('[data-key]').forEach(el=>el.addEventListener('input',markChanged))
+document.querySelectorAll('input[name="design-method"]').forEach(el=>el.addEventListener('change',event=>{
+ document.getElementById('method-explanation').textContent=event.target.value==='ASD'
+  ? 'ASD: sử dụng nội lực từ tổ hợp tải trọng ASD/service. KHÔNG tự quy đổi nội lực LRFD.'
+  : 'LRFD: sử dụng nội lực từ tổ hợp tải trọng LRFD/factored. KHÔNG tự quy đổi nội lực ASD.'
+ run()
+}))
 find('run').addEventListener('click',run);find('preset').addEventListener('click',reset)
 find('export').addEventListener('click',()=>{
   if (!latest.result){run();if(!latest.result)return}
-  const content=JSON.stringify({meta:{app:'GeekCalculus',module:'HI_DOUBLY_SYMMETRIC',mode:'LEGACY_EXCEL_PARITY',exported_at:new Date().toISOString()},input:latest.input,result:latest.result,section_properties_shared:sharedResult},null,2)
+  const content=JSON.stringify({meta:{app:'GeekCalculus',module:'HI_DOUBLY_SYMMETRIC',mode:'LEGACY_EXCEL_PARITY',design_method:latest.method,standard_factor_edition:'AISC360-10',exported_at:new Date().toISOString()},input:latest.input,result:latest.result,section_properties_shared:sharedResult},null,2)
   const url=URL.createObjectURL(new Blob([content],{type:'application/json'})), a=document.createElement('a')
   a.href=url;a.download='GeekCalculus_HI_Phase1_Parity_Result.json';a.click();URL.revokeObjectURL(url)
 })
@@ -898,6 +990,10 @@ find('file').addEventListener('change',async event=>{
       for(const k of Object.keys(values))if(!Object.hasOwn(input[section],k))throw new Error('Thiếu trường '+section+'.'+k)
     }
     latest.input=structuredClone(Object.fromEntries(Object.entries(fixture).map(([k,def])=>[k,Object.fromEntries(Object.keys(def).map(name=>[name,input[k][name]]))])))
+    const savedMethod=data.meta?.design_method ?? data.result?.design_method ?? 'LRFD'
+    if(!['LRFD','ASD'].includes(savedMethod))throw new Error('Design method phải là LRFD hoặc ASD.')
+    document.querySelector('input[name="design-method"][value="'+savedMethod+'"]').checked=true
+    latest.method=savedMethod
     updateInputs();run()
   }catch(err){find('error').textContent='Nhập JSON thất bại: '+err.message;find('error').style.display='block'}finally{event.target.value=''}
 })
@@ -923,7 +1019,7 @@ const dictionary={
 'footer':['Tính toán cục bộ · Chưa được chấp thuận thiết kế.','Calculator runs locally · Not approved for design.']
 };
 const localizedText = new Map([
-['Kiểm tra sức kháng cấu kiện I/H đối xứng · LRFD · Reference workbook ↔ Calculation engine','Doubly symmetric I/H member strength · LRFD · Workbook ↔ Calculation engine'],
+['Kiểm tra sức kháng cấu kiện I/H đối xứng · LRFD / ASD · Reference workbook ↔ Calculation engine','Doubly symmetric I/H member strength · LRFD / ASD · Workbook ↔ Calculation engine'],
 ['Chế độ đối chiếu — chưa được chấp thuận thiết kế','Excel parity only — not approved for design'],
 ['Bảng Excel gốc ghi AISC 360-05. Phiên bản này giữ nguyên một số logic có lỗi để so sánh với Excel (Cb dùng dấu, Fe trục yếu và kiểm tra sườn). ','The source workbook states AISC 360-05. This preview preserves legacy behavior for parity (signed Cb, weak-axis Fe and stiffeners). '],
 ['Không sử dụng kết quả để thiết kế thi công hoặc khẳng định đạt AISC 360-10.','Do not use this output for construction design or claim AISC 360-10 compliance.'],

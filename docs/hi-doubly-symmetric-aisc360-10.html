@@ -87,6 +87,41 @@ body{background:#f5f6f8;color:#202d3b}
 @media(max-width:750px){.shell{display:block}.sidenav{height:auto;position:static;max-height:320px;overflow:auto}.sidenav .global-nav,.sidenav .sidebottom{display:block}.sidenav .nav-caption{display:block}.sidenav .logo{padding:12px 18px}.topbar{position:sticky;top:0}.notebook-pages{padding:13px}.outline-header{position:static}}
 @media print{.sidenav,.topbar{display:none!important}.shell{display:block}.notebook-pages{padding:0}}
 
+
+.shared-section{margin-top:18px;margin-bottom:20px}
+.shared-body{padding:18px 22px;display:grid;gap:15px}
+.shared-notice,.shared-caveat{margin:0;line-height:1.65;font-size:12px;color:#516a7e;border-left:3px solid #568eb0;padding:8px 12px;background:#f2f6fa}
+#shared-status{font-size:12px;color:#265b83;font-weight:700}
+.shared-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:10px}
+.shared-stat{background:#f8fafc;border:1px solid #d9e1e7;padding:11px 12px;border-radius:8px;min-width:0}
+.shared-stat span{display:block;font-size:12px;color:#6a8395}
+.shared-stat strong{display:block;color:#234761;font-size:16px;margin:5px 0;word-wrap:break-word}
+.shared-stat small{font-size:10px;color:#7e94a3}
+.shared-comparisons{border:1px solid #d8e5ec;border-radius:7px;padding:13px;font-size:12px;line-height:1.65;background:#f8fbfd}
+.shared-comparisons p{margin:5px 0}
+.shared-differences p{color:#9b4b35}
+.shared-reference{border:1px solid #d9e1e8;border-radius:9px;padding:12px}
+.shared-reference summary{font-size:13px;font-weight:700;cursor:pointer}
+.shared-search{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:14px 0;font-size:12px}
+.shared-search input{flex:1 1 200px;max-width:480px;border:1px solid #c3d2dd;border-radius:6px;padding:9px;background:white}
+.shared-group{border:1px solid #d8dfe6;border-radius:6px;margin-bottom:10px;padding:7px 11px}
+.shared-group>summary{font-size:13px;color:#214562;font-weight:700;padding:7px;cursor:pointer}
+.shared-group>summary span{float:right;color:#6b8597;font-size:11px;font-weight:400}
+.shared-table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:12px}
+.shared-table th{background:#edf2f6;padding:10px;text-align:left;white-space:normal}
+.shared-table td{padding:10px 9px;vertical-align:top;border-bottom:1px solid #e1e6eb;text-align:left!important;white-space:normal;overflow-wrap:anywhere}
+.shared-table th:nth-child(1){width:17%}
+.shared-table th:nth-child(2){width:47%}
+.shared-table th:nth-child(3){width:18%}
+.shared-table th:nth-child(4){width:18%}
+.shared-table td small{display:block;font-size:10px;color:#708798;margin-top:6px}
+.shared-formula{font-family:Cambria,Georgia,serif;font-size:12px;color:#214663}
+.shared-substitution{font-family:Consolas,monospace;color:#69849a;font-size:11px;margin-top:8px}
+.shared-method{font-size:11px;color:#436a7f}
+.shared-result{font-weight:700;font-variant-numeric:tabular-nums}
+.shared-table tr[hidden]{display:none}
+@media(max-width:800px){.shared-body{padding:12px}.shared-table{min-width:760px}}
+
 </style></head><body>
 <div class="shell">
 
@@ -108,6 +143,7 @@ body{background:#f5f6f8;color:#202d3b}
     <a class="outline-link outline-parent" href="#results-start" data-outline="results" data-l10n="resultstree">▾ &nbsp; Results</a>
     <a class="outline-link outline-child" href="#input-card" data-outline="input" data-l10n="inputtree">01 &nbsp; Input Parameters</a>
     <a class="outline-link outline-child" href="#calculation-results" data-outline="checks" data-l10n="resulttree">02 &nbsp; Calculation Results</a>
+    <a class="outline-link outline-child" href="#shared-section" data-outline="shared" data-l10n="sharedtree">02B &nbsp; Shared Section Properties</a>
     <a class="outline-link outline-child" href="#calculation-notebook" data-outline="details" data-l10n="detailstree">03 &nbsp; Design calculations</a>
   </nav>
   <div id="sidebar-step-slot"></div>
@@ -157,6 +193,20 @@ body{background:#f5f6f8;color:#202d3b}
 <div class="details"><details><summary>⊞ &nbsp; Chi tiết phân loại & công thức trung gian</summary><div class="tracegrid" id="trace"></div></details></div>
 <div class="resultsection"><h3>Engineering warnings <span style="font-weight:400;color:#9aa5af" id="warn-count"></span></h3><div class="warning-list" id="warnings"></div></div>
 <div class="minor-note">Mọi kết quả được tính cục bộ trên máy, không tải dữ liệu lên server.</div></section></div>
+
+<section class="card shared-section" id="shared-section" aria-labelledby="shared-section-heading">
+<header class="cardhead"><h2 id="shared-section-heading">02B &nbsp; Section Properties · Shared Calculation Engine</h2><small id="shared-version">Shared numerical core · geometry only</small></header>
+<div class="shared-body">
+<p class="shared-notice">Section Properties is the single numerical source for gross section geometry and advanced mechanics. The current AISC member-resistance checker remains in Legacy Excel Parity mode; shared section values do not silently overwrite unverified LRFD equations.</p>
+<div id="shared-status" role="status" aria-live="polite">Calculating canonical section properties…</div>
+<div class="shared-summary" id="shared-summary"></div>
+<div id="shared-comparisons" class="shared-comparisons"></div>
+<details open class="shared-reference"><summary>Shared formula report · section geometry / advanced mechanics</summary>
+<div class="shared-search"><label for="shared-filter">Search formulas / Tìm công thức</label><input id="shared-filter" type="search" placeholder="A, Ix, Iy, J, Cw, shear area, warping…" autocomplete="off"></div>
+<div id="shared-formula-table"></div></details>
+<p class="shared-caveat">Geometry references describe the Section Properties mathematical model, not AISC 360-10 member-strength compliance. Advanced thin-wall properties are model-dependent. See the formula assumptions and comparison notes.</p>
+</div>
+</section>
 
 <section class="card calc-notebook" id="calculation-notebook" aria-label="Thuyết minh tính toán từng bước">
   <header class="notebook-head"><div><h2>03 &nbsp; Calculation Details · Step by Step</h2><p>Thuyết minh theo trình tự kiểm tra · Công thức ký tự có chỉ số dưới/trên · Thay số theo dữ liệu hiện tại · Trích dẫn điều khoản <strong>AISC 360-10</strong></p></div>
@@ -563,7 +613,97 @@ function render(){
   find('error').style.display='none'
   renderCalculationNotebook()
 }
+
+let sharedRequestSequence=0;
+let sharedResult=null;
+const sharedLookup={
+ area_mm2:['A','mm²'], ix_mm4:['Ix','mm⁴'], iy_mm4:['Iy','mm⁴'],
+ sx_mm3:['Sx','mm³'], sy_mm3:['Sy','mm³'],
+ zx_mm3:['Zx','mm³'], zy_mm3:['Zy','mm³'],
+ rx_mm:['rx','mm'],ry_mm:['ry','mm'],
+ torsion_constant_j_mm4:['J','mm⁴'],
+ warping_constant_cw_mm6:['Cw','mm⁶'],
+ shear_center_x_mm:['xSC','mm'],shear_center_y_mm:['ySC','mm'],
+ effective_shear_area_x_mm2:['Asx','mm²'],
+ effective_shear_area_y_mm2:['Asy','mm²'],
+}
+const propertyGroups=[
+ ['geometric.','01 · Geometric properties'],
+ ['elastic.','02 · Elastic moduli / inertias'],
+ ['plastic.','03 · Plastic neutral axes and moduli'],
+ ['principal.','04 · Principal axes'],
+ ['advanced.','05 · Torsion, warping and shear area'],
+ ['mechanics.geometry.','06 · Advanced geometric mechanics'],
+ ['mechanics.advanced.','07 · Advanced torsion / shear / warping mechanics'],
+]
+function formatShared(value,unit){
+ if(value===null||value===undefined)return '—';
+ if(typeof value==='number')return Number.isFinite(value)?format(value,6):'—';
+ if(typeof value==='string')return safe(value);
+ if(typeof value==='object')return safe(JSON.stringify(value));
+ return safe(String(value));
+}
+function renderSharedReport(result){
+ const summary=document.getElementById('shared-summary');
+ const overview=document.getElementById('shared-status');
+ const comparison=document.getElementById('shared-comparisons');
+ const output=document.getElementById('shared-formula-table');
+ document.getElementById('shared-version').textContent=`Solver ${result.solver_version} · Formulas ${result.formula_library_version}`;
+ overview.textContent=`Section Properties: ${result.entries.length} formula entries · ${result.geometry_hash.slice(0,12)}… · Units mm`;
+ summary.innerHTML=Object.entries(sharedLookup).map(([key,[symbol,unit]])=>{
+  const v=result.canonical[key];
+  const printed=typeof v==='number'?format(v,4):'—';
+  return `<div class="shared-stat"><span>${safe(symbol)}</span><strong>${safe(printed)}</strong><small>${unit}</small></div>`;
+ }).join('');
+ const differences=result.comparisons.filter(c=>!c.matching);
+ comparison.innerHTML=`<strong>Excel parity cross-check</strong> · ${result.comparisons.length} mapped legacy quantities · ${differences.length} differences (relative tolerance 10⁻⁶).
+ ${differences.length?`<div class="shared-differences">${differences.map(d=>`<p><b>${safe(d.key)}</b>: canonical ${format(d.canonical,6)} vs. legacy ${format(d.legacy,6)} · ${format(d.relative_difference*100,6)}% · ${safe(d.design_use)}</p>`).join('')}</div>`:''}
+ <p>Legacy LRFD capacity values remain unchanged. A J mismatch can reflect different thin-wall conventions; no automatic substitution is permitted.</p>`;
+ output.innerHTML=propertyGroups.map(([prefix,title])=>{
+  const entries=result.entries.filter(x=>x.key.startsWith(prefix));
+  if(!entries.length)return '';
+  return `<details class="shared-group" open><summary>${safe(title)} <span>${entries.length} entries</span></summary>
+  <div class="tablewrap"><table class="shared-table"><thead><tr><th>Property</th><th>Formula · substitution (shared engine)</th><th>Value</th><th>Method / status</th></tr></thead><tbody>
+  ${entries.map(p=>`<tr data-search="${safe((p.key+' '+p.symbol+' '+p.formula).toLowerCase())}">
+  <td><strong>${safe(p.symbol)}</strong><small>${safe(p.key)}</small></td>
+  <td><div class="shared-formula">${safe(p.formula||'—')}</div><div class="shared-substitution">↳ ${safe(p.substitution||'—')}</div></td>
+  <td class="shared-result">${formatShared(p.value,p.unit)} <small>${safe(p.unit)}</small></td>
+  <td><span class="shared-method">${safe(p.method||'—')}</span><small>${safe(p.status)}${p.reason?' · '+safe(p.reason):''}</small></td>
+  </tr>`).join('')}</tbody></table></div></details>`;
+ }).join('')+`<details class="shared-group"><summary>Assumptions and scope (${result.assumptions.length})</summary><ul>${result.assumptions.map(a=>`<li>${safe(a)}</li>`).join('')}</ul></details>`;
+ const filter=document.getElementById('shared-filter');
+ if(filter && filter.value)filter.dispatchEvent(new Event('input'));
+}
+async function refreshCanonicalProperties(input,legacy,generation){
+ const node=document.getElementById('shared-status');
+ node.textContent='Calculating shared Section Properties geometry and mechanics…';
+ try{
+  const module=await import('./hi-section-properties-core.mjs');
+  const result=await module.calculateHISectionProperties(input.section,legacy.section_properties);
+  if(generation!==sharedRequestSequence)return;
+  if(!latest.result)return;
+  sharedResult=result;
+  renderSharedReport(result);
+ }catch(error){
+  if(generation!==sharedRequestSequence)return;
+  sharedResult=null;
+  node.textContent='Shared Section Properties could not be loaded: '+error.message;
+  document.getElementById('shared-summary').innerHTML='';
+  document.getElementById('shared-comparisons').textContent='';
+  document.getElementById('shared-formula-table').textContent='';
+ }
+}
+document.getElementById('shared-filter')?.addEventListener('input',event=>{
+ const search=event.target.value.trim().toLowerCase();
+ document.querySelectorAll('.shared-table tbody tr').forEach(tr=>{
+  tr.hidden=!!search && !tr.dataset.search.includes(search);
+ });
+});
+
 function run(){
+  const generation=++sharedRequestSequence;
+  sharedResult=null;
+  document.getElementById('shared-status').textContent='Waiting for canonical Section Properties calculation…';
   try{
     latest.input=readInputs()
     latest.result=calculate(latest.input)
@@ -572,6 +712,7 @@ function run(){
     for(const key of ['phi_mnx_kNm','phi_mny_kNm','phi_pn_compression_kN']) if(!Number.isFinite(s.strengths[key]) || s.strengths[key]<=0) throw new Error('Khả năng chịu lực không hợp lệ, vui lòng kiểm tra đầu vào.')
     if(!Number.isFinite(s.interaction.lrfd_percent)) throw new Error('Giá trị tương tác không hữu hạn.')
     render()
+    void refreshCanonicalProperties(latest.input,latest.result,generation)
   }catch(err){find('error').textContent=err.message;find('error').style.display='block';find('dirtytext').textContent='Không tính được — vui lòng chỉnh dữ liệu.';latest.result=null}
 }
 function reset(){ latest.input=structuredClone(fixture); updateInputs();run() }
@@ -742,7 +883,7 @@ document.querySelectorAll('[data-key]').forEach(el=>el.addEventListener('input',
 find('run').addEventListener('click',run);find('preset').addEventListener('click',reset)
 find('export').addEventListener('click',()=>{
   if (!latest.result){run();if(!latest.result)return}
-  const content=JSON.stringify({meta:{app:'GeekCalculus',module:'HI_DOUBLY_SYMMETRIC',mode:'LEGACY_EXCEL_PARITY',exported_at:new Date().toISOString()},input:latest.input,result:latest.result},null,2)
+  const content=JSON.stringify({meta:{app:'GeekCalculus',module:'HI_DOUBLY_SYMMETRIC',mode:'LEGACY_EXCEL_PARITY',exported_at:new Date().toISOString()},input:latest.input,result:latest.result,section_properties_shared:sharedResult},null,2)
   const url=URL.createObjectURL(new Blob([content],{type:'application/json'})), a=document.createElement('a')
   a.href=url;a.download='GeekCalculus_HI_Phase1_Parity_Result.json';a.click();URL.revokeObjectURL(url)
 })
@@ -777,6 +918,7 @@ const dictionary={
 'contents':['Mục lục','Contents'],'resultstree':['▾   Kết quả','▾   Results'],
 'inputtree':['01   Thông số đầu vào','01   Input Parameters'],
 'resulttree':['02   Kết quả tính toán','02   Calculation Results'],
+'sharedtree':['02B   Section Properties dùng chung','02B   Shared Section Properties'],
 'detailstree':['03   Thuyết minh tính toán','03   Design calculations'],
 'footer':['Tính toán cục bộ · Chưa được chấp thuận thiết kế.','Calculator runs locally · Not approved for design.']
 };

@@ -64,7 +64,7 @@ class ImportStandardsOutline extends Command
                     if (!preg_match('/^[A-N][0-9]{1,2}-[0-9]+[a-z]?$/', $eq['label'] ?? '') ||
                         !is_int($eq['pdf_page'] ?? null) ||
                         $eq['pdf_page'] < 57 || $eq['pdf_page'] >= 297) {
-                        throw new \\RuntimeException('Invalid equation candidate');
+                        throw new \RuntimeException('Invalid equation candidate');
                     }
                     $clause = DB::table('standard_clauses')
                         ->where('edition_id', $edition->id)->where('kind','normative')

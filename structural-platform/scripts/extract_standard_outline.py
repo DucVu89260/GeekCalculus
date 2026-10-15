@@ -46,7 +46,7 @@ def extract(pdf_path: Path):
     candidates = {}
     for page_num in range(57, min(297, len(doc) + 1)):
         text = doc[page_num - 1].get_text()
-        for label in re.findall(r"\\(([A-N]\\d{1,2}-\\d+[a-z]?)\\)", text):
+        for label in re.findall(r"\(([A-N]\d{1,2}-\d+[a-z]?)\)", text):
             clause = label.split("-")[0]
             candidates.setdefault(label, {"label": label, "clause_code": clause,
                                           "pdf_page": page_num,

@@ -8,6 +8,7 @@ const props = defineProps({ locale: { type: String, required: true } })
 
 const selectedId = ref('')
 const standardsDialogOpen = ref(false)
+const craneStandardOpen = ref(false)
 const closeDialogButton = ref(null)
 let originalTrigger = null
 const designStandards = [
@@ -18,7 +19,8 @@ const designStandards = [
 ]
 async function selectSection(componentId, event) {
   selectedId.value = componentId
-  if (componentId !== 'symmetric_i') {
+  craneStandardOpen.value = false
+  if (componentId !== 'symmetric_i' && componentId !== 'crane_beam') {
     standardsDialogOpen.value = false
     return
   }
@@ -34,6 +36,7 @@ function closeStandardsDialog() {
 function openDesignStandard(code) {
   if (code !== 'aisc360-10') return
   standardsDialogOpen.value = false
+  if (selectedId.value === 'crane_beam') { craneStandardOpen.value = true; return }
   // This file is also present in Vite public/, so GitHub Pages and local demo builds agree.
   const path = `${import.meta.env.BASE_URL}hi-doubly-symmetric-aisc360-10.html`
   window.location.assign(new URL(path, window.location.origin).href)
@@ -41,10 +44,10 @@ function openDesignStandard(code) {
 
 const text = {
   vi: { title: 'Chọn loại tiết diện', description: 'Chọn nhóm cấu kiện để mở chức năng tương ứng.', pending: 'Chức năng này đang được phát triển.',
-    chooseStandard: 'Chọn tiêu chuẩn thiết kế', standardDescription: 'Chọn tiêu chuẩn để mở bảng tính cấu kiện I/H đối xứng.', preview: 'Đang kiểm chứng · Phase 1', comingSoon: 'Đang phát triển', dismiss: 'Đóng', previewNote: 'AISC 360-10 hiện chỉ mở bản đối chiếu Excel AISC 360-05, chưa phải công cụ thiết kế được xác minh theo tiêu chuẩn.',
+    chooseStandard: 'Chọn tiêu chuẩn thiết kế', standardDescription: 'Chọn tiêu chuẩn để mở bảng tính cấu kiện.', preview: 'Đang kiểm chứng · Phase 1', comingSoon: 'Đang phát triển', dismiss: 'Đóng', previewNote: 'AISC 360-10 hiện chỉ mở bản đối chiếu Excel AISC 360-05, chưa phải công cụ thiết kế được xác minh theo tiêu chuẩn.',
     crane_beam: 'Dầm cầu trục · I/H bất đối xứng', symmetric_i: 'Hai cánh giống nhau', asymmetric_i: 'Cánh trên và dưới độc lập', channel: 'Tiết diện U/C', angle: 'Tiết diện góc L', tee: 'Tiết diện chữ T', double_angle: 'Hai góc đối lưng', circle: 'Tròn đặc', chs: 'Ống tròn', shs_rhs: 'Hộp chữ nhật / vuông' },
   en: { title: 'Choose a section type', description: 'Choose a member family to open its workspace.', pending: 'This feature is in development.',
-    chooseStandard: 'Choose design standard', standardDescription: 'Select a standard for the symmetric I/H calculation workspace.', preview: 'Under verification · Phase 1', comingSoon: 'Coming soon', dismiss: 'Close', previewNote: 'AISC 360-10 currently opens an AISC 360-05 Excel parity preview; it is not a code-verified design tool.',
+    chooseStandard: 'Choose design standard', standardDescription: 'Select a standard for the component calculation workspace.', preview: 'Under verification · Phase 1', comingSoon: 'Coming soon', dismiss: 'Close', previewNote: 'AISC 360-10 currently opens an AISC 360-05 Excel parity preview; it is not a code-verified design tool.',
     crane_beam: 'Crane runway girder · Asymmetric I/H', symmetric_i: 'Equal flanges', asymmetric_i: 'Independent upper and lower flanges', channel: 'U/C section', angle: 'L section', tee: 'T section', double_angle: 'Back-to-back angles', circle: 'Solid circle', chs: 'Circular hollow section', shs_rhs: 'Rectangular / square hollow section' },
 }
 const t = key => text[props.locale]?.[key] ?? text.en[key]
@@ -72,7 +75,7 @@ const selected = computed(() => components.find(component => component.id === se
     <div v-if="standardsDialogOpen" class="steel-standards-backdrop" @click.self="closeStandardsDialog">
       <section class="steel-standards-dialog" role="dialog" aria-modal="true" :aria-label="t('chooseStandard')" @keydown.esc.stop.prevent="closeStandardsDialog">
         <header class="steel-standards-header">
-          <div><small>Steel Design › Component › Symmetric I/H</small><h3>{{ t('chooseStandard') }}</h3><p>{{ t('standardDescription') }}</p></div>
+          <div><small>Steel Design › Component › {{ selectedId === 'crane_beam' ? 'Crane Beam' : 'Symmetric I/H' }}</small><h3>{{ t('chooseStandard') }}</h3><p>{{ t('standardDescription') }}</p></div>
           <button ref="closeDialogButton" type="button" class="steel-standards-close" :aria-label="t('dismiss')" @click="closeStandardsDialog">×</button>
         </header>
         <div class="steel-standards-grid">
@@ -82,10 +85,10 @@ const selected = computed(() => components.find(component => component.id === se
             <span aria-hidden="true">{{ standard.ready ? '→' : '○' }}</span>
           </button>
         </div>
-        <p class="steel-standards-warning">{{ t('previewNote') }}</p>
+        <p class="steel-standards-warning">{{ selectedId === 'crane_beam' ? 'AISC 360-10 ASD · Bản chuyển thể Excel đang được kiểm chứng. Những điều kiện chưa đối chiếu sẽ hiển thị NOT VERIFIED.' : t('previewNote') }}</p>
       </section>
     </div>
-    <CraneBeamView v-if="selectedId === 'crane_beam'" :locale="locale" />
+    <CraneBeamView v-if="selectedId === 'crane_beam' && craneStandardOpen && !standardsDialogOpen" :locale="locale" />
     <section v-if="selected && selected.id !== 'symmetric_i' && selected.id !== 'crane_beam'" class="steel-component-workspace" :data-component="selected.id" :aria-label="selected.title" aria-live="polite">
       <span class="steel-component-workspace-image" aria-hidden="true"><SectionGeometrySketch :profile-id="selected.id" :dimensions="selected.profile.default_dimensions" :locale="locale" thumbnail /></span>
       <div><h3>{{ selected.title }}</h3><p>{{ t('pending') }}</p></div>

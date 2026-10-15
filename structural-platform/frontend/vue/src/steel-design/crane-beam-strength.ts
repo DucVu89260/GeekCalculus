@@ -1,0 +1,95 @@
+import { availableStrength, factorNotation, selectedMethod } from '../../../../standards/aisc360-10-resistance'
+
+/**
+ * AISC 360-10 crane beam strength calculation.
+ * Uses the shared Section Properties numerical core for geometric properties.
+ * Every check explicitly reports its coverage; unsupported limit states remain NOT VERIFIED.
+ */
+export function calculateCraneStrength(section, dimensions, actions, requestedMethod) {
+  const method = selectedMethod(requestedMethod)
+  const a = actions
+  const d = dimensions
+  const finite = x => typeof x === 'number' && Number.isFinite(x)
+  const positive = x => finite(x) && x > 0
+  const checks = []
+  function check(id, clause, label, demand, nominal, factorKey, formula, coverage = 'SCOPED', warnings = []) {
+    const capacity = finite(nominal) && nominal >= 0 ? availableStrength(nominal, method, factorKey) : null
+    const ratio = capacity > 0 && finite(demand) ? Math.abs(demand) / capacity : null
+    checks.push({
+      id, clause, label, demand, nominal, capacity, ratio,
+      status: coverage === 'SCOPED' && ratio !== null ? (ratio <= 1 ? 'PRELIMINARY PASS' : 'PRELIMINARY FAIL') : 'NOT VERIFIED',
+      coverage, formula, factor: factorNotation(method, factorKey), warnings,
+    })
+  }
+  function pending(id, clause, label, reason) {
+    checks.push({id,clause,label,demand:null,nominal:null,capacity:null,ratio:null,status:'NOT VERIFIED',coverage:'PENDING',formula:'',warnings:[reason]})
+  }
+  if (![a.fy,a.e,a.mx_knm,a.my_knm,a.vy_kn,a.vx_kn,a.n_kn,a.klx_mm,a.kly_mm,d.depth,d.top_flange_width,d.bottom_flange_width,d.top_flange_thickness,d.bottom_flange_thickness,d.web_thickness]
+    .every(finite) || !positive(a.fy)||!positive(a.e)||!positive(a.klx_mm)||!positive(a.kly_mm)) {
+    throw new RangeError('Invalid engineering inputs. Provide E, Fy, KLx, KLy and signed member actions.')
+  }
+  const area = section.properties.geometric.area
+  const elastic = section.properties.elastic
+  const plastic = section.properties.plastic
+  const webDepth = d.depth - d.top_flange_thickness - d.bottom_flange_thickness
+  if (!(webDepth > 0) || !positive(area) || !positive(elastic.rx) || !positive(elastic.ry)) throw new RangeError('Invalid section properties')
+  const webLambda = webDepth / d.web_thickness
+  const flangeTopLambda = d.top_flange_width / (2 * d.top_flange_thickness)
+  const flangeBottomLambda = d.bottom_flange_width / (2 * d.bottom_flange_thickness)
+  const sqrtEFy = Math.sqrt(a.e / a.fy)
+  const slenderWebCompression = webLambda > 1.49 * sqrtEFy
+  const slenderTopCompression = flangeTopLambda > .56 * sqrtEFy
+  const slenderBottomCompression = flangeBottomLambda > .56 * sqrtEFy
+  const compressionSlender = slenderWebCompression || slenderTopCompression || slenderBottomCompression
+
+  // E3 only for nonslender elements; E7 effective-area approach is separate.
+  const feX = Math.PI ** 2 * a.e / (a.klx_mm / elastic.rx) ** 2
+  const feY = Math.PI ** 2 * a.e / (a.kly_mm / elastic.ry) ** 2
+  const fe = Math.min(feX,feY)
+  const fcr = a.fy / fe <= 2.25 ? .658 ** (a.fy / fe) * a.fy : .877 * fe
+  if (!compressionSlender) {
+    check('compression_e3','E3','Axial compression (nonslender I/H)',Math.max(-a.n_kn,0),fcr * area / 1000,
+      'COMPRESSION','Fe = π²E/(KL/r)²; Fcr = 0.658^(Fy/Fe)Fy or 0.877Fe; Pn = Fcr A')
+  } else {
+    pending('compression_e7','E7','Compression with slender elements','E7 effective-width/effective-area Qs/Qa not yet reproduced from Excel; E3 must not be applied.')
+  }
+
+  // F4 strong-axis yielding is a component of full F4; LTB/web local buckling pending.
+  if (plastic && positive(plastic.zx)) {
+    check('flexure_f4_yield','F4','Major-axis yielding component only',Math.abs(a.mx_knm),a.fy * plastic.zx / 1e6,
+      'FLEXURE','Mny = Fy Zx; this does NOT represent governing F4 Mn','COMPONENT_ONLY',
+      ['F4 lateral torsional buckling, compression flange local buckling, web plastification require additional equations.'])
+  } else pending('flexure_f4_yield','F4','Strong-axis yielding','Plastic modulus Zx not available from shared engine.')
+  pending('flexure_f4_governing','F4','Governing major-axis flexure','Missing Lb/Cb, Sxc, Sxt, hc/hp, Cw, J and complete F4 state selection; do not claim F4 capacity.')
+
+  // F6 yielding component for doubly/singly symmetric I-section about minor axis.
+  // Further flange local buckling can govern and remains unverified here.
+  if (plastic && positive(plastic.zy)) {
+    const sy = Math.min(elastic.sy_positive,elastic.sy_negative)
+    const mny = Math.min(a.fy * plastic.zy, 1.6 * a.fy * sy) / 1e6
+    check('flexure_f6_yield','F6','Minor-axis yielding component only',Math.abs(a.my_knm),mny,
+      'FLEXURE','Mny = min(Fy Zy, 1.6 Fy Sy)','COMPONENT_ONLY',
+      ['Compression flange local buckling F6 must also be checked.'])
+  } else pending('flexure_f6_yield','F6','Weak-axis yielding','Plastic modulus Zy not available.')
+  pending('flexure_f6_governing','F6','Governing minor-axis flexure','F6 flange local buckling for top and bottom flanges still requires Excel parity.')
+
+  // G2 rolled exceptional factor is disallowed for built-up crane I sections.
+  const kv = 5.0
+  const lambda1 = 1.10 * Math.sqrt(kv * a.e / a.fy)
+  const lambda2 = 1.37 * Math.sqrt(kv * a.e / a.fy)
+  const cv = webLambda <= lambda1 ? 1
+    : webLambda <= lambda2 ? lambda1 / webLambda
+    : 1.51 * kv * a.e / (webLambda ** 2 * a.fy)
+  const aw = d.depth * d.web_thickness
+  check('shear_g2','G2','Web shear without tension field action',Math.abs(a.vy_kn),.6 * a.fy * aw * cv / 1000,
+    'SHEAR_GENERAL','Vn = 0.6 Fy Aw Cv; kv = 5 for unstiffened web; stiffener/tension-field paths excluded.','SCOPED',
+    ['For crane-specific transverse stiffeners, verify kv, panel aspect ratio and applicability to web dimensions.'])
+  pending('shear_g7','G7','Weak-axis shear through flanges','G7 weak-axis shear capacity for both asymmetric flanges not yet benchmarked to AISC/Excel.')
+  pending('interaction_h1','H1','Combined axial and biaxial bending','Requires GOVERNING available F4/F6 and E3/E7 strengths. Component-only yielding must not enter H1.')
+
+  return { method, edition:'AISC360-10', checks,
+    summary_status:'NOT VERIFIED', geometry_source:'Section Properties / Asymmetric I/H',
+    factors: {flexure:factorNotation(method,'FLEXURE'),compression:factorNotation(method,'COMPRESSION'),shear:factorNotation(method,'SHEAR_GENERAL')},
+    derived:{ webLambda,flangeTopLambda,flangeBottomLambda,compressionSlender,feX,feY,fcr,cv,webDepth },
+    note: 'Method affects RESISTANCE only; ASD and LRFD member actions require their respective load combinations.'}
+}

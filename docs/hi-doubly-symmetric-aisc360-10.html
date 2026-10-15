@@ -832,6 +832,70 @@ const localizedText = new Map([
 ['Tương tác N–M','Axial-flexure interaction'],
 ['Kiểm tra sườn tăng cứng & kết luận','Stiffener checks and conclusion']
 ]);
+const technicalEN = [
+['Chiều cao bụng thông thủy','Clear web depth'],
+['Mô đun đàn hồi','Elastic section modulus'],
+['Mô men quán tính','Second moment of area'],
+['Mô đun dẻo','Plastic section modulus'],
+['Moment thiết kế','Design moment'],
+['Lực dọc thiết kế','Design axial force'],
+['Diện tích','Area'],
+['Hằng số xoắn','Torsional constant'],
+['Bán kính quán tính','Radius of gyration'],
+['Tham số','Parameter'],
+['Cánh:','Flange:'],['Bụng:','Web:'],
+['Nhánh uốn được áp dụng','Selected flexural branch'],
+['Sức kháng thiết kế','Design resistance'],
+['Sức kháng danh định','Nominal resistance'],
+['Sức kháng cắt bụng','Web shear resistance'],
+['Sức kháng cắt cánh','Flange shear resistance'],
+['Sức kháng cắt có TFA','Tension field nominal resistance'],
+['Tỷ lệ sử dụng','Utilization ratio'],
+['Tỷ số lực dọc','Axial ratio'],
+['Tỷ số','Ratio'],
+['Moment dẻo','Plastic moment'],
+['Hệ số','Coefficient'],
+['Chiều dài','Length'],
+['Ứng suất tới hạn','Critical stress'],
+['Ứng suất Euler','Euler stress'],
+['Ứng suất','Stress'],
+['Giới hạn chuyển nhánh','Transition limit'],
+['Sử dụng uốn','Flexural utilization'],
+['Phương trình áp dụng','Applicable equation'],
+['Bề rộng / bề dày sườn','Stiffener width/thickness'],
+['Kiểm tra diện tích sườn','Stiffener area check'],
+['Xét tension field action','Tension-field action eligibility'],
+['Kết luận module','Module conclusion'],
+['trục mạnh','major axis'],['trục yếu','minor axis'],
+['kéo chảy dẻo','tension gross yielding'],
+['nén dọc trục','axial compression'],
+['kéo dọc trục','axial tension'],
+['nội lực','forces'],
+['Kiểm tra','Check'],
+['đầu vào','input'],
+['đang kiểm tra','under review'],
+['Đang kiểm chứng','Under verification'],
+['Đối chiếu','Parity reference'],
+['sườn tăng cứng','transverse stiffener'],
+['có TFA (danh định)','with TFA (nominal)'],
+['được áp dụng','selected'],
+['chảy dẻo','yielding'],
+['danh định','nominal'],
+['phân loại','classification'],
+['chưa được xác nhận','not verified'],
+['chưa được chấp thuận','not approved'],
+['Bảng Excel gốc ghi','Source workbook states'],
+['Tính toán','Calculation'],
+['Lưu ý','Note'],
+['Sao chép','Copy'],
+['Đã thay đổi dữ liệu · Nhấn Tính toán để cập nhật.','Inputs changed · Click Calculate to update.'],
+['Đã tính toán. Các thông số hiện tại đang được hiển thị.','Calculated · Current inputs are displayed.']
+];
+function translateTechnical(original){
+ let output=original;
+ for(const [vi,en] of technicalEN)output=output.split(vi).join(en);
+ return output;
+}
 const stepEN=[
 'Inputs & unit conversions','Geometric section properties','Flange & web classification',
 'Minor-axis flexural strength','Major-axis flexural strength','Axial tensile strength',
@@ -848,7 +912,11 @@ function translateNodes(root){
   const orig=originalNodes.get(node)??node.nodeValue;
   if(!originalNodes.has(node))originalNodes.set(node,orig);
   const normalized=orig.trim();const tr=localizedText.get(normalized);
-  if(!tr){if(node.nodeValue!==orig)node.nodeValue=orig;continue}
+  if(!tr){
+   const next=current==='en'?translateTechnical(orig):orig;
+   if(node.nodeValue!==next)node.nodeValue=next;
+   continue;
+  }
   const value=current==='en'?tr:normalized;
   const start=orig.match(/^\s*/)?.[0]??'';const end=orig.match(/\s*$/)?.[0]??'';
   const next=start+value+end;if(node.nodeValue!==next)node.nodeValue=next;

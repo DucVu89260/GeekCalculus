@@ -1,6 +1,7 @@
 <script setup>
 import { computed, nextTick, ref } from 'vue'
 import SectionGeometrySketch from './SectionGeometrySketch.vue'
+import CraneBeamView from './CraneBeamView.vue'
 import { SECTION_PROFILES } from '../sectional-properties/catalog.js'
 
 const props = defineProps({ locale: { type: String, required: true } })
@@ -41,18 +42,18 @@ function openDesignStandard(code) {
 const text = {
   vi: { title: 'Chọn loại tiết diện', description: 'Chọn nhóm cấu kiện để mở chức năng tương ứng.', pending: 'Chức năng này đang được phát triển.',
     chooseStandard: 'Chọn tiêu chuẩn thiết kế', standardDescription: 'Chọn tiêu chuẩn để mở bảng tính cấu kiện I/H đối xứng.', preview: 'Đang kiểm chứng · Phase 1', comingSoon: 'Đang phát triển', dismiss: 'Đóng', previewNote: 'AISC 360-10 hiện chỉ mở bản đối chiếu Excel AISC 360-05, chưa phải công cụ thiết kế được xác minh theo tiêu chuẩn.',
-    symmetric_i: 'Hai cánh giống nhau', asymmetric_i: 'Cánh trên và dưới độc lập', channel: 'Tiết diện U/C', angle: 'Tiết diện góc L', tee: 'Tiết diện chữ T', double_angle: 'Hai góc đối lưng', circle: 'Tròn đặc', chs: 'Ống tròn', shs_rhs: 'Hộp chữ nhật / vuông' },
+    crane_beam: 'Dầm cầu trục · I/H bất đối xứng', symmetric_i: 'Hai cánh giống nhau', asymmetric_i: 'Cánh trên và dưới độc lập', channel: 'Tiết diện U/C', angle: 'Tiết diện góc L', tee: 'Tiết diện chữ T', double_angle: 'Hai góc đối lưng', circle: 'Tròn đặc', chs: 'Ống tròn', shs_rhs: 'Hộp chữ nhật / vuông' },
   en: { title: 'Choose a section type', description: 'Choose a member family to open its workspace.', pending: 'This feature is in development.',
     chooseStandard: 'Choose design standard', standardDescription: 'Select a standard for the symmetric I/H calculation workspace.', preview: 'Under verification · Phase 1', comingSoon: 'Coming soon', dismiss: 'Close', previewNote: 'AISC 360-10 currently opens an AISC 360-05 Excel parity preview; it is not a code-verified design tool.',
-    symmetric_i: 'Equal flanges', asymmetric_i: 'Independent upper and lower flanges', channel: 'U/C section', angle: 'L section', tee: 'T section', double_angle: 'Back-to-back angles', circle: 'Solid circle', chs: 'Circular hollow section', shs_rhs: 'Rectangular / square hollow section' },
+    crane_beam: 'Crane runway girder · Asymmetric I/H', symmetric_i: 'Equal flanges', asymmetric_i: 'Independent upper and lower flanges', channel: 'U/C section', angle: 'L section', tee: 'T section', double_angle: 'Back-to-back angles', circle: 'Solid circle', chs: 'Circular hollow section', shs_rhs: 'Rectangular / square hollow section' },
 }
 const t = key => text[props.locale]?.[key] ?? text.en[key]
 const definitions = [
-  ['symmetric_i', 'Symmetric I/H'], ['asymmetric_i', 'Asymmetric I/H'], ['channel', 'Channel'],
+  ['symmetric_i', 'Symmetric I/H'], ['crane_beam', 'Crane Beam'], ['asymmetric_i', 'Asymmetric I/H'], ['channel', 'Channel'],
   ['angle', 'Angle'], ['tee', 'Tee'], ['double_angle', 'Double Angle'],
   ['circle', 'Circle'], ['chs', 'CHS'], ['shs_rhs', 'RHS/SHS'],
 ]
-const components = definitions.map(([id, title]) => ({ id, title, profile: SECTION_PROFILES.find(profile => profile.id === id) }))
+const components = definitions.map(([id, title]) => ({ id, title, profile: SECTION_PROFILES.find(profile => profile.id === (id === 'crane_beam' ? 'asymmetric_i' : id)) }))
 const selected = computed(() => components.find(component => component.id === selectedId.value))
 </script>
 
@@ -63,7 +64,7 @@ const selected = computed(() => components.find(component => component.id === se
       <button v-for="component in components" :key="component.id" type="button" class="steel-component-card"
         :class="{ selected: selectedId === component.id }" :data-component="component.id"
         :aria-label="component.title" :aria-pressed="selectedId === component.id" @click="selectSection(component.id, $event)">
-        <span class="steel-component-image"><SectionGeometrySketch :profile-id="component.id" :dimensions="component.profile.default_dimensions" :locale="locale" thumbnail /></span>
+        <span class="steel-component-image"><SectionGeometrySketch :profile-id="component.id === 'crane_beam' ? 'asymmetric_i' : component.id" :dimensions="component.profile.default_dimensions" :locale="locale" thumbnail /></span>
         <span class="steel-component-copy"><strong>{{ component.title }}</strong><span>{{ t(component.id) }}</span></span>
         <svg class="steel-component-arrow" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14m-5-5 5 5-5 5" /></svg>
       </button>
@@ -84,7 +85,8 @@ const selected = computed(() => components.find(component => component.id === se
         <p class="steel-standards-warning">{{ t('previewNote') }}</p>
       </section>
     </div>
-    <section v-if="selected && selected.id !== 'symmetric_i'" class="steel-component-workspace" :data-component="selected.id" :aria-label="selected.title" aria-live="polite">
+    <CraneBeamView v-if="selectedId === 'crane_beam'" :locale="locale" />
+    <section v-if="selected && selected.id !== 'symmetric_i' && selected.id !== 'crane_beam'" class="steel-component-workspace" :data-component="selected.id" :aria-label="selected.title" aria-live="polite">
       <span class="steel-component-workspace-image" aria-hidden="true"><SectionGeometrySketch :profile-id="selected.id" :dimensions="selected.profile.default_dimensions" :locale="locale" thumbnail /></span>
       <div><h3>{{ selected.title }}</h3><p>{{ t('pending') }}</p></div>
     </section>

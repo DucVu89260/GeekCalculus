@@ -40,3 +40,12 @@ esbuild.buildSync({
   nodePaths: [path.join(root, 'frontend/vue/node_modules')],
   logLevel: 'info',
 })
+
+// Browser resistance-factor adapter. AISC360-10 coefficients are defined once in
+// standards/aisc360-10-strength-factors.json; do not hardcode them in calculators.
+esbuild.buildSync({
+  entryPoints: [path.join(root, 'standards/aisc360-10-resistance.ts')],
+  outfile: path.join(root, 'frontend/vue/public/aisc360-10-resistance.js'),
+  bundle: true, platform: 'browser', format: 'iife', globalName: 'Aisc36010Resistance',
+  target: 'es2022', logLevel: 'info',
+})

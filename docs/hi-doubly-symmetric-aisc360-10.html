@@ -846,8 +846,8 @@ function buildCalculationSteps(i, r) {
       row('Chiều cao bụng thông thủy','h<sub>w</sub> = h − 2t<sub>f</sub>',`${num(h,2)} − 2 × ${num(tf,2)}`,hw,'mm','2.Details!D35'),
       row('Vật liệu F<sub>y</sub>','F<sub>y</sub> = Fy (MPa)',`${num(Fy,2)} MPa`,Fy,'MPa','3.LRFD!D9'),
       row('Mô đun đàn hồi E','E = E (MPa)',`${num(E,2)} MPa`,E,'MPa','3.LRFD!D10'),
-      row('Moment thiết kế','M<sub>u,x</sub> = |M<sub>x</sub>|',`|${num(f.moment_x_kNm,4)}|`,Math.abs(f.moment_x_kNm),'kN·m','2.Details!D19'),
-      row('Lực dọc thiết kế','P<sub>u</sub> = |N|',`|${num(f.axial_kN,4)}| · ${isCompression?'Nén':'Kéo'}`,axial,'kN','2.Details!D23'),
+      row('Moment thiết kế','M<sub>r,x</sub> = |M<sub>x</sub>|',`|${num(f.moment_x_kNm,4)}|`,Math.abs(f.moment_x_kNm),'kN·m','2.Details!D19'),
+      row('Lực dọc thiết kế','P<sub>r</sub> = |N|',`|${num(f.axial_kN,4)}| · ${isCompression?'Nén':'Kéo'}`,axial,'kN','2.Details!D23'),
     ],'Dấu N được giữ theo workbook: N âm = nén. Hệ tọa độ lực cắt Vx/Vy là quy ước legacy; cần đồng bộ với mô hình phân tích.' ,true),
     step('Đặc trưng hình học tiết diện','Phần A, I, S, Z và J của I/H đối xứng','2.Details!D48:D60',[
       row('Diện tích A','A = 2b<sub>f</sub>t<sub>f</sub> + h<sub>w</sub>t<sub>w</sub>',`2 × ${num(b,2)} × ${num(tf,2)} + ${num(hw,2)} × ${num(tw,2)}`,p.area_mm2,'mm²','D48'),
@@ -877,7 +877,7 @@ function buildCalculationSteps(i, r) {
       row('Nominal plastic M<sub>p,y</sub>','M<sub>p,y</sub> = min(F<sub>y</sub>Z<sub>y</sub>, 1,6F<sub>y</sub>S<sub>y</sub>)',`min(${num(Fy,2)} × ${num(Zy,2)},1,6 × ${num(Fy,2)} × ${num(Sy,2)}) / 10⁶`,mpY,'kN·m','D81'),
       row('Local buckling M<sub>n,FLB</sub>',c.flange==='NONCOMPACT'?'M<sub>n,FLB</sub> = M<sub>p,y</sub> − (M<sub>p,y</sub> − 0,7F<sub>y</sub>Z<sub>y</sub>)(λ<sub>f</sub>−λ<sub>pf</sub>)/(λ<sub>rf</sub>−λ<sub>pf</sub>)':c.flange==='SLENDER'?'M<sub>n,FLB</sub> = (0,69E/λ<sub>f</sub>²)S<sub>y</sub>':'M<sub>n,FLB</sub> = M<sub>p,y</sub>',`Flange ${c.flange} · λf = ${num(ratioF,4)}`,myLocal,'kN·m','D89','Legacy workbook sử dụng Zᵧ tại nhánh nội suy; cần soát lại theo F6.','caution'),
       row('Sức kháng '+availableSymbol('M<sub>n,y</sub>'),availableFormula('flexure','min(M<sub>p,y</sub>,M<sub>n,FLB</sub>)'),availableSub('flexure',r.nominal_strengths.mn_y_kNm),a.phi_mny_kNm,'kN·m','D91'),
-      row('Tỷ lệ sử dụng M<sub>y</sub>','D/C<sub>My</sub> = |M<sub>u,y</sub>|/('+availableSymbol("M<sub>n,y</sub>")+')',`${num(Math.abs(f.moment_y_kNm),4)}/${num(a.phi_mny_kNm,4)}`,Math.abs(f.moment_y_kNm)/a.phi_mny_kNm*100,'%','D92'),
+      row('Tỷ lệ sử dụng M<sub>y</sub>','D/C<sub>My</sub> = |M<sub>r,y</sub>|/('+availableSymbol("M<sub>n,y</sub>")+')',`${num(Math.abs(f.moment_y_kNm),4)}/${num(a.phi_mny_kNm,4)}`,Math.abs(f.moment_y_kNm)/a.phi_mny_kNm*100,'%','D92'),
     ],'Phiên bản Excel chưa có kiểm chứng độc lập toàn bộ nhánh F6. Chỉ sử dụng giá trị trong chế độ đối chiếu.'),
     step('Sức kháng uốn trục mạnh M<sub>x</sub>','Major-axis bending · F2–F5 theo phân loại','2.Details!D96:D157',[
       row('Moment dẻo M<sub>p</sub>','M<sub>p</sub> = F<sub>y</sub>Z<sub>x</sub>',`${num(Fy,2)} × ${num(Zx,3)} / 10⁶`,majorMp,'kN·m','D102'),
@@ -889,14 +889,14 @@ function buildCalculationSteps(i, r) {
       row('Nominal strength — FLB','M<sub>n,FLB</sub> = f(λ<sub>f</sub>, λ<sub>p</sub>, λ<sub>r</sub>, R<sub>pg</sub>, S<sub>x</sub>)',`Cánh ${c.flange}`,t.mnx_local_kNm===null?'N/A':t.mnx_local_kNm,'kN·m','D132'),
       row('Nominal strength — Yield','M<sub>n,Y</sub> = ' + (majorRule==='F5'?'R<sub>pg</sub>F<sub>y</sub>S<sub>x</sub>':'f(Fy, Zx, web slenderness)'),`Nhánh ${majorRule}`,t.mnx_yield_kNm,'kN·m','D149'),
       row('Sức kháng '+availableSymbol('M<sub>n,x</sub>'),availableFormula('flexure',applicableMajorLabel),availableSub('flexure',r.nominal_strengths.mn_x_kNm),a.phi_mnx_kNm,'kN·m','D154'),
-      row('Sử dụng uốn M<sub>x</sub>','D/C<sub>Mx</sub> = |M<sub>u,x</sub>|/('+availableSymbol("M<sub>n,x</sub>")+')',`${num(Math.abs(f.moment_x_kNm),4)}/${num(a.phi_mnx_kNm,4)}`,inter.moment_x_ratio*100,'%','D155'),
+      row('Sử dụng uốn M<sub>x</sub>','D/C<sub>Mx</sub> = |M<sub>r,x</sub>|/('+availableSymbol("M<sub>n,x</sub>")+')',`${num(Math.abs(f.moment_x_kNm),4)}/${num(a.phi_mnx_kNm,4)}`,inter.moment_x_ratio*100,'%','D155'),
     ],'Nhánh đang chọn là '+majorRule+'. Công thức hiển thị thuộc đường tính toán legacy; kiểm chứng Cb, LTB, FLB theo phiên bản AISC áp dụng trước khi phát hành.',true),
     step('Sức kháng kéo dọc trục','Gross-section yielding · chương D (chưa đủ phá hoại kéo)','2.Details!D159:D177',[
       row('Sức kháng danh định P<sub>n</sub>','P<sub>n</sub> = F<sub>y</sub>A<sub>g</sub>',`${num(Fy,2)} × ${num(p.area_mm2,2)}/1000`,Fy*p.area_mm2/1000,'kN','D172'),
       row('Sức kháng '+availableSymbol('P<sub>n,t</sub>'),availableFormula('tension_gross','F<sub>y</sub>A<sub>g</sub>'),availableSub('tension_gross',r.nominal_strengths.pn_tension_gross_kN),a.phi_pn_tension_gross_kN,'kN','D174'),
       row('D/C kéo chảy dẻo','D/C<sub>t</sub> = max(N,0)/('+availableSymbol("P<sub>n,t</sub>")+')',`${num(Math.max(0,f.axial_kN),4)}/${num(a.phi_pn_tension_gross_kN,4)}`,Math.max(0,f.axial_kN)/a.phi_pn_tension_gross_kN*100,'%','D175'),
     ],'Chưa kiểm tra đứt tiết diện hữu hiệu (net-section fracture), lỗ bu lông và các giới hạn khác. Không đánh giá tổng thể khả năng kéo.'),
-    step('Sức kháng nén dọc trục','Compression · Qs, Qa, Fe, Fcr, φPn · E3/E7 legacy','2.Details!D179:D205',[
+    step('Sức kháng nén dọc trục','Compression · Qs, Qa, Fe, Fcr, '+availableSymbol('P<sub>n</sub>')+' · E3/E7 legacy','2.Details!D179:D205',[
       row('Hệ số Q<sub>s</sub>','Q<sub>s</sub> = f(λ<sub>f</sub>, 0,64√(k<sub>c</sub>E/F<sub>y</sub>), 1,17√(k<sub>c</sub>E/F<sub>y</sub>))',`λf = ${num(ratioF,4)}`,t.qs,'','D190'),
       row('Hệ số Q<sub>a</sub>','Q<sub>a</sub> = A<sub>effective</sub>/A<sub>gross</sub>',`Effective web width calculated from λw = ${num(ratioW,4)}`,t.qa,'','D194'),
       row('Hệ số Q','Q = Q<sub>s</sub> × Q<sub>a</sub>',`${num(t.qs,6)} × ${num(t.qa,6)}`,t.q,'','D199'),

@@ -6,8 +6,8 @@ import { calculateSectionProperties } from '../sectional-properties/demo-calcula
 const props = defineProps({ locale: { type: String, required: true } })
 const profile = SECTION_PROFILES.find(p => p.id === 'asymmetric_i')
 const dimensions = ref({ ...profile.default_dimensions })
-const action = ref({ fy: 345, e: 200000, mx_knm: 200, my_knm: 15, vy_kn: 95, vx_kn: 20 })
-const actionLabels = { fy: 'Fy (MPa)', e: 'E (MPa)', mx_knm: 'Mx (kN·m)', my_knm: 'My (kN·m)', vy_kn: 'Vy (kN)', vx_kn: 'Vx (kN)' }
+const action = ref({ fy: 345, e: 200000, mx_knm: 200, my_knm: 15, vy_kn: 95, vx_kn: 20, wlmax_kn: 150, bearing_mm: 100, k_mm: 16 })
+const actionLabels = { fy: 'Fy (MPa)', e: 'E (MPa)', mx_knm: 'Mx (kN·m)', my_knm: 'My (kN·m)', vy_kn: 'Vy (kN)', vx_kn: 'Vx (kN)', wlmax_kn: 'WLmax · wheel load max for one side (kN)', bearing_mm: 'Bearing length N (mm)', k_mm: 'Fillet distance k (mm)' }
 const loading = ref(false)
 const error = ref('')
 const result = ref(null)
@@ -16,18 +16,24 @@ const preliminary = computed(() => {
   const a = action.value
   const d = result.value.normalized_input.geometry.dimensions
   const clearWeb = d.depth - d.top_flange_thickness - d.bottom_flange_thickness
-  if (clearWeb <= 0 || Object.values(a).some(x => !Number.isFinite(Number(x)) || Number(x) < 0) || a.fy <= 0 || a.e <= 0) return null
+  if (clearWeb <= 0 || Object.values(a).some(x => !Number.isFinite(Number(x)) || Number(x) < 0) || a.fy <= 0 || a.e <= 0 || a.bearing_mm <= 0 || a.k_mm < d.top_flange_thickness || a.wlmax_kn <= 0) return null
   const flangeTop = d.top_flange_width / (2 * d.top_flange_thickness)
   const flangeBottom = d.bottom_flange_width / (2 * d.bottom_flange_thickness)
   const webRatio = clearWeb / d.web_thickness
   const lpFlange = .38 * Math.sqrt(a.e / a.fy), lrFlange = Math.sqrt(a.e / a.fy)
   const lpWeb = 3.76 * Math.sqrt(a.e / a.fy), lrWeb = 5.7 * Math.sqrt(a.e / a.fy)
+  // AISC 360-10 J10.2 web local yielding: interior loading only.
+  // Rn = Fy * tw * (5k + N); ASD omega = 1.50, k is user-supplied.
+  const j10NominalKn = a.fy * d.web_thickness * (5 * a.k_mm + a.bearing_mm) / 1000
+  const j10AllowableKn = j10NominalKn / 1.5
+  const j10Ratio = a.wlmax_kn / j10AllowableKn
   const classification = (lambda, lp, lr) => lambda <= lp ? 'Compact' : lambda <= lr ? 'Noncompact' : 'Slender'
   return {
     flangeTop, flangeBottom, webRatio, lpFlange, lrFlange, lpWeb, lrWeb,
     classTop: classification(flangeTop, lpFlange, lrFlange),
     classBottom: classification(flangeBottom, lpFlange, lrFlange),
     classWeb: classification(webRatio, lpWeb, lrWeb),
+    j10NominalKn, j10AllowableKn, j10Ratio,
   }
 })
 const items = [
@@ -37,7 +43,7 @@ const items = [
   ['AISC 360-10 F6', 'Minor-axis bending'],
   ['AISC 360-10 G2 / G7', 'Shear'],
   ['AISC 360-10 H1', 'Interaction'],
-  ['AISC 360-10 J10', 'Concentrated-force resistance (future loading module)'],
+  ['AISC 360-10 J10.3–J10.5', 'Web crippling, sidesway and compression (pending)'],
   ['Excel', 'Section fatigue and stiffeners (verification pending)'],
 ]
 async function calculate() {
@@ -77,6 +83,16 @@ async function calculate() {
         </svg><figcaption>01 · Asymmetric I/H cross-section · Section Properties input</figcaption></figure>
       </div><p class="drawing-note">Section geometry schematic, not to scale. Geometric properties are obtained from the shared Section Properties engine.</p>
     </div>
+    <div class="crane-panel"><h4>02 · Wheel bearing · Web local yielding J10.2</h4>
+      <figure class="bearing-figure"><svg viewBox="0 0 360 260" role="img" aria-label="Wheel bearing and web local yielding detail">
+        <rect x="62" y="99" width="236" height="18" fill="#c7e0ed" stroke="#285474" stroke-width="2"/>
+        <rect x="172" y="117" width="15" height="118" fill="#c7e0ed" stroke="#285474" stroke-width="2"/>
+        <path d="M133 84h95v15h-95z" fill="#c1bfc1" stroke="#586979"/>
+        <path d="M181 20V77" stroke="#ad653b" stroke-width="3"/><path d="M174 69l7 11 7-11" fill="none" stroke="#ad653b" stroke-width="2"/>
+        <path d="M139 70H223" stroke="#597c92"/><path d="M139 66v8M223 66v8" stroke="#597c92"/>
+        <g fill="#345670" text-anchor="middle" font-size="13"><text x="181" y="12">WLmax</text><text x="181" y="61">N</text><text x="265" y="133">t<tspan baseline-shift="sub" font-size="9">f</tspan></text><text x="206" y="192">t<tspan baseline-shift="sub" font-size="9">w</tspan></text><text x="165" y="252">Web local yielding · AISC J10.2</text></g>
+      </svg><figcaption>Concentrated force acting through the rail/bearing onto the top flange. Only the local resistance is calculated here; WLmax must be supplied by the user or a future Crane Loading module.</figcaption></figure>
+    </div>
     <div class="crane-panel"><h4>01 · Input Data — Asymmetric I/H</h4>
       <form @submit.prevent="calculate"><div class="dimensions">
         <label v-for="key in profile.dimensions" :key="key"><span>{{ key.replaceAll('_',' ') }} (mm)</span>
@@ -99,10 +115,13 @@ async function calculate() {
       </template>
     </div>
     <div class="crane-panel"><h4>03 · Excel ASD Calculation Nodes (preliminary)</h4>
-      <p>Preliminary element classification for the section. Wheel loads and wheel positioning will be handled in a separate Crane Loading module.</p>
+      <p>Preliminary element classification and a scoped J10.2 web yielding check using user-provided WLmax. Influence-line analysis and wheel positioning remain a separate future module.</p>
       <table v-if="preliminary"><tbody>
         <tr><th>B4.1b flange top / bottom</th><td>{{ preliminary.flangeTop.toFixed(3) }} / {{ preliminary.flangeBottom.toFixed(3) }} — {{ preliminary.classTop }} / {{ preliminary.classBottom }}</td></tr>
         <tr><th>B4.1b web slenderness</th><td>{{ preliminary.webRatio.toFixed(3) }} — {{ preliminary.classWeb }}</td></tr>
+        <tr><th>J10.2 nominal Rn (kN)</th><td>{{ preliminary.j10NominalKn.toFixed(3) }}</td></tr>
+        <tr><th>J10.2 ASD Rn/Ω, Ω=1.50 (kN)</th><td>{{ preliminary.j10AllowableKn.toFixed(3) }}</td></tr>
+        <tr><th>J10.2 WLmax / Ra</th><td>{{ preliminary.j10Ratio.toFixed(3) }} · PRELIMINARY — end-distance, k and load path require verification</td></tr>
       </tbody></table>
       <p v-else>Calculate with valid geometry and actions to display Excel-based preliminary checks.</p>
     </div>
@@ -111,7 +130,7 @@ async function calculate() {
       <table><tbody><tr v-for="item in items" :key="item[0]"><th>{{ item[0] }} · {{ item[1] }}</th><td>NOT VERIFIED</td></tr></tbody></table>
     </div>
     <div class="crane-panel"><h4>05 · Calculation Details & Excel Traceability</h4>
-      <template v-if="preliminary"><p><strong>Flange compactness:</strong> λp=0.38√(E/Fy)={{ preliminary.lpFlange.toFixed(3) }}; λr=√(E/Fy)={{ preliminary.lrFlange.toFixed(3) }}.</p>
+      <template v-if="preliminary"><p><strong>J10.2 (interior concentrated force):</strong> Rn = Fy × tw × (5k + N), Ra = Rn / 1.50; WLmax/Ra = {{ preliminary.j10Ratio.toFixed(3) }}. This is not applicable within the end-region without using the correct J10.2 end equation. k must include root radius/weld detail, and other J10 checks remain NOT VERIFIED.</p><p><strong>Flange compactness:</strong> λp=0.38√(E/Fy)={{ preliminary.lpFlange.toFixed(3) }}; λr=√(E/Fy)={{ preliminary.lrFlange.toFixed(3) }}.</p>
       <p><strong>Web compactness:</strong> λp=3.76√(E/Fy)={{ preliminary.lpWeb.toFixed(3) }}; λr=5.7√(E/Fy)={{ preliminary.lrWeb.toFixed(3) }}. Confirm h/hc applicability.</p>
 </template>
       <p v-if="result">Section Properties formula manifest: {{ result.formula_report.manifest_hash }} · {{ result.formula_report.properties.length }} property records</p>
@@ -121,5 +140,5 @@ async function calculate() {
 </template>
 <style scoped>
 .crane-beam{margin-top:18px;color:#243d55}.crane-beam>header{padding:18px 20px;background:#edf3f7;border-radius:12px}.crane-beam h3{margin:7px 0;font-size:23px}.crane-beam p{line-height:1.5}.crane-panel{padding:18px 20px;background:var(--workspace-bg);border:1px solid var(--surface-border);border-radius:12px;margin-top:14px}.crane-panel h4{margin:0 0 14px;font-size:18px}.dimensions{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}.dimensions label{display:grid;gap:6px;text-transform:capitalize}.dimensions input{padding:9px;border:1px solid #aebdcc;border-radius:6px;width:100%;box-sizing:border-box}.crane-panel button{margin-top:16px;padding:11px 18px;border:0;border-radius:6px;background:#294c70;color:white;cursor:pointer}.crane-panel button:disabled{opacity:.6}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:10px;text-align:left;border-bottom:1px solid #d8e1e8}th{font-weight:600}.error{color:#a21e1e;overflow-wrap:anywhere}
-.crane-drawings{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.crane-drawings figure{margin:0;padding:12px;background:#fcfbf7;border:1px solid #d8e2e9;border-radius:10px}.crane-drawings svg{display:block;width:100%;height:220px}.crane-drawings figcaption{font-size:13px;line-height:1.5;color:#46637a}.drawing-note{font-size:12px;color:#796b54}@media(max-width:850px){.crane-drawings{grid-template-columns:1fr}}
+.bearing-figure{margin:0;max-width:570px;background:#fcfbf7;border:1px solid #d8e2e9;border-radius:10px;padding:14px}.bearing-figure svg{display:block;width:100%;height:260px}.bearing-figure figcaption{font-size:13px;color:#46637a;line-height:1.5}.crane-drawings{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.crane-drawings figure{margin:0;padding:12px;background:#fcfbf7;border:1px solid #d8e2e9;border-radius:10px}.crane-drawings svg{display:block;width:100%;height:220px}.crane-drawings figcaption{font-size:13px;line-height:1.5;color:#46637a}.drawing-note{font-size:12px;color:#796b54}@media(max-width:850px){.crane-drawings{grid-template-columns:1fr}}
 </style>

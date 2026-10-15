@@ -19,7 +19,7 @@ const preliminary = computed(() => {
   const a = action.value
   const d = result.value.normalized_input.geometry.dimensions
   const clearWeb = d.depth - d.top_flange_thickness - d.bottom_flange_thickness
-  if (clearWeb <= 0 || Object.values(a).some(x => !Number.isFinite(Number(x)) || Number(x) < 0) || a.fy <= 0 || a.e <= 0 || a.bearing_mm <= 0 || a.k_mm < d.top_flange_thickness || a.wlmax_kn <= 0) return null
+  if (clearWeb <= 0 || Object.entries(a).some(([key,x]) => !Number.isFinite(Number(x)) || (key !== 'n_kn' && Number(x) < 0)) || a.fy <= 0 || a.e <= 0 || a.bearing_mm <= 0 || a.k_mm < d.top_flange_thickness || a.wlmax_kn <= 0) return null
   const flangeTop = d.top_flange_width / (2 * d.top_flange_thickness)
   const flangeBottom = d.bottom_flange_width / (2 * d.bottom_flange_thickness)
   const webRatio = clearWeb / d.web_thickness

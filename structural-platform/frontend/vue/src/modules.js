@@ -8,7 +8,7 @@ export const groupTools = {
     { code: 'design', title: 'toolSteelDesign', description: 'steelDescription', route: 'steel' },
     { code: 'section-properties', title: 'toolSectionProperties', description: 'analysisDescription', route: 'steel/section-properties' },
     { code: 'library', title: 'toolSteelLibrary', description: 'libraryDescription', route: 'steel/library' },
-    { code: 'standards', title: 'toolSteelLibrary', description: 'libraryDescription', route: 'steel/standards' },
+
     { code: 'future', title: 'toolFutureLab', description: 'futureDescription', route: 'steel/future' },
   ],
   concrete: [
@@ -36,6 +36,7 @@ const legacyRoutes = {
 export function resolveModuleRoute(code) {
   const normalized = legacyRoutes[code] ?? code
   const [groupCode, toolCode, extra] = String(normalized).split('/')
+  if (normalized === 'steel/library/standards') return { group: moduleGroups.find(g => g.code === 'steel'), tool: { code: 'standards', title: 'toolSteelLibrary', description: 'libraryDescription', route: 'steel/library/standards' } }
   if (extra !== undefined) return null
   const group = moduleGroups.find(item => item.code === groupCode)
   const tool = groupTools[groupCode]?.find(item => item.code === (toolCode || groupTools[groupCode][0].code))
@@ -43,6 +44,6 @@ export function resolveModuleRoute(code) {
 }
 export const moduleHref = code => `${import.meta.env.BASE_URL}#/modules/${code}`
 export function moduleFromHash() {
-  const match = window.location.hash.match(/^#\/modules\/([a-z]+(?:\/[a-z-]+)?)$/)
+  const match = window.location.hash.match(/^#\/modules\/([a-z]+(?:\/[a-z-]+){0,2})$/)
   return match && resolveModuleRoute(match[1]) ? match[1] : null
 }

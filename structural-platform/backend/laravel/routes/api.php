@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\StandardsController;
 use App\Http\Controllers\ComboGeneratorWorkspaceController;
 use App\Http\Controllers\EngineeringController;
 use App\Http\Controllers\LibraryController;
@@ -22,6 +23,11 @@ Route::middleware('web')->group(function () {
             Route::get('/combo-generator/workspace', [ComboGeneratorWorkspaceController::class, 'show']);
             Route::put('/combo-generator/workspace', [ComboGeneratorWorkspaceController::class, 'update'])->middleware('throttle:20,1');
         });
+        Route::get('/v1/standards', [StandardsController::class, 'index']);
+        Route::get('/v1/standards/{code}', [StandardsController::class, 'show']);
+        Route::get('/v1/standards/{code}/equations', [StandardsController::class, 'equations']);
+        Route::get('/v1/standards/{code}/documents/{id}/file', [StandardsController::class, 'document'])->whereNumber('id');
+        Route::post('/v1/standards/{code}/documents', [StandardsController::class, 'upload'])->middleware(['admin','throttle:10,1']);
         Route::get('/catalog', [EngineeringController::class, 'catalog']);
         Route::get('/projects', [EngineeringController::class, 'index']);
         Route::post('/projects', [EngineeringController::class, 'store'])->middleware('throttle:60,1');

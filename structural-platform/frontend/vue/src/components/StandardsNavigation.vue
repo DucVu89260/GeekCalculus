@@ -3,7 +3,7 @@ import { onMounted, ref } from 'vue'
 import { request } from '../api'
 const families=ref([]), error=ref('')
 onMounted(async()=>{try{families.value=(await request('/api/v1/standards')).data}catch(e){error.value=e.message}})
-const destination=code=>window.location.pathname+'?standard='+encodeURIComponent(code)+'#/modules/steel/standards'
+const destination=code=>window.location.pathname+'?standard='+encodeURIComponent(code)+'#/modules/steel/library/standards'
 </script>
 <template>
   <details class="std-nav"><summary>STANDARDS ▾</summary>

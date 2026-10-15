@@ -6,14 +6,8 @@ import { calculateSectionProperties } from '../sectional-properties/demo-calcula
 const props = defineProps({ locale: { type: String, required: true } })
 const profile = SECTION_PROFILES.find(p => p.id === 'asymmetric_i')
 const dimensions = ref({ ...profile.default_dimensions })
-const action = ref({ fy: 345, e: 200000, span_m: 9, wheel_kn: 150, impact_percent: 25, bearing_mm: 100, mx_knm: 200, my_knm: 15, vy_kn: 95, vx_kn: 20, dy_mm: 8, dx_mm: 5, vertical_limit: 600, lateral_limit: 400 })
-const actionLabels = {
-  fy: 'Fy (MPa)', e: 'E (MPa)', span_m: 'Span (m)', wheel_kn: 'Wheel load (kN)',
-  impact_percent: 'Impact (%)', bearing_mm: 'Bearing length lb (mm)', mx_knm: 'Mx (kN·m)',
-  my_knm: 'My (kN·m)', vy_kn: 'Vy (kN)', vx_kn: 'Vx (kN)',
-  dy_mm: 'Vertical displacement (mm)', dx_mm: 'Lateral displacement (mm)',
-  vertical_limit: 'Vertical allowable L /', lateral_limit: 'Lateral allowable L /',
-}
+const action = ref({ fy: 345, e: 200000, mx_knm: 200, my_knm: 15, vy_kn: 95, vx_kn: 20 })
+const actionLabels = { fy: 'Fy (MPa)', e: 'E (MPa)', mx_knm: 'Mx (kN·m)', my_knm: 'My (kN·m)', vy_kn: 'Vy (kN)', vx_kn: 'Vx (kN)' }
 const loading = ref(false)
 const error = ref('')
 const result = ref(null)
@@ -22,29 +16,18 @@ const preliminary = computed(() => {
   const a = action.value
   const d = result.value.normalized_input.geometry.dimensions
   const clearWeb = d.depth - d.top_flange_thickness - d.bottom_flange_thickness
-  if (clearWeb <= 0 || Object.values(a).some(x => !Number.isFinite(Number(x)) || Number(x) < 0)
-    || a.fy <= 0 || a.e <= 0 || a.span_m <= 0 || a.vertical_limit <= 0 || a.lateral_limit <= 0
-    || a.bearing_mm <= 0 || a.wheel_kn <= 0) return null
+  if (clearWeb <= 0 || Object.values(a).some(x => !Number.isFinite(Number(x)) || Number(x) < 0) || a.fy <= 0 || a.e <= 0) return null
   const flangeTop = d.top_flange_width / (2 * d.top_flange_thickness)
   const flangeBottom = d.bottom_flange_width / (2 * d.bottom_flange_thickness)
   const webRatio = clearWeb / d.web_thickness
   const lpFlange = .38 * Math.sqrt(a.e / a.fy), lrFlange = Math.sqrt(a.e / a.fy)
   const lpWeb = 3.76 * Math.sqrt(a.e / a.fy), lrWeb = 5.7 * Math.sqrt(a.e / a.fy)
-  const wheelDesign = a.wheel_kn * (1 + a.impact_percent / 100)
-  const wheelWebAllowable = a.fy * d.web_thickness * (5 * d.top_flange_thickness + a.bearing_mm) / 1500
-  const verticalAllowed = a.span_m * 1000 / a.vertical_limit
-  const lateralAllowed = a.span_m * 1000 / a.lateral_limit
   const classification = (lambda, lp, lr) => lambda <= lp ? 'Compact' : lambda <= lr ? 'Noncompact' : 'Slender'
   return {
     flangeTop, flangeBottom, webRatio, lpFlange, lrFlange, lpWeb, lrWeb,
     classTop: classification(flangeTop, lpFlange, lrFlange),
     classBottom: classification(flangeBottom, lpFlange, lrFlange),
     classWeb: classification(webRatio, lpWeb, lrWeb),
-    wheelDesign, wheelWebAllowable,
-    wheelRatio: wheelDesign / wheelWebAllowable,
-    verticalAllowed, lateralAllowed,
-    verticalRatio: Math.abs(a.dy_mm) / verticalAllowed,
-    lateralRatio: Math.abs(a.dx_mm) / lateralAllowed,
   }
 })
 const items = [
@@ -54,8 +37,8 @@ const items = [
   ['AISC 360-10 F6', 'Minor-axis bending'],
   ['AISC 360-10 G2 / G7', 'Shear'],
   ['AISC 360-10 H1', 'Interaction'],
-  ['AISC 360-10 J10', 'Wheel load / web checks'],
-  ['Excel', 'Fatigue / stiffeners / deflections'],
+  ['AISC 360-10 J10', 'Concentrated-force resistance (future loading module)'],
+  ['Excel', 'Section fatigue and stiffeners (verification pending)'],
 ]
 async function calculate() {
   error.value = ''
@@ -78,7 +61,7 @@ async function calculate() {
   <section class="crane-beam">
     <header><div><small>Steel Design / Component / Crane Beam</small><h3>Crane Beam · AISC 360-10 ASD</h3>
       <p>{{ locale === 'vi' ? 'Tiết diện I/H bất đối xứng · Dùng chung Section Properties' : 'Asymmetric I/H · Shared Section Properties engine' }}</p></div></header>
-    <div class="crane-panel"><h4>Engineering diagrams · Excel calculation references</h4>
+    <div class="crane-panel"><h4>Asymmetric I/H · Section geometry</h4>
       <div class="crane-drawings">
         <figure><svg viewBox="0 0 360 260" role="img" aria-label="Asymmetric I/H section with dimension annotations">
           <defs><marker id="cb-arrow" markerWidth="7" markerHeight="7" refX="4" refY="3" orient="auto"><path d="M0 0L6 3L0 6" fill="none" stroke="#4e708a"/></marker></defs>
@@ -92,30 +75,13 @@ async function calculate() {
             <text x="297" y="223">t<tspan baseline-shift="sub" font-size="9">b</tspan></text>
           </g><path d="M187 109H214M260 47H275M286 222H296" stroke="#4e708a" stroke-width="1"/>
         </svg><figcaption>01 · Asymmetric I/H cross-section · Section Properties input</figcaption></figure>
-        <figure><svg viewBox="0 0 360 260" role="img" aria-label="Simply supported crane beam with vertical wheel loads and span">
-          <defs><marker id="cb-load" markerWidth="8" markerHeight="8" refX="5" refY="6" orient="auto"><path d="M1 1L5 6L9 1" fill="none" stroke="#b56438" stroke-width="1.5"/></marker></defs>
-          <rect x="34" y="135" width="292" height="12" fill="#bed9e8" stroke="#285474"/>
-          <path d="M55 147l-17 22h34zM305 147l-17 22h34z" fill="#dae4eb" stroke="#285474"/>
-          <g stroke="#b56438" stroke-width="2.5" marker-end="url(#cb-load)"><path d="M116 38V124"/><path d="M240 38V124"/></g>
-          <g fill="#a75b2c" text-anchor="middle" font-size="13"><text x="116" y="29">P<tspan baseline-shift="sub" font-size="10">wheel,1</tspan></text><text x="240" y="29">P<tspan baseline-shift="sub" font-size="10">wheel,2</tspan></text></g>
-          <g fill="#2d5874" font-size="13"><text x="160" y="116">Rail / runway</text><text x="175" y="215" text-anchor="middle">L · span</text></g>
-          <path d="M55 184V206M305 184V206M55 196H305" stroke="#56758a" stroke-width="1.3"/><path d="M55 196l7-4v8zM305 196l-7-4v8z" fill="#56758a"/>
-        </svg><figcaption>02 · Wheel loads and crane runway beam (schematic)</figcaption></figure>
-        <figure><svg viewBox="0 0 360 260" role="img" aria-label="Wheel concentrated load and web yielding detail">
-          <rect x="62" y="99" width="236" height="18" fill="#c7e0ed" stroke="#285474" stroke-width="2"/>
-          <rect x="172" y="117" width="15" height="118" fill="#c7e0ed" stroke="#285474" stroke-width="2"/>
-          <path d="M133 84h95v15h-95z" fill="#c1bfc1" stroke="#586979"/>
-          <path d="M181 20V77" stroke="#ad653b" stroke-width="3"/><path d="M174 69l7 11 7-11" fill="none" stroke="#ad653b" stroke-width="2"/>
-          <path d="M139 70H223" stroke="#597c92"/><path d="M139 66v8M223 66v8" stroke="#597c92"/>
-          <g fill="#345670" text-anchor="middle" font-size="13"><text x="181" y="12">P<tspan baseline-shift="sub" font-size="9">wheel</tspan></text><text x="181" y="61">l<tspan baseline-shift="sub" font-size="9">b</tspan></text><text x="265" y="133">t<tspan baseline-shift="sub" font-size="9">f</tspan></text><text x="206" y="192">t<tspan baseline-shift="sub" font-size="9">w</tspan></text><text x="165" y="252">Web local yielding · J10</text></g>
-        </svg><figcaption>03 · Wheel bearing and web local yielding (schematic)</figcaption></figure>
-      </div><p class="drawing-note">Schematic illustrations adapted from the calculation workflow; not to scale. Verify rail bearing, k-distance, wheel spacing, supports and load distribution from the original Excel/project drawings.</p>
+      </div><p class="drawing-note">Section geometry schematic, not to scale. Geometric properties are obtained from the shared Section Properties engine.</p>
     </div>
     <div class="crane-panel"><h4>01 · Input Data — Asymmetric I/H</h4>
       <form @submit.prevent="calculate"><div class="dimensions">
         <label v-for="key in profile.dimensions" :key="key"><span>{{ key.replaceAll('_',' ') }} (mm)</span>
           <input v-model.number="dimensions[key]" type="number" step="any" min="0.001" required /></label>
-      </div><h4>Crane loading, analysis actions & serviceability</h4><div class="dimensions"><label v-for="(label,key) in actionLabels" :key="key"><span>{{ label }}</span><input v-model.number="action[key]" type="number" step="any" min="0" required /></label></div><button type="submit" :disabled="loading">{{ loading ? 'Calculating…' : 'Calculate section properties' }}</button></form>
+      </div><h4>Material properties & section design actions</h4><div class="dimensions"><label v-for="(label,key) in actionLabels" :key="key"><span>{{ label }}</span><input v-model.number="action[key]" type="number" step="any" min="0" required /></label></div><button type="submit" :disabled="loading">{{ loading ? 'Calculating…' : 'Calculate section properties' }}</button></form>
       <p v-if="error" role="alert" class="error">{{ error }}</p>
     </div>
     <div class="crane-panel"><h4>02 · Calculation Results</h4>
@@ -133,15 +99,10 @@ async function calculate() {
       </template>
     </div>
     <div class="crane-panel"><h4>03 · Excel ASD Calculation Nodes (preliminary)</h4>
-      <p>The following checks are ported as live preliminary calculation nodes from the ASD sheet. Classification is indicative; the wheel calculation assumes interior loading and k = top flange thickness, subject to detailing verification.</p>
+      <p>Preliminary element classification for the section. Wheel loads and wheel positioning will be handled in a separate Crane Loading module.</p>
       <table v-if="preliminary"><tbody>
         <tr><th>B4.1b flange top / bottom</th><td>{{ preliminary.flangeTop.toFixed(3) }} / {{ preliminary.flangeBottom.toFixed(3) }} — {{ preliminary.classTop }} / {{ preliminary.classBottom }}</td></tr>
         <tr><th>B4.1b web slenderness</th><td>{{ preliminary.webRatio.toFixed(3) }} — {{ preliminary.classWeb }}</td></tr>
-        <tr><th>Wheel load with impact (kN)</th><td>{{ preliminary.wheelDesign.toFixed(3) }}</td></tr>
-        <tr><th>J10-2 interior web yielding allowable (kN)</th><td>{{ preliminary.wheelWebAllowable.toFixed(3) }}</td></tr>
-        <tr><th>J10-2 preliminary demand / allowable</th><td>{{ preliminary.wheelRatio.toFixed(3) }} — REVIEW REQUIRED</td></tr>
-        <tr><th>Vertical deflection (mm)</th><td>{{ action.dy_mm }} / {{ preliminary.verticalAllowed.toFixed(3) }} — D/C {{ preliminary.verticalRatio.toFixed(3) }}</td></tr>
-        <tr><th>Lateral deflection (mm)</th><td>{{ action.dx_mm }} / {{ preliminary.lateralAllowed.toFixed(3) }} — D/C {{ preliminary.lateralRatio.toFixed(3) }}</td></tr>
       </tbody></table>
       <p v-else>Calculate with valid geometry and actions to display Excel-based preliminary checks.</p>
     </div>
@@ -150,11 +111,9 @@ async function calculate() {
       <table><tbody><tr v-for="item in items" :key="item[0]"><th>{{ item[0] }} · {{ item[1] }}</th><td>NOT VERIFIED</td></tr></tbody></table>
     </div>
     <div class="crane-panel"><h4>05 · Calculation Details & Excel Traceability</h4>
-      <template v-if="preliminary"><p><strong>Wheel:</strong> P × (1 + impact / 100) = {{ preliminary.wheelDesign.toFixed(3) }} kN. ASD sheet J10 wheel check (interior).</p>
-      <p><strong>Web local yielding (preliminary):</strong> Fy × tw × (5 × tf,top + lb) / (1000 × 1.5) = {{ preliminary.wheelWebAllowable.toFixed(3) }} kN. Source worksheet J10; k≈tf,top requires review.</p>
-      <p><strong>Flange compactness:</strong> λp=0.38√(E/Fy)={{ preliminary.lpFlange.toFixed(3) }}; λr=√(E/Fy)={{ preliminary.lrFlange.toFixed(3) }}.</p>
+      <template v-if="preliminary"><p><strong>Flange compactness:</strong> λp=0.38√(E/Fy)={{ preliminary.lpFlange.toFixed(3) }}; λr=√(E/Fy)={{ preliminary.lrFlange.toFixed(3) }}.</p>
       <p><strong>Web compactness:</strong> λp=3.76√(E/Fy)={{ preliminary.lpWeb.toFixed(3) }}; λr=5.7√(E/Fy)={{ preliminary.lrWeb.toFixed(3) }}. Confirm h/hc applicability.</p>
-      <p><strong>Deflection:</strong> span × 1000 / limit, with displacements entered from structural analysis.</p></template>
+</template>
       <p v-if="result">Section Properties formula manifest: {{ result.formula_report.manifest_hash }} · {{ result.formula_report.properties.length }} property records</p>
       <p v-else>Section Properties calculations will be available after running geometry.</p>
     </div>

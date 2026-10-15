@@ -92,3 +92,23 @@ test('mode does not change demand inputs or silently certify legacy strength che
  assert.ok(a.warnings.some(w=>w.code==='INCOMPLETE_TENSION'))
  assert.throws(()=>runtime.calculate(runtime.fixture,'BOTH'),/Only LRFD or ASD/)
 })
+
+test('step-by-step formulas dynamically show phi for LRFD and Omega for ASD',()=>{
+ const start=scripts[0].indexOf('function buildCalculationSteps(i, r)'),
+       end=scripts[0].indexOf('function renderCalculationNotebook()')
+ assert.ok(start>=0&&end>start)
+ const reportRuntime=runInNewContext(scripts[0].slice(a,b) +
+  '\nconst format=(v,d=3)=>Number.isFinite(v)?Number(v).toFixed(d):String(v);\n' +
+  scripts[0].slice(start,end) +
+  '\n({fixture,calculate,buildCalculationSteps})',{window:{Aisc36010Resistance:standard}})
+ const make=(mode)=>reportRuntime.buildCalculationSteps(reportRuntime.fixture,reportRuntime.calculate(reportRuntime.fixture,mode))
+ const lrfd=make('LRFD'),asd=make('ASD')
+ const select=(steps)=>steps.flatMap(s=>s.rows).filter(r=>r.label.includes('Sức kháng'))
+ const phi=select(lrfd),omega=select(asd)
+ assert.ok(phi.some(r=>r.formula.includes('φ ×')))
+ assert.ok(omega.filter(r=>r.label.includes('M<sub>n')).every(r=>r.formula.includes('Ω')))
+ assert.ok(omega.some(r=>r.formula.includes('/ Ω')))
+ assert.ok(omega.some(r=>r.subst.includes(' / 1.67')))
+ assert.ok(asd.some(step=>step.subtitle.includes('ASD interaction')))
+ assert.ok(lrfd.some(step=>step.subtitle.includes('LRFD interaction')))
+})

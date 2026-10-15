@@ -1,9 +1,9 @@
 <?php
 
-namespace App\\Console\\Commands;
+namespace App\Console\Commands;
 
-use Illuminate\\Console\\Command;
-use Illuminate\\Support\\Facades\\DB;
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 
 class ImportStandardsOutline extends Command
 {
@@ -22,13 +22,13 @@ class ImportStandardsOutline extends Command
             if (($raw['edition_code'] ?? '') !== 'AISC360-10' ||
                 !isset($raw['source_sha256'], $raw['pdf_page_count'], $raw['bookmarks']) ||
                 !is_array($raw['bookmarks'])) {
-                throw new \\RuntimeException('Expected AISC360-10 private outline manifest');
+                throw new \RuntimeException('Expected AISC360-10 private outline manifest');
             }
             if (!preg_match('/^[a-f0-9]{64}$/', $raw['source_sha256'])) {
-                throw new \\RuntimeException('Invalid source hash');
+                throw new \RuntimeException('Invalid source hash');
             }
             $edition = DB::table('standard_editions')->where('code', 'AISC360-10')->first();
-            if (!$edition) throw new \\RuntimeException('Run StandardsSeeder first');
+            if (!$edition) throw new \RuntimeException('Run StandardsSeeder first');
             DB::transaction(function () use ($raw, $edition) {
                 $ids = [];
                 foreach ($raw['bookmarks'] as $row) {
@@ -37,7 +37,7 @@ class ImportStandardsOutline extends Command
                         !is_string($row['title'] ?? null) || strlen($row['title']) > 255 ||
                         !is_int($row['pdf_page'] ?? null) || $row['pdf_page'] < 1 ||
                         $row['pdf_page'] > $raw['pdf_page_count']) {
-                        throw new \\RuntimeException('Invalid bookmark row: import stopped');
+                        throw new \RuntimeException('Invalid bookmark row: import stopped');
                     }
                     $key = ['edition_id'=>$edition->id,'kind'=>$row['kind'],'code'=>$row['code']];
                     $prior = DB::table('standard_clauses')->where($key)->first();
@@ -63,7 +63,7 @@ class ImportStandardsOutline extends Command
             });
             $this->info('Imported '.count($raw['bookmarks']).' outline entries as index_only.');
             return self::SUCCESS;
-        } catch (\\Throwable $e) {
+        } catch (\Throwable $e) {
             $this->error($e->getMessage());
             return self::FAILURE;
         }

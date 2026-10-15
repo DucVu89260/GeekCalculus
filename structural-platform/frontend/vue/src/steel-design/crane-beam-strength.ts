@@ -1,3 +1,4 @@
+import type { StrengthKey, DesignMethod } from '../../../../standards/aisc360-10-resistance'
 import { availableStrength, factorNotation, selectedMethod } from '../../../../standards/aisc360-10-resistance'
 
 /**
@@ -5,23 +6,26 @@ import { availableStrength, factorNotation, selectedMethod } from '../../../../s
  * Uses the shared Section Properties numerical core for geometric properties.
  * Every check explicitly reports its coverage; unsupported limit states remain NOT VERIFIED.
  */
-export function calculateCraneStrength(section, dimensions, actions, requestedMethod) {
+type Numerics = Record<string, number>
+type SectionResult = { properties: { geometric: { area: number }, elastic: {rx: number,ry: number,sy_positive: number,sy_negative: number}, plastic: {zx: number,zy: number} | null } }
+type LimitState = {id:string,clause:string,label:string,demand:number|null,nominal:number|null,capacity:number|null,ratio:number|null,status:string,coverage:string,formula:string,factor?:ReturnType<typeof factorNotation>,warnings:string[]}
+export function calculateCraneStrength(section: SectionResult, dimensions: Numerics, actions: Numerics, requestedMethod: DesignMethod) {
   const method = selectedMethod(requestedMethod)
   const a = actions
   const d = dimensions
-  const finite = x => typeof x === 'number' && Number.isFinite(x)
-  const positive = x => finite(x) && x > 0
-  const checks = []
-  function check(id, clause, label, demand, nominal, factorKey, formula, coverage = 'SCOPED', warnings = []) {
+  const finite = (x: unknown): x is number => typeof x === 'number' && Number.isFinite(x)
+  const positive = (x: number) => finite(x) && x > 0
+  const checks: LimitState[] = []
+  function check(id: string, clause: string, label: string, demand: number, nominal: number, factorKey: StrengthKey, formula: string, coverage = 'SCOPED', warnings: string[] = []) {
     const capacity = finite(nominal) && nominal >= 0 ? availableStrength(nominal, method, factorKey) : null
-    const ratio = capacity > 0 && finite(demand) ? Math.abs(demand) / capacity : null
+    const ratio = capacity !== null && capacity > 0 && finite(demand) ? Math.abs(demand) / capacity : null
     checks.push({
       id, clause, label, demand, nominal, capacity, ratio,
       status: coverage === 'SCOPED' && ratio !== null ? (ratio <= 1 ? 'PRELIMINARY PASS' : 'PRELIMINARY FAIL') : 'NOT VERIFIED',
       coverage, formula, factor: factorNotation(method, factorKey), warnings,
     })
   }
-  function pending(id, clause, label, reason) {
+  function pending(id: string, clause: string, label: string, reason: string) {
     checks.push({id,clause,label,demand:null,nominal:null,capacity:null,ratio:null,status:'NOT VERIFIED',coverage:'PENDING',formula:'',warnings:[reason]})
   }
   if (![a.fy,a.e,a.mx_knm,a.my_knm,a.vy_kn,a.vx_kn,a.n_kn,a.klx_mm,a.kly_mm,d.depth,d.top_flange_width,d.bottom_flange_width,d.top_flange_thickness,d.bottom_flange_thickness,d.web_thickness]

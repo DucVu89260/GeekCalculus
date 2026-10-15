@@ -1,0 +1,57 @@
+{
+  "schema_version": "1.0",
+  "edition": "AISC360-10",
+  "kind": "resistance_factors",
+  "source_note": "ANSI/AISC 360-10 (2010) resistance and safety factors; strength-only registry, NOT a complete clause validation or load combination engine",
+  "status": "provision_factors_reviewed",
+  "source_url": "https://design.medeek.com/resources/DOCUMENTS/AISC_360-10.pdf",
+  "factors": {
+    "FLEXURE": {
+      "phi": 0.9,
+      "omega": 1.67,
+      "clause": "F1",
+      "description": "Flexure (F2–F6)"
+    },
+    "COMPRESSION": {
+      "phi": 0.9,
+      "omega": 1.67,
+      "clause": "E1",
+      "description": "Compression (E3/E7)"
+    },
+    "TENSION_GROSS": {
+      "phi": 0.9,
+      "omega": 1.67,
+      "clause": "D2(a)",
+      "description": "Gross-section tensile yielding (D2-1)"
+    },
+    "TENSION_RUPTURE": {
+      "phi": 0.75,
+      "omega": 2,
+      "clause": "D2(b)",
+      "description": "Effective net section fracture (D2-2), not yet calculated"
+    },
+    "SHEAR_GENERAL": {
+      "phi": 0.9,
+      "omega": 1.67,
+      "clause": "G1",
+      "description": "Shear except G2.1(a)"
+    },
+    "SHEAR_ROLLED_G21A": {
+      "phi": 1,
+      "omega": 1.5,
+      "clause": "G2.1(a)",
+      "description": "Rolled I-shape web only where h/tw <= 2.24 sqrt(E/Fy); Cv=1"
+    }
+  },
+  "selection": {
+    "web_shear_rolled": "fabrication == ROLLED AND clear_web_slenderness <= 2.24*sqrt(E/Fy)",
+    "weak_axis_shear": "SHEAR_GENERAL",
+    "tension": "TENSION_GROSS only, no rupture/connection verification"
+  },
+  "limitations": [
+    "The source workbook is labelled AISC 360-05. Only phi/Omega coefficients originate from this edition-specific registry; nominal equations remain legacy and require review.",
+    "The rolled I-shape exceptional shear factor is provisional for sharp-corner input; actual rolled fillet dimensions and clear web depth must be verified.",
+    "ASD requires service-level ASD load combinations; changing the design method never converts or rescales the supplied forces.",
+    "No tension fracture/connection limit state is checked, even though its factor is registered."
+  ]
+}

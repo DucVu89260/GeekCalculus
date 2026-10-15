@@ -1,13 +1,16 @@
 <script setup>
 import { computed, ref } from 'vue'
+import { calculateCraneStrength } from '../steel-design/crane-beam-strength.ts'
 import { SECTION_PROFILES, buildSectionCalculationRequest } from '../sectional-properties/catalog.js'
 import { calculateSectionProperties } from '../sectional-properties/demo-calculator.ts'
 
 const props = defineProps({ locale: { type: String, required: true } })
+const method = ref('ASD')
+const design = ref(null)
 const profile = SECTION_PROFILES.find(p => p.id === 'asymmetric_i')
 const dimensions = ref({ ...profile.default_dimensions })
-const action = ref({ fy: 345, e: 200000, mx_knm: 200, my_knm: 15, vy_kn: 95, vx_kn: 20, wlmax_kn: 150, bearing_mm: 100, k_mm: 16 })
-const actionLabels = { fy: 'Fy (MPa)', e: 'E (MPa)', mx_knm: 'Mx (kN·m)', my_knm: 'My (kN·m)', vy_kn: 'Vy (kN)', vx_kn: 'Vx (kN)', wlmax_kn: 'WLmax · wheel load max for one side (kN)', bearing_mm: 'Bearing length N (mm)', k_mm: 'Fillet distance k (mm)' }
+const action = ref({ fy: 345, e: 200000, n_kn: 0, klx_mm: 9000, kly_mm: 4500, mx_knm: 200, my_knm: 15, vy_kn: 95, vx_kn: 20, wlmax_kn: 150, bearing_mm: 100, k_mm: 16 })
+const actionLabels = { fy: 'Fy (MPa)', e: 'E (MPa)', n_kn: 'Axial N (kN, + tension / − compression)', klx_mm: 'KLx (mm)', kly_mm: 'KLy (mm)', mx_knm: 'Mx (kN·m)', my_knm: 'My (kN·m)', vy_kn: 'Vy (kN)', vx_kn: 'Vx (kN)', wlmax_kn: 'WLmax · wheel load max for one side (kN)', bearing_mm: 'Bearing length N (mm)', k_mm: 'Fillet distance k (mm)' }
 const loading = ref(false)
 const error = ref('')
 const result = ref(null)
@@ -49,6 +52,7 @@ const items = [
 async function calculate() {
   error.value = ''
   result.value = null
+  design.value = null
   const request = buildSectionCalculationRequest(profile, dimensions.value)
   if (!request) { error.value = 'Invalid Asymmetric I/H dimensions.'; return }
   loading.value = true
@@ -57,6 +61,8 @@ async function calculate() {
     if (computed.geometry_type !== 'i_section') throw new Error('Unexpected geometry type')
     const g = computed.normalized_input.geometry.dimensions
     if (g.depth <= g.top_flange_thickness + g.bottom_flange_thickness || g.web_thickness > Math.min(g.top_flange_width, g.bottom_flange_width)) throw new Error('Invalid physical I/H dimensions')
+    const sectionDesign = calculateCraneStrength(computed, computed.normalized_input.geometry.dimensions, action.value, method.value)
+    design.value = sectionDesign
     result.value = computed
   } catch (err) { error.value = err.message || String(err) }
   finally { loading.value = false }
@@ -94,7 +100,7 @@ async function calculate() {
       </svg><figcaption>Concentrated force acting through the rail/bearing onto the top flange. Only the local resistance is calculated here; WLmax must be supplied by the user or a future Crane Loading module.</figcaption></figure>
     </div>
     <div class="crane-panel"><h4>01 · Input Data — Asymmetric I/H</h4>
-      <form @submit.prevent="calculate"><div class="dimensions">
+      <form @submit.prevent="calculate"><fieldset class="design-method"><legend>Design Method · AISC 360-10</legend><label><input v-model="method" type="radio" value="ASD"> ASD — Allowable Strength Design</label><label><input v-model="method" type="radio" value="LRFD"> LRFD — Load and Resistance Factor Design</label></fieldset><p class="drawing-note">Enter member actions corresponding to the selected ASD or LRFD load combinations. Selecting a method does not convert the applied forces.</p><div class="dimensions">
         <label v-for="key in profile.dimensions" :key="key"><span>{{ key.replaceAll('_',' ') }} (mm)</span>
           <input v-model.number="dimensions[key]" type="number" step="any" min="0.001" required /></label>
       </div><h4>Material properties & section design actions</h4><div class="dimensions"><label v-for="(label,key) in actionLabels" :key="key"><span>{{ label }}</span><input v-model.number="action[key]" type="number" step="any" min="0" required /></label></div><button type="submit" :disabled="loading">{{ loading ? 'Calculating…' : 'Calculate section properties' }}</button></form>
@@ -125,11 +131,26 @@ async function calculate() {
       </tbody></table>
       <p v-else>Calculate with valid geometry and actions to display Excel-based preliminary checks.</p>
     </div>
-    <div class="crane-panel"><h4>04 · Remaining Design Checks — NOT VERIFIED</h4>
+    <div class="crane-panel"><h4>04 · AISC 360-10 Strength Checks — {{ method }}</h4>
+      <p v-if="design">Resistance uses the published AISC 360-10 factor registry from main; status PRELIMINARY PASS / FAIL is limited to each scoped equation and is not an overall design certification.</p>
+      <table v-if="design"><thead><tr><th>Clause / limit state</th><th>Demand</th><th>Nominal</th><th>Factor</th><th>Available</th><th>D/C</th><th>State</th></tr></thead><tbody>
+        <tr v-for="check in design.checks" :key="check.id">
+          <th>{{ check.clause }} · {{ check.label }}</th>
+          <td>{{ check.demand == null ? '—' : check.demand.toFixed(3) }}</td>
+          <td>{{ check.nominal == null ? '—' : check.nominal.toFixed(3) }}</td>
+          <td>{{ check.factor ? check.factor.symbol + ' = ' + check.factor.value : '—' }}</td>
+          <td>{{ check.capacity == null ? '—' : check.capacity.toFixed(3) }}</td>
+          <td>{{ check.ratio == null ? '—' : check.ratio.toFixed(3) }}</td>
+          <td>{{ check.status }}</td>
+        </tr>
+      </tbody></table>
+      <details v-if="design"><summary>Formula, assumptions and limitations</summary><article v-for="check in design.checks" :key="check.id"><h5>{{ check.clause }} — {{ check.label }}</h5><p>{{ check.formula }}</p><p v-for="warning in check.warnings" :key="warning">{{ warning }}</p></article></details>
+    </div>
+    <div class="crane-panel"><h4>05 · Excel Migration Coverage</h4>
       <p>Excel ASD_Q345_CR1_5T_L27_B10.xlsm — pending formula migration and benchmark verification. No design PASS is inferred from geometry results.</p>
       <table><tbody><tr v-for="item in items" :key="item[0]"><th>{{ item[0] }} · {{ item[1] }}</th><td>NOT VERIFIED</td></tr></tbody></table>
     </div>
-    <div class="crane-panel"><h4>05 · Calculation Details & Excel Traceability</h4>
+    <div class="crane-panel"><h4>06 · Calculation Details & Excel Traceability</h4>
       <template v-if="preliminary"><p><strong>J10.2 (interior concentrated force):</strong> Rn = Fy × tw × (5k + N), Ra = Rn / 1.50; WLmax/Ra = {{ preliminary.j10Ratio.toFixed(3) }}. This is not applicable within the end-region without using the correct J10.2 end equation. k must include root radius/weld detail, and other J10 checks remain NOT VERIFIED.</p><p><strong>Flange compactness:</strong> λp=0.38√(E/Fy)={{ preliminary.lpFlange.toFixed(3) }}; λr=√(E/Fy)={{ preliminary.lrFlange.toFixed(3) }}.</p>
       <p><strong>Web compactness:</strong> λp=3.76√(E/Fy)={{ preliminary.lpWeb.toFixed(3) }}; λr=5.7√(E/Fy)={{ preliminary.lrWeb.toFixed(3) }}. Confirm h/hc applicability.</p>
 </template>
@@ -141,4 +162,5 @@ async function calculate() {
 <style scoped>
 .crane-beam{margin-top:18px;color:#243d55}.crane-beam>header{padding:18px 20px;background:#edf3f7;border-radius:12px}.crane-beam h3{margin:7px 0;font-size:23px}.crane-beam p{line-height:1.5}.crane-panel{padding:18px 20px;background:var(--workspace-bg);border:1px solid var(--surface-border);border-radius:12px;margin-top:14px}.crane-panel h4{margin:0 0 14px;font-size:18px}.dimensions{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}.dimensions label{display:grid;gap:6px;text-transform:capitalize}.dimensions input{padding:9px;border:1px solid #aebdcc;border-radius:6px;width:100%;box-sizing:border-box}.crane-panel button{margin-top:16px;padding:11px 18px;border:0;border-radius:6px;background:#294c70;color:white;cursor:pointer}.crane-panel button:disabled{opacity:.6}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:10px;text-align:left;border-bottom:1px solid #d8e1e8}th{font-weight:600}.error{color:#a21e1e;overflow-wrap:anywhere}
 .bearing-figure{margin:0;max-width:570px;background:#fcfbf7;border:1px solid #d8e2e9;border-radius:10px;padding:14px}.bearing-figure svg{display:block;width:100%;height:260px}.bearing-figure figcaption{font-size:13px;color:#46637a;line-height:1.5}.crane-drawings{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.crane-drawings figure{margin:0;padding:12px;background:#fcfbf7;border:1px solid #d8e2e9;border-radius:10px}.crane-drawings svg{display:block;width:100%;height:220px}.crane-drawings figcaption{font-size:13px;line-height:1.5;color:#46637a}.drawing-note{font-size:12px;color:#796b54}@media(max-width:850px){.crane-drawings{grid-template-columns:1fr}}
+.design-method{display:flex;flex-wrap:wrap;gap:15px;padding:12px;border:1px solid #cedce6;border-radius:8px;margin-bottom:10px}.design-method legend{font-weight:700}.design-method label{display:inline-flex;align-items:center;gap:6px}.design-method input{accent-color:#345f84}details{margin-top:15px}details article{padding:8px 0;border-bottom:1px solid #e2e6ea}
 </style>

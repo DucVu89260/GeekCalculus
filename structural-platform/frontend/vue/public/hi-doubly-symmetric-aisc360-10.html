@@ -220,6 +220,7 @@ body{background:#f5f6f8;color:#202d3b}
 </section>
 
 <div class="footer-note">GeekCalculus · Steel Design / Component · H/I Doubly Symmetric · Phase 1 Browser Preview · © 2026</div></main></div></div>
+<script src="./aisc360-10-resistance.js"></script>
 <script>
 /**
  * GeekCalculus temporary browser parity engine, mirrors PHP legacy v0.1.0.
@@ -348,7 +349,10 @@ function check(clause, id, demand, capacity, unit) {
   return { clause, id, demand, capacity, unit, utilization: demand / capacity,
     status: demand <= capacity ? 'PASS' : 'FAIL' }
 }
-function calculate(input) {
+function calculate(input, designMethod = 'LRFD') {
+  const standardResistance=window.Aisc36010Resistance
+  if(!standardResistance)throw new Error('AISC360-10 phi/Omega coefficient registry unavailable.')
+  const method=standardResistance.selectedMethod(designMethod)
   const { material, section, member, stiffeners, forces } = input
   const fy = positive(material.fy_mpa, 'Fy') / 10
   const e = positive(material.e_mpa, 'E') / 10
@@ -459,8 +463,8 @@ function calculate(input) {
     }
   }
   const mnX = Math.min(nominalLtb, nominalLocal, nominalYield)
-  const phiMnX = .9 * mnX / 100
-  const phiMnY = .9 * mnY / 100
+  const phiMnX=standardResistance.availableStrength(mnX/100,method,'FLEXURE')
+  const phiMnY=standardResistance.availableStrength(mnY/100,method,'FLEXURE')
 
   const qsLimitP = .64 * Math.sqrt(kc * e / fy)
   const qsLimitR = 1.17 * Math.sqrt(kc * e / fy)
@@ -476,8 +480,8 @@ function calculate(input) {
   const fcrX = lx / rx > 4.71 * Math.sqrt(e / (fy * q)) ? .877 * feX : q * .658 ** (q * fy / feX) * fy
   const fcrY = lb / ry > 4.71 * Math.sqrt(e / (fy * q)) ? .877 * feY : q * .658 ** (q * fy / feY) * fy
   const pn = Math.min(fcrX, fcrY) * area
-  const phiPn = .9 * pn
-  const phiPt = .9 * fy * area
+  const phiPn=standardResistance.availableStrength(pn,method,'COMPRESSION')
+  const phiPt=standardResistance.availableStrength(fy*area,method,'TENSION_GROSS')
   const pRatio = Math.abs(n) / (n < 0 ? phiPn : phiPt)
   const ratioMx = mx / phiMnX
   const ratioMy = my / phiMnY
@@ -488,14 +492,14 @@ function calculate(input) {
 
   const aspect = a / hw
   const kv = a === 0 ? 1.2 : 5 + 5 / square(aspect)
-  const webKv = fabrication === 'ROLLED' && ratioW < 2.24 * Math.sqrt(e / fy) ? 1 : shearCv(ratioW, kv, e, fy)
+  const webStrengthKey=standardResistance.webShearFactorKey({fabrication,h_mm:section.h_mm,tf_mm:section.tf_mm,tw_mm:section.tw_mm,e_mpa:material.e_mpa,fy_mpa:material.fy_mpa})
+  const webKv=webStrengthKey==='SHEAR_ROLLED_G21A'?1:shearCv(ratioW,kv,e,fy)
   const awShear = hw * tw
   const vnWeb = .6 * fy * awShear * webKv
-  const phiWeb = fabrication === 'ROLLED' && ratioW < 2.24 * Math.sqrt(e / fy) ? 1 : .9
-  const phiVWeb = phiWeb * vnWeb
+  const phiVWeb=standardResistance.availableStrength(vnWeb,method,webStrengthKey)
   const cvFlange = shearCv(bf / tf, 1.2, e, fy)
   const vnFlange = .6 * fy * (2 * bf * tf) * cvFlange
-  const phiVFlange = .9 * vnFlange
+  const phiVFlange=standardResistance.availableStrength(vnFlange,method,'SHEAR_GENERAL')
   const tensionFieldEligible = !(aspect > 3 || square(260 / ratioW) > 3) && hw * tw / (bf * tf) <= 2.5 && hw / bf <= 6
   const vnTensionField = tensionFieldEligible
     ? .6 * fy * hw * tw * (ratioW > 1.1 * Math.sqrt(kv * e / fy)
@@ -522,18 +526,41 @@ function calculate(input) {
     {code:'LEGACY_WEAK_AXIS_FE',message:'Excel W194 dùng Fe trục mạnh cho trục yếu; lỗi này được giữ nguyên để đối chiếu Excel.'},
     {code:'INCOMPLETE_TENSION',message:'Chưa có kiểm tra đứt kéo tại tiết diện thực / net section.'},
     {code:'NO_GLOBAL_PASS',message:'Chế độ parity không xác nhận cấu kiện đạt tiêu chuẩn.'},
+    {code:'LOAD_COMBINATION_METHOD',message:method==='ASD'
+      ? 'ASD phải dùng nội lực từ tổ hợp ASD (service level); không tự chuyển tổ hợp LRFD sang ASD.'
+      : 'LRFD phải dùng nội lực từ tổ hợp LRFD (factored); không tự chuyển tổ hợp ASD sang LRFD.'},
+    ...(webStrengthKey==='SHEAR_ROLLED_G21A'?[{code:'ROLLED_WEB_REVIEW',message:'G2.1(a) cần xác nhận rolled profile, fillet và chiều cao bụng thông thủy thực tế.'}]:[]),
   ]
   if (!stiffenerChecksOk) warnings.push({code:'STIFFENER_REVIEW',message:'Kiểm tra sườn tăng cứng chưa đạt theo workbook. Không chấp thuận tension field enhancement.'})
   const result = {
-    status:'success', mode:'LEGACY_EXCEL_PARITY', source_standard:'AISC360-05_UNVERIFIED',
+    status:'success', mode:'LEGACY_EXCEL_PARITY',design_method:method,
+    factor_source:'AISC360-10 resistance registry',
+    factors:{
+      flexure:standardResistance.factorNotation(method,'FLEXURE'),
+      compression:standardResistance.factorNotation(method,'COMPRESSION'),
+      tension_gross:standardResistance.factorNotation(method,'TENSION_GROSS'),
+      tension_rupture_not_checked:standardResistance.factorNotation(method,'TENSION_RUPTURE'),
+      shear_web:standardResistance.factorNotation(method,webStrengthKey),
+      shear_flange:standardResistance.factorNotation(method,'SHEAR_GENERAL'),
+    },
+    nominal_strengths:{mn_x_kNm:mnX/100,mn_y_kNm:mnY/100,pn_compression_kN:pn,
+      pn_tension_gross_kN:fy*area,vn_web_kN:vnWeb,vn_flange_kN:vnFlange},
+    source_standard:'AISC360-05_UNVERIFIED',
     target_standard:'AISC360-10_NOT_VALIDATED', shape:'HI_DOUBLY_SYMMETRIC', engine_version:'browser-parity-0.1.0', overall_status:'REVIEW_REQUIRED',
     section_properties:{area_mm2:area*100,ix_mm4:ix*10000,iy_mm4:iy*10000,sx_mm3:sx*1000,sy_mm3:sy*1000,zx_mm3:zx*1000,zy_mm3:zy*1000,j_legacy_mm4:j*10000,rx_mm:rx*10,ry_mm:ry*10},
     classification:{flange:flangeClass,web:webClass,flexure_chapter:chapter,lambda_flange:ratioF,lambda_web:ratioW,lambda_p_flange:flangeP,lambda_r_flange:flangeR,lambda_p_web:webP,lambda_r_web:webR},
-    strengths:{phi_mnx_kNm:phiMnX,phi_mny_kNm:phiMnY,phi_pn_compression_kN:phiPn,phi_pn_tension_gross_kN:phiPt,phi_vn_web_kN:phiVWeb,phi_vn_flange_kN:phiVFlange},
-    interaction:{lrfd_utilization:interaction,lrfd_percent:interaction*100,axial_ratio:pRatio,moment_x_ratio:ratioMx,moment_y_ratio_rounded:roundedMinor},
+    strengths:{
+      available_mnx_kNm:phiMnX,available_mny_kNm:phiMnY,available_pn_compression_kN:phiPn,
+      available_pn_tension_gross_kN:phiPt,available_vn_web_kN:phiVWeb,available_vn_flange_kN:phiVFlange,
+      // Compatibility aliases for prior LRFD UI; refer to available ASD strengths when ASD selected.
+      phi_mnx_kNm:phiMnX,phi_mny_kNm:phiMnY,phi_pn_compression_kN:phiPn,
+      phi_pn_tension_gross_kN:phiPt,phi_vn_web_kN:phiVWeb,phi_vn_flange_kN:phiVFlange,
+    },
+    interaction:{utilization:interaction,percent:interaction*100,lrfd_utilization:interaction,lrfd_percent:interaction*100,
+      axial_ratio:pRatio,moment_x_ratio:ratioMx,moment_y_ratio_rounded:roundedMinor},
     shear:{web_percent:100*vy/phiVWeb,flange_percent:100*vx/phiVFlange,tension_field_eligible_legacy:tensionFieldEligible,nominal_tension_field_kN_legacy:vnTensionField,stiffener_width_ok:stiffenerWidthOk,stiffener_area_legacy_ok:stiffenerAreaOk,tension_field_not_approved:!stiffenerChecksOk},
     limit_states:checks, failed_checks:checks.filter(x=>x.status==='FAIL').map(x=>x.id),
-    trace:{cb_signed_legacy:cb,lp_mm:lp*10,lr_mm:lr*10,rpg, mnx_ltb_kNm:nominalLtb/100,mnx_local_kNm:Number.isFinite(nominalLocal)?nominalLocal/100:null,mnx_yield_kNm:nominalYield/100,qs,qa,q,fcrx_mpa:fcrX*10,fcry_mpa:fcrY*10,web_cv:webKv,flange_cv:cvFlange,stiffener_required_area_legacy_cm2:requiredAreaLRFD},
+    trace:{web_factor_key:webStrengthKey,cb_signed_legacy:cb,lp_mm:lp*10,lr_mm:lr*10,rpg, mnx_ltb_kNm:nominalLtb/100,mnx_local_kNm:Number.isFinite(nominalLocal)?nominalLocal/100:null,mnx_yield_kNm:nominalYield/100,qs,qa,q,fcrx_mpa:fcrX*10,fcry_mpa:fcrY*10,web_cv:webKv,flange_cv:cvFlange,stiffener_required_area_legacy_cm2:requiredAreaLRFD},
     warnings,
   }
   return result

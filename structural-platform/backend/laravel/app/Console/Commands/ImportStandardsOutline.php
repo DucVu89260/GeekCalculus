@@ -60,8 +60,23 @@ class ImportStandardsOutline extends Command
                     if ($parentId && $id) DB::table('standard_clauses')->where('id',$id)
                         ->where('verification_status','index_only')->update(['parent_id'=>$parentId]);
                 }
+                foreach (($raw['equation_candidates'] ?? []) as $eq) {
+                    if (!preg_match('/^[A-N][0-9]{1,2}-[0-9]+[a-z]?$/', $eq['label'] ?? '') ||
+                        !is_int($eq['pdf_page'] ?? null) ||
+                        $eq['pdf_page'] < 57 || $eq['pdf_page'] >= 297) {
+                        throw new \\RuntimeException('Invalid equation candidate');
+                    }
+                    $clause = DB::table('standard_clauses')
+                        ->where('edition_id', $edition->id)->where('kind','normative')
+                        ->where('code',$eq['clause_code'])->first();
+                    if (!$clause) continue;
+                    DB::table('standard_equations')->updateOrInsert(
+                        ['clause_id'=>$clause->id,'label'=>$eq['label']],
+                        ['pdf_page'=>$eq['pdf_page'],'updated_at'=>now()]
+                    );
+                }
             });
-            $this->info('Imported '.count($raw['bookmarks']).' outline entries as index_only.');
+            $this->info('Imported '.count($raw['bookmarks']).' outline entries as index_only and equation labels as unverified candidates.');
             return self::SUCCESS;
         } catch (\Throwable $e) {
             $this->error($e->getMessage());

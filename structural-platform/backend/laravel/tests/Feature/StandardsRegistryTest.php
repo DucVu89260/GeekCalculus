@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Database\Seeders\StandardsSeeder;
 use Tests\TestCase;
+use App\Models\User;
 
 class StandardsRegistryTest extends TestCase {
     use RefreshDatabase;
@@ -21,6 +22,19 @@ class StandardsRegistryTest extends TestCase {
         $this->seed(StandardsSeeder::class);
         $this->seed(StandardsSeeder::class);
         $this->assertDatabaseCount('standard_editions',6);
+    }
+
+    public function test_authenticated_user_can_read_db_backed_aisc_catalog(): void {
+        $this->seed(StandardsSeeder::class);
+        $this->actingAs(User::factory()->create(['role' => 'user']));
+        $this->getJson('/api/v1/standards')->assertOk()
+            ->assertJsonFragment(['code'=>'AISC360-10'])
+            ->assertJsonFragment(['code'=>'ASCE7-22']);
+        $this->getJson('/api/v1/standards/AISC360-10')->assertOk()
+            ->assertJsonPath('data.edition.status','in_development');
+        $this->getJson('/api/v1/standards/AISC360-10/equations')->assertOk()
+            ->assertJsonPath('data',[]);
+        $this->getJson('/api/v1/standards/UNKNOWN')->assertNotFound();
     }
 
     public function test_anonymous_user_cannot_access_private_standards(): void {

@@ -26,7 +26,8 @@ async function list() {
   loading.value = true
   try {
     families.value = (await request('/api/v1/standards')).data
-    if (!selected.value) selected.value = families.value.find(f => f.code === 'AISC360')?.editions?.[0]?.code || ''
+    if (!selected.value || !families.value.some(f=>f.editions.some(e=>e.code===selected.value))) selected.value = families.value.find(f => f.code === 'AISC360')?.editions?.[0]?.code || ''
+    if (selected.value) await loadEdition()
   } catch(e) { error.value = e.message || 'Could not load standards.' }
   finally { loading.value = false }
 }
@@ -41,7 +42,7 @@ async function loadEdition() {
     detail.value = a.data; equations.value = b.data; activePage.value = null
   } catch(e) { error.value = e.message || 'Could not load edition.' }
 }
-function goTo(c) { activePage.value = c.pdf_page || (c.printed_page ? c.printed_page + 56 : null) }
+function goTo(c) { activePage.value = c.pdf_page || null }
 async function upload() {
   if (!file.value || !props.canEdit || !selected.value) return
   uploading.value = true; error.value = ''
@@ -84,7 +85,7 @@ onMounted(list)
         <small>PDF saved privately. Parsing and verification are separate steps.</small>
       </div>
       <div class="std-three">
-        <aside class="std-outline"><label>Table of contents<input v-model="search" placeholder="Search clauses…" /></label><button v-for="clause in clauses" :key="clause.id" class="std-clause" type="button" @click="goTo(clause)"><b>{{ clause.code }}</b><span>{{ clause.title }}</span><small>{{ clause.printed_page ? 'p. '+clause.printed_page : 'No page mapped' }}</small></button><p v-if="!clauses.length">No matching clauses indexed yet.</p></aside>
+        <aside class="std-outline"><label>Table of contents<input v-model="search" placeholder="Search clauses…" /></label><button v-for="clause in clauses" :key="clause.id" class="std-clause" type="button" @click="goTo(clause)"><b>{{ clause.code }}</b><span>{{ clause.title }}</span><small>{{ clause.pdf_page ? 'PDF p. '+clause.pdf_page : clause.printed_page ? 'Printed p. '+clause.printed_page+' · PDF mapping pending' : 'No page mapped' }}</small></button><p v-if="!clauses.length">No matching clauses indexed yet.</p></aside>
         <section class="std-main">
           <h3>Equations & References</h3>
           <p v-if="!equations.length" class="std-empty">No verified equations imported for this edition yet. The registry never invents formulas.</p>

@@ -175,7 +175,7 @@ body{background:#f5f6f8;color:#202d3b}
  </div>
  <div class="tag"><span class="dot"></span> LEGACY EXCEL PARITY</div>
  </div></header>
-<main class="page"><div class="intro"><div><h1>H/I Doubly Symmetric</h1><p>Kiểm tra sức kháng cấu kiện I/H đối xứng · LRFD · Reference workbook ↔ Calculation engine</p></div><div class="intro-actions"><button class="btn" id="preset" type="button">↺ &nbsp; Dữ liệu mẫu Excel</button><button class="btn" id="import" type="button">↥ &nbsp; Nhập JSON</button><button class="btn" id="export" type="button">↧ &nbsp; Xuất kết quả</button><input type="file" accept=".json,application/json" id="file" class="hidden"></div></div>
+<main class="page"><div class="intro"><div><h1>H/I Doubly Symmetric</h1><p>Kiểm tra sức kháng cấu kiện I/H đối xứng · LRFD / ASD · Reference workbook ↔ Calculation engine</p></div><div class="intro-actions"><button class="btn" id="preset" type="button">↺ &nbsp; Dữ liệu mẫu Excel</button><button class="btn" id="import" type="button">↥ &nbsp; Nhập JSON</button><button class="btn" id="export" type="button">↧ &nbsp; Xuất kết quả</button><input type="file" accept=".json,application/json" id="file" class="hidden"></div></div>
 <div class="warningbar"><div class="alert-icon">!</div><div><strong>Chế độ đối chiếu — chưa được chấp thuận thiết kế</strong>Bảng Excel gốc ghi AISC 360-05. Phiên bản này giữ nguyên một số logic có lỗi để so sánh với Excel (Cb dùng dấu, Fe trục yếu và kiểm tra sườn). <b>Không sử dụng kết quả để thiết kế thi công hoặc khẳng định đạt AISC 360-10.</b></div></div>
 <div class="workspace" id="results-start"><section class="card" id="input-card"><header class="cardhead"><h2>01 &nbsp; Input Parameters</h2><small>Đơn vị: mm / MPa / kN / kN·m</small></header>
 <fieldset class="design-method-panel" aria-label="Design method">
@@ -550,6 +550,7 @@ function calculate(input, designMethod = 'LRFD') {
     {code:'LEGACY_CB',message:'Cb dùng moment có dấu tại các vị trí được nhập, chưa kiểm chứng moment cực trị trên đoạn Lb.'},
     {code:'LEGACY_WEAK_AXIS_FE',message:'Excel W194 dùng Fe trục mạnh cho trục yếu; lỗi này được giữ nguyên để đối chiếu Excel.'},
     {code:'INCOMPLETE_TENSION',message:'Chưa có kiểm tra đứt kéo tại tiết diện thực / net section.'},
+    {code:'STIFFENER_PARITY_ONLY',message:'Kiểm tra diện tích sườn tăng cứng vẫn theo biểu thức legacy LRFD; không phải kiểm tra sườn ASD đã được xác minh.'},
     {code:'NO_GLOBAL_PASS',message:'Chế độ parity không xác nhận cấu kiện đạt tiêu chuẩn.'},
     {code:'LOAD_COMBINATION_METHOD',message:method==='ASD'
       ? 'ASD phải dùng nội lực từ tổ hợp ASD (service level); không tự chuyển tổ hợp LRFD sang ASD.'
@@ -989,6 +990,10 @@ find('file').addEventListener('change',async event=>{
       for(const k of Object.keys(values))if(!Object.hasOwn(input[section],k))throw new Error('Thiếu trường '+section+'.'+k)
     }
     latest.input=structuredClone(Object.fromEntries(Object.entries(fixture).map(([k,def])=>[k,Object.fromEntries(Object.keys(def).map(name=>[name,input[k][name]]))])))
+    const savedMethod=data.meta?.design_method ?? data.result?.design_method ?? 'LRFD'
+    if(!['LRFD','ASD'].includes(savedMethod))throw new Error('Design method phải là LRFD hoặc ASD.')
+    document.querySelector('input[name="design-method"][value="'+savedMethod+'"]').checked=true
+    latest.method=savedMethod
     updateInputs();run()
   }catch(err){find('error').textContent='Nhập JSON thất bại: '+err.message;find('error').style.display='block'}finally{event.target.value=''}
 })
@@ -1014,7 +1019,7 @@ const dictionary={
 'footer':['Tính toán cục bộ · Chưa được chấp thuận thiết kế.','Calculator runs locally · Not approved for design.']
 };
 const localizedText = new Map([
-['Kiểm tra sức kháng cấu kiện I/H đối xứng · LRFD · Reference workbook ↔ Calculation engine','Doubly symmetric I/H member strength · LRFD · Workbook ↔ Calculation engine'],
+['Kiểm tra sức kháng cấu kiện I/H đối xứng · LRFD / ASD · Reference workbook ↔ Calculation engine','Doubly symmetric I/H member strength · LRFD / ASD · Workbook ↔ Calculation engine'],
 ['Chế độ đối chiếu — chưa được chấp thuận thiết kế','Excel parity only — not approved for design'],
 ['Bảng Excel gốc ghi AISC 360-05. Phiên bản này giữ nguyên một số logic có lỗi để so sánh với Excel (Cb dùng dấu, Fe trục yếu và kiểm tra sườn). ','The source workbook states AISC 360-05. This preview preserves legacy behavior for parity (signed Cb, weak-axis Fe and stiffeners). '],
 ['Không sử dụng kết quả để thiết kế thi công hoặc khẳng định đạt AISC 360-10.','Do not use this output for construction design or claim AISC 360-10 compliance.'],

@@ -6,6 +6,7 @@ import { demoMode } from '../api'
 import SteelDesignView from './SteelDesignView.vue'
 import SectionPropertiesPanel from './SectionPropertiesPanel.vue'
 import LibraryBrowser from './LibraryBrowser.vue'
+import StandardsExplorer from './StandardsExplorer.vue'
 import StructureIllustration from './StructureIllustration.vue'
 import ComboGeneratorView from './ComboGeneratorView.vue'
 
@@ -46,6 +47,7 @@ const tools = { concrete: ['beam', 'column', 'slab', 'foundation'], future: ['re
     <header class="module-heading"><span class="workspace-group-label">{{ t(currentGroup.title) }}</span><h1>{{ t(currentTool.title) }}</h1><p>{{ t(currentTool.description) }}</p></header>
     <SteelDesignView v-if="currentGroup.code === 'steel' && currentTool.code === 'design'" :locale="locale" />
     <SectionPropertiesPanel v-else-if="currentTool.code === 'section-properties'" :key="currentGroup.code" :locale="locale" />
+    <section v-else-if="currentTool.code === 'standards'" class="module-panel"><StandardsExplorer :locale="locale" :can-edit="isAdmin" /></section>
     <section v-else-if="currentTool.code === 'library'" class="module-panel"><LibraryBrowser :key="currentGroup.code" :locale="locale" :can-edit="false" /></section>
     <section v-else-if="currentGroup.code === 'concrete' && currentTool.code === 'design'" class="module-panel concrete-module-panel">
       <div class="concrete-design-setup">

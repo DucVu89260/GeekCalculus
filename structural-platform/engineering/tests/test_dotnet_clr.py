@@ -4,7 +4,7 @@ import pytest
 pytestmark=pytest.mark.skipif(os.environ.get('SAP_TEST_CLR')!='1',reason='Optional real CLR fixture requires .NET runtime')
 
 
-def fixture_proxy():
+def fixture_proxy(combo_mode=False):
     import clr
     import System as S
     from System.Reflection import AssemblyName, MethodAttributes as M, TypeAttributes as T, PropertyAttributes as P, ParameterAttributes as A
@@ -39,7 +39,9 @@ def fixture_proxy():
     il=method.GetILGenerator();short=il.DefineLabel();il.Emit(O.Ldarg_1);il.Emit(O.Brfalse,short)
     il.Emit(O.Ldstr,r'C:\Models\Frame.sdb');il.Emit(O.Ret);il.MarkLabel(short);il.Emit(O.Ldstr,'Frame.sdb');il.Emit(O.Ret)
     output_method('GetVersion',[],[(string,'26.2.0'),(double,26.2)])
-    output_method('GetNameList',[enum_type],[(integer,2),(string.MakeArrayType(),['DEAD','WIND'])])
+    output_method('GetNameList',[enum_type],[(integer,2),(string.MakeArrayType(),['ULS','ENV'] if combo_mode else ['DEAD','WIND'])])
+    output_method('GetTypeOAPI',[string],[(integer,0)])
+    output_method('GetCaseList',[string],[(integer,1),(enum_type.MakeArrayType(),[0]),(string.MakeArrayType(),['DEAD']),(double.MakeArrayType(),[1.0])])
     output_method('GetSelected',[],[(integer,2),(integer.MakeArrayType(),[2,2]),(string.MakeArrayType(),['F1','F2'])])
     output_method('GetCaseSelectedForOutput',[string],[(boolean,True)])
     output_method('GetCaseStatus',[],[(integer,2),(string.MakeArrayType(),['DEAD','WIND']),(enum_type.MakeArrayType(),[0,6])])
@@ -50,7 +52,7 @@ def fixture_proxy():
         (string.MakeArrayType(),['DEAD','DEAD']),(string.MakeArrayType(),['','']),
         (double.MakeArrayType(),[0.,0.]),*[(double.MakeArrayType(),[float(i),float(i+1)]) for i in range(6)]]
     output_method('FrameForce',[string,enum_type],cols)
-    for name in ['Results','SelectObj']:
+    for name in ['Results','SelectObj','RespCombo']:
         prop=cls.DefineProperty(name,getattr(P,'None'),cls,S.Array[S.Type]([]))
         getter=cls.DefineMethod('get_'+name,M.Public|M.SpecialName|M.HideBySig,cls,S.Array[S.Type]([]))
         il=getter.GetILGenerator();il.Emit(O.Ldarg_0);il.Emit(O.Ret);prop.SetGetMethod(getter)
@@ -78,3 +80,18 @@ def test_real_clr_enums_arrays_properties_and_frame_forces():
     data=outputs(proxy.Results.FrameForce('F1',0),14)
     assert data[0]==2 and data[1]==['F1','F1']
     assert data[2]==[0.,4.] and data[-1]==[5.,6.]
+
+
+def test_real_clr_combo_type_and_case_list_drive_extraction():
+    from test_sap2000_connector import FakeModel, request
+    from structural_engine.member_forces.sap2000 import Sap2000, SapError
+    combo=fixture_proxy(combo_mode=True).RespCombo
+    assert combo.GetTypeOAPI('ULS') == (0,0)
+    assert combo.GetCaseList('ULS') == (1,[0],['DEAD'],[1.0],0)
+    with pytest.raises(SapError, match='Missing API member GetTypeCombo'):
+        combo.GetTypeCombo('ULS')
+    model=FakeModel()
+    model.RespCombo=combo
+    result=Sap2000(model).extract(request())
+    assert len(result.rows)==4 and all(r.concurrency=='concurrent' for r in result.rows)
+    assert model.units==9 and model.combo_selected=={'ULS':False,'ENV':True}

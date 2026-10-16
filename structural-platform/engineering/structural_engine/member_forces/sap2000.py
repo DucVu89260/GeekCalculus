@@ -88,7 +88,7 @@ class Sap2000:
                 raise SapError('An underlying analysis case has no finished results')
             case_type, subtype = outputs(self.model.LoadCases.GetTypeOAPI(case.name), 2)
             return 'concurrent' if case_type in (1, 2, 5, 6) else 'nonconcurrent'
-        combo_type, = outputs(self.model.RespCombo.GetTypeCombo(case.name), 1)
+        combo_type, = outputs(self.model.RespCombo.GetTypeOAPI(case.name), 1)
         if combo_type != 0:
             return 'nonconcurrent'
         count, kinds, names, factors = outputs(self.model.RespCombo.GetCaseList(case.name), 4)

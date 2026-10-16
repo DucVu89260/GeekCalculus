@@ -11,9 +11,17 @@ class Names:
         self.names = names
     def GetNameList(self):
         return len(self.names), self.names, 0
+
+
+class CaseNames(Names):
     def GetTypeOAPI(self, name):
         return 1, 0, 0
-    def GetTypeCombo(self, name):
+
+
+class ComboNames(Names):
+    # cCombo exposes GetTypeOAPI(Name, ref int ComboType), not GetTypeCombo.
+    # cLoadCases.GetTypeOAPI has a different output signature.
+    def GetTypeOAPI(self, name):
         return (1 if name == 'ENV' else 0), 0
     def GetCaseList(self, name):
         return 1, [0], ['DEAD'], [1.0], 0
@@ -28,8 +36,8 @@ class FakeModel:
         self.restore_fail = False
         self.locked = True
         self.FrameObj = Names(['F1', 'F2'])
-        self.LoadCases = Names(['DEAD'])
-        self.RespCombo = Names(['ULS', 'ENV'])
+        self.LoadCases = CaseNames(['DEAD'])
+        self.RespCombo = ComboNames(['ULS', 'ENV'])
         self.Analyze = SimpleNamespace(GetCaseStatus=lambda: (1, ['DEAD'], [4], 0))
         self.SelectObj = SimpleNamespace(GetSelected=lambda: (3, [2, 1, 2], ['F1', 'joint1', 'F2'], 0))
         self.Results = SimpleNamespace(Setup=self, FrameForce=self.force)
@@ -218,3 +226,49 @@ def test_com_diagnostics_report_stage_and_hresult_without_exception_details():
     assert 'SAP2000_ATTACH' in str(error.value)
     assert '0x800401E3' in str(error.value)
     assert 'private exception details' not in str(error.value)
+
+
+def test_multiple_cases_and_combos_across_multiple_frames_restore_all_state():
+    model = FakeModel()
+    result = Sap2000(model).extract(ExtractionRequest(output_cases=[
+        {'name':'DEAD','kind':'case'}, {'name':'ULS','kind':'combination'}, {'name':'ENV','kind':'combination'}]))
+    assert len(result.rows) == 12
+    assert {r.frame for r in result.rows} == {'F1','F2'}
+    assert {r.case_kind for r in result.rows} == {'case','combination'}
+    assert {r.concurrency for r in result.rows if r.output_case == 'ULS'} == {'concurrent'}
+    assert {r.concurrency for r in result.rows if r.output_case == 'ENV'} == {'nonconcurrent'}
+    assert model.units == 9 and model.case_selected == {'DEAD':True}
+    assert model.combo_selected == {'ULS':False,'ENV':True}
+
+
+@pytest.mark.parametrize('combo_type',[1,2,3,4])
+def test_envelope_absolute_srss_and_range_combos_are_extractable_but_nonconcurrent(combo_type):
+    model = FakeModel()
+    model.RespCombo.GetTypeOAPI = lambda name: (combo_type,0)
+    result = Sap2000(model).extract(request())
+    assert all(r.concurrency == 'nonconcurrent' for r in result.rows)
+
+
+def test_nested_linear_combo_and_nested_envelope_are_classified():
+    model = FakeModel()
+    model.RespCombo.names.append('NESTED')
+    model.combo_selected['NESTED'] = False
+    model.RespCombo.GetCaseList = lambda name: (1, [1], ['ULS'], [1.0], 0) if name == 'NESTED' else (1,[0],['DEAD'],[1.0],0)
+    req = ExtractionRequest(output_cases=[{'name':'NESTED','kind':'combination'}])
+    assert all(r.concurrency == 'concurrent' for r in Sap2000(model).extract(req).rows)
+    model.RespCombo.GetCaseList = lambda name: (1,[1],['ENV'],[1.0],0)
+    assert all(r.concurrency == 'nonconcurrent' for r in Sap2000(model).extract(req).rows)
+    assert model.units == 9 and model.combo_selected['ENV'] is True
+
+
+def test_combo_type_api_failure_and_cyclic_combo_restore_settings():
+    model = FakeModel()
+    model.RespCombo.GetTypeOAPI = lambda name: (0,7)
+    with pytest.raises(SapError):
+        Sap2000(model).extract(request())
+    assert model.units == 9 and model.case_selected['DEAD']
+    model = FakeModel()
+    model.RespCombo.GetCaseList = lambda name: (1,[1],['ULS'],[1.0],0)
+    with pytest.raises(SapError, match='Cyclic'):
+        Sap2000(model).extract(request())
+    assert model.units == 9 and model.combo_selected['ENV']

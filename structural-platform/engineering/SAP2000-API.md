@@ -176,4 +176,10 @@ Chẩn đoán cùng PID:
 diagnose-sap2000.cmd --pid 20948
 ```
 
-Linux/cloud kiểm tra trên CLR thực bằng fixture .NET được sinh trong bộ nhớ, gồm ref/out, enum, mảng, thuộc tính và optional parameters. Cần pythonnet và .NET runtime; chạy `SAP_TEST_CLR=1 PYTHONNET_RUNTIME=coreclr DOTNET_ROOT=/path/to/dotnet .venv/bin/python -m pytest -q tests/test_dotnet_clr.py`. Mặc định hai kiểm thử CLR được đánh dấu skipped nếu không bật. Đây chưa phải nghiệm thu FrameForce trên SAP2000 thật; vẫn đối chiếu kết quả với bảng SAP theo checklist.
+Linux/cloud kiểm tra trên CLR thực bằng fixture .NET được sinh trong bộ nhớ, gồm ref/out, enum, mảng, thuộc tính và optional parameters. Cần pythonnet và .NET runtime; chạy `SAP_TEST_CLR=1 PYTHONNET_RUNTIME=coreclr DOTNET_ROOT=/path/to/dotnet .venv/bin/python -m pytest -q tests/test_dotnet_clr.py`. Mặc định các kiểm thử CLR được đánh dấu skipped nếu không bật. Đây chưa phải nghiệm thu FrameForce trên SAP2000 thật; vẫn đối chiếu kết quả với bảng SAP theo checklist.
+
+## Build 2026.10.16-dotnet-pid.2 — sửa xuất Combo
+
+Sửa tên hàm loại Combo thành `RespCombo.GetTypeOAPI(Name, ref ComboType)`. `LoadCases.GetTypeOAPI` có signature riêng (case type và subtype); không dùng chung mock hay xử lý tuple giữa hai interface. Bộ kiểm thử bổ sung nhiều Case/Combo cùng lúc, Combo lồng nhau, Envelope/Absolute/SRSS/Range, lỗi API và khôi phục selection/units. Có kiểm thử CLR thực cho GetTypeOAPI/GetCaseList qua .NET proxy và kiểm thử panel chọn đồng thời Case + Combo.
+
+Nếu cập nhật từ build .1: dừng connector, thay file bằng ZIP mới, giữ .venv, khởi động lại và kiểm tra đầu panel hiện `build 2026.10.16.2`. PID và DLL không thay đổi cách nhập. Envelope/statistical Combo vẫn được xuất JSON và xét extrema; không coi đó là action đồng thời để xuất liên kết CSV. Cần đối chiếu nội lực Combo với bảng SAP2000 thật.

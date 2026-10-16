@@ -159,30 +159,7 @@ body{background:#f5f6f8;color:#202d3b}
 @media(max-width:750px){.aisc-review-body{padding:10px}.aisc-results{min-width:680px}}
 .language-switch{display:flex;gap:4px;align-items:center;padding:3px;border:1px solid #9eb2c5;border-radius:9px;background:#eaf0f5}.language-switch button{min-width:52px;min-height:40px;padding:9px 14px;border:1px solid var(--border);border-radius:6px;background:#fff;color:var(--navy);font-weight:700}.language-switch button[aria-pressed="true"]{background:var(--navy);color:white}.topbar-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px}@media(max-width:600px){.topbar{padding:12px;gap:10px;flex-wrap:wrap}.page{padding:14px}}
 
-/* Muted content surfaces over the construction illustration. */
-:root{--bg:#d9ded8;--white:#e8e9e1;--border:#c9d0c7;--ink:#283a4b;--muted:#586b76;--surface:#e8e9e1;--surface-soft:#e1e5dc;--field:#f0f0e8}
-body{background-color:#252727;background-image:url('./construction-background.png');background-position:center;background-size:cover;background-attachment:fixed}
-.main{background:rgba(217,222,215,.88)}
-.topbar{background:rgba(228,231,221,.97)}
-.card,.ring-center,.step-table{background:var(--surface)}
-.card{box-shadow:0 3px 18px #172c3912}
-.btn,.language-switch button{background:var(--surface)}
-.field input,.field select,.field select option{background:var(--field);border-color:#bec9bf;color:var(--ink)}
-.diagram,.metric,.notebook-step{background:#e4e8df}
-.checkmsg,.input-actions,.notebook-head,.notebook-nav,.notebook-step summary,.step-table th{background:var(--surface-soft)}
-.tablewrap th{background:var(--surface-soft)}
-.step-table td{border-color:#cfd5ca}
-.tracegrid>div{background:#e3e7de}
-.notebook-pages{background:var(--surface)}
-.intro{padding:18px;border:1px solid #c4cdc2;border-radius:12px;background:rgba(229,233,222,.96)}
-.intro h1{font-size:27px}
-.intro-actions{align-items:center}
-.btn.primary,.language-switch button[aria-pressed="true"]{background:var(--navy);color:#fff}
-.btn.primary:hover{background:#2f4a63}
-@media(max-width:750px){body{background-attachment:scroll}.intro{padding:15px}.main{background:rgba(217,222,215,.94)}}
-@media print{body,.main,.card,.notebook-pages,.notebook-step,.step-table{background:#fff!important;background-image:none!important}.intro{background:#fff;border:0;padding:0;box-shadow:none}}
-
-.shared-stat,.shared-comparisons,.shared-notice,.shared-caveat,.design-method-panel,.factor-item,#factor-table{background:var(--surface-soft)}
+/* Keep wide engineering tables contained on narrow screens. */
 .shared-body,.aisc-review-body{grid-template-columns:minmax(0,1fr)}
 .shared-body>*,.aisc-review-body>*,.card{min-width:0}
 .tablewrap{max-width:100%}

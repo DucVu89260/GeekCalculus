@@ -403,3 +403,18 @@ input::placeholder { color: var(--muted-ink); }
   background: var(--navy-border);
   color: #fff;
 }
+
+/* Construction artwork and softer surfaces are limited to the landing/login page. */
+.login-page {
+  --page-bg: #dfe2dc;
+  --workspace-bg: #e9e9e1;
+  --surface-bg: #e3e6dd;
+  --field-bg: #f0f0e8;
+  --surface-border: #c5cdc3;
+}
+.login-page .login-visual {
+  background-color: #252727;
+  background-image: linear-gradient(140deg, #111b2480, #18212a18 55%, #121d2970), url('/construction-background.png');
+}
+.login-page .demo-login-note { background: #ebe7d9; }
+.login-page .demo-account-button { background: #f0eee4; }

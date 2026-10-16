@@ -46,6 +46,8 @@
         "bearing_mm": 50,
         "k_mm": 12,
         "end_distance_mm": 800,
+        "wheel_local_mx_knm": 0,
+        "wheel_local_moment_known": false,
         "load_flange_rotation": "UNRESTRAINED",
         "compression_flange_braced": false,
         "stiffener_spacing_mm": 2500,
@@ -589,7 +591,7 @@
         {
           "property": "web_sidesway.approval",
           "status": "NOT_VERIFIED",
-          "reason": "J10 phi/Omega are not in the approved central registry. Nominal equation is shown; available ASD/LRFD resistance is blocked pending primary-source coefficient review. Direct WLmax is used unchanged; impact/load combinations are not applied again. Maximum Mx may not equal the concurrent moment at the wheel. Supply a consistent local load case before applicability approval. Numerical candidate only: primary-source applicability and independent design benchmark remain required.",
+          "reason": "Supply the concurrent major moment at the actual wheel point and load case; a global Mx maximum or the worksheet My is not an acceptable implicit substitute.",
           "code_available": null
         },
         {
@@ -645,6 +647,8 @@
         "bearing_mm": 50,
         "k_mm": 12,
         "end_distance_mm": 4038,
+        "wheel_local_mx_knm": 0,
+        "wheel_local_moment_known": false,
         "load_flange_rotation": "UNRESTRAINED",
         "compression_flange_braced": false,
         "stiffener_spacing_mm": 800,

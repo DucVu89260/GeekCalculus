@@ -131,8 +131,10 @@ test('J10 interior/end equations and long bearing are distinct; unapproved facto
 })
 
 test('sidesway is calculated for an unrestrained applicable web and excluded with null values, never 999999',async()=>{
-  const {sections,actions,result}=await fixture('ASD')
+  const {sections,actions,result}=await fixture('ASD',{wheel_local_moment_known:true,wheel_local_mx_knm:0})
   assert.ok(check(result,'web_sidesway').nominal>0)
+  const noLocal=calculateCraneDesign(sections,{...actions,wheel_local_moment_known:false},'ASD')
+  assert.equal(check(noLocal,'web_sidesway').nominal,null,'No implicit substitution of global maximum moment')
   const braced=calculateCraneDesign(sections,{...actions,compression_flange_braced:true},'ASD')
   assert.equal(check(braced,'web_sidesway').nominal,null)
   assert.match(check(braced,'web_sidesway').coverage,/NOT_APPLICABLE/)

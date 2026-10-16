@@ -394,8 +394,8 @@ localStorage. Demo chỉ chia sẻ ID tài khoản mô phỏng trong browser.
 
 Steel Design gồm **Component**, **Connection** và **Section properties**:
 
-- Component: 9 nút có hình minh họa SVG từ registry hình học chung: Symmetric I/H,
-  Asymmetric I/H, Channel, Angle, Tee, Double Angle, Circle, CHS, RHS/SHS.
+- Component: 10 nút có hình minh họa SVG từ registry hình học chung: Symmetric I/H,
+  Crane Beam, Asymmetric I/H, Channel, Angle, Tee, Double Angle, Circle, CHS, RHS/SHS.
   Chọn nút sẽ mở workspace tương ứng đang chờ phát triển. Lựa chọn được giữ khi
   chuyển tab Component/Connection/Section properties hoặc đổi VI/EN.
 - Connection: tách **Bu-lông neo & chân cột** (12 mục) và **Liên kết kết cấu thép**
@@ -410,6 +410,14 @@ Các workspace liên kết đang chờ phát triển, chưa có tính toán/ki�
 kế. Những nhóm chưa triển khai có dropdown để chuẩn bị chức năng. Engineering
 Library tiếp tục cho người dùng xem database; sửa dữ liệu trong giao diện admin.
 Hover các tab và thẻ điều hướng dùng nền `#23395d`, chữ trắng ở cả hai giao diện.
+
+Crane Beam / AISC 360-10 kế thừa draft PR #12, theo Issue #17. Có 12 mục theo
+đặc tả, nạp riêng case Excel ASD/LRFD, hình học I/H và hai T từ Section Properties,
+thay số và xuất JSON kèm formula reports. Công thức sức kháng đang ở trạng thái
+**NOT VERIFIED**; J10, mô hình lực dọc cánh trên, chi tiết mỏi và sườn/trường kéo
+còn các chặn xác minh. Không tự chuyển đổi nội lực khi đổi ASD/LRFD.
+Xem [phạm vi và các phần còn thiếu](docs/CRANE_BEAM_AISC36010_AUDIT.md) và
+[đối chiếu hai sheet](docs/CRANE_BEAM_WORKBOOK_COMPARISON.md).
 
 Ảnh nền đăng nhập là ảnh cầu do người dùng cung cấp. Tệp tải lên có tên `.svg`
 nhưng dữ liệu thực là JPEG; lưu nguyên byte với đuôi `.jpg` để đúng MIME.

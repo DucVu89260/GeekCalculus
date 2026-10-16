@@ -194,11 +194,12 @@ export function calculateCraneDesign(sections: CraneSections, submitted: CraneAc
   resistance('wheel_web','web_crippling',interior?'J10-4':bearingRatio<=.2?'J10-5a':'J10-5b','Web local crippling','Ép nhăn cục bộ bụng',wl,crippling,null,'Rn=(0.8 interior / 0.4 end)tw²√(E Fy tf/tw)[1+α(tw/tf)^1.5]; α=3N/d or 4N/d−0.2',{E:e,Fy:fy,tw,tf:tt,N,d:d.depth,end,alpha:multiplier},['E222','E228','C231'],jWarnings)
   const swayParameter = (h/tw)/(lb/d.top_flange_width), restrained = a.load_flange_rotation === 'RESTRAINED', swayLimit = restrained ? 2.3 : 1.7
   if (a.compression_flange_braced || swayParameter > swayLimit) row('wheel_web','web_sidesway','J10.4','Web sidesway applicability','Phạm vi mất ổn định ngang bụng',{coverage:'NOT_APPLICABLE_PENDING_RESTRAINT_REVIEW',formula:`s=(h/tw)/(Lb/bf); applicability limit=${swayLimit}`,substitution:`s=${swayParameter}; braced=${a.compression_flange_braced}`,worksheet_refs:['B235','AN239:AN240'],warnings:['Exclusion is conditional on verified bracing/rotation assumptions; not a PASS or a fabricated infinite resistance.']})
+  else if (!a.wheel_local_moment_known) pending('wheel_web','web_sidesway','J10.4','Web sidesway buckling candidate','Ứng viên mất ổn định ngang bụng','Supply the concurrent major moment at the actual wheel point and load case; a global Mx maximum or the worksheet My is not an acceptable implicit substitute.',['B237:B240'])
   else {
-    const majorAtLoad = Math.abs(n('mx_knm'))*(method==='ASD'?1.5:1)*1e6
+    const majorAtLoad = Math.abs(n('wheel_local_mx_knm'))*(method==='ASD'?1.5:1)*1e6
     const cr = majorAtLoad < myc ? 6.62e6 : 3.31e6
     const sway = cr*tw**3*tt/h**2*(restrained ? 1+.4*swayParameter**3 : .4*swayParameter**3)/1000
-    resistance('wheel_web','web_sidesway','J10-6 / J10-7','Web sidesway buckling candidate','Ứng viên mất ổn định ngang bụng',wl,sway,null,'Rn=Cr tw³ tf/h² × [1+0.4s³ restrained / 0.4s³ unrestrained]; Cr depends on local major moment',{Cr:cr,tw,tf:tt,h,s:swayParameter,local_major_Nmm:majorAtLoad,My_Nmm:myc},['D240','B238'],[...jWarnings,'Maximum Mx may not equal the concurrent moment at the wheel. Supply a consistent local load case before applicability approval.'])
+    resistance('wheel_web','web_sidesway','J10-6 / J10-7','Web sidesway buckling candidate','Ứng viên mất ổn định ngang bụng',wl,sway,null,'Rn=Cr tw³ tf/h² × [1+0.4s³ restrained / 0.4s³ unrestrained]; Cr depends on local major moment',{Cr:cr,tw,tf:tt,h,s:swayParameter,local_major_Nmm:majorAtLoad,My_Nmm:myc},['D240','B238'],[...jWarnings,'Concurrent local wheel moment is explicitly supplied; original-edition Cr decision rule and restraint applicability remain pending source review.'])
   }
 
   // 9. G2: no tension-field credit here. Fabrication controls exceptional factors.

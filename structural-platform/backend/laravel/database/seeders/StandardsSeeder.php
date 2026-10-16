@@ -17,7 +17,7 @@ class StandardsSeeder extends Seeder {
             foreach ($years as $year) {
                 DB::table('standard_editions')->updateOrInsert(['code'=>$code.'-'.substr((string)$year,-2)], [
                     'family_id'=>$id,'year'=>$year,'title'=>$name.'-'.substr((string)$year,-2),
-                    'status'=>($code === 'AISC360' && $year === 2010) ? 'in_development' : 'coming_soon','updated_at'=>now(),
+                    'status'=>$year === 2010 ? 'in_development' : 'coming_soon','updated_at'=>now(),
                 ]);
             }
         }

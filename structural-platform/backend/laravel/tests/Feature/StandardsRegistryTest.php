@@ -42,4 +42,12 @@ class StandardsRegistryTest extends TestCase {
         $this->getJson('/api/v1/standards/AISC360-10')->assertUnauthorized();
         $this->post('/api/v1/standards/AISC360-10/documents',[])->assertUnauthorized();
     }
+
+    public function test_asce710_explorer_has_source_index_before_private_corpus_import(): void {
+        $this->seed(StandardsSeeder::class);
+        $this->actingAs(User::factory()->create(['role'=>'user']));
+        $this->getJson('/api/v1/standards/ASCE7-10')->assertOk()
+            ->assertJsonCount(875,'data.clauses')->assertJsonPath('data.library.page_count',658);
+        $this->getJson('/api/v1/standards/ASCE7-10/equations')->assertOk()->assertJsonCount(310,'data');
+    }
 }

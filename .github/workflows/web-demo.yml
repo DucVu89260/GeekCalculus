@@ -4,12 +4,14 @@ on:
   pull_request:
     paths:
       - 'structural-platform/frontend/vue/**'
+      - 'structural-platform/standards/**'
       - 'structural-platform/scripts/build-web-demo.sh'
       - '.github/workflows/web-demo.yml'
   push:
     branches: [main]
     paths:
       - 'structural-platform/frontend/vue/**'
+      - 'structural-platform/standards/**'
       - 'structural-platform/scripts/build-web-demo.sh'
       - '.github/workflows/web-demo.yml'
 
@@ -40,6 +42,8 @@ jobs:
         run: node --test tests/geometry/hi-aisc36010-design-method.test.js
       - name: Verify ANSI/AISC 360-10 Phase A/B formula branches
         run: node --test tests/geometry/aisc36010-verified-ih.test.js
+      - name: Verify ASCE 7-10 source library and wind kernel
+        run: node --test tests/geometry/asce710-library.test.js tests/geometry/asce710-wind.test.js
       - name: Build GitHub Pages demo
         run: npm run build -- --outDir ../../../docs --emptyOutDir
         env:

@@ -3,6 +3,7 @@ import { buildCatalogSectionCalculationRequest, catalogSectionInputProperties, i
 import catalog from '../../../database/seeds/catalog.json'
 import schema from '../../../database/seeds/engineering-schema.json'
 import seed from '../../../database/seeds/engineering-data.json'
+import { asce710Library, asce710SourceReference, asce710Equations } from './standards-library.js'
 
 // Demo-only catalog mirrors the six seeded PostgreSQL editions.
 // These records are not a substitute for the backend database or reviewed standard content.
@@ -10,7 +11,7 @@ const demoStandardCatalog = [
   { id: 1, code: 'AISC360', name: 'AISC 360', publisher: 'American Institute of Steel Construction',
     editions: [2010,2016,2022].map((year, index) => ({ id: index+1, code: 'AISC360-'+String(year).slice(-2), title: 'AISC 360-'+String(year).slice(-2), year, status: year === 2010 ? 'in_development' : 'coming_soon' })) },
   { id: 2, code: 'ASCE7', name: 'ASCE 7', publisher: 'American Society of Civil Engineers',
-    editions: [2010,2016,2022].map((year, index) => ({ id: index+4, code: 'ASCE7-'+String(year).slice(-2), title: 'ASCE 7-'+String(year).slice(-2), year, status: 'coming_soon' })) },
+    editions: [2010,2016,2022].map((year, index) => ({ id: index+4, code: 'ASCE7-'+String(year).slice(-2), title: 'ASCE 7-'+String(year).slice(-2), year, status: year === 2010 ? 'in_development' : 'coming_soon' })) },
 ]
 const demoAiscClauses = [
   ['A','General Provisions',57,1],['B','Design Requirements',66,10],
@@ -292,6 +293,10 @@ export async function demoRequest(path, options = {}) {
   if (method === 'GET' && standardDetail) {
     const edition = demoStandardCatalog.flatMap(f => f.editions).find(e => e.code === standardDetail[1])
     if (!edition) fail(404, 'Unknown design standard')
+    if (edition.code === 'ASCE7-10') {
+      if (standardDetail[2] === 'equations') return { data: asce710Equations() }
+      return { data: { edition, clauses: asce710Library.clauses, documents: [asce710SourceReference], library: { source_sha256: asce710Library.source_sha256, page_count: asce710Library.page_count, summary: asce710Library.summary } } }
+    }
     if (standardDetail[2] === 'equations') return { data: [] }
     return { data: { edition, clauses: edition.code === 'AISC360-10' ? demoAiscClauses : [], documents: [] } }
   }

@@ -1,6 +1,8 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
-import { request } from '../api'
+import { request, demoMode } from '../api'
+import StandardSourceCorpus from './StandardSourceCorpus.vue'
+import { asce710Equations, asce710WindFormulas } from '../standards-library.js'
 
 const props = defineProps({ locale: { type: String, default: 'vi' }, canEdit: Boolean })
 const families = ref([])
@@ -14,11 +16,22 @@ const showReview = ref(true)
 const activePage = ref(null)
 const viewTab = ref('outline')
 const sectionFilter = ref('normative')
+const activeClause = ref(null)
+const equationPage = ref(1)
+const isAsce710 = computed(() => selected.value === 'ASCE7-10')
+const displayedEquations = computed(() => {
+  const q = search.value.trim().toLowerCase()
+  return equations.value.filter(eq => (!q || [eq.label, eq.clause_code, eq.expression, eq.latex].join(' ').toLowerCase().includes(q))
+    && (viewTab.value !== 'outline' || !activeClause.value || q || eq.clause_code === activeClause.value.code || eq.clause_code.startsWith(activeClause.value.code + '.')))
+})
+const equationPages = computed(() => Math.max(1, Math.ceil(displayedEquations.value.length / 30)))
+const visibleEquations = computed(() => displayedEquations.value.slice((equationPage.value - 1) * 30, equationPage.value * 30))
 const current = computed(() => families.value.flatMap(f => f.editions.map(e => ({ ...e, family: f }))).find(e => e.code === selected.value))
 const clauses = computed(() => (detail.value?.clauses || []).filter(c => (sectionFilter.value === 'all' || c.kind === sectionFilter.value) && (!search.value || [c.code,c.title,c.summary].join(' ').toLowerCase().includes(search.value.toLowerCase()))))
 const pdfUrl = computed(() => {
   const doc = detail.value?.documents?.find(d => d.kind === 'specification')
   if (!doc || !selected.value) return ''
+  if (doc.file_url) return doc.file_url + '#page=' + (activePage.value || 1)
   return '/api/v1/standards/' + encodeURIComponent(selected.value) + '/documents/' + doc.id + '/file#page=' + (activePage.value || 1)
 })
 async function list() {
@@ -30,30 +43,39 @@ async function list() {
   } catch(e) { error.value = e.message || 'Could not load standards.' }
   finally { loading.value = false }
 }
+let editionGeneration = 0
 async function loadEdition() {
+  const generation = ++editionGeneration
   detail.value = null; equations.value = []; error.value = ''
+  activeClause.value = null; equationPage.value = 1; activePage.value = null; search.value = ''; viewTab.value = 'outline'
   if (!selected.value) return
   try {
     const [a,b] = await Promise.all([
       request('/api/v1/standards/'+encodeURIComponent(selected.value)),
       request('/api/v1/standards/'+encodeURIComponent(selected.value)+'/equations')
     ])
-    detail.value = a.data; equations.value = b.data; activePage.value = null
-  } catch(e) { error.value = e.message || 'Could not load edition.' }
+    if (generation !== editionGeneration) return
+    detail.value = a.data; equations.value = selected.value === 'ASCE7-10' ? asce710Equations(b.data) : b.data
+    if (selected.value === 'ASCE7-10') {
+      activeClause.value = a.data.clauses.find(c => c.kind === 'normative' && c.code === '26') || null
+      activePage.value = activeClause.value?.pdf_page || 1
+    }
+  } catch(e) { if (generation === editionGeneration) error.value = e.message || 'Could not load edition.' }
 }
-function goTo(c) { if (c.pdf_page) activePage.value = c.pdf_page }
+function goTo(c) { activeClause.value = c; equationPage.value = 1; if (c.pdf_page) activePage.value = c.pdf_page }
 function goToEquation(eq) { if (eq.pdf_page) activePage.value = eq.pdf_page }
+watch([search, viewTab], () => { equationPage.value = 1 })
 watch(selected,loadEdition)
 onMounted(list)
 </script>
 
 <template>
   <div class="standards-panel">
-    <header class="standards-header"><div><h2>{{ current?.title || 'Standards Explorer' }} <span class="std-heading-suffix">· Standards Explorer</span></h2><p>{{ locale === 'vi' ? 'Thư viện tiêu chuẩn kỹ thuật · dữ liệu từ database' : 'Engineering standards · database-backed' }}</p></div><button type="button" class="std-muted" @click="showReview=!showReview">{{ showReview ? 'Hide Review' : 'Show Review' }}</button></header>
+    <header class="standards-header"><div><h2>{{ current?.title || 'Standards Explorer' }} <span class="std-heading-suffix">· Standards Explorer</span></h2><p>{{ demoMode ? 'Engineering standards · source-indexed library' : locale === 'vi' ? 'Thư viện tiêu chuẩn kỹ thuật · dữ liệu từ database' : 'Engineering standards · database-backed' }}</p></div><button type="button" class="std-muted" @click="showReview=!showReview">{{ showReview ? 'Hide Review' : 'Show Review' }}</button></header>
     <p v-if="error" role="alert" class="std-error">{{ error }}</p>
     <p v-if="loading">Loading standards…</p>
     <div v-else class="std-families">
-      <details v-for="family in families" :key="family.id" :open="family.code==='AISC360'">
+      <details v-for="family in families" :key="family.id" :open="family.editions.some(e => e.code === selected)">
         <summary><strong>{{ family.name }}</strong> <small>{{ family.publisher }}</small></summary>
         <div class="std-editions">
           <button v-for="edition in family.editions" :key="edition.id" type="button" :aria-pressed="selected===edition.code" @click="selected=edition.code">{{ edition.title }}</button>
@@ -61,23 +83,33 @@ onMounted(list)
       </details>
     </div>
     <div v-if="detail" class="std-workspace">
-      <div class="std-context"><strong>{{ current?.title }}</strong><span>{{ detail.clauses.length }} indexed clauses · {{ equations.length }} equation labels · {{ detail.documents.length }} private documents</span></div>
+      <div class="std-context"><strong>{{ current?.title }}</strong><span>{{ detail.clauses.length }} indexed clauses · {{ equations.length }} equation labels · {{ detail.documents.length }} {{ demoMode ? 'source documents' : 'private documents' }}</span></div>
       <div class="std-reader-tabs">
         <button type="button" :aria-pressed="viewTab==='outline'" @click="viewTab='outline'">Document Outline</button>
         <button type="button" :aria-pressed="viewTab==='equations'" @click="viewTab='equations'">Equation Library</button>
         <button type="button" :aria-pressed="viewTab==='source'" @click="viewTab='source'">PDF Source</button>
+        <button v-if="detail.documents.some(d => d.extraction_summary)" type="button" :aria-pressed="viewTab==='corpus'" @click="viewTab='corpus'">Source Corpus · Toàn văn / Bảng / Công thức</button>
       </div>
-      <div class="std-three" :class="{ 'std-without-review': !showReview }">
-        <aside class="std-outline"><label>Table of contents<input v-model="search" placeholder="Search clauses…" /></label><select v-model="sectionFilter" aria-label="Document section"><option value="normative">Specification</option><option value="commentary">Commentary</option><option value="all">All sections</option></select><button v-for="clause in clauses" :key="clause.id" class="std-clause" type="button" @click="goTo(clause)"><b>{{ clause.code }}</b><span>{{ clause.title }}</span><small>{{ clause.pdf_page ? 'PDF p. '+clause.pdf_page : clause.printed_page ? 'Printed p. '+clause.printed_page+' · PDF mapping pending' : 'No page mapped' }}</small></button><p v-if="!clauses.length">No matching clauses indexed yet.</p></aside>
+      <StandardSourceCorpus v-if="viewTab === 'corpus'" :key="selected" :code="selected" :documents="detail.documents" />
+      <div v-else class="std-three" :class="{ 'std-without-review': !showReview }">
+        <aside class="std-outline"><label>Table of contents<input v-model="search" placeholder="Search clauses or equations…" /></label><select v-model="sectionFilter" aria-label="Document section"><option value="normative">Specification</option><option value="commentary">Commentary</option><option value="all">All sections</option></select><button v-for="clause in clauses" :key="clause.id" class="std-clause" :aria-pressed="activeClause?.code === clause.code && activeClause?.kind === clause.kind" type="button" @click="goTo(clause)"><b>{{ clause.code }}</b><span>{{ clause.title }}</span><small>{{ clause.pdf_page ? 'PDF p. '+clause.pdf_page : clause.printed_page ? 'Printed p. '+clause.printed_page+' · PDF mapping pending' : 'No page mapped' }}</small></button><p v-if="!clauses.length">No matching clauses indexed yet.</p></aside>
         <section class="std-main">
           <h3>{{ viewTab === 'equations' ? 'Equation Library' : viewTab === 'source' ? 'PDF Source' : 'Equations & References' }}</h3>
+          <template v-if="isAsce710 && viewTab !== 'source'">
+            <details class="std-kernel" :open="viewTab === 'outline'"><summary>Wind kernel · 7 clause-linked calculation branches · REVIEW_REQUIRED</summary>
+              <article v-for="formula in asce710WindFormulas" :key="formula.key" class="std-formula"><button type="button" class="std-eq-jump" @click="goToEquation(formula)">{{ formula.clause }}</button><code>{{ formula.expression }}</code><small>PDF p. {{ formula.pdf_page }} · implemented branch, not whole-building approval</small></article>
+            </details>
+            <p v-if="viewTab === 'outline' && activeClause"><strong>{{ activeClause.code }} · {{ activeClause.title }}</strong></p>
+          </template>
           <p v-if="!equations.length && viewTab !== 'source'" class="std-empty">No equation expressions available in this database yet. Only engineering-verified formulas may be used in calculations.</p>
-          <article v-for="eq in (viewTab === 'source' ? [] : equations)" :key="eq.id" class="std-equation"><button type="button" class="std-eq-jump" :disabled="!eq.pdf_page" @click="goToEquation(eq)"><strong>{{ eq.label }}</strong></button><code>{{ eq.latex || 'Pending engineering review — no approved expression' }}</code><span>{{ eq.clause_code }} · {{ eq.verification_status }} · {{ eq.pdf_page ? 'PDF p. '+eq.pdf_page : 'Source unmapped' }}</span></article>
+          <article v-for="eq in (viewTab === 'source' ? [] : visibleEquations)" :key="eq.id" class="std-equation"><button type="button" class="std-eq-jump" :disabled="!eq.pdf_page" @click="goToEquation(eq)"><strong>{{ eq.label }}</strong></button><code>{{ eq.latex || eq.expression || 'Source indexed — verify expression on the linked PDF page' }}</code><span>{{ eq.clause_code }} · {{ eq.verification_status }} · {{ eq.pdf_page ? 'PDF p. '+eq.pdf_page : 'Source unmapped' }}</span></article>
+          <nav v-if="viewTab !== 'source' && displayedEquations.length" class="std-equation-pages" aria-label="Equation pages"><button type="button" :disabled="equationPage <= 1" @click="equationPage--">Previous</button><span>{{ displayedEquations.length }} labels · {{ equationPage }}/{{ equationPages }}</span><button type="button" :disabled="equationPage >= equationPages" @click="equationPage++">Next</button></nav>
           <h3>PDF Preview</h3>
-          <iframe v-if="pdfUrl" :key="pdfUrl" :src="pdfUrl" title="Private engineering standard PDF" class="std-pdf"></iframe>
+          <p v-if="isAsce710 && pdfUrl" class="std-source-provenance">ASCE 7-10 · 658 pages · <a :href="pdfUrl" target="_blank" rel="noopener">Open PDF</a> · <a :href="pdfUrl.split('#')[0]" download="ASCE 7-10.pdf">Download PDF</a><br /><small>SHA-256: {{ detail.library?.source_sha256 || detail.documents.find(d => d.kind === 'specification')?.sha256 }}</small></p>
+          <iframe v-if="pdfUrl" :key="pdfUrl" :src="pdfUrl" title="Engineering standard PDF source" class="std-pdf"></iframe>
           <p v-else class="std-empty">The private source PDF has not been imported by the backend administrator yet.</p>
         </section>
-        <aside v-if="showReview" class="std-review"><h3>Source Review</h3><p>Equation candidates must be checked against the source PDF before use in design calculations.</p><p>Unverified catalog headings are navigation-only.</p><p>Documentation is available only to authenticated users.</p></aside>
+        <aside v-if="showReview" class="std-review"><h3>Source Review</h3><p>Equation candidates must be checked against the source PDF before use in design calculations.</p><p>Unverified catalog headings are navigation-only.</p><p>{{ demoMode ? 'PDF source and its page index are included in this library.' : 'Private corpus documentation requires authentication.' }}</p></aside>
       </div>
     </div>
   </div>
@@ -94,6 +126,8 @@ onMounted(list)
 .std-without-review{grid-template-columns:minmax(210px,1fr) minmax(400px,3fr)}
 .std-heading-suffix{font-size:15px;font-weight:400;color:#718096}
 .std-main{background:#fffdf8}
+.std-clause[aria-pressed="true"]{background:#e7edf5;border-left:3px solid #24395d;padding-left:8px}
+.std-kernel{padding:12px;border:1px solid #d6dfe7;background:#f3f6fa;border-radius:7px;margin-bottom:14px}.std-kernel summary{cursor:pointer;font-weight:700}.std-formula{display:grid;gap:7px;border-top:1px solid #d6dfe7;padding:12px 0;margin-top:8px}.std-formula code{white-space:normal;overflow-wrap:anywhere}.std-formula small{color:#63718b}.std-source-provenance{font-size:13px;line-height:1.7;overflow-wrap:anywhere}.std-source-provenance a{color:#274c7e}.std-equation-pages{display:flex;justify-content:space-between;gap:8px;align-items:center;margin:12px 0 20px;font-size:13px}.std-equation-pages button{padding:7px;border:1px solid #bac9dc;border-radius:5px;background:white;color:#24395d}
 .std-equation{grid-template-columns:100px minmax(0,1fr) auto;box-shadow:0 1px 2px rgba(31,52,79,.05)}
 .std-equation code{font-family:Cambria,'Times New Roman',serif;font-size:16px;font-weight:700}
 .std-pdf{height:75vh;min-height:580px}

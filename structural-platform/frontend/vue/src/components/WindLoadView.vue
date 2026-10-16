@@ -1,5 +1,6 @@
 <script setup>
 import { computed, ref } from 'vue'
+import { calculateWind710 } from '../../../../standards/asce7-10-wind.mjs'
 
 const props = defineProps({ locale: { type: String, default: 'vi' } })
 const standard = ref('asce7-10')
@@ -7,14 +8,25 @@ const family = computed(() => standard.value.startsWith('asce') ? 'asce' : 'euro
 const roof = ref('gable')
 const enclosure = ref('enclosed')
 const windSpeed = ref(40)
-const kh = ref(0.85)
+const exposure = ref('C')
+const height = ref(10)
+const evaluationHeight = ref(10)
+const length = ref(20)
+const width = ref(10)
+const slope = ref(5)
+const confirmed = ref(false)
 const kzt = ref(1)
-const kd = ref(0.85)
-const pressure = computed(() => {
-  const values = [windSpeed.value, kh.value, kzt.value, kd.value].map(Number)
-  if (values.some(v => !Number.isFinite(v) || v <= 0)) return null
-  return 0.000613 * values[0] ** 2 * values[1] * values[2] * values[3]
+const calculation = computed(() => {
+  try {
+    return calculateWind710({ edition: 'ASCE7-10', rigid: confirmed.value,
+      regular_shape: confirmed.value, chapter2_combinations: confirmed.value, wind_normal_to_ridge: true,
+      positive_internal_basis: 'QH_CONSERVATIVE',
+      building: { roof_type: roof.value.toUpperCase(), enclosure: enclosure.value === 'enclosed' ? 'ENCLOSED' : 'PARTIALLY_ENCLOSED',
+        h_m: height.value, z_m: evaluationHeight.value, length_m: length.value, width_m: width.value, slope_deg: slope.value },
+      wind: { v_mps: windSpeed.value, exposure: exposure.value, kzt: kzt.value } })
+  } catch (error) { return { status: 'INPUT_REQUIRED', reason: error.message } }
 })
+const pressure = computed(() => calculation.value.trace?.qh_kpa ?? null)
 const gcpi = computed(() => enclosure.value === 'enclosed' ? 0.18 : 0.55)
 const fmt = (n) => Number.isFinite(n) ? n.toFixed(3) : '—'
 const en = computed(() => props.locale === 'en')
@@ -62,11 +74,16 @@ const msg = (vi, english) => en.value ? english : vi
             <select v-model="enclosure"><option value="enclosed">Enclosed Building</option><option value="partially-enclosed">Partially Enclosed Building</option></select>
           </label>
           <label><span>V (m/s)</span><input v-model.number="windSpeed" type="number" min="0.01" step="0.1" /></label>
-          <label><span>K<sub>h</sub> / K<sub>z</sub></span><input v-model.number="kh" type="number" min="0.01" step="0.01" /></label>
+          <label><span>Exposure</span><select v-model="exposure"><option>B</option><option>C</option><option>D</option></select></label>
+          <label><span>h (m)</span><input v-model.number="height" type="number" min="0.01" step="0.1" /></label>
+          <label><span>z (m)</span><input v-model.number="evaluationHeight" type="number" min="0" step="0.1" /></label>
+          <label><span>L (m) · {{ msg('Song song gió', 'Along wind') }}</span><input v-model.number="length" type="number" min="0.01" /></label>
+          <label><span>B (m) · {{ msg('Vuông góc gió', 'Across wind') }}</span><input v-model.number="width" type="number" min="0.01" /></label>
+          <label><span>{{ msg('Độ dốc mái', 'Roof slope') }} (°)</span><input v-model.number="slope" type="number" min="0" max="90" step="0.1" /></label>
           <label><span>K<sub>zt</sub></span><input v-model.number="kzt" type="number" min="0.01" step="0.01" /></label>
-          <label><span>K<sub>d</sub></span><input v-model.number="kd" type="number" min="0.01" step="0.01" /></label>
         </div>
-        <p class="wind-helper">{{ msg('Các hệ số Kh/Kz, Kzt, Kd đang do người dùng nhập; chưa có bộ tra bảng tự động. Các giá trị có sẵn chỉ minh họa, không phải số liệu dự án.', 'Kh/Kz, Kzt and Kd are manual inputs; automatic code lookups are not available. Initial values are illustrative, not project-specific.') }}</p>
+        <label class="wind-helper"><input v-model="confirmed" type="checkbox" style="width:auto" /> {{ msg('Tôi xác nhận nhà cứng, hình dạng thông thường, gió vuông góc đỉnh mái; V đúng cấp rủi ro ASCE 7-10, exposure/độ kín/Kzt đã kiểm tra và dùng tổ hợp Chương 2.', 'I confirm a rigid, regular building, wind normal to ridge, ASCE 7-10 risk-specific V, verified exposure/enclosure/Kzt and Chapter 2 combinations.') }}</label>
+        <p class="wind-helper">{{ msg('Dữ liệu ban đầu chỉ minh họa. h là cao độ tham chiếu mái; với độ dốc ≤10° dùng cao độ diềm mái. Kz/Kh theo Bảng 27.3-1; Kd = G = 0.85. Kzt nhập theo §26.8, không giảm do che chắn.', 'Initial data are illustrative. h is the roof reference height; use eave height for slope ≤10°. Kz/Kh: Table 27.3-1; Kd = G = 0.85. Supply Kzt per §26.8; no shielding reduction.') }}</p>
       </section>
       <section class="wind-panel">
         <h3>02. {{ msg('Kết quả sơ bộ', 'Preliminary results') }}</h3>
@@ -74,7 +91,18 @@ const msg = (vi, english) => en.value ? english : vi
         <p class="wind-equation">q = 0.000613 × K × Kzt × Kd × V²</p>
         <div class="wind-stat"><span>GC<sub>pi</sub></span><strong>±{{ gcpi.toFixed(2) }}</strong></div>
         <p class="wind-helper">{{ msg('GCpi được chọn theo phân loại độ kín; phải xác minh openings trước khi sử dụng. Vận tốc và các hệ số phải đáp ứng phạm vi áp dụng của phương pháp.', 'GCpi follows the enclosure selection; verify opening classification and code method eligibility before use.') }}</p>
-        <p class="wind-warning" role="status">{{ msg('Chưa tính áp lực thiết kế mái/tường MWFRS hoặc C&C. Cần tra đúng hệ số ngoài, vùng tải và các trường hợp gió đồng thời theo ASCE 7-10 trước khi xuất tải SAP2000.', 'MWFRS and C&C roof/wall design pressures are not calculated yet. External coefficients, zones and simultaneous load cases must be verified before SAP2000 export.') }}</p>
+        <p v-if="calculation.reason" class="wind-warning" role="status">{{ calculation.reason }}</p>
+        <template v-if="calculation.cases">
+          <div v-for="loadCase in calculation.cases" :key="loadCase.id">
+            <h4>GCpi = {{ loadCase.gcpi }} · §27.4-1</h4>
+            <div v-for="(surface, name) in loadCase.walls" :key="name" class="wind-stat"><span>{{ name }}</span><strong>{{ fmt(surface.net_kpa) }} <small>kPa</small></strong></div>
+            <details v-if="loadCase.roof"><summary>{{ msg('Áp lực mái theo vùng', 'Roof pressure zones') }}</summary>
+              <p v-for="zone in loadCase.roof" :key="zone.from_m">x = {{ fmt(zone.from_m) }}–{{ fmt(zone.to_m) }} m: {{ zone.alternatives.map(p => fmt(p.net_kpa)).join(' / ') }} kPa</p>
+            </details>
+          </div>
+          <p v-if="calculation.roof.status !== 'CALCULATED'" class="wind-warning">{{ calculation.roof.reason }}</p>
+        </template>
+        <p class="wind-warning" role="status">{{ msg('REVIEW_REQUIRED · Áp lực mặt theo Chương 27, chưa phải bộ tải hoàn chỉnh. Hai dấu GCpi áp dụng đồng thời trên mọi mặt; hai hệ số mái là các phương án riêng. Còn kiểm tra tải tối thiểu §27.4.7, gió hai phương, xoắn Fig.27.4-8, C&C, diềm/tường chắn mái và ví dụ độc lập trước khi xuất SAP2000.', 'REVIEW_REQUIRED · Chapter 27 surface pressures, not a complete load set. Each GCpi sign applies simultaneously to all faces; roof coefficients are separate alternatives. Minimum loads §27.4.7, orthogonal winds, torsion Fig.27.4-8, C&C, overhangs/parapets and independent benchmarks remain before SAP2000 export.') }}</p>
       </section>
     </div>
   </section>

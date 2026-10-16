@@ -5,6 +5,16 @@ và phân quyền **admin/user**. Trang sử dụng gồm ba không gian **Steel
 **RC Structure**, **Loading** với thẻ minh họa; trang quản trị có thư viện kỹ thuật
 và quản lý tài khoản.
 
+Kernel gió **ASCE 7-10 Phase A**: [phạm vi, điều khoản nguồn và kiểm thử](standards/ASCE7-10-WIND-AUDIT.md).
+Màn hình Wind Load dùng kernel chung để tính Kz/Kh, qz/qh, hai dấu GCpi,
+áp lực tường và mái dốc dưới 10° theo Chương 27 Part 1. Kết quả giữ
+`REVIEW_REQUIRED`; chưa phải bộ tải hoàn chỉnh để xuất SAP2000.
+
+**Kho nguồn ASCE 7-10 đầy đủ 658 trang** trong Steel Design → Library → Standards:
+[cấu trúc lưu trữ, tra cứu công thức/bảng, nhập và sao lưu](standards/ASCE7-10-SOURCE-CORPUS.md).
+Nguồn PDF, ảnh trang, text/OCR và token số được lưu riêng qua Laravel;
+dữ liệu trích xuất chưa được tự động phê duyệt làm công thức thiết kế.
+
 ## Chạy local
 
 Cần Docker Engine/Desktop, Docker Compose v2 và Bash (Windows: WSL).

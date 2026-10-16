@@ -57,6 +57,14 @@ test('missing Ky, Ly, torsion restraint and G fail closed, never infer Ly=Lb',()
  assert.equal(entry.status,'INPUT_REQUIRED');
  assert.ok(entry.trace.fcrx_mpa>0&&entry.trace.fcry_mpa>0);
 });
+test('missing or nonfinite Cw is not coerced to zero in E4 torsional buckling',()=>{
+ for(const cw of [null,undefined,NaN,Infinity]){
+  const result=calculateIH36010(copy(),{...props,warping_constant_cw_mm6:cw},lib);
+  assert.equal(result.limit_states.compression.status,'INPUT_REQUIRED');
+  assert.equal(result.limit_states.major_flexure.status,'INPUT_REQUIRED');
+  assert.equal(result.limit_states.interaction.status,'INPUT_REQUIRED');
+ }
+});
 test('F2 major, F6 minor and H1 report clause-linked nominal and ASD ratios',()=>{
  const a=calculateIH36010(copy(),props,lib);
  assert.equal(a.limit_states.major_flexure.status,'CALCULATED');
@@ -122,12 +130,31 @@ test('E7 flange Qs follows built-up and rolled limits without global PASS',()=>{
  }
 });
 test('F1-1 uses absolute moment magnitudes and single-segment validation',()=>{
- const value=cbF11({mode:'QUARTER_POINTS',ends_braced:true,same_case:true,
+ const value=cbF11({mode:'QUARTER_POINTS',ends_braced:true,same_case:true,segment_maximum_confirmed:true,
   mmax:-200,ma:-140,mb:120,mc:-60});
  near(value.value,12.5*200/(2.5*200+3*140+4*120+3*60));
  assert.equal(cbF11({mode:'CONSERVATIVE'}).value,1);
  assert.equal(cbF11({mode:'QUARTER_POINTS',ends_braced:true,same_case:false,
   mmax:200,ma:120,mb:80,mc:10}).source,'REVIEW_REQUIRED');
+});
+test('quarter points alone cannot confirm the segment extreme used by F1-1',()=>{
+ const diagram={mode:'QUARTER_POINTS',ends_braced:true,same_case:true,mmax:200,ma:140,mb:120,mc:60};
+ assert.equal(cbF11(diagram).value,null);
+ assert.match(cbF11(diagram).reason,/entire unbraced segment/);
+ near(cbF11({...diagram,segment_maximum_confirmed:true}).value,2500/1580);
+});
+test('Chapter G gaps and stiffeners cannot inherit workbook capacities or a PASS',()=>{
+ const input=copy();input.forces.shear_y_kN=-120;input.forces.shear_x_kN=0;
+ input.stiffeners={spacing_mm:1500};
+ const result=calculateIH36010(input,props,lib);
+ assert.equal(result.limit_states.shear_web.status,'REVIEW_REQUIRED');
+ assert.equal(result.limit_states.shear_web.demand,120);
+ assert.equal(result.limit_states.shear_web.available,undefined);
+ assert.equal(result.limit_states.shear_flange.status,'NOT_APPLICABLE');
+ assert.equal(result.limit_states.stiffeners.status,'REVIEW_REQUIRED');
+ assert.equal(result.overall_status,'REVIEW_REQUIRED');
+ delete input.forces.shear_x_kN;
+ assert.equal(calculateIH36010(input,props,lib).limit_states.shear_flange.status,'INPUT_REQUIRED');
 });
 test('H1 requires verified axial strength and both bending resistances; no phantom PASS',()=>{
  const tension=copy();tension.forces.axial_kN=200;

@@ -72,6 +72,7 @@ export function cbF11(moment) {
  if(moment?.mode!=='QUARTER_POINTS') return {value:null,source:'INPUT_REQUIRED',clause:'F1-1',reason:'Supply a verified segment moment diagram or choose Cb=1 conservative.'}
  if(moment.is_unbraced_cantilever) return {value:1,source:'F1-1 unbraced free end',clause:'F1-1'}
  if(moment.ends_braced!==true || moment.same_case!==true) return {value:null,source:'REVIEW_REQUIRED',clause:'F1-1',reason:'Both segment ends must be braced; all moment stations must come from one load case/combo.'}
+ if(moment.segment_maximum_confirmed!==true) return {value:null,source:'REVIEW_REQUIRED',clause:'F1-1',reason:'Confirm Mmax is the maximum absolute moment over the entire unbraced segment; the quarter-point samples alone do not establish it.'}
  const moments=['mmax','ma','mb','mc'].map(k=>Math.abs(check(moment[k],k)));
  const [mmax,ma,mb,mc]=moments;
  const denom=2.5*mmax+3*ma+4*mb+3*mc;
@@ -136,7 +137,8 @@ export function calculateIH36010(input,canonical,factorLib) {
     clause:'E3/E4/E7',trace:{fex_mpa:fex,fey_mpa:fey,
      fcrx_mpa:critical(fex,fy),fcry_mpa:critical(fey,fy)}
    });
-  }else if(!(canonical.warping_constant_cw_mm6>=0 && canonical.torsion_constant_j_mm4>0)){
+  }else if(!(Number.isFinite(canonical.warping_constant_cw_mm6) && canonical.warping_constant_cw_mm6>=0 &&
+    Number.isFinite(canonical.torsion_constant_j_mm4) && canonical.torsion_constant_j_mm4>0)){
    comp=status('COMPRESSION','INPUT_REQUIRED','Section Properties must supply valid Cw and J for E4-4.',{clause:'E4'});
   }else {
    const fez=(Math.PI**2*e*canonical.warping_constant_cw_mm6/(kz*lz)**2+
@@ -227,7 +229,8 @@ export function calculateIH36010(input,canonical,factorLib) {
   }
  }else if(cls.flexureWeb==='NONCOMPACT'){
   major=status('MAJOR_FLEXURE','REVIEW_REQUIRED','F4 noncompact-web plastification and flange interactions require further independent validation.',{clause:'F4'});
- }else if(!(canonical.torsion_constant_j_mm4>0 && canonical.warping_constant_cw_mm6>0)){
+ }else if(!(Number.isFinite(canonical.torsion_constant_j_mm4) && canonical.torsion_constant_j_mm4>0 &&
+   Number.isFinite(canonical.warping_constant_cw_mm6) && canonical.warping_constant_cw_mm6>0)){
   major=status('MAJOR_FLEXURE','INPUT_REQUIRED','Valid J and Cw from Section Properties required.',{clause:'F2-4/F2-7'});
  }else {
   const j=canonical.torsion_constant_j_mm4,cw=canonical.warping_constant_cw_mm6;
@@ -282,6 +285,19 @@ export function calculateIH36010(input,canonical,factorLib) {
  else if(n>0)axial=status('TENSION','INPUT_REQUIRED','Gross yielding alone is insufficient. Supply Fu,An,U and connection net-section information for D2/D3.',{clause:'D2/D3'});
  else axial=value('ZERO_AXIAL',0,'H1');
  limits.tension=n>0?axial:status('TENSION','NOT_APPLICABLE','No tensile force demand.',{clause:'D2'});
+ // Expose absent Chapter G checks as explicit limit states. Never substitute the
+ // workbook stiffener-area sign test or mix its LRFD expression into ASD results.
+ for(const [key,action,clause] of [['shear_web','shear_y_kN','G2'],['shear_flange','shear_x_kN','G7']]){
+  const force=forces[action];
+  limits[key]=typeof force!=='number'||!Number.isFinite(force)
+   ? status(key.toUpperCase(),'INPUT_REQUIRED','Supply the signed shear force in kN; omitted shear is not assumed to be zero.',{clause})
+   : force===0
+    ? status(key.toUpperCase(),'NOT_APPLICABLE','No shear force demand in this direction.',{clause,demand:0})
+    : status(key.toUpperCase(),'REVIEW_REQUIRED','Chapter G resistance has not been source-verified in this kernel; legacy shear and tension-field values are not design capacities.',{clause,demand:Math.abs(force)});
+ }
+ if(input.stiffeners?.spacing_mm>0){
+  limits.stiffeners=status('STIFFENERS','REVIEW_REQUIRED','Stiffener strength, rigidity and tension-field eligibility require Chapter G source verification. No legacy area/sign test or tension-field enhancement is credited.',{clause:'G2.2/G3'});
+ }
  if(major.status==='CALCULATED' && minor.status==='CALCULATED' && axial.status==='CALCULATED'){
   const pRatio=n===0?0:Math.abs(n)/axial.available;
   const mxRatio=Math.abs(mx)/major.available,myRatio=Math.abs(my)/minor.available;

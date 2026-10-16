@@ -203,7 +203,8 @@ body{background:#123754}
  <div class="tag"><span class="dot"></span> LEGACY EXCEL PARITY</div>
  </div></header>
 <main class="page"><div class="intro"><div><h1>H/I Doubly Symmetric</h1><p>Doubly symmetric I/H member strength · LRFD / ASD · Workbook ↔ Calculation engine</p></div><div class="intro-actions"><div class="language-switch" role="group" aria-label="Language"><button type="button" data-locale="vi" lang="vi" aria-pressed="false" title="Tiếng Việt">VN</button><button type="button" data-locale="en" lang="en" aria-pressed="true" title="English">ENG</button></div><button class="btn" id="preset" type="button">↺ &nbsp; Excel sample</button><button class="btn" id="import" type="button">↥ &nbsp; Import JSON</button><button class="btn" id="export" type="button">↧ &nbsp; Export results</button><input type="file" accept=".json,application/json" id="file" class="hidden"></div></div>
-<div class="warningbar"><div class="alert-icon">!</div><div><strong>Excel parity only — not approved for design</strong>The source workbook states AISC 360-05. This preview preserves legacy behavior for parity (signed Cb, weak-axis Fe and stiffeners). <b>Do not use this output for construction design or claim AISC 360-10 compliance.</b></div></div>
+<div class="warningbar hidden" id="legacy-warning"><div class="alert-icon">!</div><div><strong>Excel parity only — not approved for design</strong>The source workbook states AISC 360-05. This preview preserves legacy behavior for parity (signed Cb, weak-axis Fe and stiffeners). <b>Do not use this output for construction design or claim AISC 360-10 compliance.</b></div></div>
+<div class="design-method-panel"><label for="calculation-mode"><strong>Calculation source</strong></label> <select id="calculation-mode"><option value="AISC36010">AISC 360-10 · Section Properties core</option><option value="LEGACY">Legacy Excel 360-05 · comparison only</option></select><p id="primary-scope">AISC 360-10 reference calculation · incomplete checks are reported explicitly; overall status remains REVIEW_REQUIRED.</p></div>
 <div class="workspace" id="results-start"><section class="card" id="input-card"><header class="cardhead"><h2>01 &nbsp; Input Parameters</h2><small>Units: mm / MPa / kN / kN·m</small></header>
 <fieldset class="design-method-panel" aria-label="Design method">
 <legend>Design Method / Phương pháp thiết kế</legend>
@@ -250,7 +251,7 @@ body{background:#123754}
 <div class="input-actions"><small id="dirtytext">Sample inputs loaded.</small><button class="btn primary" id="run" type="button">▹ &nbsp; Calculation</button></div><div class="errorbox" role="alert" id="error"></div></section>
 <section class="card" id="calculation-results" aria-live="polite"><header class="cardhead"><h2>02 &nbsp; Calculation Results</h2><small id="calc-info">Browser · not saved to DB</small></header>
 <div class="result-top"><div class="ring" id="ring"><div class="ring-center"><strong id="h1">—</strong><span>H1 · D/C</span></div></div><div><div class="result-title">Axial force–moment interaction</div><span class="status-line" id="status">REVIEW REQUIRED</span><p class="result-desc" id="overview">Loading Excel sample…</p></div></div>
-<div id="refline" class="refline"></div><div class="metrics" id="metrics"></div><div class="breakdown"><div id="factor-table" aria-live="polite"></div><div class="subheading">Demand / Capacity <span style="font-size:10px;color:#95a4b0">Legacy parity calculation</span></div><div id="bars"></div><small>Individual checks may show PASS/FAIL; the overall status always remains REVIEW REQUIRED.</small></div>
+<div id="refline" class="refline"></div><div class="metrics" id="metrics"></div><div class="breakdown"><div id="factor-table" aria-live="polite"></div><div class="subheading">Demand / Capacity <span style="font-size:10px;color:#95a4b0"><span id="active-calculation-source">AISC 360-10 reference calculation</span></span></div><div id="bars"></div><small>Computed branch ratios do not establish complete member approval; missing checks remain explicit.</small></div>
 <div class="resultsection"><h3>Limit State Checks</h3><div class="tablewrap"><table><thead><tr><th>Clause</th><th>Check</th><th>Demand</th><th>Capacity</th><th>D/C</th><th>Check</th></tr></thead><tbody id="checkrows"></tbody></table></div></div>
 <div class="details"><details><summary>⊞ &nbsp; Classification and intermediate results</summary><div class="tracegrid" id="trace"></div></details></div>
 <div class="resultsection"><h3>Engineering warnings <span style="font-weight:400;color:#9aa5af" id="warn-count"></span></h3><div class="warning-list" id="warnings"></div></div>
@@ -271,7 +272,7 @@ body{background:#123754}
 <section class="card shared-section" id="shared-section" aria-labelledby="shared-section-heading">
 <header class="cardhead"><h2 id="shared-section-heading">02B &nbsp; Section Properties · Shared Calculation Engine</h2><small id="shared-version">Shared numerical core · geometry only</small></header>
 <div class="shared-body">
-<p class="shared-notice">Section Properties is the single numerical source for gross section geometry and advanced mechanics. The current AISC member-resistance checker remains in Legacy Excel Parity mode; shared section values do not silently overwrite unverified LRFD equations.</p>
+<p class="shared-notice">Section Properties is the single numerical source for gross section geometry and advanced mechanics. The active AISC 360-10 calculation consumes these canonical properties. Legacy Excel values are retained only for explicit comparison.</p>
 <div id="shared-status" role="status" aria-live="polite">Calculating canonical section properties…</div>
 <div class="shared-summary" id="shared-summary"></div>
 <div id="shared-comparisons" class="shared-comparisons"></div>
@@ -283,7 +284,7 @@ body{background:#123754}
 </section>
 
 <section class="card calc-notebook" id="calculation-notebook" aria-label="Step-by-step calculation report">
-  <header class="notebook-head"><div><h2>03 &nbsp; Calculation Details · Step by Step</h2><p>Stepwise engineering calculations · symbolic formulae · current substitutions · design code references <strong>AISC 360-10</strong></p></div>
+  <header class="notebook-head"><div><h2>03 &nbsp; Calculation Details · Step by Step</h2><p>Stepwise engineering calculations · symbolic formulae · current substitutions · design code references <strong>Legacy Excel 360-05 · comparison only</strong></p></div>
     <div class="notebook-actions"><button class="btn mini" type="button" id="steps-expand">Expand all</button><button class="btn mini" type="button" id="steps-collapse">Collapse all</button><button class="btn mini" type="button" id="steps-copy">Copy formulas</button><button class="btn mini" type="button" id="steps-print">Print / Save PDF</button></div>
   </header>
   <div class="notebook-grid"><nav class="notebook-nav" id="step-nav" aria-label="Calculation steps index"><h3>Calculation index</h3></nav>
@@ -303,6 +304,12 @@ body{background:#123754}
  */
 // English is the canonical source. Translate presentation only, never calculation data.
 const HI_TRANSLATIONS = {
+  "Calculation source": "Nguồn tính toán",
+  "AISC 360-10 · Section Properties core": "AISC 360-10 · Bộ tính Section Properties",
+  "Legacy Excel 360-05 · comparison only": "Excel cũ 360-05 · chỉ để đối chiếu",
+  "AISC 360-10 reference calculation": "Tính toán tham khảo AISC 360-10",
+  "Inputs changed — calculate again to update results.": "Đầu vào đã thay đổi — tính lại để cập nhật kết quả.",
+  "Current AISC 360-10 reference results displayed.": "Đang hiển thị kết quả tham khảo AISC 360-10 hiện tại.",
   "Workspace": "Không gian làm việc",
   "Dashboard": "Tổng quan",
   "Steel Design": "Thiết kế thép",
@@ -644,7 +651,7 @@ const HI_TRANSLATIONS = {
   "Sample inputs loaded.": "Dữ liệu mẫu đã được nạp.",
   "Excel sample": "Dữ liệu mẫu Excel",
   "Legacy parity calculation": "Giá trị từ engine đối chiếu",
-  "Individual checks may show PASS/FAIL; the overall status always remains REVIEW REQUIRED.": "Các nhánh riêng có thể hiển thị PASS/FAIL theo công thức gốc; trạng thái tổng thể luôn là REVIEW REQUIRED.",
+  "Computed branch ratios do not establish complete member approval; missing checks remain explicit.": "Các nhánh riêng có thể hiển thị PASS/FAIL theo công thức gốc; trạng thái tổng thể luôn là REVIEW REQUIRED.",
   "Classification and intermediate results": "Chi tiết phân loại & công thức trung gian",
   "All calculations are performed locally; no input is sent to a server.": "Mọi kết quả được tính cục bộ trên máy, không tải dữ liệu lên server.",
   "Stepwise engineering calculations · symbolic formulae · current substitutions · design code references ": "Thuyết minh theo trình tự kiểm tra · Công thức ký tự có chỉ số dưới/trên · Thay số theo dữ liệu hiện tại · Trích dẫn điều khoản ",
@@ -1184,7 +1191,7 @@ function renderFactorTable(r) {
    <small>${safe(val.clause)} · ${safe(val.equation)}</small></div>`).join('')+'</div>'+
  '<p class="factor-note">Hệ số theo điều khoản AISC 360-10. Công thức nominal của Excel 360-05 vẫn đang chờ thẩm tra.</p>'
 }
-function render(){
+function renderLegacyPreview(){
   const r=latest.result
   const percent=r.interaction.percent
   find('h1').textContent=format(percent,2)+'%'
@@ -1224,6 +1231,46 @@ function render(){
   renderCalculationNotebook()
 }
 
+function isAiscMode(){return find('calculation-mode').value==='AISC36010'}
+function renderPrimaryPending(message){
+ find('h1').textContent='—';find('status').textContent='REVIEW REQUIRED';
+ find('ring').style.background='#e9eff3';find('overview').textContent=message;
+ for(const id of ['metrics','bars','checkrows','trace','warnings','factor-table','refline'])find(id).textContent='';
+ find('warn-count').textContent='';find('calc-info').textContent='AISC 360-10 · awaiting current calculation';
+ find('active-calculation-source').textContent='AISC 360-10 reference calculation';
+}
+function renderAiscPrimary(result,input,canonical){
+ const limits=result.limit_states,interaction=limits.interaction;
+ const ratio=interaction.status==='CALCULATED'?interaction.nominal:null;
+ find('h1').textContent=ratio===null?'—':format(100*ratio,2)+'%';
+ find('status').textContent='REVIEW REQUIRED';
+ const percent=ratio===null?0:Math.max(0,Math.min(100*ratio,100));
+ find('ring').style.background=`conic-gradient(${ratio>1?'#b84a43':'#067d85'} 0% ${percent}%,#e9eff3 ${percent}% 100%)`;
+ find('overview').textContent='AISC 360-10 · '+result.classification.flexureChapter+' · '+result.classification.axial+' · selected reference branches; incomplete member checks remain.';
+ const calculated=Object.entries(limits).filter(([,row])=>row.status==='CALCULATED');
+ const cards=[['Mx',limits.major_flexure.available,'kN·m'],['My',limits.minor_flexure.available,'kN·m'],['Pc',limits.compression.available,'kN'],['A',canonical.area_mm2,'mm²']];
+ find('metrics').innerHTML=cards.map(([label,number,unit])=>`<div class="metric"><span>${safe(label)}</span><strong>${format(number,3)}</strong><small>${safe(unit)}</small></div>`).join('');
+ const demand={compression:Math.max(0,-input.forces.axial_kN),tension:Math.max(0,input.forces.axial_kN),major_flexure:Math.abs(input.forces.moment_x_kNm),minor_flexure:Math.abs(input.forces.moment_y_kNm),interaction:ratio,shear_web:Math.abs(input.forces.shear_y_kN),shear_flange:Math.abs(input.forces.shear_x_kN)};
+ find('checkrows').innerHTML=Object.entries(limits).map(([name,row])=>{
+  const utilization=row.status==='CALCULATED'&&row.available>0&&Number.isFinite(demand[name])?demand[name]/row.available:null;
+  return `<tr><td>${safe(row.clause||'—')}</td><td>${safe(name)}</td><td>${format(demand[name])}</td><td>${format(row.available)}</td><td>${utilization===null?'—':format(100*utilization,2)+'%'}</td><td><span class="pill ${utilization>1?'fail':row.status==='CALCULATED'?'':'review'}">${safe(row.status)}</span>${row.reason?'<small>'+safe(row.reason)+'</small>':''}</td></tr>`;
+ }).join('');
+ find('bars').innerHTML=calculated.filter(([key,row])=>key!=='interaction'&&row.available>0&&Number.isFinite(demand[key])).map(([key,row])=>{
+  const pct=100*demand[key]/row.available;return `<div class="barrow"><div class="barlabel"><span>${safe(key)}</span><strong>${format(pct,2)}%</strong></div><div class="bar ${pct>100?'fail':''}"><div style="width:${Math.max(0,Math.min(pct,100))}%"></div></div></div>`;
+ }).join('');
+ const traces={'Calculation source':'AISC360-10 reference kernel','Geometry source':result.geometry_source,'Cb':limits.major_flexure.trace?.cb,'Cb source':limits.major_flexure.trace?.cb_source,...limits.compression.trace,...limits.major_flexure.trace,...limits.minor_flexure.trace};
+ find('trace').innerHTML=Object.entries(traces).filter(([,v])=>v!=null).map(([label,v])=>`<div><span>${safe(label)}</span><strong>${typeof v==='number'?format(v,5):safe(v)}</strong></div>`).join('');
+ find('warnings').innerHTML=result.warnings.map(w=>`<div class="warning"><strong>${safe(w.code)}</strong>${safe(w.message)}</div>`).join('');
+ find('warn-count').textContent='('+result.warnings.length+')';
+ find('refline').innerHTML='<a href="./?standard=AISC360-10#/modules/steel/library/standards" target="_blank" rel="noopener">AISC 360-10 · source library</a> · '+safe(result.mode)+' demands must use the matching load-combination method.';
+ const factorLib=window.Aisc36010Resistance;
+ find('factor-table').innerHTML='<h4>AISC 360-10 · '+safe(result.mode)+' · φ / Ω</h4><div class="factor-grid">'+['FLEXURE','COMPRESSION'].map(key=>{const f=factorLib.factorNotation(result.mode,key);return '<div class="factor-item"><span>'+safe(key)+'</span><strong>'+safe(f.symbol)+' = '+format(f.value,2)+'</strong><small>'+safe(f.clause)+'</small></div>'}).join('')+'</div>';
+ find('calc-info').textContent='AISC 360-10 · '+result.mode+' · Section Properties shared core';
+ find('active-calculation-source').textContent='AISC 360-10 reference calculation';
+ latest.changed=false;find('dirtytext').textContent='Current AISC 360-10 reference results displayed.';
+ find('dirtytext').classList.remove('input-changed');find('error').style.display='none';
+}
+let currentCalculation=Promise.resolve();
 let sharedRequestSequence=0;
 let sharedResult=null;
 let verifiedResult=null;
@@ -1246,6 +1293,7 @@ async function renderAiscReview(input,canonical,generation) {
   const verified=module.calculateIH36010(model,canonical.canonical,window.Aisc36010Resistance);
   if(generation!==sharedRequestSequence)return;
   verifiedResult=verified;
+  if(isAiscMode()) renderAiscPrimary(verified,input,canonical.canonical);
   node.textContent='ANSI/AISC 360-10 · Phase A/B · Method '+latest.method+' · Final status: '+verified.overall_status;
   const cls=verified.classification;
   document.getElementById('aisc-review-class').innerHTML=
@@ -1275,6 +1323,7 @@ async function renderAiscReview(input,canonical,generation) {
   if(generation!==sharedRequestSequence)return;
   verifiedResult=null;
   node.textContent='AISC 360-10 review calculation not available: '+error.message;
+  if(isAiscMode()) renderPrimaryPending(node.textContent);
   document.getElementById('aisc-review-class').textContent='';
   document.getElementById('aisc-review-table').textContent='';
  }
@@ -1351,6 +1400,7 @@ async function refreshCanonicalProperties(input,legacy,generation){
  }catch(error){
   if(generation!==sharedRequestSequence)return;
   sharedResult=null;
+  if(isAiscMode()) renderPrimaryPending('Section Properties calculation failed: '+error.message);
   node.textContent='Shared Section Properties could not be loaded: '+error.message;
   document.getElementById('shared-summary').innerHTML='';
   document.getElementById('shared-comparisons').textContent='';
@@ -1366,29 +1416,37 @@ document.getElementById('shared-filter')?.addEventListener('input',event=>{
 
 function run(){
   const generation=++sharedRequestSequence;
+  currentCalculation=Promise.resolve();
+  let inputReady=false;
   sharedResult=null;
   verifiedResult=null;
+  const legacyMode=!isAiscMode();
+  find('legacy-warning').classList.toggle('hidden',!legacyMode);
+  find('calculation-notebook').classList.toggle('hidden',!legacyMode);
+  find('primary-scope').classList.toggle('hidden',legacyMode);
+  if(!legacyMode) renderPrimaryPending('Calculating AISC 360-10 from canonical Section Properties…');
   document.getElementById('aisc-review-status').textContent='Đang chờ Section Properties…';
   document.getElementById('shared-status').textContent='Waiting for canonical Section Properties calculation…';
   try{
-    latest.input=readInputs()
+    latest.input=readInputs();inputReady=true;
     latest.method=document.querySelector('input[name="design-method"]:checked')?.value||'LRFD'
     latest.result=calculate(latest.input,latest.method)
     const s=latest.result
     // Fail closed if our JS engine produces a non-finite number on the result surface.
     for(const key of ['phi_mnx_kNm','phi_mny_kNm','phi_pn_compression_kN']) if(!Number.isFinite(s.strengths[key]) || s.strengths[key]<=0) throw new Error('Khả năng chịu lực không hợp lệ, vui lòng kiểm tra đầu vào.')
     if(!Number.isFinite(s.interaction.lrfd_percent)) throw new Error('Giá trị tương tác không hữu hạn.')
-    render()
-    void refreshCanonicalProperties(latest.input,latest.result,generation)
+    if(legacyMode) {renderLegacyPreview();find('active-calculation-source').textContent='Legacy Excel 360-05 · comparison only';}
+    currentCalculation=refreshCanonicalProperties(latest.input,latest.result,generation)
   }catch(err){
     find('error').textContent='Legacy Excel preview: '+err.message;
-    find('error').style.display='block';
+    find('error').style.display=legacyMode||!inputReady?'block':'none';
     find('dirtytext').textContent='Legacy failed. AISC 360-10 phase A/B still runs independently.';
     latest.result=null;
-    if(latest.input){
-      void refreshCanonicalProperties(latest.input,{section_properties:{}},generation);
-    }
+    if(inputReady && latest.input){
+      currentCalculation=refreshCanonicalProperties(latest.input,{section_properties:{}},generation);
+    }else if(isAiscMode())renderPrimaryPending('Invalid input: '+err.message);
   }
+ return currentCalculation;
 }
 function reset(){
  latest.input=structuredClone(fixture)
@@ -1396,7 +1454,7 @@ function reset(){
  latest.method='LRFD'
  updateInputs();run()
 }
-function markChanged(){latest.changed=true;find('dirtytext').textContent='Đã thay đổi dữ liệu · Nhấn Tính toán để cập nhật.';find('dirtytext').classList.add('input-changed');try{latest.input=readInputs();draw()}catch(_){}}
+function markChanged(){++sharedRequestSequence;verifiedResult=null;latest.changed=true;if(isAiscMode())renderPrimaryPending('Inputs changed — calculate again to update results.');find('dirtytext').textContent='Đã thay đổi dữ liệu · Nhấn Tính toán để cập nhật.';find('dirtytext').classList.add('input-changed');try{latest.input=readInputs();draw()}catch(_){}}
 
 // Dynamic engineering calculation notebook. All displayed capacities are read
 // from the same result object as the Phase 1 parity engine, not hardcoded.
@@ -1571,7 +1629,7 @@ document.querySelectorAll('.tab').forEach(button=>button.addEventListener('click
 }))
 document.querySelectorAll('[data-key]').forEach(el=>el.addEventListener('input',markChanged))
 Object.values(verifiedKeys).forEach(id=>document.getElementById(id)?.addEventListener('input',()=>{
- document.getElementById('aisc-review-status').textContent='Bracing inputs changed — nhấn Tính toán để cập nhật.'
+ markChanged();document.getElementById('aisc-review-status').textContent='Bracing inputs changed — nhấn Tính toán để cập nhật.'
 }))
 document.querySelectorAll('input[name="design-method"]').forEach(el=>el.addEventListener('change',event=>{
  document.getElementById('method-explanation').textContent=event.target.value==='ASD'
@@ -1580,11 +1638,14 @@ document.querySelectorAll('input[name="design-method"]').forEach(el=>el.addEvent
  run()
 }))
 find('run').addEventListener('click',run);find('preset').addEventListener('click',reset)
-find('export').addEventListener('click',()=>{
-  if (!latest.result){run();if(!latest.result)return}
-  const content=JSON.stringify({meta:{app:'GeekCalculus',module:'HI_DOUBLY_SYMMETRIC',mode:'LEGACY_EXCEL_PARITY',design_method:latest.method,standard_factor_edition:'AISC360-10',exported_at:new Date().toISOString()},input:latest.input,result:latest.result,section_properties_shared:sharedResult,aisc36010_phase_ab_review:verifiedResult},null,2)
+find('calculation-mode').addEventListener('change',run);
+find('export').addEventListener('click',async()=>{
+  if(latest.changed || (isAiscMode()?!verifiedResult:!latest.result)) await run();
+  await currentCalculation;
+  if(isAiscMode()?!verifiedResult:!latest.result)return;
+  const content=JSON.stringify({meta:{app:'GeekCalculus',module:'HI_DOUBLY_SYMMETRIC',mode:isAiscMode()?'AISC36010_REFERENCE':'LEGACY_EXCEL_PARITY',design_method:latest.method,standard_factor_edition:'AISC360-10',exported_at:new Date().toISOString()},input:isAiscMode()?{...latest.input,member:{...latest.input.member,...readVerifiedMember()}}:latest.input,result:isAiscMode()?verifiedResult:latest.result,legacy_comparison:latest.result,section_properties_shared:sharedResult,aisc36010_phase_ab_review:verifiedResult},null,2)
   const url=URL.createObjectURL(new Blob([content],{type:'application/json'})), a=document.createElement('a')
-  a.href=url;a.download='GeekCalculus_HI_Phase1_Parity_Result.json';a.click();URL.revokeObjectURL(url)
+  a.href=url;a.download=isAiscMode()?'GeekCalculus_HI_AISC36010_Reference.json':'GeekCalculus_HI_Legacy_Comparison.json';a.click();URL.revokeObjectURL(url)
 })
 find('import').addEventListener('click',()=>find('file').click())
 find('file').addEventListener('change',async event=>{

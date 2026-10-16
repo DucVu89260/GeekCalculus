@@ -16,6 +16,8 @@ for (const method of ['ASD', 'LRFD']) test(`${method}: base and BOTH T sections 
   cell(p.plastic.zx, 'B36', 1000); cell(p.plastic.zy, 'E36', 1000)
   cell(p.geometric.centroid_y, 'H36', 10); cell(p.plastic.pna_y, 'E35', 10)
   cell(r.hc_top_mm, 'H34', 10); cell(r.hp_top_mm, 'H35', 10)
+  cell(r.base.advanced.torsion_constant_j.value, 'E33', 1e4)
+  cell(r.base.advanced.warping_constant_cw.value, 'E34', 1e6)
   for (const [which, refs] of [['top', ['AP51', 'AP52', 'AP53', 'AP54', 'AP55', 'AP56']], ['bottom', ['AP57', 'AP58', 'AP59', 'AP60', 'AP61', 'AP62']]]) {
     const t = r[which].properties
     cell(t.geometric.area, refs[0]); cell(r[which + '_yc_from_outer_face_mm'], refs[1])

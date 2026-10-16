@@ -1,7 +1,7 @@
 /**
  * ANSI/AISC 360-10 reference calculation core for sharp-corner, doubly symmetric I/H.
- * Scope: B4.1a/b, E3, E4 (with supplied torsional restraint), F1, F2/F3, F6, H1.
- * F4/F5 and E7 web effective-width iteration are intentionally NOT silently approximated.
+ * Scope: B4.1a/b, E3/E4/E7, F1, F2/F3/F5/F6, H1.
+ * F4 (noncompact web), D2/D3 net fracture, G shear/stiffeners are not silently approximated.
  * Units: mm, MPa, N, N.mm internally; input actions kN/kN.m.
  * Original source: ANSI/AISC 360-10 June 22, 2010 (specification, not commentary).
  */
@@ -293,7 +293,7 @@ export function calculateIH36010(input,canonical,factorLib) {
  }
  // Phase A/B does NOT mark any member fully PASS: shear, stiffeners, D2 & combined provisions still pending.
  result.warnings=[
-  {code:'PARTIAL_STANDARD_SCOPE',message:'Phase A/B computes selected B4,E3,E4,F2,F3,F6,H1 branches; all Chapter G and other applicable checks still need verification.'},
+  {code:'PARTIAL_STANDARD_SCOPE',message:'Phase A/B computes selected B4,E3,E4,E7,F2,F3,F5,F6,H1 branches; F4 noncompact web, Chapter G and other applicable checks still need verification.'},
   {code:'TFA_NOT_VERIFIED',message:'Web stiffeners and tension field action must be checked independently under Chapter G.'},
   ...(cls.geometry_model==='SHARP_CORNER_ROLLED_APPROXIMATION'?[{code:'ROLLED_FILLET_GEOMETRY',message:'Rolled profile requires actual fillet and effective h from catalogue.'}]:[]),
   ...(cb.source==='CONSERVATIVE'?[{code:'CB_CONSERVATIVE',message:'Cb=1 conservative; replace with same-segment moment diagram when SAP importer is ready.'}]:[]),

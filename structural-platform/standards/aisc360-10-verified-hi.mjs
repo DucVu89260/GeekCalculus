@@ -98,7 +98,7 @@ export function classifyI(input) {
   axial:lf<=flangeCompressionLimit&&lw<=webCompressionLimit?'NONSLENDER':'SLENDER',
   flexureFlange:classify(lf,lp,lrMajor),flexureWeb:classify(lw,lpWeb,lrWeb),
   minorFlange:classify(lf,lp,lrMinor),
-  flexureChapter:lw>lpWeb?'F5':lf>lp?'F3':'F2',
+  flexureChapter:lw>lrWeb?'F5':lw>lpWeb?'F4':lf>lp?'F3':'F2',
   limits:{lpFlange:lp,lrMajorFlange:lrMajor,lrMinorFlange:lrMinor,lpWeb,lrWeb},
   clauses:['B4.1a-1','B4.1a-2','B4.1a-5','B4.1b-10','B4.1b-11','B4.1b-13','B4.1b-15'],
   geometry_model: fabrication==='ROLLED'?'SHARP_CORNER_ROLLED_APPROXIMATION':'BUILT_UP_RECTANGULAR_PLATES'
@@ -195,7 +195,7 @@ export function calculateIH36010(input,canonical,factorLib) {
   }else {
    const d=section.h_mm,tw=section.tw_mm,tf=section.tf_mm,bf=section.bf_mm,ho=d-tf,hc=cls.hw;
    const aw=Math.min(10,hc*tw/(bf*tf)); // F4-12, F5-6 maximum aw=10
-   const rt=bf/Math.sqrt(12*(ho/d+aw*d*d/(6*ho*d)));
+   const rt=bf/Math.sqrt(12*(ho/d+aw*hc*hc/(6*ho*d)));
    const lp=1.1*rt*Math.sqrt(e/fy); // F4-7 referenced in F5
    const lr=Math.PI*rt*Math.sqrt(e/(.7*fy)); // F5-5
    const rpg=Math.min(1,1-aw/(1200+300*aw)*(hc/tw-5.7*Math.sqrt(e/fy)));

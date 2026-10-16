@@ -2,84 +2,89 @@
 
 namespace App\Console\Commands;
 
+use App\Services\Standards\StandardsImportService;
+use App\Services\Standards\StandardPdfInspector;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use RuntimeException;
 
 class ImportStandardsOutline extends Command
 {
-    protected $signature = 'standards:import-outline {json : Path to extracted private JSON}';
-    protected $description = 'Import verified-source PDF TOC bookmarks into an existing standards edition';
+    protected $signature = 'standards:import-outline {json : Path to a manifest whose source document is already registered}';
 
-    public function handle(): int
+    protected $description = 'Import an outline only when it matches a registered source document and page count';
+
+    public function handle(StandardsImportService $imports, StandardPdfInspector $inspector): int
     {
-        $file = $this->argument('json');
-        if (!is_file($file)) {
-            $this->error('JSON file not found');
+        $file = (string) $this->argument('json');
+        if (!is_file($file) || !is_readable($file)) {
+            $this->error('A readable JSON manifest is required.');
             return self::FAILURE;
         }
+
         try {
-            $raw = json_decode(file_get_contents($file), true, 512, JSON_THROW_ON_ERROR);
-            if (($raw['edition_code'] ?? '') !== 'AISC360-10' ||
-                !isset($raw['source_sha256'], $raw['pdf_page_count'], $raw['bookmarks']) ||
-                !is_array($raw['bookmarks'])) {
-                throw new \RuntimeException('Expected AISC360-10 private outline manifest');
+            $manifest = json_decode(file_get_contents($file), true, 512, JSON_THROW_ON_ERROR);
+            if (!is_array($manifest)) {
+                throw new RuntimeException('Manifest must contain a JSON object.');
             }
-            if (!preg_match('/^[a-f0-9]{64}$/', $raw['source_sha256'])) {
-                throw new \RuntimeException('Invalid source hash');
+            $editionCode = $manifest['edition_code'] ?? null;
+            $sourceHash = strtolower((string) ($manifest['source_sha256'] ?? ''));
+            if (!is_string($editionCode) || !preg_match('/^[a-f0-9]{64}$/', $sourceHash)) {
+                throw new RuntimeException('Outline must identify a configured edition and source SHA-256.');
             }
-            $edition = DB::table('standard_editions')->where('code', 'AISC360-10')->first();
-            if (!$edition) throw new \RuntimeException('Run StandardsSeeder first');
-            DB::transaction(function () use ($raw, $edition) {
-                $ids = [];
-                foreach ($raw['bookmarks'] as $row) {
-                    if (!in_array($row['kind'] ?? '', ['normative','commentary','front_matter'], true) ||
-                        !is_string($row['code'] ?? null) || strlen($row['code']) > 100 ||
-                        !is_string($row['title'] ?? null) || strlen($row['title']) > 255 ||
-                        !is_int($row['pdf_page'] ?? null) || $row['pdf_page'] < 1 ||
-                        $row['pdf_page'] > $raw['pdf_page_count']) {
-                        throw new \RuntimeException('Invalid bookmark row: import stopped');
-                    }
-                    $key = ['edition_id'=>$edition->id,'kind'=>$row['kind'],'code'=>$row['code']];
-                    $prior = DB::table('standard_clauses')->where($key)->first();
-                    $attrs = ['title'=>$row['title'],'pdf_page'=>$row['pdf_page'],
-                        'verification_status'=>'index_only','updated_at'=>now()];
-                    if ($prior) {
-                        // Never overwrite manually verified content or source corrections.
-                        if ($prior->verification_status === 'index_only') DB::table('standard_clauses')->where('id',$prior->id)->update($attrs);
-                        $ids[$row['kind'].'|'.$row['code']] = $prior->id;
-                    } else {
-                        $ids[$row['kind'].'|'.$row['code']] = DB::table('standard_clauses')->insertGetId(
-                            $key + $attrs + ['created_at'=>now()]
-                        );
-                    }
+            $document = DB::table('standard_documents')
+                ->join('standard_editions', 'standard_editions.id', '=', 'standard_documents.edition_id')
+                ->where('standard_editions.code', $editionCode)
+                ->where('standard_documents.sha256', $sourceHash)
+                ->select('standard_documents.*')
+                ->first();
+            if (!$document) {
+                throw new RuntimeException('Outline import requires a registered source document with the same SHA-256.');
+            }
+            if (($manifest['schema_version'] ?? 1) < 2 && !in_array($document->verification_status, ['verified', 'published'], true)) {
+                throw new RuntimeException('Legacy outline manifests are accepted only for verified registered documents.');
+            }
+            if (!is_int($manifest['pdf_page_count'] ?? null) || $manifest['pdf_page_count'] !== (int) $document->page_count) {
+                throw new RuntimeException('Outline page count does not match the registered source document.');
+            }
+
+            $disk = Storage::disk((string) config('standards.private_disk', 'local'));
+            if (!$disk->exists($document->private_path)) {
+                throw new RuntimeException('Registered private source PDF is missing.');
+            }
+            $temporaryPdf = tempnam(sys_get_temp_dir(), 'standards-source-');
+            if ($temporaryPdf === false) {
+                throw new RuntimeException('Unable to create a temporary source file for inspection.');
+            }
+            try {
+                $source = $disk->readStream($document->private_path);
+                $target = fopen($temporaryPdf, 'wb');
+                if (!is_resource($source) || !is_resource($target)) {
+                    throw new RuntimeException('Unable to read the registered private source PDF.');
                 }
-                foreach ($raw['bookmarks'] as $row) {
-                    if (!$row['parent_code']) continue;
-                    $parentId = $ids[$row['kind'].'|'.$row['parent_code']] ?? null;
-                    $id = $ids[$row['kind'].'|'.$row['code']] ?? null;
-                    if ($parentId && $id) DB::table('standard_clauses')->where('id',$id)
-                        ->where('verification_status','index_only')->update(['parent_id'=>$parentId]);
+                stream_copy_to_stream($source, $target);
+                fclose($source);
+                fclose($target);
+
+                $inspection = $inspector->inspect($temporaryPdf, $editionCode);
+                if (!hash_equals($sourceHash, strtolower((string) ($inspection['source_sha256'] ?? ''))) ||
+                    (int) ($inspection['pdf_page_count'] ?? 0) !== (int) $document->page_count) {
+                    throw new RuntimeException('Registered PDF failed its source SHA-256 or page-count check.');
                 }
-                foreach (($raw['equation_candidates'] ?? []) as $eq) {
-                    if (!preg_match('/^[A-N][0-9]{1,2}-[0-9]+[a-z]?$/', $eq['label'] ?? '') ||
-                        !is_int($eq['pdf_page'] ?? null) ||
-                        $eq['pdf_page'] < 57 || $eq['pdf_page'] >= 297) {
-                        throw new \RuntimeException('Invalid equation candidate');
-                    }
-                    $clause = DB::table('standard_clauses')
-                        ->where('edition_id', $edition->id)->where('kind','normative')
-                        ->where('code',$eq['clause_code'])->first();
-                    if (!$clause) continue;
-                    DB::table('standard_equations')->updateOrInsert(
-                        ['clause_id'=>$clause->id,'label'=>$eq['label']],
-                        ['pdf_page'=>$eq['pdf_page'],'updated_at'=>now()]
-                    );
+                $actualManifest = $inspector->extract($temporaryPdf, $editionCode);
+                if (!hash_equals($sourceHash, strtolower((string) ($actualManifest['source_sha256'] ?? ''))) ||
+                    (int) ($actualManifest['pdf_page_count'] ?? 0) !== (int) $document->page_count) {
+                    throw new RuntimeException('Re-extracted outline does not match the registered source document.');
                 }
-            });
-            $this->info('Imported '.count($raw['bookmarks']).' outline entries as index_only and equation labels as unverified candidates.');
+                $report = $imports->importRegisteredOutline($actualManifest);
+            } finally {
+                @unlink($temporaryPdf);
+            }
+            $this->line(json_encode(['status' => 'indexed', 'report' => $report], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
             return self::SUCCESS;
-        } catch (\Throwable $e) {
-            $this->error($e->getMessage());
+        } catch (\Throwable $exception) {
+            $this->error($exception->getMessage());
             return self::FAILURE;
         }
     }

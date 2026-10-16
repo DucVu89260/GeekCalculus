@@ -45,6 +45,7 @@ function equationSaved(record) {
     if (typeof normalized[field] === 'string') { try { normalized[field] = JSON.parse(normalized[field]) } catch { /* retain visible source text */ } }
   }
   equations.value = equations.value.map(e => e.id === normalized.id ? normalized : e)
+  normalized.design_methods = normalized.design_method === 'both' ? ['ASD', 'LRFD'] : normalized.design_method ? [normalized.design_method] : []
   reviewEquation.value = normalized
 }
 
@@ -293,7 +294,7 @@ async function loadEdition(code = selectedCode.value) {
     detail.value = response?.data || null
     const legacyClauses = Array.isArray(detail.value?.clauses) ? detail.value.clauses : []
     const [clauseRows, equationRows, parameterRows, tableRows] = await Promise.all([
-      fetchAllPages('clauses', { code, signal, fallback: legacyClauses }),
+      code === 'ASCE7-10' ? Promise.resolve(legacyClauses) : fetchAllPages('clauses', { code, signal, fallback: legacyClauses }),
       (code === 'ASCE7-10' ? Promise.resolve([]) : fetchAllPages('equations', { code, signal })).catch(async fetchError => {
         if (fetchError?.name === 'AbortError') throw fetchError
         return fetchLegacyEquations(code, signal)
@@ -303,7 +304,7 @@ async function loadEdition(code = selectedCode.value) {
     ])
     if (sequence !== editionSequence) return
     clauses.value = clauseRows.length ? clauseRows : legacyClauses
-    equations.value = code === 'ASCE7-10' ? [] : aisc36010Equations(equationRows)
+    equations.value = code === 'ASCE7-10' ? [] : code === 'AISC360-10' ? aisc36010Equations(equationRows) : equationRows
     parameters.value = parameterRows
     tables.value = tableRows
     const initial = clauses.value.find(clause => clause.kind === 'normative') || clauseRows[0]
@@ -351,7 +352,7 @@ function syncClauseToViewerPage(page) {
 }
 
 async function loadNotes(clause) {
-  if (demoMode || !Number.isInteger(clause?.id) || !selectedCode.value) return
+  if (demoMode || isAsce710.value || !Number.isInteger(clause?.id) || !selectedCode.value) return
   const sequence = ++notesSequence
   notesController?.abort()
   const controller = new AbortController()
@@ -572,7 +573,7 @@ onMounted(loadCatalog)
             <p v-if="!selectedClause?.extraction_method && !selectedClause?.source_anchor" class="std-review-muted">{{ locale === 'vi' ? 'Chưa có thêm chẩn đoán trích xuất cho điều khoản đang chọn.' : 'No additional extraction diagnostics are available for the selected clause.' }}</p>
           </section>
 
-          <section v-if="!demoMode && Number.isInteger(selectedClause?.id)" class="std-review-section std-notes">
+          <section v-if="!demoMode && !isAsce710 && Number.isInteger(selectedClause?.id)" class="std-review-section std-notes">
             <h4>{{ text.notesTitle }}</h4>
             <p v-if="notesLoading" role="status">{{ locale === 'vi' ? 'Đang tải ghi chú…' : 'Loading notes…' }}</p>
             <ul v-else-if="notes.length" class="std-note-list"><li v-for="note in notes" :key="note.id || note.created_at"><p>{{ note.body }}</p><small>{{ note.created_at || '' }}</small></li></ul>

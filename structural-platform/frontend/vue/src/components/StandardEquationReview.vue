@@ -35,7 +35,9 @@ const fileUrl = computed(() => document.value && props.equation.pdf_page ? `/api
 const preview = computed(() => ({ ...props.equation, latex: draft.value.latex,
   variables: json(draft.value.variables), conditions: json(draft.value.conditions),
   asd_lrfd_factors: json(draft.value.asd_lrfd_factors), dependencies: json(draft.value.dependencies),
-  design_method: draft.value.design_method, verification_status: 'needs_review' }))
+  design_method: draft.value.design_method,
+  design_methods: draft.value.design_method === 'both' ? ['ASD', 'LRFD'] : draft.value.design_method ? [draft.value.design_method] : [],
+  verification_status: 'needs_review' }))
 const canApprove = computed(() => !dirty.value && compared.value && fileUrl.value && renderStandardMath(draft.value.latex).usable)
 const base = computed(() => `/api/v1/admin/standards/${encodeURIComponent(props.code)}/equations/${props.equation.id}`)
 async function save() {

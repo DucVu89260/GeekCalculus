@@ -22,7 +22,7 @@ const pdfDocument = shallowRef(null)
 const loading = ref(false)
 const loadError = ref('')
 const actualPageCount = ref(0)
-const currentPage = ref(1)
+const currentPage = ref(Number(props.page) || 1)
 const words = computed(() => props.locale === 'vi' ? {
   title: 'Tài liệu nguồn riêng tư', previous: 'Trang trước', next: 'Trang sau', go: 'Đi đến trang PDF',
   of: 'trên', physical: 'Trang PDF', printed: 'Trang in', loading: 'Đang tải PDF riêng tư…',
@@ -157,11 +157,10 @@ function navigate(target) {
 
 watch(documentUrl, loadDocument)
 watch(() => props.page, page => {
-  if (!pdfDocument.value) return
   const next = boundedPage(page)
   if (next !== currentPage.value) {
     currentPage.value = next
-    renderCurrentPage()
+    if (pdfDocument.value) renderCurrentPage()
   }
 })
 watch(() => props.pageCount, () => {
@@ -204,6 +203,8 @@ onUnmounted(async () => {
   <section class="std-pdf-viewer" :aria-label="words.title">
     <header class="std-pdf-toolbar">
       <strong>{{ words.title }}</strong>
+      <a v-if="documentUrl" class="std-pdf-open" :href="`${documentUrl}#page=${currentPage}`" target="_blank" rel="noopener">{{ locale === 'vi' ? 'Mở trang PDF' : 'Open PDF page' }}</a>
+      <a v-if="documentUrl" :href="documentUrl" download>{{ locale === 'vi' ? 'Tải PDF' : 'Download PDF' }}</a>
       <span v-if="printedPage != null" class="std-pdf-printed">{{ words.printed }} {{ printedPage }}</span>
       <div class="std-pdf-controls">
         <button type="button" :aria-label="words.previous" :disabled="loading || !pdfDocument || currentPage <= 1" @click="navigate(currentPage - 1)">‹</button>

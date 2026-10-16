@@ -278,12 +278,16 @@ class StandardsReviewService
             throw new RuntimeException('The source document reference or physical PDF page is invalid.');
         }
         $this->assertSourceDocument($document);
-        if ((int) $row->pdf_page > (int) $document->page_count) {
+        $sourceEdition = $resource === 'equations'
+            ? DB::table('standard_clauses')->where('id', $row->clause_id)->value('edition_id')
+            : ($row->edition_id ?? null);
+        if ((int) $row->pdf_page < 1 || (int) $row->pdf_page > (int) $document->page_count ||
+            (int) $sourceEdition !== (int) $document->edition_id) {
             throw new RuntimeException('The source document reference or physical PDF page is invalid.');
         }
         $anchor = $this->decode($row->source_anchor ?? null);
         $anchorPage = is_array($anchor) ? ($anchor['pdf_page'] ?? $anchor['page'] ?? $anchor['physical_page'] ?? null) : null;
-        if (!is_array($anchor) || !is_numeric($anchorPage) || (int) $anchorPage !== (int) $row->pdf_page ||
+        if (!is_array($anchor) || filter_var($anchorPage, FILTER_VALIDATE_INT) === false || (int) $anchorPage !== (int) $row->pdf_page ||
             (isset($anchor['printed_page_label'], $row->printed_page_label) &&
                 (string) $anchor['printed_page_label'] !== (string) $row->printed_page_label)) {
             throw new RuntimeException('The source anchor must identify the same physical page as the reviewed record.');

@@ -1,0 +1,11 @@
+# Optional PDF tooling for the existing SQLite backend. No DB_* overrides,
+# PostgreSQL service, storage changes or automatic source uploads.
+# docker compose -f compose.yaml -f compose.standards-sqlite.yaml up -d --build backend
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: docker/backend/Dockerfile
+    image: geekcalculus-backend-standards:local
+    environment:
+      STANDARDS_PYTHON: /usr/bin/python3

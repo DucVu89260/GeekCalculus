@@ -91,6 +91,7 @@ const printedPage = computed(() => props.printedPage ?? props.equation.printed_p
     <div v-if="rendered" class="std-equation-math" v-html="mathHtml"></div>
     <p v-else-if="latex" class="std-equation-unrendered" role="note">{{ words.renderError }} <code>{{ latex }}</code></p>
     <p v-else class="std-equation-unrendered" role="note">{{ words.noExpression }}</p>
+    <p v-if="!latex && equation.reference_expression" role="note">{{ locale === 'vi' ? 'Biểu thức tham khảo từ bộ quy tắc I/H; chưa phiên âm / duyệt nguồn.' : 'I/H implementation reference; source transcription / approval pending.' }}<br /><code>{{ equation.reference_expression }}</code></p>
 
     <dl v-if="variables.length" class="std-equation-details">
       <div class="std-equation-detail-group">

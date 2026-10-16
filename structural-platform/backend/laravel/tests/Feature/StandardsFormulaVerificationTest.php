@@ -103,6 +103,19 @@ class StandardsFormulaVerificationTest extends TestCase
         $this->getJson($lookup)->assertOk()->assertJsonPath('data', []);
     }
 
+    public function test_equation_cannot_be_approved_against_a_different_editions_document(): void
+    {
+        $otherEdition = DB::table('standard_editions')->where('code', 'ASCE7-10')->value('id');
+        $other = (array) DB::table('standard_documents')->where('id', $this->doc)->first();
+        unset($other['id']);
+        $other['edition_id'] = $otherEdition;
+        $other['source_identity'] = json_encode(['validated' => true, 'family' => 'ASCE7', 'edition_year' => 2010]);
+        $otherId = DB::table('standard_documents')->insertGetId($other);
+        DB::table('standard_equations')->where('id', $this->eq)->update(['document_id' => $otherId]);
+        $this->postJson($this->url().'/review', $this->approval(['source_comparison' => ['document_id' => $otherId]]))->assertStatus(409);
+        $this->assertDatabaseCount('standard_review_history', 0);
+    }
+
     public function test_missing_or_malformed_expression_units_or_source_cannot_be_approved(): void
     {
         foreach (['', 'Q=\\frac{a}{b', 'Q=\\href{https://example.com}{a}', 'Q='] as $latex) {

@@ -1,6 +1,7 @@
 const assert = require('node:assert/strict')
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright')
 
+const adminReview = process.env.STANDARDS_ADMIN_SMOKE === '1'
 const base = process.env.STANDARDS_EXPLORER_BASE_URL || 'http://127.0.0.1:5192/'
 
 function makePdf(pageCount = 4) {
@@ -40,6 +41,8 @@ const equations = [
   { id: 12, clause_id: 5, clause_code: 'E3', label: 'E3-1', document_id: 9, kind: 'normative', pdf_page: 4, printed_page: 33, latex: 'P_n = F_{cr} A_g', variables: [{ symbol: 'P_n', definition: 'Nominal compressive strength' }], verification_status: 'needs_review', source_anchor: 'E3.1', extraction_method: 'reviewed transcription' },
   { id: 13, clause_id: 5, clause_code: 'E3', label: 'E3-4', document_id: 9, kind: 'normative', pdf_page: 4, printed_page: 33, latex: 'F_e=\\frac{\\pi^2E}{(KL/r)^2}', variables: [{ symbol: 'F_e', definition: 'Elastic buckling stress' }], verification_status: 'needs_review', source_anchor: 'E3.4', extraction_method: 'reviewed transcription' },
 ]
+for (const equation of equations) { equation.record_version = 1; equation.source_sha256 = 'a'.repeat(64) }
+const reviewRequests = []
 const tableRecords = [{
   id: 30,
   table_code: 'B4.1b',
@@ -110,7 +113,7 @@ async function enforcePageLimit(route, url) {
     const url = new URL(request.url())
     const path = url.pathname
     const method = request.method()
-    if (path === '/api/auth/me') return respondJson(route, { data: { id: 1, name: 'Standards reader', role: 'user' } })
+    if (path === '/api/auth/me') return respondJson(route, { data: { id: 1, name: 'Standards reader', role: adminReview ? 'admin' : 'user' } })
     if (path === '/api/auth/csrf') return respondJson(route, { csrf_token: 'smoke-token' })
     if (path === '/api/v1/standards' && method === 'GET') return respondJson(route, { data: [
       { id: 1, code: 'AISC360', name: 'AISC 360', publisher: 'AISC', editions: [
@@ -147,6 +150,24 @@ async function enforcePageLimit(route, url) {
       if (!await enforcePageLimit(route, url)) return
       const data = path.endsWith('/tables') ? tableRecords : []
       return respondJson(route, { data, meta: { current_page: 1, per_page: 100, total: data.length, last_page: 1 } })
+    }
+    if (path === '/api/v1/admin/standards/AISC360-10/equations/12' && method === 'PATCH') {
+      const body = request.postDataJSON(), equation = equations.find(e => e.id === 12)
+      assert.equal(body.expected_version, equation.record_version)
+      Object.assign(equation, body.data, { record_version: equation.record_version + 1 })
+      reviewRequests.push(body)
+      return respondJson(route, { data: equation })
+    }
+    if (path === '/api/v1/admin/standards/AISC360-10/equations/12/review' && method === 'POST') {
+      const body = request.postDataJSON(), equation = equations.find(e => e.id === 12)
+      assert.equal(body.expected_version, equation.record_version)
+      assert.equal(body.source_comparison.compared, true)
+      assert.equal(body.source_comparison.pdf_page, 4)
+      assert.equal(body.source_comparison.source_sha256, 'a'.repeat(64))
+      assert.equal(body.source_comparison.latex_sha256, require('node:crypto').createHash('sha256').update(equation.latex.trim()).digest('hex'))
+      equation.verification_status = body.status; equation.record_version++
+      reviewRequests.push(body)
+      return respondJson(route, { data: equation })
     }
     if (path === '/api/v1/standards/AISC360-10/notes' && method === 'GET') return respondJson(route, { data: savedNotes.filter(note => Number(note.clause_id) === Number(url.searchParams.get('clause_id'))) })
     if (path === '/api/v1/standards/AISC360-10/notes' && method === 'POST') {
@@ -242,6 +263,25 @@ async function enforcePageLimit(route, url) {
     await page.getByText('Check the source anchor against the printed copy.', { exact: true }).waitFor()
     assert.deepEqual(notePosts, [{ clause_id: 4, body: 'Check the source anchor against the printed copy.' }])
 
+    if (adminReview) {
+      await page.getByRole('tab', { name: 'Equation library' }).click()
+      await page.locator('.std-equation').filter({ hasText: 'E3-1' }).getByRole('button', { name: 'Edit / Review source' }).click()
+      const editor = page.locator('.formula-review')
+      await editor.waitFor()
+      assert.match(await editor.getByRole('link').getAttribute('href'), /documents\/9\/file#page=4$/)
+      assert.equal(await editor.getByRole('button', { name: 'Verify against source' }).isDisabled(), true)
+      await editor.getByLabel('LaTeX', { exact: true }).fill('P_n=F_{cr}A_g')
+      await editor.getByLabel('Review reason / evidence').fill('Synthetic UI transcription test; not an authoritative source approval.')
+      await editor.getByRole('button', { name: 'Save draft' }).click()
+      await page.waitForFunction(() => document.querySelector('.formula-review h3')?.textContent.includes('v2'))
+      await editor.getByLabel('Review reason / evidence').fill('Synthetic UI comparison test; not an authoritative source approval.')
+      await editor.getByRole('checkbox').check()
+      await editor.getByRole('button', { name: 'Verify against source' }).click()
+      await page.waitForFunction(() => document.querySelector('.formula-review h3')?.textContent.includes('v3'))
+      assert.equal(reviewRequests.length, 2)
+      assert.equal(await editor.getByRole('button', { name: 'Publish', exact: true }).isDisabled(), true, 'a transition clears the prior comparison confirmation')
+      await editor.getByRole('button', { name: 'Close', exact: true }).click()
+    }
     await page.getByRole('button', { name: 'Hide Review' }).click()
     await page.getByRole('heading', { name: 'Source & review' }).waitFor({ state: 'hidden' })
     await page.getByRole('button', { name: 'Show Review' }).click()

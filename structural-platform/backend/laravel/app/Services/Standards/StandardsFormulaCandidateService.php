@@ -43,7 +43,7 @@ class StandardsFormulaCandidateService
                     ->where('e.label', $candidate['label'])->select('e.*')->lockForUpdate()->first();
                 if (!$row) { $report['unmatched']++; continue; }
                 $metadata = json_encode($candidate, JSON_THROW_ON_ERROR);
-                if ($row->source_metadata === $metadata) { $report['unchanged']++; continue; }
+                if (json_decode($row->source_metadata ?? 'null', true) == $candidate) { $report['unchanged']++; continue; }
                 $manuallyEdited = DB::table('standard_review_history')->where('record_type', 'equations')->where('record_id', $row->id)->whereNotNull('reviewer_id')->exists();
                 if (!in_array($row->verification_status, ['candidate', 'needs_review'], true) || trim((string) $row->latex) !== '' || $manuallyEdited ||
                     in_array($doc->verification_status, ['verified', 'published', 'deprecated'], true)) {

@@ -49,3 +49,10 @@ esbuild.buildSync({
   bundle: true, platform: 'browser', format: 'iife', globalName: 'Aisc36010Resistance',
   target: 'es2022', logLevel: 'info',
 })
+
+ // Publish the edition-specific calculation core without copying formulas into HTML.
+ // This native ESM file is imported by the standalone H/I report and by Node tests.
+copyFileSync(
+ path.join(root,'standards/aisc360-10-verified-hi.mjs'),
+ path.join(root,'frontend/vue/public/aisc360-10-verified-hi.mjs')
+)

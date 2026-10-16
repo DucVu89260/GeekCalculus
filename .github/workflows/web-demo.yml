@@ -38,6 +38,8 @@ jobs:
         run: node --test tests/geometry/hi-section-properties-integration.test.js
       - name: Verify AISC 360-10 ASD/LRFD resistance-factor modes
         run: node --test tests/geometry/hi-aisc36010-design-method.test.js
+      - name: Verify ANSI/AISC 360-10 Phase A/B formula branches
+        run: node --test tests/geometry/aisc36010-verified-ih.test.js
       - name: Build GitHub Pages demo
         run: npm run build -- --outDir ../../../docs --emptyOutDir
         env:

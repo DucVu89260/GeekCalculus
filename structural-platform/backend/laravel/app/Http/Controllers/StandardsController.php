@@ -30,7 +30,7 @@ class StandardsController extends Controller {
         abort_unless($edition,404);
         $rows = DB::table('standard_equations as e')->join('standard_clauses as c','c.id','=','e.clause_id')
             ->where('c.edition_id',$edition->id)
-            ->get(['e.id','e.label','e.latex','e.variables','e.conditions','e.verification_status','e.implementation_key','c.code as clause_code']);
+            ->get(['e.id','e.label','e.pdf_page','e.latex','e.variables','e.conditions','e.verification_status','e.implementation_key','c.code as clause_code']);
         return response()->json(['data'=>$rows]);
     }
     public function document(Request $request, string $code, int $id) {
@@ -41,7 +41,6 @@ class StandardsController extends Controller {
         abort_unless(Storage::disk('local')->exists($doc->private_path),404);
         return response()->file(Storage::disk('local')->path($doc->private_path),[
             'Content-Type'=>'application/pdf','Cache-Control'=>'private, no-store',
-            'Content-Security-Policy'=>"default-src 'none'; style-src 'unsafe-inline'; sandbox",
             'X-Content-Type-Options'=>'nosniff',
         ]);
     }

@@ -17,7 +17,7 @@ class StandardsSeeder extends Seeder {
             foreach ($years as $year) {
                 DB::table('standard_editions')->updateOrInsert(['code'=>$code.'-'.substr((string)$year,-2)], [
                     'family_id'=>$id,'year'=>$year,'title'=>$name.'-'.substr((string)$year,-2),
-                    'status'=>'catalogued','updated_at'=>now(),
+                    'status'=>($code === 'AISC360' && $year === 2010) ? 'in_development' : 'coming_soon','updated_at'=>now(),
                 ]);
             }
         }
@@ -36,10 +36,11 @@ class StandardsSeeder extends Seeder {
             ['L','Design for Serviceability',163],['M','Fabrication and Erection',165],
             ['N','Quality Control and Quality Assurance',170],
         ] as [$code,$title,$printedPage]) {
-            DB::table('standard_clauses')->updateOrInsert(
-                ['edition_id'=>$edition->id,'kind'=>'normative','code'=>$code],
-                ['title'=>$title,'printed_page'=>$printedPage,'pdf_page'=>$pdfPages[$code] ?? null,'verification_status'=>'index_only','updated_at'=>now()]
-            );
+            DB::table('standard_clauses')->insertOrIgnore([
+                'edition_id'=>$edition->id,'kind'=>'normative','code'=>$code,
+                'title'=>$title,'printed_page'=>$printedPage,'pdf_page'=>$pdfPages[$code] ?? null,
+                'verification_status'=>'index_only','created_at'=>now(),'updated_at'=>now()
+            ]);
         }
     }
 }

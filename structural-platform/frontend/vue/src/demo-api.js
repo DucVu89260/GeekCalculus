@@ -3,6 +3,32 @@ import { buildCatalogSectionCalculationRequest, catalogSectionInputProperties, i
 import catalog from '../../../database/seeds/catalog.json'
 import schema from '../../../database/seeds/engineering-schema.json'
 import seed from '../../../database/seeds/engineering-data.json'
+
+// Demo-only catalog mirrors the six seeded PostgreSQL editions.
+// These records are not a substitute for the backend database or reviewed standard content.
+const demoStandardCatalog = [
+  { id: 1, code: 'AISC360', name: 'AISC 360', publisher: 'American Institute of Steel Construction',
+    editions: [2010,2016,2022].map((year, index) => ({ id: index+1, code: 'AISC360-'+String(year).slice(-2), title: 'AISC 360-'+String(year).slice(-2), year, status: year === 2010 ? 'in_development' : 'coming_soon' })) },
+  { id: 2, code: 'ASCE7', name: 'ASCE 7', publisher: 'American Society of Civil Engineers',
+    editions: [2010,2016,2022].map((year, index) => ({ id: index+4, code: 'ASCE7-'+String(year).slice(-2), title: 'ASCE 7-'+String(year).slice(-2), year, status: 'coming_soon' })) },
+]
+const demoAiscClauses = [
+  ['A','General Provisions',57,1],['B','Design Requirements',66,10],
+  ['B3','Design Basis',66,10],['B4','Member Properties',70,14],
+  ['C','Design for Stability',76,20],['D','Design of Members for Tension',82,26],
+  ['D2','Tensile Strength',82,26],['E','Design of Members for Compression',87,31],
+  ['E3','Flexural Buckling of Members without Slender Elements',89,33],
+  ['E4','Torsional and Flexural-Torsional Buckling',90,34],
+  ['E7','Members with Slender Elements',96,40],
+  ['F','Design of Members for Flexure',100,44],['F2','Compact I-shaped Members',103,47],
+  ['F4','Other I-shaped Members',105,49],['G','Design of Members for Shear',123,67],
+  ['H','Design of Members for Combined Forces and Torsion',129,73],
+  ['I','Design of Composite Members',137,81],['J','Design of Connections',161,105],
+  ['K','Design of HSS and Box Member Connections',196,140],
+  ['L','Design for Serviceability',219,163],['M','Fabrication and Erection',221,165],
+  ['N','Quality Control and Quality Assurance',226,170],
+].map(([code,title,pdf_page,printed_page],i)=>({id:i+1,code,title,pdf_page,printed_page,kind:'normative',verification_status:'index_only',summary:null,parent_id:null}))
+
 const DB_KEY = 'geekcalculus-demo-library-v1'
 const PROJECT_KEY = 'geekcalculus-web-demo-projects-v1'
 const SESSION_KEY = 'geekcalculus-demo-session-v1'
@@ -261,6 +287,15 @@ export async function demoRequest(path, options = {}) {
     const visible = user.role === 'admin' ? projects : projects.filter(row => row.user_id === user.id); const page = Math.max(1, Number(url.searchParams.get('page')) || 1)
     return { data: visible.slice((page - 1) * 50, page * 50), meta: { total: visible.length, current_page: page, last_page: Math.max(1, Math.ceil(visible.length / 50)) } }
   }
+  if (method === 'GET' && url.pathname === '/api/v1/standards') return { data: demoStandardCatalog }
+  const standardDetail = url.pathname.match(/^\/api\/v1\/standards\/([A-Za-z0-9-]+)(?:\/(equations))?$/)
+  if (method === 'GET' && standardDetail) {
+    const edition = demoStandardCatalog.flatMap(f => f.editions).find(e => e.code === standardDetail[1])
+    if (!edition) fail(404, 'Unknown design standard')
+    if (standardDetail[2] === 'equations') return { data: [] }
+    return { data: { edition, clauses: edition.code === 'AISC360-10' ? demoAiscClauses : [], documents: [] } }
+  }
+  if (url.pathname.startsWith('/api/v1/standards/')) fail(501, 'PDF upload and private document access require the Laravel backend')
   const match = url.pathname.match(/^\/api\/(materials|section-types|sections|admin\/users)(?:\/([^/]+))?$/)
   if (!match) fail(404, 'Not found')
   const resource = match[1] === 'admin/users' ? 'users' : match[1].replace('-', '_'); const id = match[2]

@@ -48,6 +48,7 @@ async function main() {
       const marker = page.locator('#geek-test-indicator');
       if (host.endsWith('.test')) {
         await marker.waitFor();
+        assert.equal(await marker.count(), 1);
         assert.equal(await marker.locator('span').innerText(), 'Test');
         assert.equal(await marker.evaluate(node => getComputedStyle(node).pointerEvents), 'none');
         await page.setViewportSize({ width: 390, height: 844 });

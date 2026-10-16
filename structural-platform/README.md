@@ -58,7 +58,7 @@ không được lưu vào Git.
 
 ## Tên miền localhost cho main và test
 
-Có thể chạy main tại `http://geekcalculus.com` và bản phát triển tại `http://geekcalculus.test`, với SQLite và phiên đăng nhập riêng cho test. Xem [hướng dẫn local domains](local/README.md) để thêm hosts và chạy `bash scripts/start-local-domains.sh`.
+Có thể chạy main tại `http://geekcalculus.com` và bản phát triển tại `http://geekcalculus.test`, dùng chung database/tài liệu tiêu chuẩn, nhưng giữ phiên đăng nhập riêng cho test. Xem [hướng dẫn local domains](local/README.md) để thêm hosts và chạy `bash scripts/start-local-domains.sh`.
 
 ## Đăng nhập và phân quyền
 

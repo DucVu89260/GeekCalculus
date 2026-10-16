@@ -3,6 +3,8 @@ services:
   backend:
     environment:
       APP_URL: http://geekcalculus.com
+      DB_CONNECTION: sqlite
+      DB_DATABASE: /app/backend/laravel/database/database.sqlite
       SESSION_COOKIE: geekcalculus_main_session
       SESSION_DOMAIN: ""
       SESSION_SECURE_COOKIE: 'false'
@@ -14,7 +16,7 @@ services:
       APP_URL: http://geekcalculus.test
       APP_ENV: local
       DB_CONNECTION: sqlite
-      DB_DATABASE: /test-data/database.sqlite
+      DB_DATABASE: /app/backend/laravel/database/database.sqlite
       LARAVEL_STORAGE_PATH: /test-data/storage
       SESSION_COOKIE: geekcalculus_test_session
       SESSION_DOMAIN: ""
@@ -26,6 +28,10 @@ services:
     volumes:
       - ./:/app
       - ./local/test-data:/test-data
+      - ./backend/laravel/storage/app:/test-data/storage/app
+    depends_on:
+      backend:
+        condition: service_healthy
     command: ["sh", "/app/scripts/backend-test-start.sh"]
     healthcheck:
       test: ["CMD", "php", "-r", "exit(@file_get_contents('http://127.0.0.1:8000/api/health') === false ? 1 : 0);"]

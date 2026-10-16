@@ -9,11 +9,19 @@ from pathlib import Path
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 from .api import router
-from .contract import API_NAME, API_PREFIX
-from .sap2000 import ExtractionRequest, SapError, connect
+from .contract import API_NAME, API_PREFIX, BUILD_ID
+from .sap2000 import ExtractionRequest, SapError
+from .dotnet import ConnectionSettings, connect_dotnet
+from .models import Model
+from pydantic import Field
 
 
-def create_app(token=None, gateway=connect):
+class ConnectionRequest(Model):
+    pid: int | None = Field(default=None, strict=True, gt=0, le=2147483647)
+    dll_path: str = Field(default=ConnectionSettings().dll_path, min_length=1, max_length=1000)
+
+
+def create_app(token=None, gateway=None):
     token = token if token is not None else os.environ.get('SAP2000_CONNECTOR_TOKEN', '')
     if len(token) < 32:
         raise RuntimeError('Set SAP2000_CONNECTOR_TOKEN to a random token of at least 32 characters')
@@ -27,12 +35,13 @@ def create_app(token=None, gateway=connect):
                   docs_url=None, redoc_url=None, openapi_url=None)
     app.add_middleware(TrustedHostMiddleware, allowed_hosts=['127.0.0.1', 'localhost', 'testserver'])
     lock = threading.Lock()
+    settings = ConnectionSettings.from_environment()
 
     def call(operation):
         # Serialize all changes to SAP2000 global output selection and units.
         with lock:
             try:
-                with gateway() as sap:
+                with (gateway() if gateway is not None else connect_dotnet(settings)) as sap:
                     sap.verify_version()
                     return operation(sap)
             except SapError as error:
@@ -46,6 +55,18 @@ def create_app(token=None, gateway=connect):
             'Content-Security-Policy': "default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'",
             'X-Content-Type-Options': 'nosniff',
         })
+
+    @app.get(API_PREFIX + '/connection', dependencies=[Depends(authenticate)])
+    def connection_info():
+        with lock:
+            return {'build_id': BUILD_ID, 'transport': 'dotnet', 'pid': settings.pid, 'dll_path': settings.dll_path}
+
+    @app.put(API_PREFIX + '/connection', dependencies=[Depends(authenticate)])
+    def configure_connection(payload: ConnectionRequest):
+        nonlocal settings
+        with lock:
+            settings = ConnectionSettings(pid=payload.pid, dll_path=payload.dll_path)
+            return {'build_id': BUILD_ID, 'transport': 'dotnet', 'pid': settings.pid, 'dll_path': settings.dll_path}
 
     @app.get(API_PREFIX + '/model', dependencies=[Depends(authenticate)])
     def active_model():

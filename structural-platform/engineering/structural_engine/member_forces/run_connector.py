@@ -12,7 +12,13 @@ from .connector import create_app
 def main():
     parser = argparse.ArgumentParser(description='API_IF_SAP26.2.0_V1 local web panel')
     parser.add_argument('--no-browser', action='store_true')
+    parser.add_argument('--pid', type=int, help='PID of the running SAP2000 instance')
+    parser.add_argument('--dll', help='Full path to the installed SAP2000v1.dll')
     args = parser.parse_args()
+    if args.pid is not None:
+        os.environ['SAP2000_PID'] = str(args.pid)
+    if args.dll:
+        os.environ['SAP2000_DLL'] = args.dll
     token = os.environ.setdefault('SAP2000_CONNECTOR_TOKEN', secrets.token_urlsafe(32))
     app = create_app(token)
     if not args.no_browser:

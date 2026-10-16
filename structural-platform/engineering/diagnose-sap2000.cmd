@@ -6,5 +6,5 @@ if not exist ".venv\Scripts\python.exe" (
     pause
     exit /b 1
 )
-".venv\Scripts\python.exe" -m structural_engine.member_forces.diagnose
+".venv\Scripts\python.exe" -m structural_engine.member_forces.diagnose %*
 pause

@@ -4,7 +4,7 @@ Luồng: mở SAP2000 trên Windows → chạy analysis → chọn frame objects
 
 Tên contract: **API_IF_SAP26.2.0_V1**. Phiên bản mục tiêu: **SAP2000 26.2.0**. Connector kiểm tra `SapModel.GetVersion()` trước mỗi thao tác; phiên bản khác bị từ chối. Cb theo AISC 360-10 thuộc module tính riêng bên trong, không thuộc API nội lực; xem [module nội bộ](CB-AISC360-10.md).
 
-Connector COM chạy **cùng máy và cùng phiên đăng nhập Windows với SAP2000**. Backend cloud không thể truy cập COM của máy người dùng. Không tự chạy analysis, mở/lưu model hoặc đổi lựa chọn cấu kiện. Connector tạm đổi đơn vị và Output Cases để đọc; khôi phục cả hai khi hoàn tất hoặc có lỗi. Không thao tác model trong lúc xuất. Một worker và khóa tuần tự bảo vệ các yêu cầu trong connector; không chạy nhiều connector cho cùng SAP2000.
+Connector .NET DLL/PID chạy **cùng máy và cùng phiên đăng nhập Windows với SAP2000**. Backend cloud không thể truy cập COM của máy người dùng. Không tự chạy analysis, mở/lưu model hoặc đổi lựa chọn cấu kiện. Connector tạm đổi đơn vị và Output Cases để đọc; khôi phục cả hai khi hoàn tất hoặc có lỗi. Không thao tác model trong lúc xuất. Một worker và khóa tuần tự bảo vệ các yêu cầu trong connector; không chạy nhiều connector cho cùng SAP2000.
 
 ## Chọn web hay local?
 
@@ -17,7 +17,7 @@ Website cloud không thể trực tiếp gọi SAP2000 COM của máy người d
 1. Cần SAP2000 **26.2.0**, Python **64-bit >= 3.11** và Internet để tải dependencies. Khi cài Python, bật Python Launcher (`py`). Chạy connector cùng tài khoản/phiên desktop với SAP2000; không cần chạy administrator nếu SAP2000 không chạy elevated.
 2. Đặt bản mã có các thay đổi API này trên máy Windows, ví dụ `C:\GeekCalculus`. Không sao chép `.venv`, dependencies hoặc build cache từ Linux sang Windows.
 3. Trong Explorer, mở `C:\GeekCalculus\structural-platform\engineering`, nhấp đúp **`start-sap2000-panel.cmd`**. Script tạo venv, cài dependencies theo lock và chạy connector. Lần đầu có thể mất vài phút. Giữ cửa sổ console đang chạy.
-4. Launcher tự mở trình duyệt và ghép nối panel bằng mã chỉ giữ trong bộ nhớ tab. Không cần tự nhập token. Mã không đưa vào query/HTTP access log và được xóa khỏi fragment địa chỉ sau khi trang đọc.
+4. Launcher tự mở trình duyệt và ghép nối panel bằng mã giữ trong phiên tab. Không cần tự nhập token. Mã không đưa vào query/HTTP access log và được xóa khỏi fragment địa chỉ sau khi trang đọc. Token giữ trong sessionStorage của tab để tải lại trang vẫn kết nối được; restart connector sinh token mới nếu không cấu hình token môi trường cố định.
 
 Nếu muốn chạy bằng PowerShell thay vì nhấp đúp:
 
@@ -33,8 +33,8 @@ Không cần Node cho panel/connector nội lực. Cửa sổ launcher phải ti
 ## Thao tác hằng ngày bằng panel
 
 1. **SAP2000:** mở và lưu file `.sdb`, chạy **Analyze → Run Analysis** cho các cases cần dùng. Sau khi hoàn tất, giữ model khóa. Bản đầu nên chỉ mở một phiên SAP2000 để tránh mơ hồ instance COM.
-2. **Panel:** launcher tự mở trang **Xuất nội lực cấu kiện**. Nếu đang ở website GeekCalculus, dùng nút **SAP2000 · Nội lực (local)** để mở panel; tab mới chưa ghép nối sẽ yêu cầu token. Thuận tiện nhất là quay lại tab đã được launcher mở. Khi mất token do reload, khởi động lại launcher để mở tab đã ghép nối.
-3. Bấm **Kết nối / Làm mới model**. Kiểm tra **File đang hoạt động**, đường dẫn đầy đủ, phiên bản **26.2.0** và trạng thái model. Nếu tên file sai, dừng xuất và kiểm tra SAP2000.
+2. **Panel:** launcher tự mở trang **Xuất nội lực cấu kiện**. Nếu đang ở website GeekCalculus, dùng nút **SAP2000 · Nội lực (local)** để mở panel; tab mới chưa ghép nối sẽ yêu cầu token. Thuận tiện nhất là quay lại tab đã được launcher mở. Tải lại cùng tab sẽ giữ token. Nếu đã restart connector hoặc đóng tab và mất token, dùng tab mới do launcher mở để nhận mã mới.
+3. Nhập **PID SAP2000** từ **Task Manager → Details → SAP2000.exe** vào panel. Ví dụ PID từng xác nhận là `20948`, nhưng phải kiểm tra lại nếu SAP2000 đã khởi động lại. Kiểm tra đường dẫn DLL là `C:\Program Files\Computers and Structures\SAP2000 26\SAP2000v1.dll` (file ở thư mục chính, không phải NativeAPI). Bấm **Kết nối / Làm mới model**. Kiểm tra **File đang hoạt động**, đường dẫn đầy đủ, phiên bản **26.2.0** và trạng thái model. Nếu tên file sai, dừng xuất và kiểm tra SAP2000.
 4. Ở **Output Cases**, tìm theo tên và đánh dấu cases/combinations muốn xuất. Có thể chọn các mục đang hiển thị hoặc bỏ chọn tất cả. Case chưa có kết quả sẽ bị vô hiệu hóa; combinations được kiểm tra khi trích xuất.
 5. Quay sang **SAP2000**, chọn một hoặc nhiều **frame objects**. Joint/area objects không thuộc phạm vi API này.
 6. Quay lại panel. Có thể bấm **Đọc lựa chọn hiện tại** để kiểm tra danh sách; sau đó bấm **Lấy nội lực cấu kiện đang chọn**. Lệnh xuất luôn đọc lại selection tại thời điểm bấm, không dùng danh sách preview cũ. Giữ nguyên model trong lúc đang đọc.
@@ -46,10 +46,10 @@ Cb nằm ở module riêng, không nằm trong panel/API nội lực. Panel hi�
 
 ### Khi gặp lỗi
 
-Nếu trang đã mở nhưng `/model` trả 503, chạy `diagnose-sap2000.cmd` trong cùng thư mục. Script chỉ đọc: phiên bản/bitness Python, khả năng attach COM, kết quả GetVersion, tên file và trạng thái khóa. Không chạy analysis, sửa model hoặc in token. Gửi lại các dòng kết quả chẩn đoán, đặc biệt tên bước lỗi và HRESULT. Console connector cũng in lỗi cụ thể sau mỗi 503. Không kết luận lỗi phiên bản hay lỗi phân tích chỉ từ HTTP 503.
+Nếu trang đã mở nhưng `/model` trả 503, chạy `diagnose-sap2000.cmd` trong cùng thư mục. Script chỉ đọc: phiên bản/bitness Python, khả năng attach .NET theo PID, kết quả GetVersion, tên file và trạng thái khóa. Không chạy analysis, sửa model hoặc in token. Gửi lại các dòng kết quả chẩn đoán, đặc biệt tên bước lỗi và HRESULT. Console connector cũng in lỗi cụ thể sau mỗi 503. Không kết luận lỗi phiên bản hay lỗi phân tích chỉ từ HTTP 503.
 
 - **Không mở được trang/không kết nối connector:** kiểm tra cửa sổ launcher còn chạy và cổng 8010 không bị một connector cũ chiếm. Chỉ chạy một connector cho một SAP2000.
-- **Không tìm thấy SAP2000:** mở SAP2000 trước, cùng tài khoản Windows và cùng mức quyền với connector; kiểm tra cài đặt OAPI `SAP2000v1.Helper`.
+- **Không tìm thấy SAP2000:** mở SAP2000 trước, cùng tài khoản Windows và cùng mức quyền với connector. Nhập PID hiện tại và kiểm tra DLL cài đặt. Bản này nạp Helper trực tiếp qua pythonnet, không yêu cầu ProgID Helper có sẵn trong Registry và không cần Repair.
 - **Sai phiên bản:** API chỉ chấp nhận 26.2.0, không tự coi bản 26 khác là tương thích.
 - **Chưa có kết quả/không có lựa chọn:** chạy analysis cho cases cần lấy; chọn frame objects rồi thử lại.
 - **File đã đổi:** kết nối lại và kiểm tra tên model trước khi xuất.
@@ -63,6 +63,7 @@ Các endpoint cần `Authorization: Bearer <SAP2000_CONNECTOR_TOKEN>`. Launcher 
 
 | Method | Connector Windows | Dữ liệu |
 |---|---|---|
+| GET/PUT | `/API_IF_SAP26.2.0_V1/connection` | Xem/cấu hình `pid`, `dll_path`; yêu cầu bearer token; lưu trong bộ nhớ connector |
 | GET | `/API_IF_SAP26.2.0_V1/model` | File/đường dẫn model đang hoạt động, phiên bản và trạng thái khóa |
 | GET | `/API_IF_SAP26.2.0_V1/output-cases` | Danh sách Load Cases và Response Combinations, `name`, `kind`, trạng thái analysis |
 | GET | `/API_IF_SAP26.2.0_V1/selection` | `frames`: các object loại frame đang được chọn |
@@ -143,15 +144,36 @@ Thay chuỗi placeholder bằng object dataset, không phải tên file. Bỏ `f
 docker compose exec -T backend php artisan test --filter=MemberForceApiTest
 ```
 
-Linux/cloud kiểm tra algorithms, API contracts, auth và COM adapter bằng fake typed COM. **Chưa nghiệm thu trực tiếp SAP2000 trên Windows.** Không suy diễn fake COM thành bằng chứng tương thích mọi phiên bản SAP2000. Khi có máy SAP2000:
+Linux/cloud kiểm tra algorithms, API contracts, auth và adapter bằng fake SAP interface và bộ chuyển đổi CLR. **Chưa nghiệm thu trực tiếp SAP2000 trên Windows.** Không suy diễn fake COM thành bằng chứng tương thích mọi phiên bản SAP2000. Khi có máy SAP2000:
 
 1. Chạy một dầm có nghiệm kiểm chứng; chọn 1 rồi nhiều frame, kể cả object chia nhiều elements.
 2. So sánh từng tuple tại từng ObjSta/ElmSta với bảng `Element Forces - Frames`, cùng kN/m và cùng output settings. Kiểm tra local axes và offsets.
 3. Thử static case, linear-add combo, envelope, history và spectrum. Xác nhận step type/num, combo classification; envelope không được xuất concurrent action.
 4. Đổi đơn vị ban đầu, chọn vài Outputs khác, trích xuất rồi xác nhận tất cả trạng thái được khôi phục; thử chưa analyze/không có selection/không có results.
 
-Nếu phiên bản trả COM signature khác, adapter trả lỗi có kiểm soát; cần kiểm tra type library của bản SAP đang dùng trước khi điều chỉnh. Không bỏ qua CSI return codes để lấy kết quả.
+Nếu phiên bản có .NET signature khác, adapter trả lỗi có kiểm soát; cần kiểm tra metadata của DLL đang dùng trước khi điều chỉnh. Không bỏ qua CSI return codes để lấy kết quả.
 
 ## Kiểm thử panel bằng trình duyệt (SAP mô phỏng)
 
 Từ `engineering`: `PYTHONPATH=. .venv/bin/python tests/sap_panel_server.py`. Ở terminal khác, từ `structural-platform`: `node tests/sap2000-panel-smoke.cjs` (cần Playwright và Chromium theo quy ước smoke tests hiện có). Fixture chỉ giả lập SAP2000, không kết nối model thật.
+
+## Bản .NET/PID — build 2026.10.16-dotnet-pid.1
+
+Đã xác nhận từ máy người dùng: pythonnet 3.2.1 nạp được DLL cài đặt, `GetObjectProcess` gắn được SAP2000 theo PID; GetVersion .NET trả `(0, '26.2.0', 26.2)` và model locked=True. Adapter đọc metadata CLR để điền tham số ref/out, chuyển enum/mảng và chuẩn hóa kết quả theo contract nội bộ. Không áp dụng quy tắc COM cũ trực tiếp cho tuple .NET.
+
+Khởi động với PID từ CMD (thay bằng PID đang dùng):
+
+```cmd
+cd /d C:\SAP2000-Forces
+start-sap2000-panel.cmd --pid 20948
+```
+
+Hoặc nhấp đúp launcher và nhập PID trong panel. Đường dẫn DLL có thể đổi trong panel hoặc qua `--dll "C:\...\SAP2000v1.dll"`. PID được chọn rõ ràng sẽ không tự fallback sang model khác khi PID không còn tồn tại. Không lưu PID cố định vào source.
+
+Chẩn đoán cùng PID:
+
+```cmd
+diagnose-sap2000.cmd --pid 20948
+```
+
+Linux/cloud kiểm tra trên CLR thực bằng fixture .NET được sinh trong bộ nhớ, gồm ref/out, enum, mảng, thuộc tính và optional parameters. Cần pythonnet và .NET runtime; chạy `SAP_TEST_CLR=1 PYTHONNET_RUNTIME=coreclr DOTNET_ROOT=/path/to/dotnet .venv/bin/python -m pytest -q tests/test_dotnet_clr.py`. Mặc định hai kiểm thử CLR được đánh dấu skipped nếu không bật. Đây chưa phải nghiệm thu FrameForce trên SAP2000 thật; vẫn đối chiếu kết quả với bảng SAP theo checklist.

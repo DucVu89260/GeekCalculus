@@ -7,7 +7,7 @@ if not exist ".venv\Scripts\python.exe" (
 )
 ".venv\Scripts\python.exe" -m pip install -r requirements-test.lock -r requirements-windows.txt
 if errorlevel 1 goto failed
-".venv\Scripts\python.exe" -m structural_engine.member_forces.run_connector
+".venv\Scripts\python.exe" -m structural_engine.member_forces.run_connector %*
 if errorlevel 1 goto failed
 exit /b 0
 :failed

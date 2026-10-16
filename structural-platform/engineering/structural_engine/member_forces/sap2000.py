@@ -1,6 +1,6 @@
-"""Read-only attachment to a running SAP2000 via its generated COM interface.
+"""Read-only SAP2000 adapter using the direct .NET DLL/PID transport.
 
-COM output arguments precede the trailing CSI return code (comtypes typed API).
+The .NET bridge normalizes ref/out arguments before the trailing CSI return code.
 No analysis, file opening/saving, object selection or model edits are performed.
 """
 from __future__ import annotations
@@ -192,33 +192,17 @@ class Sap2000:
 def com_operation(stage, operation):
     try:
         return operation()
+    except SapError:
+        raise
     except Exception as error:
-        hresult = getattr(error, 'hresult', None)
+        cause = getattr(error, 'InnerException', None) or error
+        hresult = getattr(cause, 'hresult', getattr(cause, 'HResult', None))
         code = f' HRESULT=0x{hresult & 0xffffffff:08X}' if isinstance(hresult, int) else ''
         raise SapError(f'{stage}: {type(error).__name__}{code}. Run diagnose-sap2000.cmd; check the SAP2000 Windows session and elevation level.') from error
 
 
 @contextmanager
 def connect():
-    try:
-        import comtypes
-        import comtypes.client
-    except ImportError as error:
-        raise SapError('COM_IMPORT: Cannot import comtypes. Run diagnose-sap2000.cmd and check Python/Windows compatibility.') from error
-    com_operation('COM_INITIALIZE', comtypes.CoInitialize)
-    try:
-        helper = com_operation('COM_HELPER_CREATE', lambda: comtypes.client.CreateObject('SAP2000v1.Helper'))
-        import importlib
-        library = com_operation('COM_TYPE_LIBRARY', lambda: importlib.import_module('comtypes.gen.SAP2000v1'))
-        helper = com_operation('COM_HELPER_INTERFACE', lambda: helper.QueryInterface(library.cHelper))
-        application = com_operation('SAP2000_ATTACH', lambda: helper.GetObject('CSI.SAP2000.API.SapObject'))
-        if application is None:
-            raise SapError('SAP2000_ATTACH: No active SAP2000 instance. Open SAP2000 in the same Windows user session and elevation level as this connector.')
-        model = com_operation('SAP2000_MODEL', lambda: application.SapModel)
-        yield Sap2000(model)
-    except SapError:
-        raise
-    except Exception as error:
-        raise SapError('SAP2000_READ: Cannot read SAP2000. Run diagnose-sap2000.cmd for the failing step.') from error
-    finally:
-        comtypes.CoUninitialize()
+    from .dotnet import ConnectionSettings, connect_dotnet
+    with connect_dotnet(ConnectionSettings.from_environment()) as sap:
+        yield sap

@@ -1,2 +1,2 @@
-# Optional COM bridge; install only on the Windows machine running SAP2000.
-comtypes==1.4.13; sys_platform == 'win32'
+# Direct .NET DLL/PID bridge; install on the Windows SAP2000 machine.
+pythonnet==3.2.1; sys_platform == 'win32'

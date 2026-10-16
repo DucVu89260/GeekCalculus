@@ -8,11 +8,13 @@
 </style>
 </head>
 <body><main>
-<header><div class="badge">API_IF_SAP26.2.0_V1 · SAP2000 26.2.0</div><h1>Xuất nội lực cấu kiện</h1><p class="muted">Chọn cấu kiện trong SAP2000, sau đó quay lại đây để lấy nội lực. Đơn vị: kN · m · kN.m; giữ nguyên trục local SAP2000.</p></header>
+<header><div class="badge">API_IF_SAP26.2.0_V1 · SAP2000 26.2.0 · .NET / PID · build 2026.10.16.1</div><h1>Xuất nội lực cấu kiện</h1><p class="muted">Chọn cấu kiện trong SAP2000, sau đó quay lại đây để lấy nội lực. Đơn vị: kN · m · kN.m; giữ nguyên trục local SAP2000.</p></header>
 <div id="status" class="status" role="status" aria-live="polite">Đang chờ kết nối SAP2000 trên máy này.</div>
 <fieldset id="controls" aria-label="Bảng xuất nội lực SAP2000"><div class="layout"><aside>
 <section class="card"><h2>1. Kết nối model</h2>
-<div id="token-entry"><label for="token">Mã kết nối local</label><input id="token" type="password" autocomplete="off" placeholder="Token của connector"><small>Chạy launcher để trang tự nhận mã kết nối. Mã chỉ giữ trong bộ nhớ tab này.</small></div>
+<div id="token-entry"><label for="token">Mã kết nối local</label><input id="token" type="password" autocomplete="off" placeholder="Token của connector"><small>Chạy launcher để trang tự nhận mã kết nối. Mã chỉ giữ trong phiên tab này; được khôi phục khi tải lại trang.</small></div>
+<label for="pid">PID SAP2000 đang mở</label><input id="pid" type="number" min="1" max="2147483647" step="1" placeholder="Ví dụ: PID trong Task Manager → Details" style="width:100%;padding:10px;margin:5px 0 12px">
+<label for="dll">Đường dẫn SAP2000v1.dll</label><input id="dll" type="text" value="C:\Program Files\Computers and Structures\SAP2000 26\SAP2000v1.dll" style="width:100%;padding:10px;margin:5px 0 12px"><small>Nhập PID để kết nối đúng phiên SAP2000. Để trống chỉ khi muốn thử tự tìm phiên đang mở. Không cần đăng ký COM Helper.</small>
 <div class="actions"><button id="connect" class="primary">Kết nối / Làm mới model</button></div>
 <div class="info"><div><small>File đang hoạt động</small><strong id="filename">Chưa kết nối</strong><small id="modelpath"></small></div><div><small>Trạng thái</small><strong id="modelstate">—</strong></div></div></section>
 <section class="card"><h2>2. Output Cases</h2><label for="search">Tìm case / combination</label><input type="search" id="search" placeholder="Nhập tên…"><div class="actions"><button id="select-all">Chọn các mục đang hiển thị</button><button id="select-none">Bỏ chọn tất cả</button></div><p id="case-count" class="muted">0 mục được chọn</p><div id="cases" class="cases"></div></section>
@@ -27,7 +29,8 @@
 'use strict';
 const prefix='/API_IF_SAP26.2.0_V1';
 const $=id=>document.getElementById(id);
-let token=new URLSearchParams(location.hash.slice(1)).get('token')||'';
+let token=new URLSearchParams(location.hash.slice(1)).get('token')||sessionStorage.getItem('sap2000-connector-token')||'';
+if(token)sessionStorage.setItem('sap2000-connector-token',token);
 if(location.hash)history.replaceState(null,'',location.pathname+location.search);
 let model=null,cases=[],chosen=new Set(),dataset=null,extremeData=null,page=0,busy=false;
 const pageSize=100;
@@ -41,11 +44,11 @@ function syncButtons(){
  $('next').disabled=!dataset||(page+1)*pageSize>=dataset.rows.length;
 }
 async function run(fn){if(busy)return;busy=true;$('controls').disabled=true;try{await fn()}catch(error){message(error.message,true)}finally{busy=false;$('controls').disabled=false;syncButtons()}}
-async function api(path,payload,raw=false){
+async function api(path,payload,raw=false,method=payload?'POST':'GET'){
  const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),120000);
  let response;
- try{response=await fetch(prefix+path,{method:payload?'POST':'GET',headers:{Authorization:'Bearer '+token,...(payload?{'Content-Type':'application/json'}:{})},body:payload?JSON.stringify(payload):undefined,signal:controller.signal,cache:'no-store'});
- if(!response.ok){let data={};try{data=await response.json()}catch{};throw new Error(response.status===401?'Mã kết nối không hợp lệ. Khởi động lại launcher hoặc nhập lại token.':typeof data.detail==='string'?data.detail:data.message||'Không thực hiện được yêu cầu ('+response.status+'). Kiểm tra SAP2000 và dữ liệu lựa chọn.');}
+ try{response=await fetch(prefix+path,{method,headers:{Authorization:'Bearer '+token,...(payload?{'Content-Type':'application/json'}:{})},body:payload?JSON.stringify(payload):undefined,signal:controller.signal,cache:'no-store'});
+ if(!response.ok){if(response.status===401){sessionStorage.removeItem('sap2000-connector-token');$('token-entry').hidden=false}let data={};try{data=await response.json()}catch{};throw new Error(response.status===401?'Mã kết nối không hợp lệ. Khởi động lại launcher hoặc nhập lại token.':typeof data.detail==='string'?data.detail:data.message||'Không thực hiện được yêu cầu ('+response.status+'). Kiểm tra SAP2000 và dữ liệu lựa chọn.');}
  return raw?await response.blob():await response.json();
  }catch(error){if(error.name==='AbortError')throw new Error('Đã quá 120 giây. Connector có thể vẫn đang đọc SAP2000; đợi hoàn tất trước khi thử lại.');if(error instanceof TypeError)throw new Error('Không kết nối được connector local. Kiểm tra cửa sổ launcher còn chạy.');throw error;}finally{clearTimeout(timeout)}
 }
@@ -65,7 +68,10 @@ function download(content,name,type='application/json'){const blob=content insta
 $('connect').onclick=()=>run(async()=>{
  token=$('token').value.trim()||token;if(!token)throw new Error('Hãy chạy launcher để mở panel có mã kết nối, hoặc nhập token local.');
  model=null;cases=[];chosen.clear();clearResults();$('filename').textContent='Chưa kết nối';$('modelpath').textContent='';$('modelstate').textContent='—';$('frames').textContent='Chưa đọc lựa chọn.';renderCases();
- message('Đang đọc model SAP2000…');const info=await api('/model');const output=await api('/output-cases');model=info;cases=output.data;
+ sessionStorage.setItem('sap2000-connector-token',token);
+ const pid=$('pid').value.trim();if(pid&&(!Number.isInteger(Number(pid))||Number(pid)<=0||Number(pid)>2147483647))throw new Error('PID phải là số nguyên dương trong Task Manager → Details.');
+ await api('/connection',{pid:pid?Number(pid):null,dll_path:$('dll').value.trim()},false,'PUT');
+ message('Đang đọc model SAP2000 qua DLL / PID…');const info=await api('/model');const output=await api('/output-cases');model=info;cases=output.data;
  $('filename').textContent=info.filename||'Model chưa lưu';$('modelpath').textContent=info.model;$('modelstate').textContent='SAP2000 '+info.sap2000_version+' · '+(info.locked?'Model đang khóa':'Model chưa khóa — cần chạy analysis');renderCases();message('Đã kết nối. Kiểm tra tên file rồi chọn Output Cases.');
 });
 $('search').oninput=renderCases;
@@ -83,5 +89,5 @@ $('prev').onclick=()=>{page--;renderResults()};$('next').onclick=()=>{page++;ren
 $('scope').onchange=()=>{extremeData=null;$('extreme-results').replaceChildren();syncButtons()};
 $('extremes').onclick=()=>run(async()=>{message('Đang xác định extreme case…');extremeData=await api('/extremes',{dataset,scope:$('scope').value});$('extreme-results').replaceChildren();for(const r of extremeData.data)tableRow($('extreme-results'),[r.group,r.component,r.min.value,r.max.value,r.absolute.value,r.absolute.rows[0].output_case+' · '+r.absolute.tie_count+' dòng đồng hạng']);message('Đã xác định cực trị. Tải extreme JSON để xem đầy đủ bộ lực và các dòng đồng hạng.');});
 $('extreme-json').onclick=()=>download(extremeData,'sap2000-extremes.json');
-syncButtons();if(token)$('connect').click();
+syncButtons();if(token){let ready=false;run(async()=>{const cfg=await api('/connection');$('pid').value=cfg.pid||'';$('dll').value=cfg.dll_path;ready=true}).then(()=>{if(ready)$('connect').click()})}
 </script></main></body></html>

@@ -7,6 +7,8 @@ This is an opt-in local setup. It does not change public DNS, GitHub Pages, or t
 | `http://geekcalculus.com` | Native production build in `frontend/vue/dist` | Existing `backend/laravel/database/database.sqlite` and storage |
 | `http://geekcalculus.test` | Native Vite development server with HMR | Separate `local/test-data/database.sqlite` and `local/test-data/storage` |
 
+Every HTML page on `geekcalculus.test` displays a fixed **Test** label at the bottom left, including standalone calculators. The gateway injects its hostname-guarded script; embedded frames defer to the outer page. Main never receives the marker.
+
 Both use the existing section engine. Host-only session cookies have different names. Test accounts, sessions, private sources and SQLite data are not copied from main. Both use the same source checkout: edits appear immediately on test; main changes after a new build. Neither app uses the browser-only demo database.
 
 ## Start

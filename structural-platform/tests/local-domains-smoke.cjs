@@ -45,10 +45,22 @@ async function main() {
       await page.locator('.login-form').waitFor()
       if (websocket) assert.equal(new URL((await websocket).url()).hostname, host)
       assert.equal(await page.locator('.demo-login-note').count(), 0, 'Both apps must use native Laravel authentication')
+      const marker = page.locator('#geek-test-indicator');
+      if (host.endsWith('.test')) {
+        await marker.waitFor();
+        assert.equal(await marker.locator('span').innerText(), 'Test');
+        assert.equal(await marker.evaluate(node => getComputedStyle(node).pointerEvents), 'none');
+        await page.setViewportSize({ width: 390, height: 844 });
+        const box = await marker.boundingBox();
+        assert.ok(box.x >= 0 && box.x < 40 && box.y + box.height <= 844);
+      } else assert.equal(await marker.count(), 0);
+      await page.goto(`http://${host}${port === 80 ? '' : ':' + port}/hi-doubly-symmetric-aisc360-10.html`);
+      if (host.endsWith('.test')) await page.locator('#geek-test-indicator').waitFor();
+      else assert.equal(await page.locator('#geek-test-indicator').count(), 0);
       assert.deepEqual(errors, [])
       await page.close()
     }
   } finally { await browser.close() }
-  console.log('Local domains passed: main built app, test Vite app, native health/CSRF/guest authentication, separate cookies, browser rendering and unknown-host rejection.')
+  console.log('Local domains passed: main built app, test Vite app, native health/CSRF/guest authentication, separate cookies, browser rendering, test-only fixed badge (app/standalone/mobile) and unknown-host rejection.')
 }
 main().catch(error => { console.error(error); process.exitCode = 1 })

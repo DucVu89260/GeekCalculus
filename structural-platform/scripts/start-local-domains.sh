@@ -28,5 +28,8 @@ docker run --rm --user "$LOCAL_UID:$LOCAL_GID" \
 chmod -R a+rX frontend/vue/dist
 docker compose -f compose.yaml -f compose.local-domains.yaml up -d --no-build --wait --wait-timeout 120 \
   section-engine backend backend-test frontend-test local-web
+# Bind-mounted Nginx config changes need an explicit reload on existing containers.
+docker compose -f compose.yaml -f compose.local-domains.yaml exec -T local-web nginx -t
+docker compose -f compose.yaml -f compose.local-domains.yaml exec -T local-web nginx -s reload
 printf 'Main: http://geekcalculus.com\nTest: http://geekcalculus.test\n'
 printf 'On the browser machine, hosts must contain: 127.0.0.1 geekcalculus.com geekcalculus.test\n'

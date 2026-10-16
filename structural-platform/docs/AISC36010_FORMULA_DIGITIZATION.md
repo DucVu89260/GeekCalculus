@@ -202,7 +202,7 @@ separately named `legacy_comparison`.
 | --- | --- |
 | Laravel full suite, explicit SQLite `:memory:` | 81 passed / 753 assertions at integration; final standards-focused follow-up 28 passed / 303 assertions after source-edition hardening; no application DB reset |
 | Vue typecheck and complete Node suite | Passed; 108 Node tests passed |
-| Python source/index/candidate suite | 12 passed; synthetic PDFs only |
+| Python source/index/candidate suite | 12 passed; synthetic PDFs only. Also reproduced with isolated PyMuPDF 1.26.6; missing Tesseract reproduces an OCR-only error. CI explicitly installs English OCR and uses the main requirements pin. |
 | Native and demo Vue production builds | Passed; existing large reader chunk warning remains |
 | Standards reader/admin smoke | Synthetic API/PDF: hierarchy, typed math, exact pages, draft save/version, explicit comparison, review transition, reset confirmation; passed |
 | AISC edition/source isolation smoke | Passed with synthetic fixtures; explicit document/page, stored expression precedence, unknown source and 2010/2016 separation |

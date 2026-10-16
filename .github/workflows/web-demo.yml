@@ -7,6 +7,9 @@ on:
       - 'structural-platform/backend/laravel/**'
       - 'structural-platform/standards/**'
       - 'structural-platform/scripts/extract_standard_outline.py'
+      - 'structural-platform/scripts/extract_aisc_formula_candidates.py'
+      - 'structural-platform/scripts/extract_asce710_corpus.py'
+      - 'structural-platform/scripts/requirements-standard-source.txt'
       - 'structural-platform/scripts/standards-editions.json'
       - 'structural-platform/scripts/tests/**'
       - 'structural-platform/scripts/build-section-properties-core.cjs'
@@ -20,6 +23,9 @@ on:
       - 'structural-platform/backend/laravel/**'
       - 'structural-platform/standards/**'
       - 'structural-platform/scripts/extract_standard_outline.py'
+      - 'structural-platform/scripts/extract_aisc_formula_candidates.py'
+      - 'structural-platform/scripts/extract_asce710_corpus.py'
+      - 'structural-platform/scripts/requirements-standard-source.txt'
       - 'structural-platform/scripts/standards-editions.json'
       - 'structural-platform/scripts/tests/**'
       - 'structural-platform/scripts/build-section-properties-core.cjs'
@@ -98,6 +104,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: python -m pip install PyMuPDF==1.26.6
+      - name: Install OCR dependencies for synthetic ASCE corpus tests
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends tesseract-ocr tesseract-ocr-eng
+          tesseract --list-langs
+      - run: python -m pip install -r structural-platform/scripts/requirements-standard-source.txt
       - name: Verify indexing with synthetic PDFs only
         run: python -m unittest discover -s structural-platform/scripts/tests -v

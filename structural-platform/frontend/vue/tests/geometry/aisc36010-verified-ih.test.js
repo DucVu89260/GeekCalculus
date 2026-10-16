@@ -18,7 +18,7 @@ const props=Object.freeze({
  torsion_constant_j_mm4:5e5,warping_constant_cw_mm6:2.9e12
 });
 const baseInput={
- method:'LRFD',section:{h_mm:800,bf_mm:250,tf_mm:16,tw_mm:12,fabrication:'BUILT_UP'},
+ method:'LRFD',section:{h_mm:800,bf_mm:250,tf_mm:16,tw_mm:24,fabrication:'BUILT_UP'},
  material:{fy_mpa:345,e_mpa:200000},
  member:{kx:1,ky:1,kz:1,lx_mm:5000,ly_mm:4000,lz_mm:4000,lb_mm:3000,g_mpa:77000},
  moment_diagram:{mode:'CONSERVATIVE'},

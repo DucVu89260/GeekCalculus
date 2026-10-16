@@ -3,7 +3,6 @@ import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { request, demoMode } from '../api'
 import { aisc36010Equations, equationDocument } from '../aisc-equation-library.mjs'
 import StandardSourceCorpus from './StandardSourceCorpus.vue'
-import { asce710Equations, asce710WindFormulas } from '../standards-library.js'
 
 const props = defineProps({ locale: { type: String, default: 'vi' }, canEdit: Boolean })
 const families = ref([])
@@ -56,13 +55,14 @@ async function loadEdition() {
   try {
     const [a,b] = await Promise.all([
       request('/api/v1/standards/'+encodeURIComponent(selected.value)),
-      request('/api/v1/standards/'+encodeURIComponent(selected.value)+'/equations')
+      selected.value === 'ASCE7-10' ? Promise.resolve({ data: [] }) : request('/api/v1/standards/'+encodeURIComponent(selected.value)+'/equations')
     ])
     if (generation !== editionGeneration) return
-    detail.value = a.data; equations.value = selected.value === 'ASCE7-10' ? asce710Equations(b.data) : selected.value === 'AISC360-10' ? aisc36010Equations(b.data) : b.data
+    detail.value = a.data; equations.value = selected.value === 'AISC360-10' ? aisc36010Equations(b.data) : b.data
     if (selected.value === 'ASCE7-10') {
       activeClause.value = a.data.clauses.find(c => c.kind === 'normative' && c.code === '26') || null
       activePage.value = activeClause.value?.pdf_page || 1
+      activeDocumentId.value = activeClause.value?.document_id ?? null
     }
   } catch(e) { if (generation === editionGeneration) error.value = e.message || 'Could not load edition.' }
 }
@@ -93,38 +93,33 @@ onMounted(list)
       </details>
     </div>
     <div v-if="detail" class="std-workspace">
-      <div class="std-context"><strong>{{ current?.title }}</strong><span>{{ detail.clauses.length }} indexed clauses · {{ equations.length }} equation labels · {{ detail.documents.length }} {{ demoMode ? 'source documents' : 'private documents' }}</span></div>
+      <div class="std-context"><strong>{{ current?.title }}</strong><span>{{ detail.clauses.length }} indexed clauses · <template v-if="!isAsce710">{{ equations.length }} equation labels · </template>{{ detail.documents.length }} {{ demoMode ? 'source documents' : 'private documents' }}</span></div>
       <div class="std-reader-tabs">
         <button type="button" :aria-pressed="viewTab==='outline'" @click="viewTab='outline'">Document Outline</button>
-        <button type="button" :aria-pressed="viewTab==='equations'" @click="viewTab='equations'">Equation Library</button>
+        <button v-if="!isAsce710" type="button" :aria-pressed="viewTab==='equations'" @click="viewTab='equations'">Equation Library</button>
         <button type="button" :aria-pressed="viewTab==='source'" @click="viewTab='source'">PDF Source</button>
-        <button v-if="detail.documents.some(d => d.extraction_summary)" type="button" :aria-pressed="viewTab==='corpus'" @click="viewTab='corpus'">Source Corpus · Toàn văn / Bảng / Công thức</button>
+        <button v-if="!isAsce710 && detail.documents.some(d => d.extraction_summary)" type="button" :aria-pressed="viewTab==='corpus'" @click="viewTab='corpus'">Source Corpus · Toàn văn / Bảng / Công thức</button>
       </div>
       <StandardSourceCorpus v-if="viewTab === 'corpus'" :key="selected" :code="selected" :documents="detail.documents" />
       <div v-else class="std-three" :class="{ 'std-without-review': !showReview }">
         <aside class="std-outline"><label>Table of contents<input v-model="search" placeholder="Search clauses or equations…" /></label><select v-model="sectionFilter" aria-label="Document section"><option value="normative">Specification</option><option value="commentary">Commentary</option><option value="all">All sections</option></select><button v-for="clause in clauses" :key="clause.id" class="std-clause" :aria-pressed="activeClause?.code === clause.code && activeClause?.kind === clause.kind" type="button" @click="goTo(clause)"><b>{{ clause.code }}</b><span>{{ clause.title }}</span><small>{{ clause.pdf_page ? 'PDF p. '+clause.pdf_page : clause.printed_page ? 'Printed p. '+clause.printed_page+' · PDF mapping pending' : 'No page mapped' }}</small></button><p v-if="!clauses.length">No matching clauses indexed yet.</p></aside>
         <section class="std-main">
-          <h3>{{ viewTab === 'equations' ? 'Equation Library' : viewTab === 'source' ? 'PDF Source' : 'Equations & References' }}</h3>
-          <template v-if="isAsce710 && viewTab !== 'source'">
-            <details class="std-kernel" :open="viewTab === 'outline'"><summary>Wind kernel · 7 clause-linked calculation branches · REVIEW_REQUIRED</summary>
-              <article v-for="formula in asce710WindFormulas" :key="formula.key" class="std-formula"><button type="button" class="std-eq-jump" @click="goToEquation(formula)">{{ formula.clause }}</button><code>{{ formula.expression }}</code><small>PDF p. {{ formula.pdf_page }} · implemented branch, not whole-building approval</small></article>
-            </details>
-            <p v-if="viewTab === 'outline' && activeClause"><strong>{{ activeClause.code }} · {{ activeClause.title }}</strong></p>
-          </template>
+          <h3>{{ viewTab === 'equations' ? 'Equation Library' : viewTab === 'source' || isAsce710 ? 'PDF Source' : 'Equations & References' }}</h3>
+          <p v-if="isAsce710 && activeClause"><strong>{{ activeClause.code }} · {{ activeClause.title }}</strong></p>
           <p v-if="selected === 'AISC360-10' && viewTab !== 'source'" class="std-empty">{{ locale === 'vi' ? 'Import hiện lập chỉ mục mã và trang PDF, chưa phiên âm toàn bộ công thức. Một số biểu thức tham khảo được lấy từ bộ quy tắc I/H hiện có. Chọn mã để xem trang nguồn; trạng thái xác minh được giữ nguyên.' : 'Import indexes labels and PDF pages; it does not transcribe all formulas. Available implementation references come from the existing I/H rules. Select a label to view its source; review status is unchanged.' }}</p>
-          <p v-if="!equations.length && viewTab !== 'source'" class="std-empty">No equation expressions available in this database yet. Only engineering-verified formulas may be used in calculations.</p>
+          <p v-if="!isAsce710 && !equations.length && viewTab !== 'source'" class="std-empty">No equation expressions available in this database yet. Only engineering-verified formulas may be used in calculations.</p>
           <article v-for="eq in (viewTab === 'source' ? [] : visibleEquations)" :key="eq.id" class="std-equation"><button type="button" class="std-eq-jump" :aria-pressed="activeEquation?.id === eq.id" @click="goToEquation(eq)"><strong>{{ eq.label }}</strong></button><code>{{ eq.latex || eq.expression || eq.reference_expression || (locale === 'vi' ? 'Chưa phiên âm biểu thức · chọn mã để xem PDF gốc' : 'Expression not transcribed · select label to view source PDF') }}</code><span><small v-if="eq.reference_expression" class="std-reference-label">{{ locale === 'vi' ? 'Tham khảo từ bộ quy tắc I/H · cần đối chiếu PDF' : 'I/H implementation reference · check against PDF' }}</small>{{ eq.clause_code }} · {{ eq.verification_status }} · {{ eq.pdf_page ? 'PDF p. '+eq.pdf_page : 'Source unmapped' }}</span></article>
           <nav v-if="viewTab !== 'source' && displayedEquations.length" class="std-equation-pages" aria-label="Equation pages"><button type="button" :disabled="equationPage <= 1" @click="equationPage--">Previous</button><span>{{ displayedEquations.length }} labels · {{ equationPage }}/{{ equationPages }}</span><button type="button" :disabled="equationPage >= equationPages" @click="equationPage++">Next</button></nav>
           <div ref="sourcePreview" class="std-source-selection" tabindex="-1">
           <h3>{{ activeEquation ? (activeEquation.label || activeEquation.clause) + ' · PDF Source' : 'PDF Preview' }}</h3>
-          <p v-if="activeEquation" role="status">{{ activePage ? 'PDF p. ' + activePage : (locale === 'vi' ? 'Chưa có trang nguồn cho mục này.' : 'No source page mapped for this item.') }} <a v-if="pdfUrl && activePage" :href="pdfUrl" target="_blank" rel="noopener">{{ locale === 'vi' ? 'Mở trang PDF trong tab mới' : 'Open PDF page in new tab' }}</a></p>
+          <p v-if="activeEquation || (isAsce710 && activeClause)" role="status">{{ activePage ? 'PDF p. ' + activePage : (locale === 'vi' ? 'Chưa có trang nguồn cho mục này.' : 'No source page mapped for this item.') }} <a v-if="pdfUrl && activePage" :href="pdfUrl" target="_blank" rel="noopener">{{ locale === 'vi' ? 'Mở trang PDF trong tab mới' : 'Open PDF page in new tab' }}</a></p>
           <p v-if="activeEquation?.reference_expression"><code>{{ activeEquation.reference_expression }}</code><br /><small>{{ activeEquation.reference_citation }} · {{ activeEquation.reference_conditions }} · REVIEW_REQUIRED</small></p>
           <p v-if="isAsce710 && pdfUrl" class="std-source-provenance">ASCE 7-10 · 658 pages · <a :href="pdfUrl" target="_blank" rel="noopener">Open PDF</a> · <a :href="pdfUrl.split('#')[0]" download="ASCE 7-10.pdf">Download PDF</a><br /><small>SHA-256: {{ detail.library?.source_sha256 || detail.documents.find(d => d.kind === 'specification')?.sha256 }}</small></p>
           <iframe v-if="pdfUrl" :key="pdfUrl" :src="pdfUrl" title="Engineering standard PDF source" class="std-pdf"></iframe>
           <p v-else class="std-empty">{{ locale === 'vi' ? 'Chưa có PDF nguồn phù hợp. Quản trị viên cần import PDF và liên kết tài liệu với mục tiêu chuẩn.' : 'No unambiguous source PDF is linked. Ask an administrator to import and associate the source document.' }}</p>
         </div>
         </section>
-        <aside v-if="showReview" class="std-review"><h3>Source Review</h3><p>Equation candidates must be checked against the source PDF before use in design calculations.</p><p>Unverified catalog headings are navigation-only.</p><p>{{ demoMode ? 'PDF source and its page index are included in this library.' : 'Private corpus documentation requires authentication.' }}</p></aside>
+        <aside v-if="showReview" class="std-review"><h3>Source Review</h3><p v-if="isAsce710">{{ locale === 'vi' ? 'Chọn điều khoản trong mục lục để xem trang PDF gốc. Công thức được đọc trực tiếp trong PDF, không cần phiên âm.' : 'Select an outline entry to view its original PDF page. Read equations directly in the PDF; no transcription is required.' }}</p><p v-if="!isAsce710">Equation candidates must be checked against the source PDF before use in design calculations.</p><p>Unverified catalog headings are navigation-only.</p><p>{{ demoMode ? 'PDF source and its page index are included in this library.' : 'Private corpus documentation requires authentication.' }}</p></aside>
       </div>
     </div>
   </div>

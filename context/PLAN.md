@@ -14,6 +14,10 @@ Baseline `main`: `991342d`, audited 2026-10-16. This is a dependency/acceptance 
 
 Review BUILD-01 as the smallest runtime fix first. STD-01 needs a dedicated integration task; PostgreSQL deployment and source review approval are not implicit side effects of resolving Git conflicts.
 
+## Active UI slice — Crane Beam workspace
+
+`CRANE-UI-01` (implemented, base `408ea8e`): reuse existing `CraneBeamView` calculations in a dedicated routed workspace with the H/I-style right navigation, linked H/I/Crane entries, contents anchors and responsive input/results layout. Preserve legacy Crane query URLs and current preliminary/NOT VERIFIED statuses. Acceptance: deep links/new-tab entry, both-direction navigation, language switch, mobile layout, existing numerical output parity and unchanged calculation sources; native/demo build and targeted browser checks. Evidence: native/demo builds and typecheck passed; 92 Node tests passed; Crane browser smoke passed in native and demo modes, H/I bilingual/numeric/export smoke passed against the fresh build, and structure-group routing/shared-calculator smoke passed. Desktop navigation is on the right on both pages; mobile navigation sits above content. This slice does not add crane design limit states.
+
 ## 1 — Independent engineering MVP slices
 
 A slice ends with a reviewable input/output contract, independent expected fixture, source/edition/version evidence, negative/boundary tests, UI/status behavior and a reproducible command. Existing implemented formulas are extended/validated in place, not re-created.

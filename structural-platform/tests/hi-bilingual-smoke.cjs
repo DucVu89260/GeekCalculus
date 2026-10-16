@@ -77,7 +77,8 @@ async function main() {
     assert.equal(output.result.overall_status, 'REVIEW_REQUIRED')
     assert.deepEqual(errors, [])
     const source = fs.readFileSync(path.join(__dirname, '../frontend/vue/public/hi-doubly-symmetric-aisc360-10.html'))
-    assert.deepEqual(source, fs.readFileSync(path.join(__dirname, '../../docs/hi-doubly-symmetric-aisc360-10.html')))
+    const publishedDir = process.env.HI_PUBLISHED_DIR || path.join(__dirname, '../../docs')
+    assert.deepEqual(source, fs.readFileSync(path.join(publishedDir, 'hi-doubly-symmetric-aisc360-10.html')))
     console.log('Symmetric I/H bilingual checks passed: EN/VI round-trip, numeric parity, dirty inputs, validation, JSON import/export, copied report, persistence, mobile labels and published copy.')
   } finally { await browser.close() }
 }

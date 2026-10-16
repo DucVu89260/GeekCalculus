@@ -3,6 +3,7 @@ import { computed, nextTick, ref } from 'vue'
 import SectionGeometrySketch from './SectionGeometrySketch.vue'
 import CraneBeamView from './CraneBeamView.vue'
 import { SECTION_PROFILES } from '../sectional-properties/catalog.js'
+import { moduleHref } from '../modules'
 
 const props = defineProps({ locale: { type: String, required: true } })
 
@@ -38,10 +39,7 @@ function openDesignStandard(code) {
   if (code !== 'aisc360-10') return
   standardsDialogOpen.value = false
   if (selectedId.value === 'crane_beam') {
-    const url = new URL(window.location.href)
-    url.searchParams.set('component', 'crane-beam')
-    url.searchParams.set('standard', 'aisc360-10')
-    url.hash = '#/modules/steel'
+    const url = new URL(moduleHref('steel/crane-beam'), window.location.origin)
     const tab = window.open(url.href, '_blank')
     if (tab) tab.opener = null
     else window.location.assign(url.href)

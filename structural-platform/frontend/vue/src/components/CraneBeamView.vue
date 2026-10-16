@@ -9,8 +9,13 @@ const method = ref('ASD')
 const design = ref(null)
 const profile = SECTION_PROFILES.find(p => p.id === 'asymmetric_i')
 const dimensions = ref({ ...profile.default_dimensions })
-const action = ref({ fy: 345, e: 200000, n_kn: 0, klx_mm: 9000, kly_mm: 4500, mx_knm: 200, my_knm: 15, vy_kn: 95, vx_kn: 20, wlmax_kn: 150, bearing_mm: 100, k_mm: 16 })
-const actionLabels = { fy: 'Fy (MPa)', e: 'E (MPa)', n_kn: 'Axial N (kN, + tension / − compression)', klx_mm: 'KLx (mm)', kly_mm: 'KLy (mm)', mx_knm: 'Mx (kN·m)', my_knm: 'My (kN·m)', vy_kn: 'Vy (kN)', vx_kn: 'Vx (kN)', wlmax_kn: 'WLmax · wheel load max for one side (kN)', bearing_mm: 'Bearing length N (mm)', k_mm: 'Fillet distance k (mm)' }
+const action = ref({ fy: 345, e: 200000, n_kn: 0, klx_mm: 9000, kly_mm: 4500, mx_knm: 200, my_knm: 15, vy_kn: 95, vx_kn: 20, deflection_y_mm: 8, deflection_x_mm: 5, wlmax_kn: 150, bearing_mm: 100, k_mm: 16 })
+const groups = [
+ {name:'Material & axial',fields:[['fy','Fy (MPa)'],['e','E (MPa)'],['n_kn','N (kN; +tension / −compression)'],['klx_mm','KLx (mm)'],['kly_mm','KLy (mm)']]},
+ {name:'Y · Vertical | Major-axis bending',fields:[['mx_knm','Mx · Major (kN·m)'],['vy_kn','Vy (kN)'],['deflection_y_mm','Deflection y (mm)']]},
+ {name:'X · Horizontal | Minor-axis bending',fields:[['my_knm','My · Minor (kN·m)'],['vx_kn','Vx (kN)'],['deflection_x_mm','Deflection x (mm)']]},
+ {name:'Wheel local bearing · Section J10',fields:[['wlmax_kn','WLmax · one side (kN)'],['bearing_mm','Bearing length N (mm)'],['k_mm','Distance k (mm)']]}
+]
 const loading = ref(false)
 const error = ref('')
 const result = ref(null)
@@ -71,7 +76,7 @@ async function calculate() {
 
 <template>
   <section class="crane-beam">
-    <header><div><small>Steel Design / Component / Crane Beam</small><h3>Crane Beam · AISC 360-10 ASD</h3>
+    <header><div><small>Steel Design / Component / Crane Beam</small><h3>Crane Beam · AISC 360-10 {{ method }}</h3>
       <p>{{ locale === 'vi' ? 'Tiết diện I/H bất đối xứng · Dùng chung Section Properties' : 'Asymmetric I/H · Shared Section Properties engine' }}</p></div></header>
     <div class="crane-panel"><h4>Asymmetric I/H · Section geometry</h4>
       <div class="crane-drawings">
@@ -85,9 +90,9 @@ async function calculate() {
             <text x="330" y="135">H</text><text x="221" y="105">t<tspan baseline-shift="sub" font-size="9">w</tspan></text>
             <text x="278" y="50">t<tspan baseline-shift="sub" font-size="9">t</tspan></text>
             <text x="297" y="223">t<tspan baseline-shift="sub" font-size="9">b</tspan></text>
-          </g><path d="M187 109H214M260 47H275M286 222H296" stroke="#4e708a" stroke-width="1"/>
+          </g><path d="M187 109H214M260 47H275M286 222H296" stroke="#4e708a" stroke-width="1"/><g stroke="#b36835" stroke-width="2.5" fill="none"><path d="M175 148V90"/><path d="M175 148H249"/><path d="M170 99L175 89L180 99"/><path d="M239 143L251 148L239 153"/></g><g fill="#b36835" font-size="18" font-weight="bold"><text x="160" y="89">Y</text><text x="254" y="154">X</text></g><circle cx="175" cy="148" r="3" fill="#b36835"/>
         </svg><figcaption>01 · Asymmetric I/H cross-section · Section Properties input</figcaption></figure>
-      </div><p class="drawing-note">Section geometry schematic, not to scale. Geometric properties are obtained from the shared Section Properties engine.</p>
+      </div><p class="drawing-note">Coordinate convention: Y vertical (Vy, deflection y, Mx major); X horizontal (Vx, deflection x, My minor). Section schematic not to scale. Geometric properties are obtained from the shared Section Properties engine.</p>
     </div>
     <div class="crane-panel"><h4>02 · Wheel bearing · Web local yielding J10.2</h4>
       <figure class="bearing-figure"><svg viewBox="0 0 360 260" role="img" aria-label="Wheel bearing and web local yielding detail">
@@ -103,7 +108,7 @@ async function calculate() {
       <form @submit.prevent="calculate"><fieldset class="design-method"><legend>Design Method · AISC 360-10</legend><label><input v-model="method" type="radio" value="ASD"> ASD — Allowable Strength Design</label><label><input v-model="method" type="radio" value="LRFD"> LRFD — Load and Resistance Factor Design</label></fieldset><p class="drawing-note">Enter member actions corresponding to the selected ASD or LRFD load combinations. Selecting a method does not convert the applied forces.</p><div class="dimensions">
         <label v-for="key in profile.dimensions" :key="key"><span>{{ key.replaceAll('_',' ') }} (mm)</span>
           <input v-model.number="dimensions[key]" type="number" step="any" min="0.001" required /></label>
-      </div><h4>Material properties & section design actions</h4><div class="dimensions"><label v-for="(label,key) in actionLabels" :key="key"><span>{{ label }}</span><input v-model.number="action[key]" type="number" step="any" min="0" required /></label></div><button type="submit" :disabled="loading">{{ loading ? 'Calculating…' : 'Calculate section properties' }}</button></form>
+      </div><h4>Material properties & section design actions</h4><div class="action-groups"><section v-for="group in groups" :key="group.name" class="action-group"><h5>{{ group.name }}</h5><div class="dimensions"><label v-for="field in group.fields" :key="field[0]"><span>{{ field[1] }}</span><input v-model.number="action[field[0]]" type="number" step="any" :min="field[0]==='n_kn' ? undefined : 0" required /></label></div></section></div><button type="submit" :disabled="loading">{{ loading ? 'Calculating…' : 'Calculate section properties' }}</button></form>
       <p v-if="error" role="alert" class="error">{{ error }}</p>
     </div>
     <div class="crane-panel"><h4>02 · Calculation Results</h4>
@@ -162,5 +167,5 @@ async function calculate() {
 <style scoped>
 .crane-beam{margin-top:18px;color:#243d55}.crane-beam>header{padding:18px 20px;background:#edf3f7;border-radius:12px}.crane-beam h3{margin:7px 0;font-size:23px}.crane-beam p{line-height:1.5}.crane-panel{padding:18px 20px;background:var(--workspace-bg);border:1px solid var(--surface-border);border-radius:12px;margin-top:14px}.crane-panel h4{margin:0 0 14px;font-size:18px}.dimensions{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}.dimensions label{display:grid;gap:6px;text-transform:capitalize}.dimensions input{padding:9px;border:1px solid #aebdcc;border-radius:6px;width:100%;box-sizing:border-box}.crane-panel button{margin-top:16px;padding:11px 18px;border:0;border-radius:6px;background:#294c70;color:white;cursor:pointer}.crane-panel button:disabled{opacity:.6}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:10px;text-align:left;border-bottom:1px solid #d8e1e8}th{font-weight:600}.error{color:#a21e1e;overflow-wrap:anywhere}
 .bearing-figure{margin:0;max-width:570px;background:#fcfbf7;border:1px solid #d8e2e9;border-radius:10px;padding:14px}.bearing-figure svg{display:block;width:100%;height:260px}.bearing-figure figcaption{font-size:13px;color:#46637a;line-height:1.5}.crane-drawings{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.crane-drawings figure{margin:0;padding:12px;background:#fcfbf7;border:1px solid #d8e2e9;border-radius:10px}.crane-drawings svg{display:block;width:100%;height:220px}.crane-drawings figcaption{font-size:13px;line-height:1.5;color:#46637a}.drawing-note{font-size:12px;color:#796b54}@media(max-width:850px){.crane-drawings{grid-template-columns:1fr}}
-.design-method{display:flex;flex-wrap:wrap;gap:15px;padding:12px;border:1px solid #cedce6;border-radius:8px;margin-bottom:10px}.design-method legend{font-weight:700}.design-method label{display:inline-flex;align-items:center;gap:6px}.design-method input{accent-color:#345f84}details{margin-top:15px}details article{padding:8px 0;border-bottom:1px solid #e2e6ea}
+.action-groups{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:14px 0}.action-group{padding:14px;border:1px solid #d1dfe8;border-radius:9px;background:#f8fbfd}.action-group h5{font-size:16px;color:#2b4d6c;margin:0 0 12px}@media(max-width:850px){.action-groups{grid-template-columns:1fr}}.design-method{display:flex;flex-wrap:wrap;gap:15px;padding:12px;border:1px solid #cedce6;border-radius:8px;margin-bottom:10px}.design-method legend{font-weight:700}.design-method label{display:inline-flex;align-items:center;gap:6px}.design-method input{accent-color:#345f84}details{margin-top:15px}details article{padding:8px 0;border-bottom:1px solid #e2e6ea}
 </style>

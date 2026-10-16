@@ -141,6 +141,22 @@ body{background:#f5f6f8;color:#202d3b}
 .factor-item small{color:#7b8c9b;font-size:10px}
 .factor-note{color:#8c641c;font-size:11px;line-height:1.5;margin:10px 0 0}
 @media(max-width:700px){.factor-grid{grid-template-columns:1fr}.design-method-choice{min-width:100%}}
+
+.aisc-review-card{margin-top:18px;margin-bottom:18px}
+.aisc-review-body{padding:18px 20px;display:grid;gap:13px}
+.aisc-review-disclaimer{font-size:12px;color:#855c21;background:#fff6e6;border-left:3px solid #ca9b4f;line-height:1.6;padding:10px}
+#aisc-review-status{font-weight:700;font-size:13px;color:#23648a}
+#aisc-review-class{font-size:13px;line-height:1.65;border-bottom:1px solid #e4e9ed;padding-bottom:10px}
+.aisc-results{width:100%;border-collapse:collapse;font-size:12px}
+.aisc-results th{text-align:left;background:#eaf0f4;color:#2c516c}
+.aisc-results th,.aisc-results td{border-bottom:1px solid #dfe5e9;padding:9px;vertical-align:top}
+.aisc-results td small{display:block;font-size:11px;color:#916121;margin-top:5px}
+.aisc-results td strong{color:#34546a}
+.aisc-formulas summary{font-weight:700;font-size:13px;cursor:pointer;padding:9px}
+.aisc-formulas{border:1px solid #d6e0e6;border-radius:8px}
+.aisc-formula-text{font-family:Cambria,Georgia,serif;color:#214d6b}
+.aisc-bracing-form{padding:8px;background:#eef5f9;border-radius:6px}
+@media(max-width:750px){.aisc-review-body{padding:10px}.aisc-results{min-width:680px}}
 </style></head><body>
 <div class="shell">
 
@@ -162,6 +178,7 @@ body{background:#f5f6f8;color:#202d3b}
     <a class="outline-link outline-parent" href="#results-start" data-outline="results" data-l10n="resultstree">▾ &nbsp; Results</a>
     <a class="outline-link outline-child" href="#input-card" data-outline="input" data-l10n="inputtree">01 &nbsp; Input Parameters</a>
     <a class="outline-link outline-child" href="#calculation-results" data-outline="checks" data-l10n="resulttree">02 &nbsp; Calculation Results</a>
+    <a class="outline-link outline-child" href="#aisc-review" data-outline="aisc">02A &nbsp; AISC 360-10 Verified Branches</a>
     <a class="outline-link outline-child" href="#shared-section" data-outline="shared" data-l10n="sharedtree">02B &nbsp; Shared Section Properties</a>
     <a class="outline-link outline-child" href="#calculation-notebook" data-outline="details" data-l10n="detailstree">03 &nbsp; Design calculations</a>
   </nav>
@@ -197,6 +214,16 @@ body{background:#f5f6f8;color:#202d3b}
 <div class="tab-panel hidden" id="member" role="tabpanel"><div class="sectiontitle"><h3>Thông số vật liệu & cấu kiện</h3><span>Phase 1 · Excel input</span></div>
 <div class="formgrid" data-section="material"><label class="field"><span>Giới hạn chảy <em>Fy · MPa</em></span><input type="number" step="any" data-key="fy_mpa"></label><label class="field"><span>Đàn hồi <em>E · MPa</em></span><input type="number" step="any" data-key="e_mpa"></label></div>
 <div class="fieldset-caption">Chiều dài ổn định / không giằng</div><div class="formgrid" data-section="member"><label class="field"><span>Chiều dài trục mạnh <em>Lx · mm</em></span><input type="number" step="any" data-key="lx_mm"></label><label class="field"><span>Chiều dài không giằng <em>Lb · mm</em></span><input type="number" step="any" data-key="lb_mm"></label></div>
+<div class="fieldset-caption">AISC 360-10 · E2/E3/E4 · Dữ liệu ổn định độc lập</div>
+<p class="checkmsg">Bắt buộc xác định riêng Kx, Ky, Ly, Kz, Lz và G. Lb chỉ dùng cho uốn xoắn ngang, KHÔNG thay thế Ly của nén. Để trống sẽ hiện INPUT_REQUIRED.</p>
+<div class="formgrid aisc-bracing-form">
+ <label class="field"><span>Kx · E2</span><input id="aisc-kx" type="number" min="0" step="any" placeholder="Nhập Kx"></label>
+ <label class="field"><span>Ky · E2</span><input id="aisc-ky" type="number" min="0" step="any" placeholder="Nhập Ky"></label>
+ <label class="field"><span>Ly (mm)</span><input id="aisc-ly" type="number" min="0" step="any" placeholder="Chiều dài nén trục yếu"></label>
+ <label class="field"><span>Kz · E4</span><input id="aisc-kz" type="number" min="0" step="any" placeholder="Nhập Kz"></label>
+ <label class="field"><span>Lz (mm)</span><input id="aisc-lz" type="number" min="0" step="any" placeholder="Torsional unbraced length"></label>
+ <label class="field"><span>G (MPa)</span><input id="aisc-g" type="number" min="0" step="any" placeholder="Shear modulus, xác nhận vật liệu"></label>
+</div>
 <div class="fieldset-caption">Sườn tăng cứng</div><div class="formgrid" data-section="stiffeners"><label class="field"><span>Khoảng cách <em>a · mm</em></span><input type="number" step="any" data-key="spacing_mm"></label><label class="field"><span>Bề dày <em>ts · mm</em></span><input type="number" step="any" data-key="thickness_mm"></label><label class="field"><span>Bề rộng <em>bs · mm</em></span><input type="number" step="any" data-key="width_mm"></label><label class="field"><span>Cấu tạo</span><select data-key="layout"><option value="PAIRED">Hai bên bụng (paired)</option><option value="SINGLE_ANGLE">Một thép góc</option><option value="SINGLE_PLATE">Một bản thép</option></select></label></div>
 <p class="checkmsg">Phase 1 giữ cách tính và giới hạn trong workbook để kiểm tra khả năng tái tạo kết quả.</p></div>
 <div class="tab-panel hidden" id="forces" role="tabpanel"><div class="sectiontitle"><h3>Nội lực tại tiết diện đang kiểm tra</h3><span>Tương ứng Excel COMB42</span></div>
@@ -219,6 +246,18 @@ body{background:#f5f6f8;color:#202d3b}
 <div class="resultsection"><h3>Engineering warnings <span style="font-weight:400;color:#9aa5af" id="warn-count"></span></h3><div class="warning-list" id="warnings"></div></div>
 <div class="minor-note">Mọi kết quả được tính cục bộ trên máy, không tải dữ liệu lên server.</div></section></div>
 
+<section class="card aisc-review-card" id="aisc-review" aria-labelledby="aisc-review-header">
+<header class="cardhead"><h2 id="aisc-review-header">02A &nbsp; AISC 360-10 · Formula Verification (Phase A/B)</h2>
+<small>Clause-linked calculations · Independent of Legacy Excel</small></header>
+<div class="aisc-review-body">
+<div class="aisc-review-disclaimer">Kết quả Phase A/B chỉ áp dụng cho các công thức đã đối chiếu trong phạm vi công bố. Không coi trạng thái CALCULATED là PASS toàn bộ cấu kiện. E7 và F5 đã có công thức riêng; F4 (bụng NONCOMPACT), kéo đứt và Chương G chưa đầy đủ sẽ có trạng thái REVIEW_REQUIRED / INPUT_REQUIRED.</div>
+<div id="aisc-review-status" role="status" aria-live="polite">Đang chờ tính toán từ Section Properties…</div>
+<div id="aisc-review-class"></div>
+<div id="aisc-review-table"></div>
+<details class="aisc-formulas" open><summary>Formula Registry — Trích dẫn điều khoản và công thức AISC 360-10</summary>
+<div id="aisc-review-formulas"></div></details>
+</div>
+</section>
 <section class="card shared-section" id="shared-section" aria-labelledby="shared-section-heading">
 <header class="cardhead"><h2 id="shared-section-heading">02B &nbsp; Section Properties · Shared Calculation Engine</h2><small id="shared-version">Shared numerical core · geometry only</small></header>
 <div class="shared-body">
@@ -686,6 +725,60 @@ function render(){
 
 let sharedRequestSequence=0;
 let sharedResult=null;
+let verifiedResult=null;
+const verifiedKeys={kx:'aisc-kx',ky:'aisc-ky',ly_mm:'aisc-ly',kz:'aisc-kz',lz_mm:'aisc-lz',g_mpa:'aisc-g'};
+function readVerifiedMember() {
+ const values={};
+ for(const [key,id] of Object.entries(verifiedKeys)){
+  const str=document.getElementById(id)?.value.trim();
+  values[key]=str===''?null:Number(str);
+ }
+ return values;
+}
+async function renderAiscReview(input,canonical,generation) {
+ const node=document.getElementById('aisc-review-status');
+ try {
+  const module=await import('./aisc360-10-verified-hi.mjs');
+  if(generation!==sharedRequestSequence)return;
+  const model={...input,method:latest.method,member:{...input.member,...readVerifiedMember()},
+    geometry_hash:canonical.geometry_hash,moment_diagram:{mode:'CONSERVATIVE'}};
+  const verified=module.calculateIH36010(model,canonical.canonical,window.Aisc36010Resistance);
+  if(generation!==sharedRequestSequence)return;
+  verifiedResult=verified;
+  node.textContent='ANSI/AISC 360-10 · Phase A/B · Method '+latest.method+' · Final status: '+verified.overall_status;
+  const cls=verified.classification;
+  document.getElementById('aisc-review-class').innerHTML=
+   '<strong>B4.1a Compression:</strong> '+safe(cls.axial)+
+   ' (flange: '+safe(cls.axialFlange)+', web: '+safe(cls.axialWeb)+') · '+
+   '<strong>B4.1b Flexure:</strong> '+safe(cls.flexureChapter)+
+   ' (flange: '+safe(cls.flexureFlange)+', web: '+safe(cls.flexureWeb)+')'+
+   '<br>λf='+format(cls.lf,3)+' · λw='+format(cls.lw,3)+' · kc='+format(cls.kc,4);
+  const rows=Object.entries(verified.limit_states);
+  document.getElementById('aisc-review-table').innerHTML=
+   '<div class="tablewrap"><table class="aisc-results"><thead><tr><th>Limit state</th><th>AISC clause</th><th>Nominal</th><th>Available '+safe(latest.method)+'</th><th>Status / Scope</th></tr></thead><tbody>'+
+   rows.map(([name,row])=>'<tr><td>'+safe(name)+'</td><td>'+safe(row.clause||'—')+
+    '</td><td>'+(typeof row.nominal==='number'?format(row.nominal,4):'—')+
+    '</td><td>'+(typeof row.available==='number'?format(row.available,4):'—')+
+    '</td><td><strong>'+safe(row.status)+'</strong><small>'+safe(row.reason||'')+'</small></td></tr>').join('')+
+   '</tbody></table></div>'+
+   '<p class="aisc-review-disclaimer">Sức kháng uốn: kN·m; nén: kN; H1: tỷ số. Khi thiếu dữ liệu giằng hoặc gặp nhánh tiêu chuẩn chưa triển khai, không công bố D/C hoàn chỉnh.</p>';
+  const used=['B4.1a-1','B4.1a-2','B4.1a-5','B4.1b-10','B4.1b-11','B4.1b-13','B4.1b-15',
+    'E3-1','E3-2','E3-3','E3-4','E4-4','E7-1','E7-2','E7-3','E7-4/E7-6','E7-7/E7-9','E7-16','E7-17',
+    'F1-1','F2-1','F2-2','F2-3','F2-4','F2-5','F2-6','F2-7',
+    'F3-1','F3-2','F4-7','F4-11','F4-12','F5-1','F5-2','F5-3','F5-4','F5-5','F5-6','F5-7','F5-8','F5-9',
+    'F6-1','F6-2','F6-3','F6-4','H1-1a','H1-1b'];
+  document.getElementById('aisc-review-formulas').innerHTML='<div class="tablewrap"><table class="aisc-results"><thead><tr><th>Clause</th><th>Expression</th><th>Conditions</th></tr></thead><tbody>'+
+   used.map(k=>{const f=module.FORMULAS[k];return '<tr><td>'+safe(f.clause)+'</td><td class="aisc-formula-text">'+safe(f.expression)+'</td><td>'+safe(f.applies)+'</td></tr>'}).join('')+
+   '</tbody></table></div>';
+ }catch(error){
+  if(generation!==sharedRequestSequence)return;
+  verifiedResult=null;
+  node.textContent='AISC 360-10 review calculation not available: '+error.message;
+  document.getElementById('aisc-review-class').textContent='';
+  document.getElementById('aisc-review-table').textContent='';
+ }
+}
+
 const sharedLookup={
  area_mm2:['A','mm²'], ix_mm4:['Ix','mm⁴'], iy_mm4:['Iy','mm⁴'],
  sx_mm3:['Sx','mm³'], sy_mm3:['Sy','mm³'],
@@ -751,9 +844,9 @@ async function refreshCanonicalProperties(input,legacy,generation){
   const module=await import('./hi-section-properties-core.mjs');
   const result=await module.calculateHISectionProperties(input.section,legacy.section_properties);
   if(generation!==sharedRequestSequence)return;
-  if(!latest.result)return;
   sharedResult=result;
   renderSharedReport(result);
+  await renderAiscReview(input,result,generation);
  }catch(error){
   if(generation!==sharedRequestSequence)return;
   sharedResult=null;
@@ -773,6 +866,8 @@ document.getElementById('shared-filter')?.addEventListener('input',event=>{
 function run(){
   const generation=++sharedRequestSequence;
   sharedResult=null;
+  verifiedResult=null;
+  document.getElementById('aisc-review-status').textContent='Đang chờ Section Properties…';
   document.getElementById('shared-status').textContent='Waiting for canonical Section Properties calculation…';
   try{
     latest.input=readInputs()
@@ -784,7 +879,15 @@ function run(){
     if(!Number.isFinite(s.interaction.lrfd_percent)) throw new Error('Giá trị tương tác không hữu hạn.')
     render()
     void refreshCanonicalProperties(latest.input,latest.result,generation)
-  }catch(err){find('error').textContent=err.message;find('error').style.display='block';find('dirtytext').textContent='Không tính được — vui lòng chỉnh dữ liệu.';latest.result=null}
+  }catch(err){
+    find('error').textContent='Legacy Excel preview: '+err.message;
+    find('error').style.display='block';
+    find('dirtytext').textContent='Legacy failed. AISC 360-10 phase A/B still runs independently.';
+    latest.result=null;
+    if(latest.input){
+      void refreshCanonicalProperties(latest.input,{section_properties:{}},generation);
+    }
+  }
 }
 function reset(){
  latest.input=structuredClone(fixture)
@@ -966,6 +1069,9 @@ document.querySelectorAll('.tab').forEach(button=>button.addEventListener('click
   document.querySelectorAll('.tab-panel').forEach(t=>t.classList.toggle('hidden',t.id!==button.dataset.tab))
 }))
 document.querySelectorAll('[data-key]').forEach(el=>el.addEventListener('input',markChanged))
+Object.values(verifiedKeys).forEach(id=>document.getElementById(id)?.addEventListener('input',()=>{
+ document.getElementById('aisc-review-status').textContent='Bracing inputs changed — nhấn Tính toán để cập nhật.'
+}))
 document.querySelectorAll('input[name="design-method"]').forEach(el=>el.addEventListener('change',event=>{
  document.getElementById('method-explanation').textContent=event.target.value==='ASD'
   ? 'ASD: sử dụng nội lực từ tổ hợp tải trọng ASD/service. KHÔNG tự quy đổi nội lực LRFD.'
@@ -975,7 +1081,7 @@ document.querySelectorAll('input[name="design-method"]').forEach(el=>el.addEvent
 find('run').addEventListener('click',run);find('preset').addEventListener('click',reset)
 find('export').addEventListener('click',()=>{
   if (!latest.result){run();if(!latest.result)return}
-  const content=JSON.stringify({meta:{app:'GeekCalculus',module:'HI_DOUBLY_SYMMETRIC',mode:'LEGACY_EXCEL_PARITY',design_method:latest.method,standard_factor_edition:'AISC360-10',exported_at:new Date().toISOString()},input:latest.input,result:latest.result,section_properties_shared:sharedResult},null,2)
+  const content=JSON.stringify({meta:{app:'GeekCalculus',module:'HI_DOUBLY_SYMMETRIC',mode:'LEGACY_EXCEL_PARITY',design_method:latest.method,standard_factor_edition:'AISC360-10',exported_at:new Date().toISOString()},input:latest.input,result:latest.result,section_properties_shared:sharedResult,aisc36010_phase_ab_review:verifiedResult},null,2)
   const url=URL.createObjectURL(new Blob([content],{type:'application/json'})), a=document.createElement('a')
   a.href=url;a.download='GeekCalculus_HI_Phase1_Parity_Result.json';a.click();URL.revokeObjectURL(url)
 })

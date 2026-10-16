@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="vi"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>GeekCalculus — H/I Doubly Symmetric | Phase 1 Preview</title>
 <style>
 :root{--navy:#152e49;--navy2:#203f5a;--muted:#6c7c89;--border:#dce3e8;--bg:#f4f6f7;--white:#fff;--ink:#283a4b;--accent:#067d85;--pale:#e8f4f2;--amber:#a56a16;--amberbg:#fff6e7;--red:#b43838;--redbg:#fff0ee;--line:#f0f2f4;font-family:Calibri,'Segoe UI',Arial,sans-serif;color:var(--ink);font-size:15px}
@@ -157,6 +157,35 @@ body{background:#f5f6f8;color:#202d3b}
 .aisc-formula-text{font-family:Cambria,Georgia,serif;color:#214d6b}
 .aisc-bracing-form{padding:8px;background:#eef5f9;border-radius:6px}
 @media(max-width:750px){.aisc-review-body{padding:10px}.aisc-results{min-width:680px}}
+.language-switch{display:flex;gap:4px;align-items:center;padding:3px;border:1px solid #9eb2c5;border-radius:9px;background:#eaf0f5}.language-switch button{min-width:52px;min-height:40px;padding:9px 14px;border:1px solid var(--border);border-radius:6px;background:#fff;color:var(--navy);font-weight:700}.language-switch button[aria-pressed="true"]{background:var(--navy);color:white}.topbar-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px}@media(max-width:600px){.topbar{padding:12px;gap:10px;flex-wrap:wrap}.page{padding:14px}}
+
+/* Muted content surfaces over the construction illustration. */
+:root{--bg:#d9ded8;--white:#e8e9e1;--border:#c9d0c7;--ink:#283a4b;--muted:#586b76;--surface:#e8e9e1;--surface-soft:#e1e5dc;--field:#f0f0e8}
+body{background-color:#252727;background-image:url('./construction-background.png');background-position:center;background-size:cover;background-attachment:fixed}
+.main{background:rgba(217,222,215,.88)}
+.topbar{background:rgba(228,231,221,.97)}
+.card,.ring-center,.step-table{background:var(--surface)}
+.card{box-shadow:0 3px 18px #172c3912}
+.btn,.language-switch button{background:var(--surface)}
+.field input,.field select,.field select option{background:var(--field);border-color:#bec9bf;color:var(--ink)}
+.diagram,.metric,.notebook-step{background:#e4e8df}
+.checkmsg,.input-actions,.notebook-head,.notebook-nav,.notebook-step summary,.step-table th{background:var(--surface-soft)}
+.tablewrap th{background:var(--surface-soft)}
+.step-table td{border-color:#cfd5ca}
+.tracegrid>div{background:#e3e7de}
+.notebook-pages{background:var(--surface)}
+.intro{padding:18px;border:1px solid #c4cdc2;border-radius:12px;background:rgba(229,233,222,.96)}
+.intro h1{font-size:27px}
+.intro-actions{align-items:center}
+.btn.primary,.language-switch button[aria-pressed="true"]{background:var(--navy);color:#fff}
+.btn.primary:hover{background:#2f4a63}
+@media(max-width:750px){body{background-attachment:scroll}.intro{padding:15px}.main{background:rgba(217,222,215,.94)}}
+@media print{body,.main,.card,.notebook-pages,.notebook-step,.step-table{background:#fff!important;background-image:none!important}.intro{background:#fff;border:0;padding:0;box-shadow:none}}
+
+.shared-stat,.shared-comparisons,.shared-notice,.shared-caveat,.design-method-panel,.factor-item,#factor-table{background:var(--surface-soft)}
+.shared-body,.aisc-review-body{grid-template-columns:minmax(0,1fr)}
+.shared-body>*,.aisc-review-body>*,.card{min-width:0}
+.tablewrap{max-width:100%}
 </style></head><body>
 <div class="shell">
 
@@ -186,75 +215,72 @@ body{background:#f5f6f8;color:#202d3b}
   <div class="sidebottom"><strong>PHASE 1 · EXCEL PARITY</strong><p data-l10n="footer">Calculator runs locally. Not approved for design.</p></div>
 </aside>
 <div class="main"><header class="topbar"><div class="breadcrumb">Steel Design &nbsp;›&nbsp; Component &nbsp;›&nbsp; <strong>H/I Doubly Symmetric</strong></div><div class="topbar-right">
- <div class="lang-switch" role="group" aria-label="Language / Ngôn ngữ">
-  <button id="lang-vi" type="button" lang="vi" aria-pressed="true">VN</button>
-  <button id="lang-en" type="button" lang="en" aria-pressed="false">EN</button>
- </div>
+
  <div class="tag"><span class="dot"></span> LEGACY EXCEL PARITY</div>
  </div></header>
-<main class="page"><div class="intro"><div><h1>H/I Doubly Symmetric</h1><p>Kiểm tra sức kháng cấu kiện I/H đối xứng · LRFD / ASD · Reference workbook ↔ Calculation engine</p></div><div class="intro-actions"><button class="btn" id="preset" type="button">↺ &nbsp; Dữ liệu mẫu Excel</button><button class="btn" id="import" type="button">↥ &nbsp; Nhập JSON</button><button class="btn" id="export" type="button">↧ &nbsp; Xuất kết quả</button><input type="file" accept=".json,application/json" id="file" class="hidden"></div></div>
-<div class="warningbar"><div class="alert-icon">!</div><div><strong>Chế độ đối chiếu — chưa được chấp thuận thiết kế</strong>Bảng Excel gốc ghi AISC 360-05. Phiên bản này giữ nguyên một số logic có lỗi để so sánh với Excel (Cb dùng dấu, Fe trục yếu và kiểm tra sườn). <b>Không sử dụng kết quả để thiết kế thi công hoặc khẳng định đạt AISC 360-10.</b></div></div>
-<div class="workspace" id="results-start"><section class="card" id="input-card"><header class="cardhead"><h2>01 &nbsp; Input Parameters</h2><small>Đơn vị: mm / MPa / kN / kN·m</small></header>
+<main class="page"><div class="intro"><div><h1>H/I Doubly Symmetric</h1><p>Doubly symmetric I/H member strength · LRFD / ASD · Workbook ↔ Calculation engine</p></div><div class="intro-actions"><div class="language-switch" role="group" aria-label="Language"><button type="button" data-locale="vi" lang="vi" aria-pressed="false" title="Tiếng Việt">VN</button><button type="button" data-locale="en" lang="en" aria-pressed="true" title="English">ENG</button></div><button class="btn" id="preset" type="button">↺ &nbsp; Excel sample</button><button class="btn" id="import" type="button">↥ &nbsp; Import JSON</button><button class="btn" id="export" type="button">↧ &nbsp; Export results</button><input type="file" accept=".json,application/json" id="file" class="hidden"></div></div>
+<div class="warningbar"><div class="alert-icon">!</div><div><strong>Excel parity only — not approved for design</strong>The source workbook states AISC 360-05. This preview preserves legacy behavior for parity (signed Cb, weak-axis Fe and stiffeners). <b>Do not use this output for construction design or claim AISC 360-10 compliance.</b></div></div>
+<div class="workspace" id="results-start"><section class="card" id="input-card"><header class="cardhead"><h2>01 &nbsp; Input Parameters</h2><small>Units: mm / MPa / kN / kN·m</small></header>
 <fieldset class="design-method-panel" aria-label="Design method">
 <legend>Design Method / Phương pháp thiết kế</legend>
 <label class="design-method-choice"><input type="radio" name="design-method" value="LRFD" checked><span><strong>LRFD</strong><small>φ × Rn · Factored demand</small></span></label>
 <label class="design-method-choice"><input type="radio" name="design-method" value="ASD"><span><strong>ASD</strong><small>Rn / Ω · Service-level demand</small></span></label>
-<p class="method-clarification" id="method-explanation">Chọn tổ hợp tải trọng LRFD. Đổi phương pháp không tự chuyển nội lực hoặc tổ hợp.</p>
+<p class="method-clarification" id="method-explanation">Select LRFD load combinations. Changing the method does not convert forces or combinations.</p>
 </fieldset>
-<div class="tabstrip" role="tablist"><button class="tab active" data-tab="geometry" role="tab" aria-selected="true">Hình học</button><button class="tab" data-tab="member" role="tab" aria-selected="false">Vật liệu & chiều dài</button><button class="tab" data-tab="forces" role="tab" aria-selected="false">Nội lực</button></div>
-<div class="tab-panel" id="geometry" role="tabpanel"><div class="sectiontitle"><h3>Tiết diện I/H đối xứng hai trục</h3><span>Sharp-corner · mm</span></div>
+<div class="tabstrip" role="tablist"><button class="tab active" data-tab="geometry" role="tab" aria-selected="true">Geometry</button><button class="tab" data-tab="member" role="tab" aria-selected="false">Material & lengths</button><button class="tab" data-tab="forces" role="tab" aria-selected="false">Forces</button></div>
+<div class="tab-panel" id="geometry" role="tabpanel"><div class="sectiontitle"><h3>Doubly symmetric I/H section</h3><span>Sharp-corner · mm</span></div>
 <div class="shapegrid"><div class="formgrid" data-section="section">
-<label class="field"><span>Chiều cao toàn bộ <em>h</em></span><input type="number" step="any" data-key="h_mm"></label>
-<label class="field"><span>Bề rộng cánh <em>bf</em></span><input type="number" step="any" data-key="bf_mm"></label>
-<label class="field"><span>Bề dày bụng <em>tw</em></span><input type="number" step="any" data-key="tw_mm"></label>
-<label class="field"><span>Bề dày cánh <em>tf</em></span><input type="number" step="any" data-key="tf_mm"></label>
-<label class="field"><span>Chế tạo</span><select data-key="fabrication"><option value="BUILT_UP">Built-up / Hàn tổ hợp</option><option value="ROLLED">Rolled / Cán nóng</option></select></label>
-</div><div class="diagram"><svg viewBox="0 0 240 240" role="img" aria-label="Sơ đồ tiết diện I/H"><g id="section-outline"></g><g stroke="#7894a6" stroke-width="1" fill="none"><path d="M25 26h-9v188h9M35 224v8h170v-8"/></g><g fill="#557589" font-size="12" font-weight="700"><text x="11" y="119" transform="rotate(-90 11 119)" text-anchor="middle" id="diag-h">h</text><text x="120" y="239" text-anchor="middle" id="diag-b">bf</text></g></svg></div></div>
-<p class="checkmsg">Hai cánh bằng nhau (bf, tf), bụng nằm chính giữa. Chưa xét bán kính fillet.</p></div>
-<div class="tab-panel hidden" id="member" role="tabpanel"><div class="sectiontitle"><h3>Thông số vật liệu & cấu kiện</h3><span>Phase 1 · Excel input</span></div>
-<div class="formgrid" data-section="material"><label class="field"><span>Giới hạn chảy <em>Fy · MPa</em></span><input type="number" step="any" data-key="fy_mpa"></label><label class="field"><span>Đàn hồi <em>E · MPa</em></span><input type="number" step="any" data-key="e_mpa"></label></div>
-<div class="fieldset-caption">Chiều dài ổn định / không giằng</div><div class="formgrid" data-section="member"><label class="field"><span>Chiều dài trục mạnh <em>Lx · mm</em></span><input type="number" step="any" data-key="lx_mm"></label><label class="field"><span>Chiều dài không giằng <em>Lb · mm</em></span><input type="number" step="any" data-key="lb_mm"></label></div>
+<label class="field"><span>Overall depth <em>h</em></span><input type="number" step="any" data-key="h_mm"></label>
+<label class="field"><span>Flange width <em>bf</em></span><input type="number" step="any" data-key="bf_mm"></label>
+<label class="field"><span>Web thickness <em>tw</em></span><input type="number" step="any" data-key="tw_mm"></label>
+<label class="field"><span>Flange thickness <em>tf</em></span><input type="number" step="any" data-key="tf_mm"></label>
+<label class="field"><span>Fabrication</span><select data-key="fabrication"><option value="BUILT_UP">Built-up / welded</option><option value="ROLLED">Hot-rolled</option></select></label>
+</div><div class="diagram"><svg viewBox="0 0 240 240" role="img" aria-label="I/H section diagram"><g id="section-outline"></g><g stroke="#7894a6" stroke-width="1" fill="none"><path d="M25 26h-9v188h9M35 224v8h170v-8"/></g><g fill="#557589" font-size="12" font-weight="700"><text x="11" y="119" transform="rotate(-90 11 119)" text-anchor="middle" id="diag-h">h</text><text x="120" y="239" text-anchor="middle" id="diag-b">bf</text></g></svg></div></div>
+<p class="checkmsg">Equal flanges (bf, tf) with centered web. Fillet radii are excluded.</p></div>
+<div class="tab-panel hidden" id="member" role="tabpanel"><div class="sectiontitle"><h3>Material and member parameters</h3><span>Phase 1 · Excel input</span></div>
+<div class="formgrid" data-section="material"><label class="field"><span>Yield strength <em>Fy · MPa</em></span><input type="number" step="any" data-key="fy_mpa"></label><label class="field"><span>Elastic modulus <em>E · MPa</em></span><input type="number" step="any" data-key="e_mpa"></label></div>
+<div class="fieldset-caption">Member and unbraced lengths</div><div class="formgrid" data-section="member"><label class="field"><span>Major-axis length <em>Lx · mm</em></span><input type="number" step="any" data-key="lx_mm"></label><label class="field"><span>Unbraced length <em>Lb · mm</em></span><input type="number" step="any" data-key="lb_mm"></label></div>
 <div class="fieldset-caption">AISC 360-10 · E2/E3/E4 · Dữ liệu ổn định độc lập</div>
-<p class="checkmsg">Bắt buộc xác định riêng Kx, Ky, Ly, Kz, Lz và G. Lb chỉ dùng cho uốn xoắn ngang, KHÔNG thay thế Ly của nén. Để trống sẽ hiện INPUT_REQUIRED.</p>
+<p class="checkmsg">Bắt buộc xác định riêng Kx, Ky, Ly, Kz, Lz and G. Lb chỉ dùng cho uốn xoắn ngang, NO thay thế Ly của compression. Để trống sẽ hiện INPUT_REQUIRED.</p>
 <div class="formgrid aisc-bracing-form">
  <label class="field"><span>Kx · E2</span><input id="aisc-kx" type="number" min="0" step="any" placeholder="Nhập Kx"></label>
  <label class="field"><span>Ky · E2</span><input id="aisc-ky" type="number" min="0" step="any" placeholder="Nhập Ky"></label>
- <label class="field"><span>Ly (mm)</span><input id="aisc-ly" type="number" min="0" step="any" placeholder="Chiều dài nén trục yếu"></label>
+ <label class="field"><span>Ly (mm)</span><input id="aisc-ly" type="number" min="0" step="any" placeholder="Length compression minor axis"></label>
  <label class="field"><span>Kz · E4</span><input id="aisc-kz" type="number" min="0" step="any" placeholder="Nhập Kz"></label>
  <label class="field"><span>Lz (mm)</span><input id="aisc-lz" type="number" min="0" step="any" placeholder="Torsional unbraced length"></label>
  <label class="field"><span>G (MPa)</span><input id="aisc-g" type="number" min="0" step="any" placeholder="Shear modulus, xác nhận vật liệu"></label>
 </div>
-<div class="fieldset-caption">Sườn tăng cứng</div><div class="formgrid" data-section="stiffeners"><label class="field"><span>Khoảng cách <em>a · mm</em></span><input type="number" step="any" data-key="spacing_mm"></label><label class="field"><span>Bề dày <em>ts · mm</em></span><input type="number" step="any" data-key="thickness_mm"></label><label class="field"><span>Bề rộng <em>bs · mm</em></span><input type="number" step="any" data-key="width_mm"></label><label class="field"><span>Cấu tạo</span><select data-key="layout"><option value="PAIRED">Hai bên bụng (paired)</option><option value="SINGLE_ANGLE">Một thép góc</option><option value="SINGLE_PLATE">Một bản thép</option></select></label></div>
-<p class="checkmsg">Phase 1 giữ cách tính và giới hạn trong workbook để kiểm tra khả năng tái tạo kết quả.</p></div>
-<div class="tab-panel hidden" id="forces" role="tabpanel"><div class="sectiontitle"><h3>Nội lực tại tiết diện đang kiểm tra</h3><span>Tương ứng Excel COMB42</span></div>
+<div class="fieldset-caption">Transverse stiffeners</div><div class="formgrid" data-section="stiffeners"><label class="field"><span>Spacing <em>a · mm</em></span><input type="number" step="any" data-key="spacing_mm"></label><label class="field"><span>Thickness <em>ts · mm</em></span><input type="number" step="any" data-key="thickness_mm"></label><label class="field"><span>Width <em>bs · mm</em></span><input type="number" step="any" data-key="width_mm"></label><label class="field"><span>Arrangement</span><select data-key="layout"><option value="PAIRED">Paired web stiffeners</option><option value="SINGLE_ANGLE">Single angle</option><option value="SINGLE_PLATE">Single plate</option></select></label></div>
+<p class="checkmsg">Phase 1 preserves workbook equations and limits to verify reproducibility.</p></div>
+<div class="tab-panel hidden" id="forces" role="tabpanel"><div class="sectiontitle"><h3>Design actions at the current section</h3><span>Excel COMB42 reference</span></div>
 <div class="formgrid" data-section="forces">
-<label class="field"><span>Lực dọc <em>N · kN</em></span><input type="number" step="any" data-key="axial_kN"><small>Dương: kéo; âm: nén</small></label>
-<label class="field"><span>Moment trục mạnh <em>Mx · kN·m</em></span><input type="number" step="any" data-key="moment_x_kNm"><small>Giữ nguyên dấu để đối chiếu Cb</small></label>
-<label class="field"><span>Moment trục yếu <em>My · kN·m</em></span><input type="number" step="any" data-key="moment_y_kNm"></label>
-<label class="field"><span>Lực cắt <em>Vx · kN</em></span><input type="number" step="any" data-key="shear_x_kN"></label>
-<label class="field"><span>Lực cắt <em>Vy · kN</em></span><input type="number" step="any" data-key="shear_y_kN"></label>
-<label class="field"><span>Moment tại 1/4 <em>M25 · kN·m</em></span><input type="number" step="any" data-key="moment_25_kNm"></label>
-<label class="field"><span>Moment tại 1/2 <em>M50 · kN·m</em></span><input type="number" step="any" data-key="moment_50_kNm"></label>
-<label class="field"><span>Moment tại 3/4 <em>M75 · kN·m</em></span><input type="number" step="any" data-key="moment_75_kNm"></label>
-</div><p class="checkmsg">Khi đổi Mx, cũng cần cập nhật M25/M50/M75 theo biểu đồ moment thực tế trên đoạn không giằng.</p></div>
-<div class="input-actions"><small id="dirtytext">Dữ liệu mẫu đã được nạp.</small><button class="btn primary" id="run" type="button">▹ &nbsp; Tính toán</button></div><div class="errorbox" role="alert" id="error"></div></section>
-<section class="card" id="calculation-results" aria-live="polite"><header class="cardhead"><h2>02 &nbsp; Calculation Results</h2><small id="calc-info">Browser · chưa lưu DB</small></header>
-<div class="result-top"><div class="ring" id="ring"><div class="ring-center"><strong id="h1">—</strong><span>H1 · D/C</span></div></div><div><div class="result-title">Tương tác lực dọc – moment</div><span class="status-line" id="status">REVIEW REQUIRED</span><p class="result-desc" id="overview">Đang nạp mẫu Excel và tính toán...</p></div></div>
-<div id="refline" class="refline"></div><div class="metrics" id="metrics"></div><div class="breakdown"><div id="factor-table" aria-live="polite"></div><div class="subheading">Demand / Capacity <span style="font-size:10px;color:#95a4b0">Giá trị từ engine đối chiếu</span></div><div id="bars"></div><small>Các nhánh riêng có thể hiển thị PASS/FAIL theo công thức gốc; trạng thái tổng thể luôn là REVIEW REQUIRED.</small></div>
-<div class="resultsection"><h3>Limit State Checks</h3><div class="tablewrap"><table><thead><tr><th>Điều khoản</th><th>Kiểm tra</th><th>Demand</th><th>Capacity</th><th>D/C</th><th>Check</th></tr></thead><tbody id="checkrows"></tbody></table></div></div>
-<div class="details"><details><summary>⊞ &nbsp; Chi tiết phân loại & công thức trung gian</summary><div class="tracegrid" id="trace"></div></details></div>
+<label class="field"><span>Axial force <em>N · kN</em></span><input type="number" step="any" data-key="axial_kN"><small>Positive = tension; negative = compression</small></label>
+<label class="field"><span>Major-axis moment <em>Mx · kN·m</em></span><input type="number" step="any" data-key="moment_x_kNm"><small>Preserve moment signs for legacy Cb parity</small></label>
+<label class="field"><span>Minor-axis moment <em>My · kN·m</em></span><input type="number" step="any" data-key="moment_y_kNm"></label>
+<label class="field"><span>Shear force <em>Vx · kN</em></span><input type="number" step="any" data-key="shear_x_kN"></label>
+<label class="field"><span>Shear force <em>Vy · kN</em></span><input type="number" step="any" data-key="shear_y_kN"></label>
+<label class="field"><span>Moment at 1/4 <em>M25 · kN·m</em></span><input type="number" step="any" data-key="moment_25_kNm"></label>
+<label class="field"><span>Moment at 1/2 <em>M50 · kN·m</em></span><input type="number" step="any" data-key="moment_50_kNm"></label>
+<label class="field"><span>Moment at 3/4 <em>M75 · kN·m</em></span><input type="number" step="any" data-key="moment_75_kNm"></label>
+</div><p class="checkmsg">When changing Mx, update M25/M50/M75 using the actual moment diagram of the unbraced segment.</p></div>
+<div class="input-actions"><small id="dirtytext">Sample inputs loaded.</small><button class="btn primary" id="run" type="button">▹ &nbsp; Calculation</button></div><div class="errorbox" role="alert" id="error"></div></section>
+<section class="card" id="calculation-results" aria-live="polite"><header class="cardhead"><h2>02 &nbsp; Calculation Results</h2><small id="calc-info">Browser · not saved to DB</small></header>
+<div class="result-top"><div class="ring" id="ring"><div class="ring-center"><strong id="h1">—</strong><span>H1 · D/C</span></div></div><div><div class="result-title">Axial force–moment interaction</div><span class="status-line" id="status">REVIEW REQUIRED</span><p class="result-desc" id="overview">Loading Excel sample…</p></div></div>
+<div id="refline" class="refline"></div><div class="metrics" id="metrics"></div><div class="breakdown"><div id="factor-table" aria-live="polite"></div><div class="subheading">Demand / Capacity <span style="font-size:10px;color:#95a4b0">Legacy parity calculation</span></div><div id="bars"></div><small>Individual checks may show PASS/FAIL; the overall status always remains REVIEW REQUIRED.</small></div>
+<div class="resultsection"><h3>Limit State Checks</h3><div class="tablewrap"><table><thead><tr><th>Clause</th><th>Check</th><th>Demand</th><th>Capacity</th><th>D/C</th><th>Check</th></tr></thead><tbody id="checkrows"></tbody></table></div></div>
+<div class="details"><details><summary>⊞ &nbsp; Classification and intermediate results</summary><div class="tracegrid" id="trace"></div></details></div>
 <div class="resultsection"><h3>Engineering warnings <span style="font-weight:400;color:#9aa5af" id="warn-count"></span></h3><div class="warning-list" id="warnings"></div></div>
-<div class="minor-note">Mọi kết quả được tính cục bộ trên máy, không tải dữ liệu lên server.</div></section></div>
+<div class="minor-note">All calculations are performed locally; no input is sent to a server.</div></section></div>
 
 <section class="card aisc-review-card" id="aisc-review" aria-labelledby="aisc-review-header">
 <header class="cardhead"><h2 id="aisc-review-header">02A &nbsp; AISC 360-10 · Formula Verification (Phase A/B)</h2>
 <small>Clause-linked calculations · Independent of Legacy Excel</small></header>
 <div class="aisc-review-body">
-<div class="aisc-review-disclaimer">Kết quả Phase A/B chỉ áp dụng cho các công thức đã đối chiếu trong phạm vi công bố. Không coi trạng thái CALCULATED là PASS toàn bộ cấu kiện. E7 và F5 đã có công thức riêng; F4 (bụng NONCOMPACT), kéo đứt và Chương G chưa đầy đủ sẽ có trạng thái REVIEW_REQUIRED / INPUT_REQUIRED.</div>
+<div class="aisc-review-disclaimer">Phase A/B results apply only to the reviewed formulas within the declared scope. CALCULATED is not an overall member PASS. E7 and F5 have specific formulas; F4 (NONCOMPACT web), tensile fracture and incomplete Chapter G checks return REVIEW_REQUIRED / INPUT_REQUIRED.</div>
 <div id="aisc-review-status" role="status" aria-live="polite">Đang chờ tính toán từ Section Properties…</div>
 <div id="aisc-review-class"></div>
 <div id="aisc-review-table"></div>
-<details class="aisc-formulas" open><summary>Formula Registry — Trích dẫn điều khoản và công thức AISC 360-10</summary>
+<details class="aisc-formulas" open><summary>Formula Registry — AISC 360-10 clause and equation references</summary>
 <div id="aisc-review-formulas"></div></details>
 </div>
 </section>
@@ -272,14 +298,14 @@ body{background:#f5f6f8;color:#202d3b}
 </div>
 </section>
 
-<section class="card calc-notebook" id="calculation-notebook" aria-label="Thuyết minh tính toán từng bước">
-  <header class="notebook-head"><div><h2>03 &nbsp; Calculation Details · Step by Step</h2><p>Thuyết minh theo trình tự kiểm tra · Công thức ký tự có chỉ số dưới/trên · Thay số theo dữ liệu hiện tại · Trích dẫn điều khoản <strong>AISC 360-10</strong></p></div>
-    <div class="notebook-actions"><button class="btn mini" type="button" id="steps-expand">Mở tất cả</button><button class="btn mini" type="button" id="steps-collapse">Thu gọn</button><button class="btn mini" type="button" id="steps-copy">Sao chép công thức</button><button class="btn mini" type="button" id="steps-print">In / Lưu PDF</button></div>
+<section class="card calc-notebook" id="calculation-notebook" aria-label="Step-by-step calculation report">
+  <header class="notebook-head"><div><h2>03 &nbsp; Calculation Details · Step by Step</h2><p>Stepwise engineering calculations · symbolic formulae · current substitutions · design code references <strong>AISC 360-10</strong></p></div>
+    <div class="notebook-actions"><button class="btn mini" type="button" id="steps-expand">Expand all</button><button class="btn mini" type="button" id="steps-collapse">Collapse all</button><button class="btn mini" type="button" id="steps-copy">Copy formulas</button><button class="btn mini" type="button" id="steps-print">Print / Save PDF</button></div>
   </header>
-  <div class="notebook-grid"><nav class="notebook-nav" id="step-nav" aria-label="Danh mục các bước tính"><h3>Calculation index</h3></nav>
-  <div class="notebook-pages"><p class="notebook-note"><strong>Lưu ý chuyên môn:</strong> Công thức đang trình bày theo engine Phase 1; phần <strong>trích dẫn hiển thị theo AISC 360-10</strong> để tiện kiểm tra điều khoản. Đây vẫn là chế độ đối chiếu, chưa phải bản thuyết minh phát hành. Các phép tính dùng hệ đơn vị mm – MPa – kN – kN·m; một số biểu thức legacy được giữ nguyên và có cảnh báo riêng.</p>
-    <div class="notebook-legend"><span><strong>Formula:</strong> dạng ký tự dễ đọc</span><span><strong>Substitution:</strong> số đầu vào</span><span><strong>Result:</strong> kết quả đang tính</span><span><strong>Standard:</strong> trích dẫn điều khoản đang áp dụng</span></div>
-    <div id="step-content" class="notebook-pending">Nhấn Tính toán để tạo thuyết minh.</div>
+  <div class="notebook-grid"><nav class="notebook-nav" id="step-nav" aria-label="Calculation steps index"><h3>Calculation index</h3></nav>
+  <div class="notebook-pages"><p class="notebook-note"><strong>Engineering note:</strong> This report follows the Phase 1 engine; <strong>AISC 360-10 citations are provided as review pointers</strong> and are not validated clause-level attestations. The report is not approved for design. The units are mm, MPa, kN and kN·m.</p>
+    <div class="notebook-legend"><span><strong>Formula:</strong> readable symbols</span><span><strong>Substitution:</strong> input substitution</span><span><strong>Result:</strong> computed value</span><span><strong>Standard:</strong> clause reference for review</span></div>
+    <div id="step-content" class="notebook-pending">Click Calculate to generate the report.</div>
   </div></div>
 </section>
 
@@ -291,6 +317,496 @@ body{background:#f5f6f8;color:#202d3b}
  * Reference workbook identifies AISC 360-05; it is not an AISC 360-10 checker.
  * Units internally cm, kN, kN/cm², kN.cm. Do not use for construction design.
  */
+// English is the canonical source. Translate presentation only, never calculation data.
+const HI_TRANSLATIONS = {
+  "Workspace": "Không gian làm việc",
+  "Dashboard": "Tổng quan",
+  "Steel Design": "Thiết kế thép",
+  "Component": "Cấu kiện",
+  "H/I Doubly Symmetric": "I/H đối xứng hai trục",
+  "Section Properties": "Đặc trưng tiết diện",
+  "Engineering Tools": "Công cụ kỹ thuật",
+  "Material Library": "Thư viện vật liệu",
+  "Design Standards": "Tiêu chuẩn thiết kế",
+  "PHASE 1 PREVIEW": "XEM TRƯỚC GIAI ĐOẠN 1",
+  "LEGACY EXCEL PARITY": "ĐỐI CHIẾU EXCEL GỐC",
+  "Offline browser preview.": "Giao diện thử nghiệm chạy offline trên trình duyệt.",
+  "No data is written to the database.": "Không ghi dữ liệu lên database.",
+  "Doubly symmetric I/H member resistance checks · LRFD · Reference workbook ↔ Calculation engine": "Kiểm tra sức kháng cấu kiện I/H đối xứng · LRFD · Reference workbook ↔ Calculation engine",
+  "Excel sample data": "Dữ liệu mẫu Excel",
+  "Import JSON": "Nhập JSON",
+  "Export results": "Xuất kết quả",
+  "Parity mode — not approved for design": "Chế độ đối chiếu — chưa được chấp thuận thiết kế",
+  "The source workbook identifies AISC 360-05. This version preserves known issues for Excel comparison (signed Cb, weak-axis Fe and stiffener checks).": "Bảng Excel gốc ghi AISC 360-05. Phiên bản này giữ nguyên một số logic có lỗi để so sánh với Excel (Cb dùng dấu, Fe trục yếu và kiểm tra sườn).",
+  "Do not use these results for construction design or to claim AISC 360-10 compliance.": "Không sử dụng kết quả để thiết kế thi công hoặc khẳng định đạt AISC 360-10.",
+  "Input Parameters": "Thông số đầu vào",
+  "Units:": "Đơn vị:",
+  "Geometry": "Hình học",
+  "Material & lengths": "Vật liệu & chiều dài",
+  "Internal forces": "Nội lực",
+  "Doubly symmetric I/H section": "Tiết diện I/H đối xứng hai trục",
+  "Overall depth": "Chiều cao toàn bộ",
+  "Flange width": "Bề rộng cánh",
+  "Web thickness": "Bề dày bụng",
+  "Flange thickness": "Bề dày cánh",
+  "Fabrication": "Chế tạo",
+  "Built-up / welded": "Built-up / Hàn tổ hợp",
+  "Hot-rolled": "Rolled / Cán nóng",
+  "I/H section diagram": "Sơ đồ tiết diện I/H",
+  "Equal flanges (bf, tf), centered web. Fillet radii are not included.": "Hai cánh bằng nhau (bf, tf), bụng nằm chính giữa. Chưa xét bán kính fillet.",
+  "Material & member parameters": "Thông số vật liệu & cấu kiện",
+  "Phase 1 · Excel input": "Giai đoạn 1 · Dữ liệu Excel",
+  "Yield stress": "Giới hạn chảy",
+  "Elastic modulus": "Đàn hồi",
+  "Buckling / unbraced lengths": "Chiều dài ổn định / không giằng",
+  "Major-axis length": "Chiều dài trục mạnh",
+  "Unbraced length": "Chiều dài không giằng",
+  "Stiffeners": "Sườn tăng cứng",
+  "Spacing": "Khoảng cách",
+  "Thickness": "Bề dày",
+  "Width": "Bề rộng",
+  "Layout": "Cấu tạo",
+  "Paired web stiffeners": "Hai bên bụng (paired)",
+  "Single angle": "Một thép góc",
+  "Single plate": "Một bản thép",
+  "Phase 1 preserves workbook calculations and limitations to verify result reproducibility.": "Phase 1 giữ cách tính và giới hạn trong workbook để kiểm tra khả năng tái tạo kết quả.",
+  "Internal forces at the checked section": "Nội lực tại tiết diện đang kiểm tra",
+  "Corresponds to Excel COMB42": "Tương ứng Excel COMB42",
+  "Axial force": "Lực dọc",
+  "Positive: tension; negative: compression": "Dương: kéo; âm: nén",
+  "Major-axis moment": "Moment trục mạnh",
+  "Preserve signs for Cb comparison": "Giữ nguyên dấu để đối chiếu Cb",
+  "Minor-axis moment": "Moment trục yếu",
+  "Shear force": "Lực cắt",
+  "Moment at 1/4": "Moment tại 1/4",
+  "Moment at 1/2": "Moment tại 1/2",
+  "Moment at 3/4": "Moment tại 3/4",
+  "When changing Mx, also update M25/M50/M75 from the actual moment diagram along the unbraced segment.": "Khi đổi Mx, cũng cần cập nhật M25/M50/M75 theo biểu đồ moment thực tế trên đoạn không giằng.",
+  "Sample data loaded.": "Dữ liệu mẫu đã được nạp.",
+  "Calculate": "Tính toán",
+  "Calculation Results": "Kết quả tính toán",
+  "Browser · not saved to DB": "Browser · chưa lưu DB",
+  "Axial force–moment interaction": "Tương tác lực dọc – moment",
+  "Loading the Excel sample and calculating...": "Đang nạp mẫu Excel và tính toán...",
+  "Demand / Capacity": "Nhu cầu / Sức kháng",
+  "Values from the parity engine": "Giá trị từ engine đối chiếu",
+  "Individual checks may show PASS/FAIL using the source formulas; the overall status always remains REVIEW REQUIRED.": "Các nhánh riêng có thể hiển thị PASS/FAIL theo công thức gốc; trạng thái tổng thể luôn là REVIEW REQUIRED.",
+  "Limit State Checks": "Kiểm tra trạng thái giới hạn",
+  "Clause": "Điều khoản",
+  "Check": "Kiểm tra",
+  "Demand": "Nhu cầu",
+  "Capacity": "Sức kháng",
+  "Classification & intermediate formulas": "Chi tiết phân loại & công thức trung gian",
+  "Engineering warnings": "Cảnh báo kỹ thuật",
+  "All results are calculated locally; no input data is uploaded to a server.": "Mọi kết quả được tính cục bộ trên máy, không tải dữ liệu lên server.",
+  "Step-by-step calculation report": "Thuyết minh tính toán từng bước",
+  "Calculation Details · Step by Step": "Chi tiết tính toán · Từng bước",
+  "Sequential checks · Formulas with subscripts/superscripts · Substitution using current inputs · Clause references": "Thuyết minh theo trình tự kiểm tra · Công thức ký tự có chỉ số dưới/trên · Thay số theo dữ liệu hiện tại · Trích dẫn điều khoản",
+  "Expand all": "Mở tất cả",
+  "Collapse all": "Thu gọn",
+  "Copy formulas": "Sao chép công thức",
+  "Print / Save PDF": "In / Lưu PDF",
+  "Calculation steps index": "Danh mục các bước tính",
+  "Calculation index": "Mục lục tính toán",
+  "Engineering note:": "Lưu ý chuyên môn:",
+  "Formulas follow the Phase 1 engine;": "Công thức đang trình bày theo engine Phase 1; phần",
+  "references are displayed for AISC 360-10": "trích dẫn hiển thị theo AISC 360-10",
+  "to help locate clauses. This remains a parity preview, not an issued calculation report. Calculations use mm – MPa – kN – kN·m; some legacy expressions are preserved and carry specific warnings.": "để tiện kiểm tra điều khoản. Đây vẫn là chế độ đối chiếu, chưa phải bản thuyết minh phát hành. Các phép tính dùng hệ đơn vị mm – MPa – kN – kN·m; một số biểu thức legacy được giữ nguyên và có cảnh báo riêng.",
+  "Formula:": "Công thức:",
+  "Substitution:": "Thay số:",
+  "Result:": "Kết quả:",
+  "Standard:": "Tiêu chuẩn:",
+  "readable symbolic expression": "dạng ký tự dễ đọc",
+  "input values": "số đầu vào",
+  "calculated result": "kết quả đang tính",
+  "applicable clause reference": "trích dẫn điều khoản đang áp dụng",
+  "Click Calculate to generate the report.": "Nhấn Tính toán để tạo thuyết minh.",
+  "Phase 1 Browser Preview": "Bản xem trước giai đoạn 1 trên trình duyệt",
+  "must be a finite positive number.": "phải là số dương hữu hạn.",
+  "must be a finite nonnegative number.": "phải là số không âm hữu hạn.",
+  "Cannot calculate limit state": "Không thể tính trạng thái",
+  "nonfinite value or capacity <= 0.": "giá trị không hữu hạn hoặc khả năng chịu lực <= 0.",
+  "Invalid I/H geometry, stiffener width or E/Fy ratio.": "Hình học I/H, bề rộng sườn tăng cứng hoặc tỷ số E/Fy is invalid.",
+  "The source workbook identifies AISC 360-05, not AISC 360-10.": "Workbook gốc ghi AISC 360-05, không phải AISC 360-10.",
+  "Cb uses signed moments at the specified locations; the extreme moment along Lb has not been verified.": "Cb dùng moment có dấu tại các vị trí được nhập, chưa kiểm chứng moment cực trị trên đoạn Lb.",
+  "Excel W194 uses the major-axis Fe for the weak axis; this error is preserved for Excel parity.": "Excel W194 dùng Fe trục mạnh cho trục yếu; lỗi này được giữ nguyên để đối chiếu Excel.",
+  "Net-section tensile fracture has not been checked.": "Chưa có kiểm tra đứt kéo tại tiết diện thực / net section.",
+  "Parity mode does not certify member compliance.": "Chế độ parity không xác nhận cấu kiện đạt tiêu chuẩn.",
+  "Stiffener checks fail for the source workbook. Tension-field enhancement is not approved.": "Kiểm tra sườn tăng cứng chưa đạt theo workbook. Không chấp thuận tension field enhancement.",
+  "Major-axis flexure (Mx)": "Uốn trục mạnh (Mx)",
+  "Minor-axis flexure (My)": "Uốn trục yếu (My)",
+  "Axial compression": "Nén dọc trục",
+  "Tensile yielding (fracture not checked)": "Kéo chảy dẻo (chưa đứt kéo)",
+  "N–M interaction (H1)": "Tương tác N–M (H1)",
+  "Web shear (Vy in Excel)": "Cắt bụng (Vy trong Excel)",
+  "Flange shear (Vx in Excel)": "Cắt cánh (Vx trong Excel)",
+  "Please enter a numeric value for:": "Vui lòng nhập giá trị số cho:",
+  "Flexure branch": "Nhánh uốn",
+  "Flange": "Cánh",
+  "Web": "Bụng",
+  "This is not a code compliance conclusion.": "Đây không phải kết luận đạt tiêu chuẩn.",
+  "φPn (compression)": "φPn (nén)",
+  "Mx flexure": "Uốn Mx",
+  "Compression/tension N": "Nén/kéo N",
+  "Web shear": "Cắt bụng",
+  "Flange shear": "Cắt cánh",
+  "Flange classification": "Phân loại cánh",
+  "Web classification": "Phân loại bụng",
+  "Flexure chapter": "Điều khoản uốn",
+  "Cb (signed, Excel)": "Cb (có dấu, Excel)",
+  "Stiffener width OK": "Bề rộng sườn đạt",
+  "Stiffener area OK (legacy)": "Diện tích sườn đạt (gốc)",
+  "Sample data comparison": "Đối chiếu dữ liệu mẫu",
+  "5/5 main metrics match the Phase 1 PHP engine within 1e−6 tolerance.": "5/5 chỉ tiêu chính trùng engine PHP Phase 1 trong dung sai 1e−6.",
+  "Inputs have changed — further Excel comparison is required for this case.": "Dữ liệu đã thay đổi — cần đối chiếu thêm với Excel nếu dùng trường hợp này.",
+  "Calculated. Current parameters are displayed.": "Đã tính toán. Các thông số hiện tại đang được hiển thị.",
+  "Invalid resistance; please check the inputs.": "Khả năng chịu lực không hợp lệ, vui lòng kiểm tra đầu vào.",
+  "Nonfinite interaction value.": "Giá trị tương tác không hữu hạn.",
+  "Calculation failed — please correct the inputs.": "Không tính được — vui lòng chỉnh dữ liệu.",
+  "Inputs changed · Click Calculate to update.": "Đã thay đổi dữ liệu · Nhấn Tính toán để cập nhật.",
+  "Input data & unit conversion": "Dữ liệu & quy đổi đơn vị",
+  "Selected geometry, material and internal forces": "Thông số hình học, vật liệu và nội lực đã chọn",
+  "Clear web depth": "Chiều cao bụng thông thủy",
+  "Material F": "Vật liệu F",
+  "Elastic modulus E": "Mô đun đàn hồi E",
+  "Design moment": "Moment thiết kế",
+  "Design axial force": "Lực dọc thiết kế",
+  "Compression": "Nén",
+  "Tension": "Kéo",
+  "The workbook sign convention is retained: negative N = compression. Shear axes Vx/Vy follow the legacy convention and must be aligned with the analysis model.": "Dấu N được giữ theo workbook: N âm = nén. Hệ tọa độ lực cắt Vx/Vy là quy ước legacy; cần đồng bộ với mô hình phân tích.",
+  "Section geometric properties": "Đặc trưng hình học tiết diện",
+  "A, I, S, Z and J for a doubly symmetric I/H section": "Phần A, I, S, Z và J của I/H đối xứng",
+  "Area A": "Diện tích A",
+  "Second moment of area I": "Mô men quán tính I",
+  "Elastic section modulus S": "Mô đun đàn hồi S",
+  "Plastic section modulus Z": "Mô đun dẻo Z",
+  "Torsion constant J — legacy": "Hằng số xoắn J — legacy",
+  "Radius of gyration r": "Bán kính quán tính r",
+  "J follows Excel cell D57 exactly for parity. The model uses sharp corners without fillets.": "J được trình bày đúng như D57 của Excel để đối chiếu. Mô hình tiết diện góc vuông (sharp-corner), không có fillet.",
+  "Flange and web slenderness classification": "Phân loại độ mảnh cánh và bụng",
+  "Parameter k": "Tham số k",
+  "Flange: classification": "Cánh: classification",
+  "Web: classification": "Bụng: classification",
+  "Flange:": "Cánh:",
+  "Web:": "Bụng:",
+  "otherwise": "khác",
+  "compared with": "so với",
+  "Based on": "Theo",
+  "Applied flexure branch": "Nhánh uốn được áp dụng",
+  "Classification describes the active parity-engine branch; it does not confirm full applicability of AISC 360-10.": "Phân loại mô tả nhánh đang chạy trong engine parity, không tự xác nhận tính áp dụng đầy đủ của phiên bản AISC 360-10.",
+  "Minor-axis flexural resistance M": "Sức kháng uốn trục yếu M",
+  "Minor-axis bending · clause F6 (legacy)": "Minor-axis bending · điều khoản F6 (legacy)",
+  "The legacy workbook uses Zᵧ in the interpolation branch; review against F6.": "Legacy workbook sử dụng Zᵧ tại nhánh nội suy; cần soát lại theo F6.",
+  "Design resistance φM": "Sức kháng thiết kế φM",
+  "Utilization M": "Tỷ lệ sử dụng M",
+  "The Excel version does not independently verify every F6 branch. Use only for parity comparison.": "Phiên bản Excel chưa có kiểm chứng độc lập toàn bộ nhánh F6. Chỉ sử dụng giá trị trong chế độ đối chiếu.",
+  "Major-axis flexural resistance M": "Sức kháng uốn trục mạnh M",
+  "Major-axis bending · F2–F5 by classification": "Major-axis bending · F2–F5 theo phân loại",
+  "Plastic moment M": "Moment dẻo M",
+  "Factor C": "Hệ số C",
+  "Excel uses signed moments and does not determine Mmax along Lb automatically.": "Excel dùng moment có dấu, không tự xác định Mmax trên Lb.",
+  "Length L": "Chiều dài L",
+  "Branch": "Nhánh",
+  "Factor R": "Hệ số R",
+  "Stress F": "Ứng suất F",
+  "Flexural utilization M": "Sử dụng uốn M",
+  "The selected branch is": "Nhánh đang chọn là",
+  "Displayed formulas follow the legacy calculation path; verify Cb, LTB and FLB against the applicable AISC edition before issue.": "Công thức hiển thị thuộc đường tính toán legacy; kiểm chứng Cb, LTB, FLB theo phiên bản AISC áp dụng trước khi phát hành.",
+  "Axial tensile resistance": "Sức kháng kéo dọc trục",
+  "Gross-section yielding · Chapter D (tensile failure checks incomplete)": "Gross-section yielding · chương D (chưa đủ phá hoại kéo)",
+  "Nominal resistance P": "Sức kháng danh định P",
+  "Design resistance φP": "Sức kháng thiết kế φP",
+  "Tensile yielding D/C": "D/C kéo chảy dẻo",
+  "Net-section fracture, bolt holes and other limits are not checked. Overall tensile capacity is not assessed.": "Chưa kiểm tra đứt tiết diện hữu hiệu (net-section fracture), lỗ bu lông và các giới hạn khác. Không đánh giá tổng thể khả năng kéo.",
+  "Axial compressive resistance": "Sức kháng nén dọc trục",
+  "Factor Q": "Hệ số Q",
+  "Branch transition limit": "Giới hạn chuyển nhánh",
+  "Euler stress F": "Ứng suất Euler F",
+  "(preserves W194=Q194 error)": "(giữ lỗi W194=Q194)",
+  "This is not the correct y-axis Euler formula; it is retained only for parity.": "Không phải công thức Euler đúng cho trục y, chỉ để đối chiếu.",
+  "Critical stress F": "Ứng suất tới hạn F",
+  "Compressive resistance φP": "Sức kháng nén φP",
+  "The Excel Fe error is explicitly identified. This is legacy parity and must not be used for actual design decisions.": "Lỗi Fe của Excel được đánh dấu trực tiếp. Đây là phép tính “legacy parity”, không dùng để quyết định thiết kế thực.",
+  "N–M interaction": "Tương tác N–M",
+  "Chapter H1 · LRFD interaction": "Chương H1 · LRFD interaction",
+  "Axial force ratio": "Tỷ số lực dọc",
+  "Moment ratio M": "Tỷ số M",
+  "Excel rounds the My ratio before combining.": "Excel làm tròn tỷ lệ My trước khi tổng hợp.",
+  "Applicable equation": "Phương trình áp dụng",
+  "H1 D/C below 100% covers only one check. Member compliance cannot be concluded while other checks remain unsatisfied.": "D/C H1 dưới 100% chỉ phản ánh một nhánh. Không được kết luận cấu kiện đạt khi còn các phép kiểm tra khác chưa thỏa.",
+  "Web and flange shear resistance": "Sức kháng cắt bụng và cánh",
+  "Factor a/h": "Hệ số a/h",
+  "Factor k": "Hệ số k",
+  "Web shear resistance φV": "Sức kháng cắt bụng φV",
+  "Web shear D/C": "D/C cắt bụng",
+  "Flange shear resistance φV": "Sức kháng cắt cánh φV",
+  "Flange shear D/C": "D/C cắt cánh",
+  "Vx/Vy labels preserve the workbook shear mapping; standardize them when connecting SAP/ETABS.": "Nhãn Vx/Vy phản ánh đúng cách map lực cắt của workbook, cần quy chuẩn lại khi kết nối SAP/ETABS.",
+  "Stiffener checks & conclusion": "Kiểm tra sườn tăng cứng & kết luận",
+  "Tension-field action and mandatory warnings": "Tension-field action và các cảnh báo bắt buộc",
+  "Stiffener width / thickness": "Bề rộng / bề dày sườn",
+  "Stiffener area check (legacy)": "Kiểm tra diện tích sườn (legacy)",
+  "Preserves the reversed-sign Excel condition for parity.": "Giữ điều kiện ngược dấu của Excel để đối chiếu.",
+  "Consider tension-field action": "Xét tension field action",
+  "Web panel and stiffener geometry conditions": "Điều kiện hình học vùng bụng và sườn",
+  "Shear resistance with TFA (nominal)": "Sức kháng cắt có TFA (danh định)",
+  "V<sub>n,TFA</sub> from the legacy G3 formula": "V<sub>n,TFA</sub> theo công thức legacy G3",
+  "Consider only if stiffener conditions are satisfied": "Chỉ xem xét nếu các điều kiện sườn thỏa",
+  "Module conclusion": "Kết luận module",
+  "Overall status ≠ H1 check": "Trạng thái tổng thể ≠ kiểm tra H1",
+  "Mandatory warnings from Excel verification": "Có cảnh báo bắt buộc từ kiểm chứng Excel",
+  "Stiffeners fail for the sample workbook. If stiffener conditions are not satisfied, enhanced tension-field resistance must not be used.": "Sườn tăng cứng không đạt theo workbook mẫu. Nếu các điều kiện sườn không đạt, không được sử dụng sức kháng tension-field được tăng thêm.",
+  "PARAMETER": "THÔNG SỐ",
+  "FORMULA / SUBSTITUTION": "CÔNG THỨC / THAY SỐ",
+  "RESULT": "KẾT QUẢ",
+  "STANDARD REFERENCE": "TRÍCH DẪN TIÊU CHUẨN",
+  "Not applicable": "Không áp dụng",
+  "Parameter": "Thông số",
+  "Formula": "Công thức",
+  "Result": "Kết quả",
+  "Standard reference": "Trích dẫn tiêu chuẩn",
+  "Review required": "Cần rà soát",
+  "Each parameter follows the check sequence. The “↳” line substitutes the current input data; the final column provides AISC 360-10 clauses for quick reference.": "Trình bày từng tham số theo trình tự kiểm tra. Dòng “↳” là phép thay số từ dữ liệu đầu vào hiện hành; cột cuối là điều khoản AISC 360-10 để tra cứu nhanh.",
+  "Copied": "Đã sao chép",
+  "Exported TXT": "Đã xuất TXT",
+  "JSON file too large (maximum 50 kB).": "File JSON quá lớn (tối đa 50 kB).",
+  "JSON must include group": "JSON phải có nhóm",
+  "Missing field": "Thiếu trường",
+  "JSON import failed:": "Nhập JSON thất bại:",
+  "compression": "nén",
+  "tension": "kéo",
+  "Language": "Ngôn ngữ",
+  "English": "Tiếng Anh",
+  "REVIEW REQUIRED": "CẦN RÀ SOÁT",
+  "PASS": "ĐẠT",
+  "FAIL": "KHÔNG ĐẠT",
+  "COMPACT": "ĐẶC CHẮC",
+  "NONCOMPACT": "KHÔNG ĐẶC CHẮC",
+  "SLENDER": "MẢNH",
+  "YES": "CÓ",
+  "NO": "KHÔNG",
+  "OK (legacy)": "ĐẠT (gốc)",
+  "NOT OK (legacy)": "KHÔNG ĐẠT (gốc)",
+  "YES (geometry only)": "CÓ (chỉ hình học)",
+  "Sharp-corner": "Góc vuông",
+  "Browser": "Trình duyệt",
+  "Nominal plastic": "Mô men dẻo danh định",
+  "Local buckling": "Mất ổn định cục bộ",
+  "Nominal strength — LTB": "Sức kháng danh định — LTB",
+  "Nominal strength — FLB": "Sức kháng danh định — FLB",
+  "Nominal strength — Yield": "Sức kháng danh định — Chảy dẻo",
+  "Width-to-thickness limits": "Giới hạn bề rộng/bề dày",
+  "Compression · Qs, Qa, Fe, Fcr, φPn · E3/E7 legacy": "Nén · Qs, Qa, Fe, Fcr, φPn · E3/E7 gốc",
+  "Web shear · flange shear · G2/G7 legacy": "Cắt bụng · cắt cánh · G2/G7 gốc",
+  "Flange =": "Cánh =",
+  "Web =": "Bụng =",
+  "Flange ": "Cánh ",
+  "Web ": "Bụng ",
+  "signed": "có dấu",
+  "geometric section properties": "đặc trưng hình học tiết diện",
+  "width-thickness classification": "phân loại bề rộng/bề dày",
+  "minor-axis flexure": "uốn trục yếu",
+  "major-axis flexure": "uốn trục mạnh",
+  "tension members": "cấu kiện chịu kéo",
+  "compression members": "cấu kiện chịu nén",
+  "combined forces": "nội lực kết hợp",
+  "shear strength": "sức kháng cắt",
+  "stiffeners & tension-field context": "sườn và điều kiện trường kéo",
+  "Project input · adopted unit convention": "Dữ liệu dự án · quy ước đơn vị",
+  "Project input / adopted unit convention": "Dữ liệu dự án / quy ước đơn vị",
+  "torsional property input / section property definition": "đặc trưng xoắn đầu vào / định nghĩa đặc trưng tiết diện",
+  "Chapter B": "Chương B",
+  "Chapter H": "Chương H",
+  "Table": "Bảng",
+  "Eq.": "Công thức",
+  "through": "đến",
+  "Effective web width calculated from": "Bề rộng bụng hữu hiệu tính theo",
+  "Summary": "Tổng hợp",
+  "NO_GLOBAL_PASS": "NO_GLOBAL_PASS",
+  "Unsupported section fabrication or stiffener layout.": "Chưa hỗ trợ kiểu chế tạo tiết diện hoặc cấu tạo sườn này.",
+  "is invalid.": "không hợp lệ.",
+  "The signed Excel Cb is invalid for this moment diagram.": "Cb có dấu của Excel không hợp lệ với biểu đồ mô men này.",
+  "REVIEW_REQUIRED": "CẦN RÀ SOÁT",
+  "Symmetric I/H": "I/H đối xứng",
+  "Vn,TFA from the legacy G3 formula": "Vn,TFA theo công thức G3 gốc",
+  "Reference workbook ↔ Calculation engine": "Bảng tính tham chiếu ↔ Bộ máy tính toán",
+  "PASS/FAIL": "ĐẠT/KHÔNG ĐẠT",
+  "from the legacy G3 formula": "theo công thức G3 gốc",
+  "and": "và",
+  "Compact": "Đặc chắc",
+  "Non-compact": "Không đặc chắc",
+  "Slender": "Mảnh",
+  "web slenderness": "độ mảnh bụng",
+  "Phase 1 Preview": "Bản xem trước giai đoạn 1",
+  "Doubly symmetric I/H member strength · LRFD / ASD · Workbook ↔ Calculation engine": "Kiểm tra sức kháng cấu kiện I/H đối xứng · LRFD / ASD · Reference workbook ↔ Calculation engine",
+  "Excel parity only — not approved for design": "Chế độ đối chiếu — chưa được chấp thuận thiết kế",
+  "The source workbook states AISC 360-05. This preview preserves legacy behavior for parity (signed Cb, weak-axis Fe and stiffeners). ": "Bảng Excel gốc ghi AISC 360-05. Phiên bản này giữ nguyên một số logic có lỗi để so sánh với Excel (Cb dùng dấu, Fe trục yếu và kiểm tra sườn). ",
+  "Do not use this output for construction design or claim AISC 360-10 compliance.": "Không sử dụng kết quả để thiết kế thi công hoặc khẳng định đạt AISC 360-10.",
+  "Units: mm / MPa / kN / kN·m": "Đơn vị: mm / MPa / kN / kN·m",
+  "Forces": "Nội lực",
+  "Equal flanges (bf, tf) with centered web. Fillet radii are excluded.": "Hai cánh bằng nhau (bf, tf), bụng nằm chính giữa. Chưa xét bán kính fillet.",
+  "Material and member parameters": "Thông số vật liệu & cấu kiện",
+  "Yield strength": "Giới hạn chảy",
+  "Member and unbraced lengths": "Chiều dài ổn định / không giằng",
+  "Transverse stiffeners": "Sườn tăng cứng",
+  "Arrangement": "Cấu tạo",
+  "Design actions at the current section": "Nội lực tại tiết diện đang kiểm tra",
+  "Positive = tension; negative = compression": "Dương: kéo; âm: nén",
+  "Preserve moment signs for legacy Cb parity": "Giữ nguyên dấu để đối chiếu Cb",
+  "Excel COMB42 reference": "Tương ứng Excel COMB42",
+  "When changing Mx, update M25/M50/M75 using the actual moment diagram of the unbraced segment.": "Khi đổi Mx, cũng cần cập nhật M25/M50/M75 theo biểu đồ moment thực tế trên đoạn không giằng.",
+  "Phase 1 preserves workbook equations and limits to verify reproducibility.": "Phase 1 giữ cách tính và giới hạn trong workbook để kiểm tra khả năng tái tạo kết quả.",
+  "Sample inputs loaded.": "Dữ liệu mẫu đã được nạp.",
+  "Excel sample": "Dữ liệu mẫu Excel",
+  "Legacy parity calculation": "Giá trị từ engine đối chiếu",
+  "Individual checks may show PASS/FAIL; the overall status always remains REVIEW REQUIRED.": "Các nhánh riêng có thể hiển thị PASS/FAIL theo công thức gốc; trạng thái tổng thể luôn là REVIEW REQUIRED.",
+  "Classification and intermediate results": "Chi tiết phân loại & công thức trung gian",
+  "All calculations are performed locally; no input is sent to a server.": "Mọi kết quả được tính cục bộ trên máy, không tải dữ liệu lên server.",
+  "Stepwise engineering calculations · symbolic formulae · current substitutions · design code references ": "Thuyết minh theo trình tự kiểm tra · Công thức ký tự có chỉ số dưới/trên · Thay số theo dữ liệu hiện tại · Trích dẫn điều khoản ",
+  "This report follows the Phase 1 engine; ": "Công thức đang trình bày theo engine Phase 1; phần ",
+  "AISC 360-10 citations are provided as review pointers": "trích dẫn hiển thị theo AISC 360-10",
+  " and are not validated clause-level attestations. The report is not approved for design. The units are mm, MPa, kN and kN·m.": " để tiện kiểm tra điều khoản. Đây vẫn là chế độ đối chiếu, chưa phải bản thuyết minh phát hành. Các phép tính dùng hệ đơn vị mm – MPa – kN – kN·m; một số biểu thức legacy được giữ nguyên và có cảnh báo riêng.",
+  "readable symbols": "dạng ký tự dễ đọc",
+  "input substitution": "số đầu vào",
+  "computed value": "kết quả đang tính",
+  "clause reference for review": "trích dẫn điều khoản đang áp dụng",
+  "Each parameter follows the calculation sequence. ↳ shows the current substitution; the last column gives an AISC 360-10 clause to review.": "Trình bày từng tham số theo trình tự kiểm tra. Dòng “↳” là phép thay số từ dữ liệu đầu vào hiện hành; cột cuối là điều khoản AISC 360-10 để tra cứu nhanh.",
+  "Review": "Cần rà soát",
+  "N/A": "Không áp dụng",
+  "Loading Excel sample…": "Đang nạp mẫu Excel và tính toán...",
+  "Calculated with the current inputs.": "Đã tính toán. Các thông số hiện tại đang được hiển thị.",
+  "Calculation results": "Bảng kết quả tính toán",
+  "Flange and web width-thickness classification": "Phân loại độ mảnh cánh và bụng",
+  "Minor-axis flexural strength": "Sức kháng uốn trục yếu",
+  "Major-axis flexural strength": "Sức kháng uốn trục mạnh",
+  "Tensile strength": "Sức kháng chịu kéo",
+  "Compressive strength": "Sức kháng chịu nén",
+  "Axial-flexure interaction": "Tương tác N–M",
+  "Stiffener checks and conclusion": "Kiểm tra sườn tăng cứng & kết luận",
+  "Elastic section modulus": "Mô đun đàn hồi",
+  "Second moment of area": "Mô men quán tính",
+  "Plastic section modulus": "Mô đun dẻo",
+  "Area": "Diện tích",
+  "Torsional constant": "Hằng số xoắn",
+  "Radius of gyration": "Bán kính quán tính",
+  "Selected flexural branch": "Nhánh uốn được áp dụng",
+  "Design resistance": "Sức kháng thiết kế",
+  "Nominal resistance": "Sức kháng danh định",
+  "Web shear resistance": "Sức kháng cắt bụng",
+  "Flange shear resistance": "Sức kháng cắt cánh",
+  "Tension field nominal resistance": "Sức kháng cắt có TFA",
+  "Utilization ratio": "Tỷ lệ sử dụng",
+  "Axial ratio": "Tỷ số lực dọc",
+  "Ratio": "Tỷ số",
+  "Plastic moment": "Moment dẻo",
+  "Coefficient": "Hệ số",
+  "Length": "Chiều dài",
+  "Critical stress": "Ứng suất tới hạn",
+  "Euler stress": "Ứng suất Euler",
+  "Stress": "Ứng suất",
+  "Transition limit": "Giới hạn chuyển nhánh",
+  "Flexural utilization": "Sử dụng uốn",
+  "Stiffener width/thickness": "Bề rộng / bề dày sườn",
+  "Stiffener area check": "Kiểm tra diện tích sườn",
+  "Tension-field action eligibility": "Xét tension field action",
+  "major axis": "trục mạnh",
+  "minor axis": "trục yếu",
+  "tension gross yielding": "kéo chảy dẻo",
+  "axial compression": "nén dọc trục",
+  "axial tension": "kéo dọc trục",
+  "forces": "nội lực",
+  "input": "đầu vào",
+  "under review": "đang kiểm tra",
+  "Under verification": "Đang kiểm chứng",
+  "Parity reference": "Đối chiếu",
+  "transverse stiffener": "sườn tăng cứng",
+  "with TFA (nominal)": "có TFA (danh định)",
+  "selected": "được áp dụng",
+  "yielding": "chảy dẻo",
+  "nominal": "danh định",
+  "classification": "phân loại",
+  "not verified": "chưa được xác nhận",
+  "not approved": "chưa được chấp thuận",
+  "Source workbook states": "Bảng Excel gốc ghi",
+  "Calculation": "Tính toán",
+  "Note": "Lưu ý",
+  "Copy": "Sao chép",
+  "Calculated · Current inputs are displayed.": "Đã tính toán. Các thông số hiện tại đang được hiển thị.",
+  "⌘   Section Properties": "⌘   Đặc trưng tiết diện",
+  "ENGINEERING TOOLS": "CÔNG CỤ KỸ THUẬT",
+  "≡   Material Library": "≡   Thư viện vật liệu",
+  "⌗   Design Standards (Library)": "⌗   Tiêu chuẩn (Thư viện)",
+  "Contents": "Mục lục",
+  "▾   Results": "▾   Kết quả",
+  "01   Input Parameters": "01   Thông số đầu vào",
+  "02   Calculation Results": "02   Kết quả tính toán",
+  "02B   Shared Section Properties": "02B   Section Properties dùng chung",
+  "03   Design calculations": "03   Thuyết minh tính toán",
+  "Calculator runs locally · Not approved for design.": "Tính toán cục bộ · Chưa được chấp thuận thiết kế.",
+  "Design Method / Design method": "Phương pháp thiết kế",
+  "Select LRFD load combinations. Changing the method does not convert forces or combinations.": "Chọn tổ hợp tải trọng LRFD. Đổi phương pháp không tự chuyển nội lực hoặc tổ hợp.",
+  "Factors follow AISC 360-10 clauses. The nominal Excel 360-05 formulas remain under review.": "Hệ số theo điều khoản AISC 360-10. Công thức nominal của Excel 360-05 vẫn đang chờ thẩm tra.",
+  "The stiffener area check still follows the legacy LRFD expression; it is not a verified ASD stiffener check.": "Kiểm tra diện tích sườn tăng cứng vẫn theo biểu thức legacy LRFD; không phải kiểm tra sườn ASD đã được xác minh.",
+  "LRFD requires forces from factored LRFD combinations; ASD combinations are not converted automatically.": "LRFD phải dùng nội lực từ tổ hợp LRFD (factored); không tự chuyển tổ hợp ASD sang LRFD.",
+  "Phase A/B results apply only to the reviewed formulas within the declared scope. CALCULATED is not an overall member PASS. E7 and F5 have specific formulas; F4 (NONCOMPACT web), tensile fracture and incomplete Chapter G checks return REVIEW_REQUIRED / INPUT_REQUIRED.": "Kết quả Phase A/B chỉ áp dụng cho các công thức đã đối chiếu trong phạm vi công bố. Không coi trạng thái CALCULATED là PASS toàn bộ cấu kiện. E7 và F5 đã có công thức riêng; F4 (bụng NONCOMPACT), kéo đứt và Chương G chưa đầy đủ sẽ có trạng thái REVIEW_REQUIRED / INPUT_REQUIRED.",
+  "Flexural resistance: kN·m; compression: kN; H1: ratio. Complete D/C results are withheld when bracing data are missing or a standard branch is not implemented.": "Sức kháng uốn: kN·m; nén: kN; H1: tỷ số. Khi thiếu dữ liệu giằng hoặc gặp nhánh tiêu chuẩn chưa triển khai, không công bố D/C hoàn chỉnh.",
+  "Formula Registry — AISC 360-10 clause and equation references": "Formula Registry — Trích dẫn điều khoản và công thức AISC 360-10",
+  "Search formulas": "Search formulas / Tìm công thức",
+  "Design Method": "Design Method / Phương pháp thiết kế",
+  "ASD uses forces from ASD/service load combinations. LRFD forces are NOT converted automatically.": "ASD: sử dụng nội lực từ tổ hợp tải trọng ASD/service. KHÔNG tự quy đổi nội lực LRFD.",
+  "LRFD uses forces from LRFD/factored load combinations. ASD forces are NOT converted automatically.": "LRFD: sử dụng nội lực từ tổ hợp tải trọng LRFD/factored. KHÔNG tự quy đổi nội lực ASD.",
+  "N–Mx–My interaction": "Tương tác N–Mx–My",
+  "using the legacy G3 formula": "theo công thức legacy G3",
+  "Overall status is not the H1 check": "Overall status ≠ kiểm tra H1"
+};
+let locale = 'en';
+try { locale = localStorage.getItem('geekcalculus-locale') === 'vi' ? 'vi' : 'en'; } catch (_) {}
+const originalText = new WeakMap();
+const originalAttributes = new WeakMap();
+const translationKeys = Object.keys(HI_TRANSLATIONS).sort((a,b) => b.length-a.length);
+const escapePattern = text => Array.from(text, char => '^$.*+?()[]{}|'.includes(char) || char === String.fromCharCode(92) ? String.fromCharCode(92) + char : char).join('');
+const translationPattern = new RegExp('(?<![\p{L}\p{N}_])(?:' + translationKeys.map(escapePattern).join('|') + ')(?![\p{L}\p{N}_])', 'gu');
+const canonicalTranslations = new Map(Object.entries(HI_TRANSLATIONS).map(([en, vi]) => [vi, en]));
+const canonicalPattern = new RegExp('(?<![\\p{L}\\p{N}_])(?:' + [...canonicalTranslations.keys()].sort((a,b) => b.length-a.length).map(escapePattern).join('|') + ')(?![\\p{L}\\p{N}_])', 'gu');
+function canonicalText(text) { return text.replace(canonicalPattern, key => canonicalTranslations.get(key)); }
+function translateText(text) {
+  return locale === 'vi' ? text.replace(translationPattern, key => HI_TRANSLATIONS[key]) : text;
+}
+function localizePage() {
+  document.documentElement.lang = locale;
+  document.title = locale === 'vi' ? 'GeekCalculus — I/H đối xứng hai trục | Bản xem trước giai đoạn 1' : 'GeekCalculus — H/I Doubly Symmetric | Phase 1 Preview';
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  while (walker.nextNode()) {
+    const node = walker.currentNode;
+    if (node.parentElement.closest('script, style, [data-locale], .warning strong')) continue;
+    const previous = originalText.get(node);
+    const english = previous && node.nodeValue === previous.displayed ? previous.english : canonicalText(node.nodeValue);
+    const displayed = translateText(english);
+    if (node.nodeValue !== displayed) node.nodeValue = displayed;
+    originalText.set(node, { english, displayed });
+  }
+  document.querySelectorAll('[aria-label], [data-label], [title]').forEach(node => {
+    let originals = originalAttributes.get(node);
+    if (!originals) { originals = {}; originalAttributes.set(node, originals); }
+    for (const name of ['aria-label', 'data-label', 'title']) {
+      if (!node.hasAttribute(name)) continue;
+      originals[name] ??= canonicalText(node.getAttribute(name));
+      node.setAttribute(name, translateText(originals[name]));
+    }
+  });
+  document.querySelectorAll('[data-locale]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.locale === locale)));
+}
+document.querySelectorAll('[data-locale]').forEach(button => button.addEventListener('click', () => {
+  locale = button.dataset.locale;
+  try { localStorage.setItem('geekcalculus-locale', locale); } catch (_) {}
+  localizePage();
+}));
+window.addEventListener('storage', event => {
+  if (event.key === 'geekcalculus-locale') { locale = event.newValue === 'vi' ? 'vi' : 'en'; localizePage(); }
+});
+// Apply after synchronous UI handlers, including validation and dirty-state messages.
+for (const event of ['click', 'input', 'change']) document.addEventListener(event, () => queueMicrotask(localizePage));
+
 const fixture = {
   material: { fy_mpa: 345, e_mpa: 200000 },
   section: { h_mm: 940, bf_mm: 250, tw_mm: 6, tf_mm: 12, fabrication: 'BUILT_UP' },
@@ -1110,186 +1626,13 @@ reset()
 (function(){
 'use strict';
 const home='./', livePath='./#/modules/steel';
-const dictionary={
-'workspace':['WORKSPACE','WORKSPACE'],'dashboard':['▦   Dashboard','▦   Dashboard'],
-'steel':['▱   Steel Design','▱   Steel Design'],'component':['↳   Component','↳   Component'],
-'sectionprops':['⌘   Đặc trưng tiết diện','⌘   Section Properties'],
-'engineering':['CÔNG CỤ KỸ THUẬT','ENGINEERING TOOLS'],
-'materiallib':['≡   Thư viện vật liệu','≡   Material Library'],
-'standardlib':['⌗   Tiêu chuẩn (Thư viện)','⌗   Design Standards (Library)'],
-'contents':['Mục lục','Contents'],'resultstree':['▾   Kết quả','▾   Results'],
-'inputtree':['01   Thông số đầu vào','01   Input Parameters'],
-'resulttree':['02   Kết quả tính toán','02   Calculation Results'],
-'sharedtree':['02B   Section Properties dùng chung','02B   Shared Section Properties'],
-'detailstree':['03   Thuyết minh tính toán','03   Design calculations'],
-'footer':['Tính toán cục bộ · Chưa được chấp thuận thiết kế.','Calculator runs locally · Not approved for design.']
-};
-const localizedText = new Map([
-['Kiểm tra sức kháng cấu kiện I/H đối xứng · LRFD / ASD · Reference workbook ↔ Calculation engine','Doubly symmetric I/H member strength · LRFD / ASD · Workbook ↔ Calculation engine'],
-['Chế độ đối chiếu — chưa được chấp thuận thiết kế','Excel parity only — not approved for design'],
-['Bảng Excel gốc ghi AISC 360-05. Phiên bản này giữ nguyên một số logic có lỗi để so sánh với Excel (Cb dùng dấu, Fe trục yếu và kiểm tra sườn). ','The source workbook states AISC 360-05. This preview preserves legacy behavior for parity (signed Cb, weak-axis Fe and stiffeners). '],
-['Không sử dụng kết quả để thiết kế thi công hoặc khẳng định đạt AISC 360-10.','Do not use this output for construction design or claim AISC 360-10 compliance.'],
-['Đơn vị: mm / MPa / kN / kN·m','Units: mm / MPa / kN / kN·m'],
-['Hình học','Geometry'],['Vật liệu & chiều dài','Material & lengths'],['Nội lực','Forces'],
-['Tiết diện I/H đối xứng hai trục','Doubly symmetric I/H section'],
-['Chiều cao toàn bộ','Overall depth'],['Bề rộng cánh','Flange width'],['Bề dày bụng','Web thickness'],['Bề dày cánh','Flange thickness'],['Chế tạo','Fabrication'],
-['Hai cánh bằng nhau (bf, tf), bụng nằm chính giữa. Chưa xét bán kính fillet.','Equal flanges (bf, tf) with centered web. Fillet radii are excluded.'],
-['Thông số vật liệu & cấu kiện','Material and member parameters'],
-['Giới hạn chảy','Yield strength'],['Đàn hồi','Elastic modulus'],
-['Chiều dài ổn định / không giằng','Member and unbraced lengths'],
-['Chiều dài trục mạnh','Major-axis length'],['Chiều dài không giằng','Unbraced length'],
-['Sườn tăng cứng','Transverse stiffeners'],['Khoảng cách','Spacing'],['Bề dày','Thickness'],['Bề rộng','Width'],['Cấu tạo','Arrangement'],
-['Nội lực tại tiết diện đang kiểm tra','Design actions at the current section'],
-['Lực dọc','Axial force'],['Dương: kéo; âm: nén','Positive = tension; negative = compression'],
-['Moment trục mạnh','Major-axis moment'],['Moment trục yếu','Minor-axis moment'],['Lực cắt','Shear force'],
-['Moment tại 1/4','Moment at 1/4'],['Moment tại 1/2','Moment at 1/2'],['Moment tại 3/4','Moment at 3/4'],
-['Giữ nguyên dấu để đối chiếu Cb','Preserve moment signs for legacy Cb parity'],
-['Tương ứng Excel COMB42','Excel COMB42 reference'],
-['Khi đổi Mx, cũng cần cập nhật M25/M50/M75 theo biểu đồ moment thực tế trên đoạn không giằng.','When changing Mx, update M25/M50/M75 using the actual moment diagram of the unbraced segment.'],
-['Phase 1 giữ cách tính và giới hạn trong workbook để kiểm tra khả năng tái tạo kết quả.','Phase 1 preserves workbook equations and limits to verify reproducibility.'],
-['Dữ liệu mẫu đã được nạp.','Sample inputs loaded.'],['Tính toán','Calculate'],
-['Dữ liệu mẫu Excel','Excel sample'],['Nhập JSON','Import JSON'],['Xuất kết quả','Export results'],
-['Giá trị từ engine đối chiếu','Legacy parity calculation'],
-['Các nhánh riêng có thể hiển thị PASS/FAIL theo công thức gốc; trạng thái tổng thể luôn là REVIEW REQUIRED.','Individual checks may show PASS/FAIL; the overall status always remains REVIEW REQUIRED.'],
-['Điều khoản','Clause'],['Kiểm tra','Check'],['Chi tiết phân loại & công thức trung gian','Classification and intermediate results'],
-['Mọi kết quả được tính cục bộ trên máy, không tải dữ liệu lên server.','All calculations are performed locally; no input is sent to a server.'],
-['Thuyết minh theo trình tự kiểm tra · Công thức ký tự có chỉ số dưới/trên · Thay số theo dữ liệu hiện tại · Trích dẫn điều khoản ','Stepwise engineering calculations · symbolic formulae · current substitutions · design code references '],
-['Mở tất cả','Expand all'],['Thu gọn','Collapse all'],['Sao chép công thức','Copy formulas'],['In / Lưu PDF','Print / Save PDF'],
-['Lưu ý chuyên môn:','Engineering note:'],
-['Công thức đang trình bày theo engine Phase 1; phần ','This report follows the Phase 1 engine; '],
-['trích dẫn hiển thị theo AISC 360-10','AISC 360-10 citations are provided as review pointers'],
-[' để tiện kiểm tra điều khoản. Đây vẫn là chế độ đối chiếu, chưa phải bản thuyết minh phát hành. Các phép tính dùng hệ đơn vị mm – MPa – kN – kN·m; một số biểu thức legacy được giữ nguyên và có cảnh báo riêng.',' and are not validated clause-level attestations. The report is not approved for design. The units are mm, MPa, kN and kN·m.'],
-['dạng ký tự dễ đọc','readable symbols'],['số đầu vào','input substitution'],['kết quả đang tính','computed value'],['trích dẫn điều khoản đang áp dụng','clause reference for review'],
-['Thông số','Parameter'],['CÔNG THỨC / THAY SỐ','FORMULA / SUBSTITUTION'],['KẾT QUẢ','RESULT'],['TRÍCH DẪN TIÊU CHUẨN','STANDARD REFERENCE'],
-['Trình bày từng tham số theo trình tự kiểm tra. Dòng “↳” là phép thay số từ dữ liệu đầu vào hiện hành; cột cuối là điều khoản AISC 360-10 để tra cứu nhanh.','Each parameter follows the calculation sequence. ↳ shows the current substitution; the last column gives an AISC 360-10 clause to review.'],
-['Nhấn Tính toán để tạo thuyết minh.','Click Calculate to generate the report.'],
-['Cần rà soát','Review'],['Không áp dụng','N/A'],['Đang nạp mẫu Excel và tính toán...','Loading Excel sample…'],
-['Đã tính toán. Các thông số hiện tại đang được hiển thị.','Calculated with the current inputs.'],
-['Đã tính toán. Các thông số hiện tại đang được hiển thị.','Calculated with the current inputs.'],
-['Bảng kết quả tính toán','Calculation results'],
-['Phân loại độ mảnh cánh và bụng','Flange and web width-thickness classification'],
-['Đặc trưng hình học tiết diện','Section geometric properties'],
-['Sức kháng uốn trục yếu','Minor-axis flexural strength'],
-['Sức kháng uốn trục mạnh','Major-axis flexural strength'],
-['Sức kháng chịu kéo','Tensile strength'],
-['Sức kháng chịu nén','Compressive strength'],
-['Tương tác N–M','Axial-flexure interaction'],
-['Kiểm tra sườn tăng cứng & kết luận','Stiffener checks and conclusion']
-]);
-const technicalEN = [
-['Chiều cao bụng thông thủy','Clear web depth'],
-['Mô đun đàn hồi','Elastic section modulus'],
-['Mô men quán tính','Second moment of area'],
-['Mô đun dẻo','Plastic section modulus'],
-['Moment thiết kế','Design moment'],
-['Lực dọc thiết kế','Design axial force'],
-['Diện tích','Area'],
-['Hằng số xoắn','Torsional constant'],
-['Bán kính quán tính','Radius of gyration'],
-['Tham số','Parameter'],
-['Cánh:','Flange:'],['Bụng:','Web:'],
-['Nhánh uốn được áp dụng','Selected flexural branch'],
-['Sức kháng thiết kế','Design resistance'],
-['Sức kháng danh định','Nominal resistance'],
-['Sức kháng cắt bụng','Web shear resistance'],
-['Sức kháng cắt cánh','Flange shear resistance'],
-['Sức kháng cắt có TFA','Tension field nominal resistance'],
-['Tỷ lệ sử dụng','Utilization ratio'],
-['Tỷ số lực dọc','Axial ratio'],
-['Tỷ số','Ratio'],
-['Moment dẻo','Plastic moment'],
-['Hệ số','Coefficient'],
-['Chiều dài','Length'],
-['Ứng suất tới hạn','Critical stress'],
-['Ứng suất Euler','Euler stress'],
-['Ứng suất','Stress'],
-['Giới hạn chuyển nhánh','Transition limit'],
-['Sử dụng uốn','Flexural utilization'],
-['Phương trình áp dụng','Applicable equation'],
-['Bề rộng / bề dày sườn','Stiffener width/thickness'],
-['Kiểm tra diện tích sườn','Stiffener area check'],
-['Xét tension field action','Tension-field action eligibility'],
-['Kết luận module','Module conclusion'],
-['trục mạnh','major axis'],['trục yếu','minor axis'],
-['kéo chảy dẻo','tension gross yielding'],
-['nén dọc trục','axial compression'],
-['kéo dọc trục','axial tension'],
-['nội lực','forces'],
-['Kiểm tra','Check'],
-['đầu vào','input'],
-['đang kiểm tra','under review'],
-['Đang kiểm chứng','Under verification'],
-['Đối chiếu','Parity reference'],
-['sườn tăng cứng','transverse stiffener'],
-['có TFA (danh định)','with TFA (nominal)'],
-['được áp dụng','selected'],
-['chảy dẻo','yielding'],
-['danh định','nominal'],
-['phân loại','classification'],
-['chưa được xác nhận','not verified'],
-['chưa được chấp thuận','not approved'],
-['Bảng Excel gốc ghi','Source workbook states'],
-['Tính toán','Calculation'],
-['Lưu ý','Note'],
-['Sao chép','Copy'],
-['Đã thay đổi dữ liệu · Nhấn Tính toán để cập nhật.','Inputs changed · Click Calculate to update.'],
-['Đã tính toán. Các thông số hiện tại đang được hiển thị.','Calculated · Current inputs are displayed.']
-];
-function translateTechnical(original){
- let output=original;
- for(const [vi,en] of technicalEN)output=output.split(vi).join(en);
- return output;
-}
-const stepEN=[
-'Inputs & unit conversions','Geometric section properties','Flange & web classification',
-'Minor-axis flexural strength','Major-axis flexural strength','Axial tensile strength',
-'Axial compressive strength','Axial–flexural interaction','Web and flange shear strength',
-'Stiffener checks and conclusion'];
-let current='vi';
-const originalNodes=new WeakMap();
-function translateNodes(root){
- const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode(node){
-  return node.parentElement?.closest('script,style,svg,.lang-switch,.logo')?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT;
- }});
- while(walker.nextNode()){
-  const node=walker.currentNode;
-  const orig=originalNodes.get(node)??node.nodeValue;
-  if(!originalNodes.has(node))originalNodes.set(node,orig);
-  const normalized=orig.trim();const tr=localizedText.get(normalized);
-  if(!tr){
-   const next=current==='en'?translateTechnical(orig):orig;
-   if(node.nodeValue!==next)node.nodeValue=next;
-   continue;
-  }
-  const value=current==='en'?tr:normalized;
-  const start=orig.match(/^\s*/)?.[0]??'';const end=orig.match(/\s*$/)?.[0]??'';
-  const next=start+value+end;if(node.nodeValue!==next)node.nodeValue=next;
- }
-}
-function updateLocale(){
- document.documentElement.lang=current;
- localStorage.setItem('geekcalculus-locale',current);
- for(const [key, pair] of Object.entries(dictionary)){
-  const el=document.querySelector('[data-l10n="'+key+'"]');
-  if(el)el.textContent=pair[current==='vi'?0:1];
- }
- for(const key of ['vi','en'])document.getElementById('lang-'+key)?.setAttribute('aria-pressed',String(key===current));
- translateNodes(document.querySelector('.page'));
- const links=[...document.querySelectorAll('#step-nav a')];
- links.forEach((link,i)=>{
-  const span=link.querySelector('span');
-  if(!span)return;
-  if(!span.dataset.vi)span.dataset.vi=span.innerHTML;
-  span.innerHTML=current==='en'?(stepEN[i]??span.dataset.vi):span.dataset.vi;
- });
-}
-let pending=false;
-const observe=document.getElementById('step-content');
-if(observe){const mut=new MutationObserver(()=>{
- if(pending)return;pending=true;queueMicrotask(()=>{pending=false;updateLocale();});
-});mut.observe(observe,{childList:true});}
-document.getElementById('lang-vi')?.addEventListener('click',()=>{current='vi';updateLocale()});
-document.getElementById('lang-en')?.addEventListener('click',()=>{current='en';updateLocale()});
+function updateLocale(){ localizePage(); }
+let localizationPending = false;
+new MutationObserver(() => {
+ if (localizationPending) return;
+ localizationPending = true;
+ queueMicrotask(() => { localizationPending = false; localizePage(); });
+}).observe(document.body, { childList: true, subtree: true });
 function moveContents(){
  const holder=document.getElementById('sidebar-step-slot');
  const nav=document.getElementById('step-nav');
@@ -1331,7 +1674,6 @@ window.addEventListener('scroll',()=>{if(ticking)return;ticking=true;requestAnim
 window.addEventListener('resize',updateActive);
 document.querySelectorAll('.outline-tree a').forEach(a=>a.addEventListener('click',()=>setTimeout(updateActive,550)));
 document.querySelectorAll('#step-nav').forEach(n=>n.addEventListener('click',()=>setTimeout(updateActive,550)));
-current=localStorage.getItem('geekcalculus-locale')==='en'?'en':'vi';
 updateLocale();updateActive();
 })();
 </script>

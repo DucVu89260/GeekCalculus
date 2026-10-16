@@ -36,10 +36,11 @@ class StandardsSeeder extends Seeder {
             ['L','Design for Serviceability',163],['M','Fabrication and Erection',165],
             ['N','Quality Control and Quality Assurance',170],
         ] as [$code,$title,$printedPage]) {
-            DB::table('standard_clauses')->updateOrInsert(
-                ['edition_id'=>$edition->id,'kind'=>'normative','code'=>$code],
-                ['title'=>$title,'printed_page'=>$printedPage,'pdf_page'=>$pdfPages[$code] ?? null,'verification_status'=>'index_only','updated_at'=>now()]
-            );
+            DB::table('standard_clauses')->insertOrIgnore([
+                'edition_id'=>$edition->id,'kind'=>'normative','code'=>$code,
+                'title'=>$title,'printed_page'=>$printedPage,'pdf_page'=>$pdfPages[$code] ?? null,
+                'verification_status'=>'index_only','created_at'=>now(),'updated_at'=>now()
+            ]);
         }
     }
 }

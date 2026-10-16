@@ -23,10 +23,10 @@ def extract(pdf_path: Path):
         title = " ".join(title.split())
         if page < 1 or page > len(doc):
             continue
-        kind = "front_matter" if page < 57 else ("normative" if page < 297 else "commentary")
+        kind = "front_matter" if page < 57 or page > 608 else ("normative" if page < 297 else "commentary")
         # Preserve chapter and numbered paragraph labels; never guess an equation from a title.
-        match = re.match(r"^(?:CHAP(?:TER)?\s+)?([A-N](?:\d{1,2})?)\s*[-. ]", title, re.IGNORECASE)
-        match = match or re.match(r"^(APPENDIX\s+\d+)\s*[-. ]", title, re.IGNORECASE)
+        match = re.match(r"^(?:CHAP(?:TER)?\s+)?([A-N](?:\d{1,2})?)[.\s-]", title, re.IGNORECASE)
+        match = match or re.match(r"^(APPENDIX\s*\d+)[.\s-]", title, re.IGNORECASE)
         label = match.group(1).upper().replace(" ", "") if match else None
         code = label or f"BOOKMARK-{index:04d}"
         # Repeated labels can occur in secondary outline branches.

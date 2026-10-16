@@ -9,6 +9,7 @@
     "test": "node --test tests/geometry/*.test.js ../../tests/section-properties-core.test.cjs ../../tests/section-mechanics-advanced.test.cjs",
     "preview": "vite preview --host 0.0.0.0",
     "typecheck": "vue-tsc --noEmit",
+    "test:crane-beam": "node --test ../../tests/crane-beam-section.test.cjs ../../tests/crane-beam-strength.test.cjs && node ../../scripts/compare-crane-workbook.cjs --check",
     "predev": "node ../../scripts/build-section-properties-core.cjs",
     "prebuild": "node ../../scripts/build-section-properties-core.cjs",
     "pretest": "node ../../scripts/build-section-properties-core.cjs",

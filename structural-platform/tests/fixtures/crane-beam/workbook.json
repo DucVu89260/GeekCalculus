@@ -1,0 +1,5808 @@
+{
+  "schema_version": "1.0",
+  "source_filename": "CRANEBEAM_AISC360-10.xlsm",
+  "source_sha256": "a47d55dc165f905dc8720be62328fae66728d13ddef2e949c33cbfcfffec52c8",
+  "basis": "EXCEL_SAVED_CACHE_NOT_RECALCULATED_NOT_AISC_VERIFICATION",
+  "macros_executed": false,
+  "sheet_names": [
+    "AISC360-LRFD",
+    "AISC360-ASD"
+  ],
+  "defined_names": [
+    {
+      "name": "B_Tee_bot",
+      "scope": "0",
+      "reference": "'AISC360-LRFD'!$AT$32"
+    },
+    {
+      "name": "B_Tee_bot",
+      "scope": null,
+      "reference": "'AISC360-ASD'!$AT$32"
+    },
+    {
+      "name": "B_Tee_Top",
+      "scope": "0",
+      "reference": "'AISC360-LRFD'!$AQ$32"
+    },
+    {
+      "name": "B_Tee_Top",
+      "scope": null,
+      "reference": "'AISC360-ASD'!$AQ$32"
+    },
+    {
+      "name": "bfb",
+      "scope": "0",
+      "reference": "'AISC360-LRFD'!$H$9"
+    },
+    {
+      "name": "bfb",
+      "scope": null,
+      "reference": "'AISC360-ASD'!$H$9"
+    },
+    {
+      "name": "bft",
+      "scope": "0",
+      "reference": "'AISC360-LRFD'!$E$9"
+    },
+    {
+      "name": "bft",
+      "scope": null,
+      "reference": "'AISC360-ASD'!$E$9"
+    },
+    {
+      "name": "Cb",
+      "scope": "0",
+      "reference": "'AISC360-LRFD'!$C$95"
+    },
+    {
+      "name": "Cb",
+      "scope": null,
+      "reference": "'AISC360-ASD'!$C$95"
+    },
+    {
+      "name": "Cw",
+      "scope": "0",
+      "reference": "'AISC360-LRFD'!$E$34"
+    },
+    {
+      "name": "Cw",
+      "scope": null,
+      "reference": "'AISC360-ASD'!$E$34"
+    },
+    {
+      "name": "E",
+      "scope": "0",
+      "reference": "'AISC360-LRFD'!$AQ$31"
+    },
+    {
+      "name": "E",
+      "scope": null,
+      "reference": "'AISC360-ASD'!$AQ$31"
+    },
+    {
+      "name": "E_kn_cm2",
+      "scope": "0",
+      "reference": "'AISC360-LRFD'!$AQ$30"
+    },
+    {
+      "name": "E_kn_cm2",
+      "scope": null,
+      "reference": "'AISC360-ASD'!$AQ$30"
+    },
+    {
+      "name": "Fu",
+      "scope": "0",
+      "reference": "'AISC360-LRFD'!$H$7"
+    },
+    {
+      "name": "Fu",
+      "scope": null,
+      "reference": "'AISC360-ASD'!$H$7"
+    },
+    {
+      "name": "Fu_Kn_cm2",
+      "scope": "0",
+      "reference": "'AISC360-LRFD'!$AR$7"
+    },
+    {
+      "name": "Fu_Kn_cm2",
+      "scope": null,
+      "reference": "'AISC360-ASD'!$AR$7"
+    },
+    {
+      "name": "Fy",
+      "scope": "0",
+      "reference": "'AISC360-LRFD'!$H$6"
+    },
+    {
+      "name": "Fy",
+      "scope": null,
+      "reference": "'AISC360-ASD'!$H$6"
+    },
+    {
+      "name": "Fy_Kn_cm2",
+      "scope": "0",
+      "reference": "'AISC360-LRFD'!$AR$6"
+    },
+    {
+      "name": "Fy_Kn_cm2",
+      "scope": null,
+      "reference": "'AISC360-ASD'!$AR$6"
+    },
+    {
+      "name": "h",
+      "scope": "1",
+      "reference": "'AISC360-ASD'!$D$9"
+    },
+    {
+      "name": "h",
+      "scope": "0",
+      "reference": "'AISC360-LRFD'!$D$9"
+    },
+    {
+      "name": "h_full",
+      "scope": "0",
+      "reference": "'AISC360-LRFD'!$AP$33"
+    },
+    {
+      "name": "h_full",
+      "scope": null,
+      "reference": "'AISC360-ASD'!$AP$33"
+    },
+    {
+      "name": "h_Tee_bot",
+      "scope": "0",
+      "reference": "'AISC360-LRFD'!$AS$48"
+    },
+    {
+      "name": "h_Tee_bot",
+      "scope": null,
+      "reference": "'AISC360-ASD'!$AS$48"
+    },
+    {
+      "name": "h_Tee_Top",
+      "scope": "0",
+      "reference": "'AISC360-LRFD'!$AS$45"
+    },
+    {
+      "name": "h_Tee_Top",
+      "scope": null,
+      "reference": "'AISC360-ASD'!$AS$45"
+    },
+    {
+      "name": "h0",
+      "scope": "0",
+      "reference": "'AISC360-LRFD'!$AQ$33"
+    },
+    {
+      "name": "h0",
+      "scope": null,
+      "reference": "'AISC360-ASD'!$AQ$33"
+    },
+    {
+      "name": "hc",
+      "scope": "0",
+      "reference": "'AISC360-LRFD'!$H$34"
+    },
+    {
+      "name": "hc",
+      "scope": null,
+      "reference": "'AISC360-ASD'!$H$34"
+    },
+    {
+      "name": "hp",
+      "scope": "0",
+      "reference": "'AISC360-LRFD'!$H$35"
+    },
+    {
+      "name": "hp",
+      "scope": null,
+      "reference": "'AISC360-ASD'!$H$35"
+    },
+    {
+      "name": "J",
+      "scope": "0",
+      "reference": "'AISC360-LRFD'!$E$33"
+    },
+    {
+      "name": "J",
+      "scope": null,
+      "reference": "'AISC360-ASD'!$E$33"
+    },
+    {
+      "name": "Myc",
+      "scope": "0",
+      "reference": "'AISC360-LRFD'!$AR$97"
+    },
+    {
+      "name": "Myc",
+      "scope": null,
+      "reference": "'AISC360-ASD'!$AR$97"
+    },
+    {
+      "name": "_xlnm.Print_Area",
+      "scope": "1",
+      "reference": "'AISC360-ASD'!$A$1:$I$333"
+    },
+    {
+      "name": "_xlnm.Print_Area",
+      "scope": "0",
+      "reference": "'AISC360-LRFD'!$A$1:$I$302"
+    },
+    {
+      "name": "Rpc",
+      "scope": "0",
+      "reference": "'AISC360-LRFD'!$B$92"
+    },
+    {
+      "name": "Rpc",
+      "scope": null,
+      "reference": "'AISC360-ASD'!$B$92"
+    },
+    {
+      "name": "Sxc",
+      "scope": "0",
+      "reference": "'AISC360-LRFD'!$B$30"
+    },
+    {
+      "name": "Sxc",
+      "scope": null,
+      "reference": "'AISC360-ASD'!$B$30"
+    },
+    {
+      "name": "Sxt",
+      "scope": "0",
+      "reference": "'AISC360-LRFD'!$B$31"
+    },
+    {
+      "name": "Sxt",
+      "scope": null,
+      "reference": "'AISC360-ASD'!$B$31"
+    },
+    {
+      "name": "Sy_Top",
+      "scope": "0",
+      "reference": "'AISC360-LRFD'!$B$32"
+    },
+    {
+      "name": "Sy_Top",
+      "scope": null,
+      "reference": "'AISC360-ASD'!$B$32"
+    },
+    {
+      "name": "tf_Tee_bot",
+      "scope": "0",
+      "reference": "'AISC360-LRFD'!$AU$32"
+    },
+    {
+      "name": "tf_Tee_bot",
+      "scope": null,
+      "reference": "'AISC360-ASD'!$AU$32"
+    },
+    {
+      "name": "tf_Tee_Top",
+      "scope": "0",
+      "reference": "'AISC360-LRFD'!$AR$32"
+    },
+    {
+      "name": "tf_Tee_Top",
+      "scope": null,
+      "reference": "'AISC360-ASD'!$AR$32"
+    },
+    {
+      "name": "tfb",
+      "scope": "0",
+      "reference": "'AISC360-LRFD'!$I$9"
+    },
+    {
+      "name": "tfb",
+      "scope": null,
+      "reference": "'AISC360-ASD'!$I$9"
+    },
+    {
+      "name": "tft",
+      "scope": "0",
+      "reference": "'AISC360-LRFD'!$F$9"
+    },
+    {
+      "name": "tft",
+      "scope": null,
+      "reference": "'AISC360-ASD'!$F$9"
+    },
+    {
+      "name": "tw",
+      "scope": "0",
+      "reference": "'AISC360-LRFD'!$G$9"
+    },
+    {
+      "name": "tw",
+      "scope": null,
+      "reference": "'AISC360-ASD'!$G$9"
+    },
+    {
+      "name": "ypma",
+      "scope": "0",
+      "reference": "'AISC360-LRFD'!$AY$37"
+    },
+    {
+      "name": "ypma",
+      "scope": null,
+      "reference": "'AISC360-ASD'!$AY$37"
+    },
+    {
+      "name": "Zy",
+      "scope": "0",
+      "reference": "'AISC360-LRFD'!$E$36"
+    },
+    {
+      "name": "Zy",
+      "scope": null,
+      "reference": "'AISC360-ASD'!$E$36"
+    }
+  ],
+  "sheets": {
+    "AISC360-LRFD": {
+      "cells": {
+        "C1": {
+          "value": "Crane Beam Runway Design"
+        },
+        "H2": {
+          "value": "Phan Lạc Thiện Tâm"
+        },
+        "H4": {
+          "value": "xaydungpro.org"
+        },
+        "A6": {
+          "value": "1. Section Info"
+        },
+        "G6": {
+          "value": "Fy"
+        },
+        "H6": {
+          "value": 345.0
+        },
+        "I6": {
+          "value": "Mpa"
+        },
+        "AQ6": {
+          "value": "Fy_Kn/cm2"
+        },
+        "AR6": {
+          "value": 34.5,
+          "formula": "=Fy/10"
+        },
+        "AS6": {
+          "value": "Kn/cm2"
+        },
+        "G7": {
+          "value": "Fu"
+        },
+        "H7": {
+          "value": 400.0
+        },
+        "I7": {
+          "value": "Mpa"
+        },
+        "AQ7": {
+          "value": "Fu_Kn/cm2"
+        },
+        "AR7": {
+          "value": 40.0,
+          "formula": "=Fu/10"
+        },
+        "AS7": {
+          "value": "Kn/cm2"
+        },
+        "D9": {
+          "value": 2000.0
+        },
+        "E9": {
+          "value": 300.0
+        },
+        "F9": {
+          "value": 12.0
+        },
+        "G9": {
+          "value": 6.0
+        },
+        "H9": {
+          "value": 200.0
+        },
+        "I9": {
+          "value": 7.0
+        },
+        "D10": {
+          "value": "Tension field"
+        },
+        "E10": {
+          "value": "Y"
+        },
+        "F10": {
+          "value": "Spacing of stifferner"
+        },
+        "H10": {
+          "value": 0.8
+        },
+        "I10": {
+          "value": "m"
+        },
+        "J11": {
+          "value": "Crane runway design based on"
+        },
+        "D12": {
+          "value": "Runway beam unbraced length Lb(m)="
+        },
+        "H12": {
+          "value": 7.0
+        },
+        "J12": {
+          "value": "+AISC 360-10 Specification for Structural Steel Buildings"
+        },
+        "AQ12": {
+          "value": 1.0,
+          "formula": "=IF(E10=\"Y\",1,0)"
+        },
+        "J13": {
+          "value": "+AISC Design Guide 7: Industrial Buildings-Roofs to Anchor Rods 2nd Edition"
+        },
+        "D14": {
+          "value": "Maximum bending moment and shear from SAP 2000"
+        },
+        "D15": {
+          "value": "Mx (kN.m)"
+        },
+        "E15": {
+          "value": 200.0
+        },
+        "F15": {
+          "value": "My (kN.m)"
+        },
+        "G15": {
+          "value": 20.0
+        },
+        "H15": {
+          "value": "Dx (mm)"
+        },
+        "I15": {
+          "value": 50.0
+        },
+        "D16": {
+          "value": "Vy (kN)"
+        },
+        "E16": {
+          "value": 50.0
+        },
+        "F16": {
+          "value": "Vx  (kN)"
+        },
+        "G16": {
+          "value": 20.0
+        },
+        "H16": {
+          "value": "Dy (mm)"
+        },
+        "I16": {
+          "value": 10.0
+        },
+        "J16": {
+          "value": "Design Basis & Assumption"
+        },
+        "D17": {
+          "value": "Wheel load(kN)"
+        },
+        "E17": {
+          "value": 65.2
+        },
+        "J17": {
+          "value": "The I section top flange and resist the horrizontal load and the combined section resists the vertical. "
+        },
+        "T17": {
+          "value": "AISC Design Guide 7 (Section 18.1 on Page 56)"
+        },
+        "AN17": {
+          "value": 500.0
+        },
+        "D18": {
+          "value": "Effective wheel brearing lenght="
+        },
+        "G18": {
+          "value": 5.0
+        },
+        "H18": {
+          "value": "cm"
+        },
+        "J18": {
+          "value": "This assumption eliminates the need for an analysis of torsional effects on the combined section and simplifies the analysis."
+        },
+        "AU18": {
+          "value": "A"
+        },
+        "AV18": {
+          "value": 20000.0
+        },
+        "D19": {
+          "value": "CMAA 70 Crane Classification"
+        },
+        "G19": {
+          "value": "C"
+        },
+        "AU19": {
+          "value": "B"
+        },
+        "AV19": {
+          "value": 50000.0
+        },
+        "D20": {
+          "value": "Vertical impact (%)"
+        },
+        "F20": {
+          "value": 10.0
+        },
+        "AU20": {
+          "value": "C"
+        },
+        "AV20": {
+          "value": 100000.0
+        },
+        "D21": {
+          "value": "Lateral impact (%)"
+        },
+        "F21": {
+          "value": 20.0
+        },
+        "AU21": {
+          "value": "D"
+        },
+        "AV21": {
+          "value": 500000.0
+        },
+        "A22": {
+          "value": "2. Section Properties "
+        },
+        "D22": {
+          "value": "Longitudinal impact (%)"
+        },
+        "F22": {
+          "value": 10.0
+        },
+        "G22": {
+          "value": "No of Crane"
+        },
+        "I22": {
+          "value": 2.0,
+          "formula": "=2"
+        },
+        "AU22": {
+          "value": "E"
+        },
+        "AV22": {
+          "value": 1500000.0
+        },
+        "A23": {
+          "value": "Web"
+        },
+        "B23": {
+          "value": 200.0,
+          "formula": "=D9/10"
+        },
+        "C23": {
+          "value": 0.6,
+          "formula": "=G9/10"
+        },
+        "D23": {
+          "value": "(cm)"
+        },
+        "AU23": {
+          "value": "F"
+        },
+        "AV23": {
+          "value": 2000000.0
+        },
+        "A24": {
+          "value": "Top  Flange "
+        },
+        "B24": {
+          "value": 30.0,
+          "formula": "=E9/10"
+        },
+        "C24": {
+          "value": 1.2,
+          "formula": "=F9/10"
+        },
+        "D24": {
+          "value": "(cm)"
+        },
+        "A25": {
+          "value": "Bott Flange "
+        },
+        "B25": {
+          "value": 20.0,
+          "formula": "=H9/10"
+        },
+        "C25": {
+          "value": 0.7,
+          "formula": "=I9/10"
+        },
+        "D25": {
+          "value": "(cm)"
+        },
+        "A26": {
+          "value": "Base Section "
+        },
+        "A27": {
+          "value": "Area="
+        },
+        "B27": {
+          "value": 170.0,
+          "formula": "=AQ36/100"
+        },
+        "C27": {
+          "value": "(cm2)"
+        },
+        "A28": {
+          "value": "Ix="
+        },
+        "B28": {
+          "value": 876415.1026078432,
+          "formula": "=AQ38/10000"
+        },
+        "C28": {
+          "value": "(cm4)"
+        },
+        "AP28": {
+          "value": 200.0,
+          "formula": "=h/10"
+        },
+        "AQ28": {
+          "value": 30.0,
+          "formula": "=B_Tee_Top/10"
+        },
+        "AR28": {
+          "value": 1.2,
+          "formula": "=tf_Tee_Top/10"
+        },
+        "AS28": {
+          "value": 0.6,
+          "formula": "=AS32/10"
+        },
+        "AT28": {
+          "value": 20.0,
+          "formula": "=B_Tee_bot/10"
+        },
+        "AU28": {
+          "value": 0.7,
+          "formula": "=tf_Tee_bot/10"
+        },
+        "AX28": {
+          "value": 1190.3333333333333,
+          "formula": "=tf_Tee_bot+((AQ36-(2*B_Tee_bot*tf_Tee_bot))/(2*tw))"
+        },
+        "A29": {
+          "value": "Iy="
+        },
+        "B29": {
+          "value": 3170.266666666667,
+          "formula": "=AQ41/10000"
+        },
+        "C29": {
+          "value": "(cm4)"
+        },
+        "A30": {
+          "value": "Sx-Top ="
+        },
+        "B30": {
+          "value": 9941.12131226661,
+          "formula": "=AQ42/1000"
+        },
+        "C30": {
+          "value": "(cm3)"
+        },
+        "AP30": {
+          "value": "E(kn/cm2)"
+        },
+        "AQ30": {
+          "value": 21000.0,
+          "formula": "=E/10"
+        },
+        "AS30": {
+          "value": "Steel density:"
+        },
+        "AT30": {
+          "value": 7850.0
+        },
+        "AU30": {
+          "value": "Kg/M3"
+        },
+        "AZ30": {
+          "value": "Plastis top"
+        },
+        "BC30": {
+          "value": "Plastis bot"
+        },
+        "A31": {
+          "value": "Sx- Bottom="
+        },
+        "B31": {
+          "value": 7705.465405614141,
+          "formula": "=AQ43/1000"
+        },
+        "C31": {
+          "value": "(cm3)"
+        },
+        "AP31": {
+          "value": "E"
+        },
+        "AQ31": {
+          "value": 210000.0
+        },
+        "AR31": {
+          "value": "Mpa"
+        },
+        "AZ31": {
+          "value": "first cen"
+        },
+        "BA31": {
+          "value": 822.6666666666667,
+          "formula": "=AP33-AY37-(tf_Tee_Top/2)"
+        },
+        "BC31": {
+          "value": "first cen"
+        },
+        "BD31": {
+          "value": 1184.3333333333333,
+          "formula": "=AY37-(tf_Tee_Top/2)"
+        },
+        "A32": {
+          "value": "Sy-Top ="
+        },
+        "B32": {
+          "value": 211.35111111111112,
+          "formula": "=AQ44/1000"
+        },
+        "C32": {
+          "value": "(cm3)"
+        },
+        "AP32": {
+          "value": 2000.0,
+          "formula": "=D9"
+        },
+        "AQ32": {
+          "value": 300.0,
+          "formula": "="
+        },
+        "AR32": {
+          "value": 12.0,
+          "formula": "="
+        },
+        "AS32": {
+          "value": 6.0,
+          "formula": "="
+        },
+        "AT32": {
+          "value": 200.0,
+          "formula": "="
+        },
+        "AU32": {
+          "value": 7.0,
+          "formula": "="
+        },
+        "AW32": {
+          "value": 17000.0,
+          "formula": "=AQ36"
+        },
+        "AX32": {
+          "value": "Au"
+        },
+        "AY32": {
+          "value": 3600.0,
+          "formula": "=B_Tee_Top*tf_Tee_Top"
+        },
+        "AZ32": {
+          "value": "ser cen"
+        },
+        "BA32": {
+          "value": 408.33333333333337,
+          "formula": "=(AP33-AY37-tf_Tee_Top)/2"
+        },
+        "BC32": {
+          "value": "ser cen"
+        },
+        "BD32": {
+          "value": 591.6666666666666,
+          "formula": "=(AY37-tf_Tee_bot)/2"
+        },
+        "A33": {
+          "value": "Sy- Bottom="
+        },
+        "B33": {
+          "value": 317.0266666666667,
+          "formula": "=AQ45/1000"
+        },
+        "C33": {
+          "value": "(cm3)"
+        },
+        "D33": {
+          "value": "J"
+        },
+        "E33": {
+          "value": 34.035066666666665,
+          "formula": "=BB39/10000"
+        },
+        "F33": {
+          "value": "(cm4)"
+        },
+        "AP33": {
+          "value": 2019.0,
+          "formula": "=AP32+AR32+AU32"
+        },
+        "AQ33": {
+          "value": 2009.5,
+          "formula": "=h_full-(tf_Tee_Top/2)-(tf_Tee_bot/2)"
+        },
+        "AU33": {
+          "value": 144.93431372549017,
+          "formula": "=AS44/2"
+        },
+        "AW33": {
+          "value": 8500.0,
+          "formula": "=AW32/2"
+        },
+        "AX33": {
+          "value": "Ad"
+        },
+        "AY33": {
+          "value": 1400.0,
+          "formula": "=B_Tee_bot*tf_Tee_bot"
+        },
+        "AZ33": {
+          "value": "A1"
+        },
+        "BA33": {
+          "value": 3600.0,
+          "formula": "=tf_Tee_Top*B_Tee_Top"
+        },
+        "BC33": {
+          "value": "A1"
+        },
+        "BD33": {
+          "value": 3.0
+        },
+        "A34": {
+          "value": "R-xx="
+        },
+        "B34": {
+          "value": 71.80099551201728,
+          "formula": "=AQ46/10"
+        },
+        "C34": {
+          "value": "(cm)"
+        },
+        "D34": {
+          "value": "Cw"
+        },
+        "E34": {
+          "value": 16067348.573684212,
+          "formula": "=BB40/1000000"
+        },
+        "F34": {
+          "value": "(cm6)"
+        },
+        "G34": {
+          "value": "hc="
+        },
+        "H34": {
+          "value": 173.92117647058822,
+          "formula": "=((h_full-AQ37-tf_Tee_Top)*2)/10"
+        },
+        "I34": {
+          "value": "(cm)"
+        },
+        "AT34": {
+          "value": 340585002.68464196,
+          "formula": "=((B_Tee_Top*tf_Tee_Top^3)/12)+((AS44^2)*(B_Tee_Top*tf_Tee_Top))+((AS32*AU33^3)/12)+(AU33^2)*(AS44*AS32)"
+        },
+        "AZ34": {
+          "value": "A2"
+        },
+        "BA34": {
+          "value": 4900.0,
+          "formula": "=(AP33-AY37-tf_Tee_Top)*tw"
+        },
+        "BC34": {
+          "value": "A2"
+        },
+        "BD34": {
+          "value": 7100.0,
+          "formula": "=(AY37-tf_Tee_bot)*tw"
+        },
+        "A35": {
+          "value": "R-yy="
+        },
+        "B35": {
+          "value": 4.31840566077116,
+          "formula": "=AQ47/10"
+        },
+        "C35": {
+          "value": "(cm)"
+        },
+        "D35": {
+          "value": "ypna"
+        },
+        "E35": {
+          "value": 119.03333333333333,
+          "formula": "=ypma/10"
+        },
+        "F35": {
+          "value": "(cm)"
+        },
+        "G35": {
+          "value": "hp="
+        },
+        "H35": {
+          "value": 163.33333333333334,
+          "formula": "=((h_full-ypma-tf_Tee_Top)*2)/10"
+        },
+        "I35": {
+          "value": "(cm)"
+        },
+        "AO35": {
+          "value": "Weight"
+        },
+        "AP35": {
+          "value": "="
+        },
+        "AQ35": {
+          "value": 13345.0,
+          "formula": "=(h*tw+bft*tft+bfb*tfb)*7850/10000"
+        },
+        "AR35": {
+          "value": "kG/cm"
+        },
+        "AT35": {
+          "value": 34058.500268464195,
+          "formula": "=AT34/10000"
+        },
+        "A36": {
+          "value": "Zx="
+        },
+        "B36": {
+          "value": 10824.833333333328,
+          "formula": "=AY43/1000"
+        },
+        "C36": {
+          "value": "(cm3)"
+        },
+        "D36": {
+          "value": "Zy"
+        },
+        "E36": {
+          "value": 358.0,
+          "formula": "=AY44/1000"
+        },
+        "F36": {
+          "value": "(cm3)"
+        },
+        "G36": {
+          "value": "ycg="
+        },
+        "H36": {
+          "value": 113.73941176470589,
+          "formula": "=AQ37/10"
+        },
+        "I36": {
+          "value": "(cm)"
+        },
+        "AO36": {
+          "value": "A"
+        },
+        "AP36": {
+          "value": "="
+        },
+        "AQ36": {
+          "value": 17000.0,
+          "formula": "=h*tw+bft*tft+bfb*tfb"
+        },
+        "AR36": {
+          "value": "mm2"
+        },
+        "AX36": {
+          "value": "Platis section modulus"
+        },
+        "A37": {
+          "value": "Top portion properties based on based on Top  Flange with 1/3 of Web to N.Axis    "
+        },
+        "AO37": {
+          "value": "y"
+        },
+        "AP37": {
+          "value": "="
+        },
+        "AQ37": {
+          "value": 1137.394117647059,
+          "formula": "=(bft*tft*(h+tft/2+tfb)+h*tw*(h/2+tfb)+bfb*tfb*tfb/2)/AQ36"
+        },
+        "AR37": {
+          "value": "mm"
+        },
+        "AS37": {
+          "value": "x"
+        },
+        "AT37": {
+          "value": "="
+        },
+        "AU37": {
+          "value": 150.0,
+          "formula": "=(((AP32*AS32)*(AQ32/2))+((AQ32*AR32)*(AQ32/2))+((AT32*AU32)*(AQ32/2)))/((AP32*AS32)+(AQ32*AR32)+(AT32*AU32))"
+        },
+        "AV37": {
+          "value": "mm"
+        },
+        "AX37": {
+          "value": "ypma"
+        },
+        "AY37": {
+          "value": 1190.3333333333333,
+          "formula": "=IF(AY32>=AW33,(h_full-AW32/(2*B_Tee_Top)),IF(AY33>=AW33*(AW32/(2*B_Tee_Top)),(AW32/(2*B_Tee_bot)),IF(AND(AY33<AW33,AY32<AW33),tf_Tee_bot+((AQ36-(2*B_Tee_bot*tf_Tee_bot))/(2*tw)))))"
+        },
+        "BA37": {
+          "value": "α"
+        },
+        "BB37": {
+          "value": 0.1473684210526316,
+          "formula": "=1/(1+(((B_Tee_Top/B_Tee_bot)^3)*(tf_Tee_Top/tf_Tee_bot)))"
+        },
+        "A38": {
+          "value": "Area="
+        },
+        "B38": {
+          "value": 36.607882352941175,
+          "formula": "=AP57/100"
+        },
+        "C38": {
+          "value": "(cm2)"
+        },
+        "AO38": {
+          "value": "Ix"
+        },
+        "AP38": {
+          "value": "="
+        },
+        "AQ38": {
+          "value": 8764151026.078432,
+          "formula": "=h^3*tw/12+bft*tft^3/12+bfb*tfb^3/12+bft*tft*(h+tft+tfb-AQ37-tft/2)^2+h*tw*(h/2+tfb-AQ37)^2+bfb*tfb*(AQ37-tfb/2)^2"
+        },
+        "AR38": {
+          "value": "mm4"
+        },
+        "AS38": {
+          "value": "Iy"
+        },
+        "AT38": {
+          "value": "="
+        },
+        "AU38": {
+          "value": 31702666.666666668,
+          "formula": "=bft^3*tft/12+bfb^3*tfb/12+h*tw^3/12"
+        },
+        "AV38": {
+          "value": "mm4"
+        },
+        "AX38": {
+          "value": "Zx-Top"
+        },
+        "AY38": {
+          "value": 4962433.333333334,
+          "formula": "=(BA31*BA33)+(BA32*BA34)"
+        },
+        "BA38": {
+          "value": "d'"
+        },
+        "BB38": {
+          "value": 2009.5,
+          "formula": "=h_full-((tf_Tee_Top+tf_Tee_bot)/2)"
+        },
+        "A39": {
+          "value": "yc="
+        },
+        "B39": {
+          "value": 12.201082827221523,
+          "formula": "=AP58/10"
+        },
+        "C39": {
+          "value": "(cm)"
+        },
+        "AO39": {
+          "value": "Sx-Top"
+        },
+        "AP39": {
+          "value": "="
+        },
+        "AQ39": {
+          "value": 9941121.31226661,
+          "formula": "=AQ38/(h+tft+tfb-AQ37)"
+        },
+        "AR39": {
+          "value": "mm3"
+        },
+        "AS39": {
+          "value": "Sy-TOP"
+        },
+        "AT39": {
+          "value": "="
+        },
+        "AU39": {
+          "value": 211351.11111111112,
+          "formula": "=AU38/AU37"
+        },
+        "AV39": {
+          "value": "mm3"
+        },
+        "AX39": {
+          "value": "Zx-bot"
+        },
+        "AY39": {
+          "value": 4204386.333333333,
+          "formula": "=(BD31*BD33)+(BD32*BD34)"
+        },
+        "BA39": {
+          "value": "J"
+        },
+        "BB39": {
+          "value": 340350.6666666667,
+          "formula": "=((B_Tee_Top*(tf_Tee_Top^3))+(B_Tee_bot*(tf_Tee_bot^3))+(BB38*(tw^3)))/3"
+        },
+        "BC39": {
+          "value": "mm4"
+        },
+        "A40": {
+          "value": "I-XT =    "
+        },
+        "B40": {
+          "value": 3893.6049314276197,
+          "formula": "=AP53/10000"
+        },
+        "C40": {
+          "value": "(cm4)"
+        },
+        "D40": {
+          "value": " 85.2% OF I -YY",
+          "formula": "=\" \"&AQ54&\"%\"&\" \"&\"OF I -YY\""
+        },
+        "AO40": {
+          "value": "Zx"
+        },
+        "AP40": {
+          "value": "="
+        },
+        "AQ40": {
+          "value": 10841648.696678199,
+          "formula": "=2*(bft*tft*(h+tft+tfb-AQ37-tft/2)+tw*(h+tfb-AQ37)*(h+tfb-AQ37)/2)"
+        },
+        "AR40": {
+          "value": "mm3"
+        },
+        "AS40": {
+          "value": "Sy-BOT"
+        },
+        "AT40": {
+          "value": "="
+        },
+        "AU40": {
+          "value": 317026.6666666667,
+          "formula": "=AU38/(AT32/2)"
+        },
+        "AV40": {
+          "value": "mm3"
+        },
+        "AX40": {
+          "value": "Zx3"
+        },
+        "AY40": {
+          "value": 196134577.77777782,
+          "formula": "=(B_Tee_Top*((AP33-ypma)^2)/2)+(B_Tee_bot*((AP33-tf_Tee_Top-ypma)^2)/2)+(h*tw*(ypma-tf_Tee_bot+(h/2)))+(B_Tee_bot*(ypma-(tf_Tee_Top/2)))"
+        },
+        "BA40": {
+          "value": "Cw"
+        },
+        "BB40": {
+          "value": 16067348573684.21,
+          "formula": "=((BB38^2)*(B_Tee_Top^3)*tf_Tee_Top*BB37)/12"
+        },
+        "BC40": {
+          "value": "mm6"
+        },
+        "A41": {
+          "value": "I-YT =  "
+        },
+        "B41": {
+          "value": 2700.5217635294116,
+          "formula": "=AP54/10000"
+        },
+        "C41": {
+          "value": "(cm4)"
+        },
+        "AO41": {
+          "value": "Iy"
+        },
+        "AP41": {
+          "value": "="
+        },
+        "AQ41": {
+          "value": 31702666.666666668,
+          "formula": "=bft^3*tft/12+bfb^3*tfb/12+h*tw^3/12"
+        },
+        "AR41": {
+          "value": "mm4"
+        },
+        "AX41": {
+          "value": "Zx2"
+        },
+        "AY41": {
+          "value": 282478722.2222222,
+          "formula": "=(B_Tee_bot*(ypma^2)/2)+(B_Tee_bot*((tf_Tee_bot-ypma)^2)/2)+((h*tw)*(tf_Tee_bot+(h/2)-ypma))+((B_Tee_Top*tf_Tee_Top)*(AP33-(tf_Tee_Top/2)-ypma))"
+        },
+        "A42": {
+          "value": "S-YT =     "
+        },
+        "B42": {
+          "value": 180.03478423529413,
+          "formula": "=AP55/1000"
+        },
+        "C42": {
+          "value": "(cm3)"
+        },
+        "AO42": {
+          "value": "SXT"
+        },
+        "AP42": {
+          "value": "="
+        },
+        "AQ42": {
+          "value": 9941121.31226661,
+          "formula": "=AQ39"
+        },
+        "AR42": {
+          "value": "mm3"
+        },
+        "AX42": {
+          "value": "Zx1"
+        },
+        "AY42": {
+          "value": 10824833.333333328,
+          "formula": "=(B_Tee_bot*(ypma^2)/2)-(((B_Tee_bot-tw)*((ypma-tf_Tee_bot)^2))/2)+(B_Tee_Top*((AP33-ypma)^2)/2)-((B_Tee_Top-tw)*((AP33-tf_Tee_Top-ypma)^2)/2)"
+        },
+        "A43": {
+          "value": "R-TT"
+        },
+        "B43": {
+          "value": 7.111893879745695,
+          "formula": "=AP56/10"
+        },
+        "C43": {
+          "value": "(cm)"
+        },
+        "AO43": {
+          "value": "SXB"
+        },
+        "AP43": {
+          "value": "="
+        },
+        "AQ43": {
+          "value": 7705465.40561414,
+          "formula": "=AQ38/AQ37"
+        },
+        "AR43": {
+          "value": "mm3"
+        },
+        "AS43": {
+          "value": "H/3 TOP"
+        },
+        "AT43": {
+          "value": "TW TO AXE"
+        },
+        "AU43": {
+          "value": 875.6058823529411,
+          "formula": "=AP33-AQ37-(AR32/2)"
+        },
+        "AX43": {
+          "value": "Zx final"
+        },
+        "AY43": {
+          "value": 10824833.333333328,
+          "formula": "=IF(AY32>AW33,AY40,IF(AY33>AW33,AY41,AY42))"
+        },
+        "A44": {
+          "value": "Z-YT"
+        },
+        "B44": {
+          "value": 161.5,
+          "formula": "=AY45/1000"
+        },
+        "C44": {
+          "value": "(cm3)"
+        },
+        "AO44": {
+          "value": "SYT"
+        },
+        "AP44": {
+          "value": "="
+        },
+        "AQ44": {
+          "value": 211351.11111111112,
+          "formula": "=AU39"
+        },
+        "AR44": {
+          "value": "mm3"
+        },
+        "AS44": {
+          "value": 289.86862745098034,
+          "formula": "=(AP33-AQ37-AR32)/3"
+        },
+        "AT44": {
+          "value": 869.6058823529411,
+          "formula": "=AP33-AQ37-AR32"
+        },
+        "AU44": {
+          "value": 579.7372549019608,
+          "formula": "=AT44-AS44"
+        },
+        "AV44": {
+          "value": 144.93431372549017,
+          "formula": "=AS44/2"
+        },
+        "AW44": {
+          "value": 724.6715686274509,
+          "formula": "=AU44+AV44"
+        },
+        "AX44": {
+          "value": "Zy"
+        },
+        "AY44": {
+          "value": 358000.0,
+          "formula": "=(tf_Tee_Top*(B_Tee_Top^2)/4)+(tf_Tee_bot*(B_Tee_bot^2)/4)+(h*(tw^2)/4)"
+        },
+        "AZ44": {
+          "value": "x2"
+        },
+        "BA44": {
+          "value": 50.0,
+          "formula": "=AU37-(B_Tee_bot/2)"
+        },
+        "AO45": {
+          "value": "SYB"
+        },
+        "AP45": {
+          "value": "="
+        },
+        "AQ45": {
+          "value": 317026.6666666667,
+          "formula": "=AU40"
+        },
+        "AR45": {
+          "value": "mm3"
+        },
+        "AS45": {
+          "value": 301.86862745098034,
+          "formula": "=AS44+AR32"
+        },
+        "AX45": {
+          "value": "Ztt"
+        },
+        "AY45": {
+          "value": 161500.0,
+          "formula": "=(tf_Tee_Top*AU37)*((B_Tee_Top/2)/2)+(((tw/2)/2)*(tw/2)*h)+((BA44*tf_Tee_bot)*(B_Tee_bot/2)/2)"
+        },
+        "AO46": {
+          "value": "Rxx"
+        },
+        "AP46": {
+          "value": "="
+        },
+        "AQ46": {
+          "value": 718.0099551201728,
+          "formula": "=SQRT(AQ38/AQ36)"
+        },
+        "AR46": {
+          "value": "mm"
+        },
+        "A47": {
+          "value": "Bottom portion properties based on based on Top  Flange with 1/3 of Web to N.Axis    "
+        },
+        "AO47": {
+          "value": "Rxy"
+        },
+        "AP47": {
+          "value": "="
+        },
+        "AQ47": {
+          "value": 43.1840566077116,
+          "formula": "=SQRT(AU38/AQ36)"
+        },
+        "AR47": {
+          "value": "mm"
+        },
+        "AS47": {
+          "value": 376.7980392156863,
+          "formula": "=(AQ37-AU32)/3"
+        },
+        "A48": {
+          "value": "Area="
+        },
+        "B48": {
+          "value": 36.607882352941175,
+          "formula": "=AP57/100"
+        },
+        "C48": {
+          "value": "(cm2)"
+        },
+        "AO48": {
+          "value": "RTT"
+        },
+        "AP48": {
+          "value": "="
+        },
+        "AS48": {
+          "value": 383.7980392156863,
+          "formula": "=AS47+AU32"
+        },
+        "A49": {
+          "value": "yc="
+        },
+        "B49": {
+          "value": 12.201082827221523,
+          "formula": "=AP58/10"
+        },
+        "C49": {
+          "value": "(cm)"
+        },
+        "A50": {
+          "value": "I-XB =    "
+        },
+        "B50": {
+          "value": 5859.295596347306,
+          "formula": "=AP59/10000"
+        },
+        "C50": {
+          "value": "(cm4)"
+        },
+        "AP50": {
+          "value": "top"
+        },
+        "AY50": {
+          "value": 3600.0,
+          "formula": "=B_Tee_Top*tf_Tee_Top"
+        },
+        "A51": {
+          "value": "I-YB =  "
+        },
+        "B51": {
+          "value": 467.3449031372549,
+          "formula": "=AP60/10000"
+        },
+        "C51": {
+          "value": "(cm4)"
+        },
+        "AO51": {
+          "value": "A"
+        },
+        "AP51": {
+          "value": 5339.211764705882,
+          "formula": "=(AQ32*AR32)+((AP33-AQ37-AR32)/3)*AS32"
+        },
+        "AQ51": {
+          "value": "Zx"
+        },
+        "AR51": {
+          "value": 11521997.647058822,
+          "formula": "=((B_Tee_Top*tf_Tee_Top)*AS51+((AP32/2)*AS32*AT51))*2"
+        },
+        "AS51": {
+          "value": 875.6058823529411,
+          "formula": "=AP33-AQ37-(tf_Tee_Top/2)"
+        },
+        "AT51": {
+          "value": 434.80294117647054,
+          "formula": "=(AP33-AQ37-tf_Tee_Top)/2"
+        },
+        "AV51": {
+          "value": "y"
+        },
+        "AW51": {
+          "value": 881.6058823529411,
+          "formula": "=h_full-AQ37"
+        },
+        "A52": {
+          "value": "S-YB =     "
+        },
+        "B52": {
+          "value": 58592.95596347306,
+          "formula": "=AP59/1000"
+        },
+        "C52": {
+          "value": "(cm3)"
+        },
+        "AO52": {
+          "value": "yc"
+        },
+        "AP52": {
+          "value": 55.16582179123242,
+          "formula": "=((tw*(h_Tee_Top^2))+(B_Tee_Top*tf_Tee_Top^2)-(tw*tf_Tee_Top^2))/(2*AP51)"
+        },
+        "AW52": {
+          "value": 1739.2117647058822,
+          "formula": "=2*(AW51-tf_Tee_Top)"
+        },
+        "AY52": {
+          "value": 1633.3333333333333,
+          "formula": "=(AQ36-(2*AY50))/tw"
+        },
+        "AO53": {
+          "value": "Ix"
+        },
+        "AP53": {
+          "value": 38936049.314276196,
+          "formula": "=(tw*(h_Tee_Top^3)/3)+((B_Tee_Top-tw)*(tf_Tee_Top^3)/3)-(AP51*(AP52^2))"
+        },
+        "A54": {
+          "value": "Weight ="
+        },
+        "B54": {
+          "value": 133.45,
+          "formula": "=(AP28*AS28+AQ28*AR28+AT28*AU28)*AT30/10000"
+        },
+        "C54": {
+          "value": "kg/m"
+        },
+        "AO54": {
+          "value": "Iy"
+        },
+        "AP54": {
+          "value": 27005217.635294117,
+          "formula": "=(((h_Tee_Top-tf_Tee_Top)*(tw^3))/12)+((tf_Tee_Top*B_Tee_Top^3)/12)"
+        },
+        "AQ54": {
+          "value": 85.2,
+          "formula": "=ROUND(100-((AQ41-AP54)/AQ41)*100,1)"
+        },
+        "AO55": {
+          "value": "Sy"
+        },
+        "AP55": {
+          "value": 180034.78423529412,
+          "formula": "=2*AP54/B_Tee_Top"
+        },
+        "A56": {
+          "value": "2. Local Buckling "
+        },
+        "AP56": {
+          "value": 71.11893879745695,
+          "formula": "=SQRT(AP54/AP51)"
+        },
+        "A57": {
+          "value": "Flange of I-Section:  Table B4.1b Case 11"
+        },
+        "G57": {
+          "value": "Non-Compact",
+          "formula": "=IF(G58<=G59,\"Compact\",IF(G58>G59,IF(G58<=G60,\"Non-Compact\",\"Slender\")))"
+        },
+        "AO57": {
+          "value": "A"
+        },
+        "AP57": {
+          "value": 3660.788235294118,
+          "formula": "=(B_Tee_bot*tf_Tee_bot)+(h_Tee_bot*tw)-(tf_Tee_bot*tw)"
+        },
+        "AR57": {
+          "value": "Compact"
+        },
+        "AS57": {
+          "value": 3.0
+        },
+        "AT57": {
+          "value": "Compact"
+        },
+        "B58": {
+          "value": "bf / 2tf\t"
+        },
+        "F58": {
+          "value": "="
+        },
+        "G58": {
+          "value": 12.5,
+          "formula": "=bft/(2*tft)"
+        },
+        "AO58": {
+          "value": "yc"
+        },
+        "AP58": {
+          "value": 122.01082827221522,
+          "formula": "=((tw*(h_Tee_bot^2))+(B_Tee_bot*tf_Tee_bot^2)-(tw*tf_Tee_bot^2))/(2*AP57)"
+        },
+        "AR58": {
+          "value": "Non-Compact"
+        },
+        "AS58": {
+          "value": 2.0
+        },
+        "AT58": {
+          "value": "Non-Compact"
+        },
+        "B59": {
+          "value": "Compact Limit  λp=0.38 sqrt (E / Fy)"
+        },
+        "F59": {
+          "value": "="
+        },
+        "G59": {
+          "value": 9.375268112108209,
+          "formula": "=0.38*SQRT(E/Fy)"
+        },
+        "AO59": {
+          "value": "Ix"
+        },
+        "AP59": {
+          "value": 58592955.96347306,
+          "formula": "=(tw*(h_Tee_bot^3)/3)+((B_Tee_bot-tw)*(tf_Tee_bot^3)/3)-(AP57*(AP58^2))"
+        },
+        "AR59": {
+          "value": "Slender"
+        },
+        "AS59": {
+          "value": 1.0
+        },
+        "AT59": {
+          "value": "Slender"
+        },
+        "B60": {
+          "value": "Noncompact Limit  λr=1.0 sqrt (E / Fy)"
+        },
+        "F60": {
+          "value": "="
+        },
+        "G60": {
+          "value": 24.671758189758446,
+          "formula": "=1*SQRT(E/Fy)"
+        },
+        "AO60": {
+          "value": "Iy"
+        },
+        "AP60": {
+          "value": 4673449.031372549,
+          "formula": "=(((h_Tee_bot-tf_Tee_bot)*(tw^3))/12)+((tf_Tee_bot*B_Tee_bot^3)/12)"
+        },
+        "A61": {
+          "value": "For web Web of I-Section: Table B4.1b Case 16"
+        },
+        "G61": {
+          "value": "Slender",
+          "formula": "=IF(G62<=G63,\"Compact\",IF(G62>G63,IF(G62<=G64,\"Non-Compact\",\"Slender\")))"
+        },
+        "AO61": {
+          "value": "Sx"
+        },
+        "AP61": {
+          "value": 46734.49031372549,
+          "formula": "=2*AP60/B_Tee_bot"
+        },
+        "B62": {
+          "value": "hc / tw\t"
+        },
+        "F62": {
+          "value": "="
+        },
+        "G62": {
+          "value": 289.8686274509804,
+          "formula": "=hc/C23"
+        },
+        "AO62": {
+          "value": "R-xx"
+        },
+        "AP62": {
+          "value": 126.5130717649383,
+          "formula": "=SQRT(AP59/AP57)"
+        },
+        "AR62": {
+          "value": "Non-Compact",
+          "formula": "=VLOOKUP(G57,AR57:AS59,1)"
+        },
+        "AT62": {
+          "value": 2.0,
+          "formula": "=IF(AR62=\"Non-Compact\",2,IF(AR62=\"Compact\",3,1))"
+        },
+        "B63": {
+          "value": "Compact Limit λp"
+        },
+        "F63": {
+          "value": "="
+        },
+        "G63": {
+          "value": 92.76581079349175,
+          "formula": "=3.76*SQRT(E/Fy)"
+        },
+        "AR63": {
+          "value": "Slender",
+          "formula": "=VLOOKUP(G61,AR57:AS59,1)"
+        },
+        "AT63": {
+          "value": 1.0,
+          "formula": "=IF(AR63=\"Non-Compact\",2,IF(AR63=\"Compact\",3,1))"
+        },
+        "B64": {
+          "value": "Noncompact Limit λr=5.7 sqrt (E / Fy)"
+        },
+        "F64": {
+          "value": "="
+        },
+        "G64": {
+          "value": 140.62902168162316,
+          "formula": "=5.7*SQRT(E/Fy)"
+        },
+        "J64": {
+          "value": "**** kiểm tra lại phương trình ổn định cục bộ mục 16"
+        },
+        "AT64": {
+          "value": 1.0,
+          "formula": "=MIN(AT62:AT63)"
+        },
+        "A66": {
+          "value": "Section classification:  "
+        },
+        "C66": {
+          "value": "Slender",
+          "formula": "=IF(AT64=3,AT57,IF(AT64=2,AT58,AT59))"
+        },
+        "F66": {
+          "value": "PLATE GIRDERS",
+          "formula": "=IF(C66=\"Slender\",\"PLATE GIRDERS\",\"\")"
+        },
+        "J66": {
+          "value": 105.92870739264288,
+          "formula": "=((hc/hp)*(SQRT(E_kn_cm2/Fy_Kn_cm2)))/((((0.54*AR96)/Myc)-0.09)^2)"
+        },
+        "A68": {
+          "value": "3. Axial Compression Under Total Longitudnal Force "
+        },
+        "A69": {
+          "value": "Axial load is assummed to be carried only by top flange."
+        },
+        "AP69": {
+          "value": 1.0
+        },
+        "A70": {
+          "value": "Slender Unstiffened Elements Qs = "
+        },
+        "D70": {
+          "value": 0.6661565217391304,
+          "formula": "=IF(D71<=D72,AP69,IF(D71<D73,AP71,AP70))"
+        },
+        "F70": {
+          "value": "(AISC 360 - 10 Eq E7-8)"
+        },
+        "AP70": {
+          "value": 1.1760833209855825,
+          "formula": "=1.415-(0.65*((B_Tee_Top/10)/(tf_Tee_Top/10))*SQRT(Fy_Kn_cm2/(E*D74)))"
+        },
+        "A71": {
+          "value": "b/t="
+        },
+        "D71": {
+          "value": 25.0,
+          "formula": "=B_Tee_Top/tf_Tee_Top"
+        },
+        "AP71": {
+          "value": 0.6661565217391304,
+          "formula": "=(0.9*E_kn_cm2*D74)/(Fy_Kn_cm2*(((B_Tee_Top/10)/(tf_Tee_Top/10))^2))"
+        },
+        "A72": {
+          "value": "0.64(E*kc/Fy)^1/2"
+        },
+        "D72": {
+          "value": 13.765337690704522,
+          "formula": "=0.64*SQRT((E*D74)/Fy)"
+        },
+        "A73": {
+          "value": "1.17(E*kc/Fy)^1/2"
+        },
+        "D73": {
+          "value": 25.164757965819202,
+          "formula": "=1.17*SQRT((E*D74)/Fy)"
+        },
+        "A74": {
+          "value": "kc="
+        },
+        "D74": {
+          "value": 0.76,
+          "formula": "=IF((4/SQRT(h_Tee_Top/tf_Tee_Top))<0.35,0.35,IF((4/SQRT(h_Tee_Top/tf_Tee_Top))>0.76,0.76,(4/SQRT(h_Tee_Top/tf_Tee_Top))))"
+        },
+        "A76": {
+          "value": "Slender Stiffened Elements Qa = "
+        },
+        "D76": {
+          "value": 1.0
+        },
+        "F76": {
+          "value": "(AISC 360 - 10 Eq E7-16)"
+        },
+        "A77": {
+          "value": "Q= min(Qs,Qa)="
+        },
+        "C77": {
+          "value": 0.6661565217391304,
+          "formula": "=MIN(D70,D76)"
+        },
+        "A79": {
+          "value": "Elastic buckling stress Fe= ((π^2)E/(KL/r)^2)"
+        },
+        "E79": {
+          "value": 788.0057452100842,
+          "formula": "=((3.14^2)*E_kn_cm2)/(((1*H12*100)/AQ47)^2)"
+        },
+        "F79": {
+          "value": "(kN/cm2)  "
+        },
+        "A80": {
+          "value": "KL/r="
+        },
+        "D80": {
+          "value": 98.42666550376458,
+          "formula": "=(1*H12*1000)/(AP56)"
+        },
+        "G80": {
+          "value": null,
+          "formula": "=IF(D80>200,\"Slender For Top Flange Over 200\",\"\")"
+        },
+        "A81": {
+          "value": "4.71(E/Qfy)^1/2"
+        },
+        "D81": {
+          "value": 142.3747140840898,
+          "formula": "=4.71*SQRT(E_kn_cm2/(C77*Fy_Kn_cm2))"
+        },
+        "AN81": {
+          "value": 1.0,
+          "formula": "=IF(D80>D81,2,1)"
+        },
+        "A82": {
+          "value": "Fcr=Q(0.658*(Q*Fy/Fe))*Fy"
+        },
+        "D82": {
+          "value": 22.703556174380576,
+          "formula": "=C77*Fy_Kn_cm2*(0.658^((C77*Fy_Kn_cm2)/E79))"
+        },
+        "E82": {
+          "value": "(kN/cm2)  "
+        },
+        "AN82": {
+          "value": 22.703556174380576,
+          "formula": "=IF(D80>D81,D83,D82)"
+        },
+        "A83": {
+          "value": "Fcr=0.877Fe"
+        },
+        "D83": {
+          "value": 691.0810385492439,
+          "formula": "=0.877*E79"
+        },
+        "E83": {
+          "value": "(kN/cm2)  "
+        },
+        "A84": {
+          "value": "Pn="
+        },
+        "D84": {
+          "value": 735.5952200499306,
+          "formula": "=(AN82*(bft/10)*(tft/10))*0.9"
+        },
+        "E84": {
+          "value": "(kN)  "
+        },
+        "A86": {
+          "value": "Total Longitudnal Force  =    "
+        },
+        "D86": {
+          "value": 20.864,
+          "formula": "=((F22*E17/100)*I22)*1.6"
+        },
+        "E86": {
+          "value": "(kN) "
+        },
+        "AP88": {
+          "value": "Pick Rpc"
+        },
+        "AQ88": {
+          "value": 1.0888946018570644,
+          "formula": "=IF(AP92>0.23,AQ90,AR104)"
+        },
+        "A89": {
+          "value": "4. Major Axis Bending Around X-X: "
+        },
+        "A90": {
+          "value": "4.1 Compression Flange Yielding:"
+        },
+        "D90": {
+          "value": "(AISC 360 - 10  F4-1)"
+        },
+        "AN90": {
+          "value": "Rpc Case"
+        },
+        "AO90": {
+          "value": 1.0,
+          "formula": "=IF(AP92>0.23,1,2)"
+        },
+        "AQ90": {
+          "value": 1.0888946018570644,
+          "formula": "=IF(AQ93<=AS95,AR98,AR101)"
+        },
+        "A91": {
+          "value": "Mn1 = Rpc*Fy*Sxc"
+        },
+        "C91": {
+          "value": 3734.5674999999983,
+          "formula": "=(B92*Fy_Kn_cm2*B30)/100"
+        },
+        "D91": {
+          "value": "(kN/m)"
+        },
+        "A92": {
+          "value": "Rpc="
+        },
+        "B92": {
+          "value": 1.0888946018570644,
+          "formula": "=AQ88"
+        },
+        "AO92": {
+          "value": "Iyc/Iy="
+        },
+        "AP92": {
+          "value": 0.8518279524948726,
+          "formula": "=B41/B29"
+        },
+        "A93": {
+          "value": "λ =hc/tw"
+        },
+        "B93": {
+          "value": 50.31143790849672,
+          "formula": "=AQ93"
+        },
+        "AP93": {
+          "value": "hc/tw"
+        },
+        "AQ93": {
+          "value": 50.31143790849672,
+          "formula": "=h_Tee_Top/tw"
+        },
+        "AU93": {
+          "value": "E N.MM"
+        },
+        "AV93": {
+          "value": 210000.0,
+          "formula": "=E"
+        },
+        "AW93": {
+          "value": "hc"
+        },
+        "AX93": {
+          "value": 1739.2117647058822,
+          "formula": "=hc*10"
+        },
+        "A94": {
+          "value": "4.2 Lateral Torsional Buckling Yielding:"
+        },
+        "D94": {
+          "value": "(AISC 360 - 10 F4-2)"
+        },
+        "AU94": {
+          "value": "FY"
+        },
+        "AV94": {
+          "value": 345.0,
+          "formula": "=Fy"
+        },
+        "AW94": {
+          "value": "hp"
+        },
+        "AX94": {
+          "value": 1633.3333333333335,
+          "formula": "=hp*10"
+        },
+        "A95": {
+          "value": "Moment gradient Cb="
+        },
+        "C95": {
+          "value": 1.0
+        },
+        "AP95": {
+          "value": "when"
+        },
+        "AQ95": {
+          "value": "hc/tw<=λpw"
+        },
+        "AR95": {
+          "value": "λpw="
+        },
+        "AS95": {
+          "value": 92.76581079349175,
+          "formula": "=G63"
+        },
+        "AQ96": {
+          "value": "Mp=min ( Zx*Fy ,1.6*Sxc*Fy )"
+        },
+        "AR96": {
+          "value": 373456.7499999998,
+          "formula": "=MIN(Fy_Kn_cm2*B36,1.6*Sxc*Fy_Kn_cm2)"
+        },
+        "AT96": {
+          "value": "Kn.cm"
+        },
+        "AU96": {
+          "value": 3734567499.999998,
+          "formula": "=AR96*(1000)*(10)"
+        },
+        "AV96": {
+          "value": "N.MM"
+        },
+        "AW96": {
+          "value": 105.92870739264293,
+          "formula": "=((AX93/AX94)*SQRT(AV93/AV94))/((0.54*(AU96/AU97)-0.09)^2)"
+        },
+        "AQ97": {
+          "value": "Myc=Fy*Sxc"
+        },
+        "AR97": {
+          "value": 342968.68527319806,
+          "formula": "=Fy_Kn_cm2*Sxc"
+        },
+        "AT97": {
+          "value": "Kn.cm"
+        },
+        "AU97": {
+          "value": 3429686852.731981,
+          "formula": "=AR97*(1000)*(10)"
+        },
+        "AV97": {
+          "value": "N.MM"
+        },
+        "A98": {
+          "value": "Runway beam unbraced length Lb="
+        },
+        "D98": {
+          "value": 700.0,
+          "formula": "=H12*100"
+        },
+        "E98": {
+          "value": "(cm)"
+        },
+        "AQ98": {
+          "value": "Rpc=Mp/Myc"
+        },
+        "AR98": {
+          "value": 1.0888946018570644,
+          "formula": "=AR96/AR97"
+        },
+        "A99": {
+          "value": "The limiting laterally unbraced length for the limit state of yielding Lp=1.1*rt*sqrt(E/fy)"
+        },
+        "H99": {
+          "value": "(AISC 360  Eq F4-7)"
+        },
+        "A100": {
+          "value": "Lp="
+        },
+        "B100": {
+          "value": 193.7441030404295,
+          "formula": "=1.1*(AQ119/10)*SQRT(E_kn_cm2/Fy_Kn_cm2)"
+        },
+        "C100": {
+          "value": "(cm)"
+        },
+        "AP100": {
+          "value": "when"
+        },
+        "AQ100": {
+          "value": "hc/tw>λpw"
+        },
+        "AR100": {
+          "value": "λpw="
+        },
+        "AS100": {
+          "value": 92.76581079349175,
+          "formula": "=G63"
+        },
+        "A101": {
+          "value": "The limiting unbraced length for the limit state of inelastic lateral-torsional buckling Lr"
+        },
+        "AQ101": {
+          "value": "Rpc="
+        },
+        "AR101": {
+          "value": 1.1677435654906099,
+          "formula": "=((AR96/AR97)-(((AR96/AR97)-1)*((AQ93-AS100)/(G64-AS100))))"
+        },
+        "AU101": {
+          "value": 1.0888946018570644,
+          "formula": "=AR96/Myc"
+        },
+        "AN102": {
+          "value": "Rpc Case"
+        },
+        "AO102": {
+          "value": 2.0,
+          "formula": "=IF(AP104>0.23,1,2)"
+        },
+        "AO103": {
+          "value": "Iyc/Iy="
+        },
+        "AP103": {
+          "value": 0.8518279524948726,
+          "formula": "=B41/B29"
+        },
+        "E104": {
+          "value": "="
+        },
+        "F104": {
+          "value": 663.8072576346854,
+          "formula": "=1.95*(AQ119/10)*(E_kn_cm2/B108)*SQRT((J/(B30*(h0/10)))+SQRT((J/((B30*(h0/10))^2))+(6.76*((B108/E_kn_cm2)^2))))"
+        },
+        "G104": {
+          "value": "(cm)"
+        },
+        "H104": {
+          "value": "(AISC 360  Eq F4-8)"
+        },
+        "AQ104": {
+          "value": "Rpc="
+        },
+        "AR104": {
+          "value": 1.0,
+          "formula": "=1"
+        },
+        "A107": {
+          "value": "Sxt/Sxc"
+        },
+        "B107": {
+          "value": 1.2901389843400748,
+          "formula": "=B30/B31"
+        },
+        "AO107": {
+          "value": "Sxt/Sxc"
+        },
+        "AP107": {
+          "value": 1.2901389843400748,
+          "formula": "=B107"
+        },
+        "A108": {
+          "value": "FL = 0.7Fy",
+          "formula": "=IF(B107>=0.7,AP108,AP109)"
+        },
+        "B108": {
+          "value": 24.15,
+          "formula": "=IF(B107>=0.7,AR108,AR109)"
+        },
+        "C108": {
+          "value": "(kn/cm2)"
+        },
+        "AP108": {
+          "value": "FL = 0.7Fy"
+        },
+        "AR108": {
+          "value": 24.15,
+          "formula": "=0.7*Fy_Kn_cm2"
+        },
+        "AP109": {
+          "value": "FL=FY*SXT/SXC"
+        },
+        "AR109": {
+          "value": 44.50979495973258,
+          "formula": "=Fy_Kn_cm2*(AP107)"
+        },
+        "A110": {
+          "value": "For Lp < Lb ≤ Lr"
+        },
+        "AR110": {
+          "value": 17.25,
+          "formula": "=0.5*Fy_Kn_cm2"
+        },
+        "E111": {
+          "value": "="
+        },
+        "F111": {
+          "value": 229808.52377235354,
+          "formula": "=Cb*((B92*AR97)-(((B92*AR97)-(B108*B30))*((D98-B100)/(F104-B100))))"
+        },
+        "G111": {
+          "value": "(Kn.cm)"
+        },
+        "H111": {
+          "value": "(AISC 360  Eq F4-8)"
+        },
+        "A114": {
+          "value": "For Lb > Lr"
+        },
+        "AQ115": {
+          "value": 2.8986862745098034,
+          "formula": "=((hc*10)*tw)/(B_Tee_Top*tf_Tee_Top)"
+        },
+        "D117": {
+          "value": "="
+        },
+        "E117": {
+          "value": 21.536824508545966,
+          "formula": "=(Cb*(3.14^2)*E_kn_cm2)/((D98/(AQ119/10))^2)*SQRT(1+((0.078*J)/(B30*(h0/10)))*((D98/AQ119)^2))"
+        },
+        "F117": {
+          "value": "(kn/cm2)"
+        },
+        "G117": {
+          "value": "(AISC 360  Eq F4-5)"
+        },
+        "AQ119": {
+          "value": 71.38972480572583,
+          "formula": "=B_Tee_Top/SQRT(12*((h0/h_full)+(AQ115/6)*((h^2)/(h0*h_full))))"
+        },
+        "AN120": {
+          "value": 3.0,
+          "formula": "=IF(D98<=B100,1,IF(D98>F104,3,2))"
+        },
+        "C121": {
+          "value": 214100.18512045217,
+          "formula": "=E117*B30"
+        },
+        "D121": {
+          "value": "(Kn.cm)"
+        },
+        "F121": {
+          "value": "(AISC 360  Eq F4-3)"
+        },
+        "A124": {
+          "value": "Lateral Torsional Buckling Norminal Strenght: Mn2"
+        },
+        "E124": {
+          "value": 2141.0018512045217,
+          "formula": "=IF(D98<=B100,99999999,IF(D98>F104,C121,F111))/100"
+        },
+        "F124": {
+          "value": "(kN.m)"
+        },
+        "A127": {
+          "value": "4.3 Compression Flange Local Buckling:"
+        },
+        "E127": {
+          "value": "(AISC 360 - 10 F4-3)"
+        },
+        "B130": {
+          "value": "="
+        },
+        "C130": {
+          "value": 0.35,
+          "formula": "=IF(AQ130<=0.35,0.35,IF(AQ130>=0.76,0.76,AQ130))"
+        },
+        "E130": {
+          "value": "="
+        },
+        "F130": {
+          "value": 12.5,
+          "formula": "=bft/(2*tft)"
+        },
+        "AQ130": {
+          "value": 0.21908902300206645,
+          "formula": "=4/SQRT((h/tw))"
+        },
+        "A134": {
+          "value": "For sections with noncompact flanges"
+        },
+        "D136": {
+          "value": "="
+        },
+        "E136": {
+          "value": 346210.46133098414,
+          "formula": "=(Rpc*Myc)-(((Rpc*Myc)-(B108*Sxc))*((F130-G59)/(G60-G59)))"
+        },
+        "F136": {
+          "value": "(kn.cm)"
+        },
+        "G136": {
+          "value": "(AISC 360  Eq F4-13)"
+        },
+        "A139": {
+          "value": "For sections with slender flanges"
+        },
+        "C141": {
+          "value": "="
+        },
+        "D141": {
+          "value": 420867.31187611923,
+          "formula": "=(0.9*E_kn_cm2*C130*Sxc)/(F130^2)"
+        },
+        "E141": {
+          "value": "(kn.cm)"
+        },
+        "G141": {
+          "value": "(AISC 360  Eq F4-14)"
+        },
+        "A144": {
+          "value": "Compression Flange Local Buckling norminal strenght Mn3="
+        },
+        "F144": {
+          "value": 3462.104613309841,
+          "formula": "=IF(G57=AT57,\"the limit state of local buckling does not\napply\",IF(G57=AT58,(E136/100),(D141/100)))"
+        },
+        "G144": {
+          "value": "(kN.m)"
+        },
+        "AN144": {
+          "value": 2.0,
+          "formula": "=IF(G57=AT57,1,IF(G57=AT58,2,3))"
+        },
+        "A150": {
+          "value": "4.3 Tension Flange Yielding:"
+        },
+        "D150": {
+          "value": "(AISC 360 - 10 F4-4)"
+        },
+        "AN151": {
+          "value": "Rpt Case"
+        },
+        "A152": {
+          "value": "hc/tw="
+        },
+        "B152": {
+          "value": 28.986862745098037,
+          "formula": "=hc/tw"
+        },
+        "AO152": {
+          "value": "Myt=Fy*Sxt"
+        },
+        "AP152": {
+          "value": 265838.55649368785,
+          "formula": "=Fy_Kn_cm2*Sxt"
+        },
+        "AQ152": {
+          "value": "Kn.cm"
+        },
+        "A153": {
+          "value": "λpw="
+        },
+        "B153": {
+          "value": 92.76581079349175,
+          "formula": "=G63"
+        },
+        "A155": {
+          "value": "For hc/tw<=λpw"
+        },
+        "B157": {
+          "value": "="
+        },
+        "C157": {
+          "value": 1.4048253756932632,
+          "formula": "=AR96/AP152"
+        },
+        "E157": {
+          "value": "(AISC 360  Eq F4-16a)"
+        },
+        "AN159": {
+          "value": 1.0,
+          "formula": "=IF(B152<=B153,1,2)"
+        },
+        "A160": {
+          "value": "For hc/tw>λpw"
+        },
+        "E162": {
+          "value": -0.26226340341232346,
+          "formula": "=(AR96/AP152)-(((AR96/AP152)-1)*((G62-G63)/(G64-G63)))"
+        },
+        "F162": {
+          "value": "(AISC 360  Eq F4-16b)"
+        },
+        "A166": {
+          "value": "Tension Flange Yielding norminal strenght "
+        },
+        "B167": {
+          "value": "="
+        },
+        "C167": {
+          "value": 373456.7499999998,
+          "formula": "=IF(B152<=B153,C157*AP152,E162*AP152)"
+        },
+        "D167": {
+          "value": "(kn.cm)"
+        },
+        "F167": {
+          "value": "(AISC 360  Eq F4-15)"
+        },
+        "A171": {
+          "value": "Tension Flange Yielding norminal strenght Mn4="
+        },
+        "E171": {
+          "value": 3734.5674999999983,
+          "formula": "=C167/100"
+        },
+        "F171": {
+          "value": "(kN.m)"
+        },
+        "A174": {
+          "value": "The nominal flexural strength, Mn Major Axis Bending Around X-X: "
+        },
+        "A176": {
+          "value": "Mn=min(Mn1,Mn2,Mn3,Mn4)"
+        },
+        "D176": {
+          "value": 1926.9016660840696,
+          "formula": "=(MIN(C91,E124,F144,E171))*0.9"
+        },
+        "E176": {
+          "value": "(kN.m)"
+        },
+        "A178": {
+          "value": "5. Minor Axis Bending Y-Y: "
+        },
+        "A179": {
+          "value": "For top running crane, top flange is checked for bending about Y-Y axis"
+        },
+        "A180": {
+          "value": "5.1 Yielding:"
+        },
+        "D180": {
+          "value": "(AISC 360 - 10 F6)"
+        },
+        "C182": {
+          "value": "="
+        },
+        "D182": {
+          "value": 5571.75,
+          "formula": "=Fy_Kn_cm2*B44"
+        },
+        "F182": {
+          "value": 9937.920089788237,
+          "formula": "=1.6*Fy_Kn_cm2*B42"
+        },
+        "G182": {
+          "value": "PASS",
+          "formula": "=IF(F182>=D182,\"PASS\",\"FAIL\")"
+        },
+        "H182": {
+          "value": "(AISC 360  Eq F6-1)"
+        },
+        "AQ183": {
+          "value": "Mp="
+        },
+        "AR183": {
+          "value": 5571.75,
+          "formula": "=D182"
+        },
+        "A184": {
+          "value": "5.2 Flange Local Buckling"
+        },
+        "AQ184": {
+          "value": "Myc=Fy*Sxc"
+        },
+        "AR184": {
+          "value": 342968.68527319806,
+          "formula": "=Fy_Kn_cm2*Sxc"
+        },
+        "A185": {
+          "value": "Top flange compactness"
+        },
+        "C185": {
+          "value": "Non-Compact",
+          "formula": "=G57"
+        },
+        "E185": {
+          "value": null,
+          "formula": "=IF(AN189=1,\" flange local buckling does not apply\",\"\")"
+        },
+        "A187": {
+          "value": "For sections with noncompact flanges"
+        },
+        "D189": {
+          "value": "="
+        },
+        "E189": {
+          "value": 5321.732482076025,
+          "formula": "=D182-(((B192-G59)/(G60-G59))*(D182-(0.7*Fy_Kn_cm2*B42)))"
+        },
+        "F189": {
+          "value": "(kn.cm)"
+        },
+        "G189": {
+          "value": "(AISC 360  Eq F6-2)"
+        },
+        "AN189": {
+          "value": 2.0,
+          "formula": "=IF(C185=AT57,1,IF(C185=AT58,2,3))"
+        },
+        "A192": {
+          "value": "λ=b/tf="
+        },
+        "B192": {
+          "value": 12.5,
+          "formula": "=B_Tee_Top/(2*tf_Tee_Top)"
+        },
+        "AN192": {
+          "value": 5321.732482076025,
+          "formula": "=IF(AN189=1,99999999,IF(AN189=2,E189,F196))"
+        },
+        "A194": {
+          "value": "For sections with slender flanges"
+        },
+        "B196": {
+          "value": 92.73599999999999,
+          "formula": "=(0.69*E_kn_cm2)/(B192^2)"
+        },
+        "C196": {
+          "value": "(kN/cm2)  "
+        },
+        "E196": {
+          "value": "="
+        },
+        "F196": {
+          "value": 16695.705750844234,
+          "formula": "=B196*B42"
+        },
+        "G196": {
+          "value": "(kn.cm)"
+        },
+        "H196": {
+          "value": "(AISC 360  Eq F6-3)"
+        },
+        "A199": {
+          "value": "The nominal flexural strength, Mn Minor Axis Bending Around Y-Y: "
+        },
+        "G199": {
+          "value": "Mn-y"
+        },
+        "H199": {
+          "value": 47.895592338684224,
+          "formula": "=(MIN(D182,AN192)/100)*0.9"
+        },
+        "I199": {
+          "value": "(kN.m)"
+        },
+        "A202": {
+          "value": "6.Check Biaxial Bending on Top Flange"
+        },
+        "G204": {
+          "value": "AISC 360  Eq H1-1b"
+        },
+        "A208": {
+          "value": "7.Check web capacity due to wheel load (Web yielding/Crippling/Sidesway buckling):"
+        },
+        "A210": {
+          "value": "7.1 Web Local Yielding"
+        },
+        "A211": {
+          "value": "This section applies to single-concentrated forces and both components of double concentrated forces"
+        },
+        "C213": {
+          "value": 227.7,
+          "formula": "=(Fy_Kn_cm2*(tw/10)*((5*(tf_Tee_Top/10))+(G18)))*1"
+        },
+        "D213": {
+          "value": "(kN)"
+        },
+        "F213": {
+          "value": "AISC 360  Eq J10-2"
+        },
+        "A215": {
+          "value": "7.2 Web Local Crippling"
+        },
+        "A216": {
+          "value": "This section applies to compressive single-concentrated forces \ncomponent of double-concentrated forces."
+        },
+        "A217": {
+          "value": "or the compressive component of double-concentrated forces."
+        },
+        "AP217": {
+          "value": "d"
+        },
+        "AQ217": {
+          "value": 201.9,
+          "formula": "=h_full/10"
+        },
+        "AP218": {
+          "value": "tw"
+        },
+        "AQ218": {
+          "value": 0.6,
+          "formula": "=tw/10"
+        },
+        "A219": {
+          "value": "+When point load distance from the member end that is greater than or equal to d/2"
+        },
+        "AP219": {
+          "value": "lb"
+        },
+        "AQ219": {
+          "value": 5.0,
+          "formula": "=G18"
+        },
+        "AP220": {
+          "value": "tf"
+        },
+        "AQ220": {
+          "value": 1.2,
+          "formula": "=tf_Tee_Top/10"
+        },
+        "D222": {
+          "value": "="
+        },
+        "E222": {
+          "value": 355.7845060654627,
+          "formula": "=0.8*(AQ218^2)*(SQRT((E_kn_cm2*Fy_Kn_cm2*AQ220)/AQ218))*(1+((3*(AQ219/AQ217)*((AQ218/AQ220)^1.5))))"
+        },
+        "F222": {
+          "value": "(kN)"
+        },
+        "G222": {
+          "value": "AISC 360  Eq J10-4"
+        },
+        "A225": {
+          "value": "+When point load distance from the member end that is less than d/2"
+        },
+        "D228": {
+          "value": "="
+        },
+        "E228": {
+          "value": 177.89225303273136,
+          "formula": "=0.4*(AQ218^2)*(SQRT((E_kn_cm2*Fy_Kn_cm2*AQ220)/AQ218))*(1+((3*(AQ219/AQ217)*((AQ218/AQ220)^1.5))))"
+        },
+        "F228": {
+          "value": "(kN)"
+        },
+        "G228": {
+          "value": "AISC 360  Eq J10-5a"
+        },
+        "A231": {
+          "value": "Web local cripling Rn="
+        },
+        "C231": {
+          "value": 133.41918977454853,
+          "formula": "=(MIN(E228,E222))*0.75"
+        },
+        "D231": {
+          "value": "(kN)"
+        },
+        "A233": {
+          "value": "7.3 Web Sidesway Buckling"
+        },
+        "A234": {
+          "value": "Compression flange is not restrained against rotation"
+        },
+        "B235": {
+          "value": 14.285714285714286,
+          "formula": "=(h/tw)/((H12*1000)/B_Tee_Top)"
+        },
+        "D235": {
+          "value": ">1.7 the limit state of web sidesway buckling does not apply",
+          "formula": "=IF(B235>1.7,\">1.7 the limit state of web sidesway buckling does not apply\",\"\")"
+        },
+        "A237": {
+          "value": "1.5Ma="
+        },
+        "B237": {
+          "value": 30.0,
+          "formula": "=1.5*G15"
+        },
+        "J237": {
+          "value": "ASD"
+        },
+        "A238": {
+          "value": "Cr="
+        },
+        "B238": {
+          "value": 662000.0,
+          "formula": "=IF(B237>=H199,331000,662000)"
+        },
+        "AN239": {
+          "value": 1.0,
+          "formula": "=IF(D235=\">1.7 the limit state of web sidesway buckling does not apply\",1,2)"
+        },
+        "C240": {
+          "value": "="
+        },
+        "D240": {
+          "value": 4252.240233236154,
+          "formula": "=((B238*(AP245^3)*AP249)/((AP246^2)))*((0.4*(((AP246/AP245)/(AP247/AP248))^3)))*0.85"
+        },
+        "E240": {
+          "value": "(kN)"
+        },
+        "F240": {
+          "value": "AISC 360  Eq J10-6"
+        },
+        "AN240": {
+          "value": 999999.0,
+          "formula": "=IF(AN239,999999,D240)"
+        },
+        "F244": {
+          "value": "Wheel loads ="
+        },
+        "H244": {
+          "value": 71.72,
+          "formula": "=E17+(F20*E17/100)"
+        },
+        "I244": {
+          "value": "(kN)"
+        },
+        "A245": {
+          "value": "Web capacity due to wheel load (Web yielding/Crippling/Sidesway buckling)"
+        },
+        "H245": {
+          "value": 133.41918977454853,
+          "formula": "=MIN(C213,C231,AN240)"
+        },
+        "I245": {
+          "value": "(kN)"
+        },
+        "AN245": {
+          "value": "tw"
+        },
+        "AO245": {
+          "value": 6.0,
+          "formula": "=tw"
+        },
+        "AP245": {
+          "value": 0.6,
+          "formula": "=AO245/10"
+        },
+        "AN246": {
+          "value": "h"
+        },
+        "AO246": {
+          "value": 2000.0,
+          "formula": "=h"
+        },
+        "AP246": {
+          "value": 200.0,
+          "formula": "=AO246/10"
+        },
+        "A247": {
+          "value": "6. Shear along Y - Y: "
+        },
+        "C247": {
+          "value": "AISC 360-G2"
+        },
+        "AN247": {
+          "value": "Lb"
+        },
+        "AO247": {
+          "value": 700.0,
+          "formula": "=H12*100"
+        },
+        "AP247": {
+          "value": 700.0,
+          "formula": "=AO247"
+        },
+        "A248": {
+          "value": "h/tw="
+        },
+        "B248": {
+          "value": 333.3333333333333,
+          "formula": "=h/tw"
+        },
+        "E248": {
+          "value": "Strengthen for first panel in tension field zone"
+        },
+        "AN248": {
+          "value": "Bf"
+        },
+        "AO248": {
+          "value": 300.0,
+          "formula": "=B_Tee_Top"
+        },
+        "AP248": {
+          "value": 30.0,
+          "formula": "=AO248/10"
+        },
+        "A249": {
+          "value": "kv="
+        },
+        "B249": {
+          "value": 5.0
+        },
+        "E249": {
+          "value": "tw (strengthen)(1st panel)"
+        },
+        "F249": {
+          "value": 1.2
+        },
+        "G249": {
+          "value": "cm"
+        },
+        "H249": {
+          "value": "N"
+        },
+        "AN249": {
+          "value": "tf"
+        },
+        "AO249": {
+          "value": 12.0,
+          "formula": "=tf_Tee_Top"
+        },
+        "AP249": {
+          "value": 1.2,
+          "formula": "=AO249/10"
+        },
+        "A250": {
+          "value": "1.1*sqrt(kv*E/Fy)"
+        },
+        "C250": {
+          "value": 60.68450128041075,
+          "formula": "=1.1*SQRT(B249*E_kn_cm2/Fy_Kn_cm2)"
+        },
+        "AN250": {
+          "value": "tf-bit"
+        },
+        "AO250": {
+          "value": 7.0,
+          "formula": "=tf_Tee_bot"
+        },
+        "AP250": {
+          "value": 0.7,
+          "formula": "=AO250/10"
+        },
+        "A251": {
+          "value": "1.37*sqrt(kv*E/Fy)"
+        },
+        "C251": {
+          "value": 75.57978795832976,
+          "formula": "=1.37*SQRT(B249*E_kn_cm2/Fy_Kn_cm2)"
+        },
+        "AN251": {
+          "value": "d"
+        },
+        "AO251": {
+          "value": 2019.0,
+          "formula": "=h_full"
+        },
+        "AP251": {
+          "value": 201.9,
+          "formula": "=AO251/10"
+        },
+        "A253": {
+          "value": "Cv=1.1*sqrt(kv*E/Fy)/(h/tw)"
+        },
+        "C253": {
+          "value": 0.18205350384123226,
+          "formula": "=C250/B248"
+        },
+        "E253": {
+          "value": "AISC 360  Eq G2-4"
+        },
+        "AN253": {
+          "value": 3.0,
+          "formula": "=IF(B248<C250,1,IF(B248>C251,3,1))"
+        },
+        "AN254": {
+          "value": 0.0413608695652174,
+          "formula": "=IF(B248<=C250,1,IF(B248>C251,C255,C253))"
+        },
+        "A255": {
+          "value": "Cv=1.5*kv*E/(h/tw)^2*Fy"
+        },
+        "C255": {
+          "value": 0.0413608695652174,
+          "formula": "=(1.51*B249*E_kn_cm2)/((B248^2)*Fy_Kn_cm2)"
+        },
+        "E255": {
+          "value": "AISC 360  Eq J2-5"
+        },
+        "C257": {
+          "value": 93.34479042000004,
+          "formula": "=(0.6*Fy_Kn_cm2*AN254*(AP251*(IF(H249=\"N\",AP245,F249)))*0.9)"
+        },
+        "D257": {
+          "value": "(kN)"
+        },
+        "AN258": {
+          "value": 0.0,
+          "formula": "=IF(H249=\"Y\",1,0)"
+        },
+        "A259": {
+          "value": "7. Shear along X -X: "
+        },
+        "C259": {
+          "value": "AISC 360-G7"
+        },
+        "A260": {
+          "value": "h/tw=b/tf="
+        },
+        "B260": {
+          "value": 12.5,
+          "formula": "=(B_Tee_Top/2)/tf_Tee_Top"
+        },
+        "A261": {
+          "value": "kv="
+        },
+        "B261": {
+          "value": 1.2
+        },
+        "A262": {
+          "value": "1.1*sqrt(kv*E/Fy)"
+        },
+        "C262": {
+          "value": 60.68450128041075,
+          "formula": "=1.1*SQRT(5*E_kn_cm2/Fy_Kn_cm2)"
+        },
+        "AN262": {
+          "value": 1.0,
+          "formula": "=IF(B260<C262,1,IF(B260>C263,3,2))"
+        },
+        "A263": {
+          "value": "1.37*sqrt(kv*E/Fy)"
+        },
+        "C263": {
+          "value": 75.57978795832976,
+          "formula": "=1.37*SQRT(5*E_kn_cm2/Fy_Kn_cm2)"
+        },
+        "AN263": {
+          "value": 1.0,
+          "formula": "=IF(B260<C262,1,IF(B260>C263,C267,C265))"
+        },
+        "A265": {
+          "value": "Cv=1.1*sqrt(kv*E/Fy)/(h/tw)"
+        },
+        "C265": {
+          "value": 4.85476010243286,
+          "formula": "=C262/B260"
+        },
+        "E265": {
+          "value": "AISC 360  Eq G2-4"
+        },
+        "A267": {
+          "value": "Cv=1.5*kv*E/(h/tw)^2*Fy"
+        },
+        "C267": {
+          "value": 7.058921739130435,
+          "formula": "=(1.51*B261*E_kn_cm2)/((B260^2)*Fy_Kn_cm2)"
+        },
+        "E267": {
+          "value": "AISC 360  Eq J2-5"
+        },
+        "C270": {
+          "value": 335.34,
+          "formula": "=(0.6*Fy_Kn_cm2*(((B_Tee_Top/2)/10)*AP249))*0.9"
+        },
+        "D270": {
+          "value": "(kN)"
+        },
+        "A272": {
+          "value": "8. Bottom Flange Fatigue : "
+        },
+        "A277": {
+          "value": "Fsr"
+        },
+        "B277": {
+          "value": 19.5
+        },
+        "C277": {
+          "value": "kN/m2"
+        },
+        "A278": {
+          "value": "Fth"
+        },
+        "B278": {
+          "value": 12.4
+        },
+        "C278": {
+          "value": "kN/m2"
+        },
+        "A280": {
+          "value": "9. Tension field check : "
+        },
+        "A281": {
+          "value": "Check tesnsion field action parameter"
+        },
+        "C282": {
+          "value": 333.3333333333333,
+          "formula": "=h/tw"
+        },
+        "D282": {
+          "value": 60.69252514680578,
+          "formula": "=2.46*SQRT(E_kn_cm2/Fy_Kn_cm2)"
+        },
+        "E282": {
+          "value": "Pass",
+          "formula": "=IF(C282<=D282,\"stifferner not required\",\"Pass\")"
+        },
+        "B285": {
+          "value": 0.4,
+          "formula": "=H10*1000/h"
+        },
+        "C285": {
+          "value": 3.0
+        },
+        "D285": {
+          "value": "Pass",
+          "formula": "=IF(B285>C285,\"NG\",\"Pass\")"
+        },
+        "C288": {
+          "value": 0.4,
+          "formula": "=H10*1000/h"
+        },
+        "D288": {
+          "value": 0.6084,
+          "formula": "=(260/((h/tw)))^2"
+        },
+        "E288": {
+          "value": "Pass",
+          "formula": "=IF(C288>D288,\"NG\",\"Pass\")"
+        },
+        "C290": {
+          "value": 4.8,
+          "formula": "=(2*h*tw)/((B_Tee_Top*tf_Tee_Top)+(B_Tee_bot*tf_Tee_bot))"
+        },
+        "D290": {
+          "value": 2.5
+        },
+        "E290": {
+          "value": "NG",
+          "formula": "=IF(C290>D290,\"NG\",\"Pass\")"
+        },
+        "C293": {
+          "value": 10.0,
+          "formula": "=h/B_Tee_bot"
+        },
+        "D293": {
+          "value": 6.0
+        },
+        "E293": {
+          "value": "NG",
+          "formula": "=IF(C293>D293,\"NG\",\"Pass\")"
+        },
+        "C295": {
+          "value": 6.666666666666667,
+          "formula": "=h/B_Tee_Top"
+        },
+        "D295": {
+          "value": 6.0
+        },
+        "E295": {
+          "value": "NG",
+          "formula": "=IF(C295>D295,\"NG\",\"Pass\")"
+        },
+        "E298": {
+          "value": 2321.7282625838116,
+          "formula": "=(0.6*Fy_Kn_cm2*((h/10)*(tw/10))*(AP249+((1-AP249)/(1.15*SQRT(1+(((H10*100)/(h/10))^2))))))*0.9"
+        },
+        "F298": {
+          "value": "(kN)"
+        }
+      }
+    },
+    "AISC360-ASD": {
+      "cells": {
+        "C1": {
+          "value": "Crane Beam Runway Design"
+        },
+        "M4": {
+          "value": 400.0
+        },
+        "A6": {
+          "value": "1. Section Info"
+        },
+        "G6": {
+          "value": "Fy"
+        },
+        "H6": {
+          "value": 345.0
+        },
+        "I6": {
+          "value": "Mpa"
+        },
+        "AQ6": {
+          "value": "Fy_Kn/cm2"
+        },
+        "AR6": {
+          "value": 34.5,
+          "formula": "=Fy/10"
+        },
+        "AS6": {
+          "value": "Kn/cm2"
+        },
+        "G7": {
+          "value": "Fu"
+        },
+        "H7": {
+          "value": 450.0
+        },
+        "I7": {
+          "value": "Mpa"
+        },
+        "AQ7": {
+          "value": "Fu_Kn/cm2"
+        },
+        "AR7": {
+          "value": 45.0,
+          "formula": "=Fu/10"
+        },
+        "AS7": {
+          "value": "Kn/cm2"
+        },
+        "D9": {
+          "value": 376.0,
+          "formula": "=M4-tft-tfb"
+        },
+        "E9": {
+          "value": 250.0
+        },
+        "F9": {
+          "value": 12.0
+        },
+        "G9": {
+          "value": 8.0
+        },
+        "H9": {
+          "value": 250.0
+        },
+        "I9": {
+          "value": 12.0
+        },
+        "D10": {
+          "value": "Tension field"
+        },
+        "E10": {
+          "value": "Y"
+        },
+        "F10": {
+          "value": "Spacing of stifferner"
+        },
+        "H10": {
+          "value": 2.5
+        },
+        "I10": {
+          "value": "m"
+        },
+        "AQ10": {
+          "value": "Y"
+        },
+        "J11": {
+          "value": "Crane runway design based on"
+        },
+        "AQ11": {
+          "value": "N"
+        },
+        "D12": {
+          "value": "Runway beam unbraced length Lb(m)="
+        },
+        "H12": {
+          "value": 9.0
+        },
+        "J12": {
+          "value": "+AISC 360-10 Specification for Structural Steel Buildings"
+        },
+        "AQ12": {
+          "value": 1.0,
+          "formula": "=IF(E10=\"Y\",1,0)"
+        },
+        "J13": {
+          "value": "+AISC Design Guide 7: Industrial Buildings-Roofs to Anchor Rods 2nd Edition"
+        },
+        "D14": {
+          "value": "Maximum bending moment and shear from SAP 2000"
+        },
+        "D15": {
+          "value": "Mx (kN.m)"
+        },
+        "E15": {
+          "value": 165.0
+        },
+        "F15": {
+          "value": "My (kN.m)"
+        },
+        "G15": {
+          "value": 10.5
+        },
+        "H15": {
+          "value": "Dx (mm)"
+        },
+        "I15": {
+          "value": 12.0
+        },
+        "D16": {
+          "value": "Vy (kN)"
+        },
+        "E16": {
+          "value": 80.5
+        },
+        "F16": {
+          "value": "Vx  (kN)"
+        },
+        "G16": {
+          "value": 21.0
+        },
+        "H16": {
+          "value": "Dy (mm)"
+        },
+        "I16": {
+          "value": 13.66
+        },
+        "J16": {
+          "value": "Design Basis & Assumption"
+        },
+        "D17": {
+          "value": "Wheel load(kN)"
+        },
+        "E17": {
+          "value": 43.0
+        },
+        "J17": {
+          "value": "The I section top flange and resist the horrizontal load and the combined section resists the vertical. "
+        },
+        "T17": {
+          "value": "AISC Design Guide 7 (Section 18.1 on Page 56)"
+        },
+        "AN17": {
+          "value": 500.0
+        },
+        "D18": {
+          "value": "Effective wheel brearing lenght="
+        },
+        "G18": {
+          "value": 5.0
+        },
+        "H18": {
+          "value": "cm"
+        },
+        "J18": {
+          "value": "This assumption eliminates the need for an analysis of torsional effects on the combined section and simplifies the analysis."
+        },
+        "AU18": {
+          "value": "A"
+        },
+        "AV18": {
+          "value": 20000.0
+        },
+        "D19": {
+          "value": "CMAA 70 Crane Classification"
+        },
+        "G19": {
+          "value": "B"
+        },
+        "AU19": {
+          "value": "B"
+        },
+        "AV19": {
+          "value": 50000.0
+        },
+        "D20": {
+          "value": "Vertical impact (%)"
+        },
+        "F20": {
+          "value": 10.0
+        },
+        "AU20": {
+          "value": "C"
+        },
+        "AV20": {
+          "value": 100000.0
+        },
+        "D21": {
+          "value": "Lateral impact (%)"
+        },
+        "F21": {
+          "value": 20.0
+        },
+        "AU21": {
+          "value": "D"
+        },
+        "AV21": {
+          "value": 500000.0
+        },
+        "A22": {
+          "value": "2. Section Properties "
+        },
+        "D22": {
+          "value": "Longitudinal impact (%)"
+        },
+        "F22": {
+          "value": 10.0
+        },
+        "G22": {
+          "value": "No of Crane"
+        },
+        "I22": {
+          "value": 1.0
+        },
+        "AU22": {
+          "value": "E"
+        },
+        "AV22": {
+          "value": 1500000.0
+        },
+        "A23": {
+          "value": "Web"
+        },
+        "B23": {
+          "value": 37.6,
+          "formula": "=D9/10"
+        },
+        "C23": {
+          "value": 0.8,
+          "formula": "=G9/10"
+        },
+        "D23": {
+          "value": "(cm)"
+        },
+        "AU23": {
+          "value": "F"
+        },
+        "AV23": {
+          "value": 2000000.0
+        },
+        "A24": {
+          "value": "Top  Flange "
+        },
+        "B24": {
+          "value": 25.0,
+          "formula": "=E9/10"
+        },
+        "C24": {
+          "value": 1.2,
+          "formula": "=F9/10"
+        },
+        "D24": {
+          "value": "(cm)"
+        },
+        "A25": {
+          "value": "Bott Flange "
+        },
+        "B25": {
+          "value": 25.0,
+          "formula": "=H9/10"
+        },
+        "C25": {
+          "value": 1.2,
+          "formula": "=I9/10"
+        },
+        "D25": {
+          "value": "(cm)"
+        },
+        "A26": {
+          "value": "Base Section "
+        },
+        "A27": {
+          "value": "Area="
+        },
+        "B27": {
+          "value": 90.08,
+          "formula": "=AQ36/100"
+        },
+        "C27": {
+          "value": "(cm2)"
+        },
+        "A28": {
+          "value": "Ix="
+        },
+        "B28": {
+          "value": 26132.625066666667,
+          "formula": "=AQ38/10000"
+        },
+        "C28": {
+          "value": "(cm4)"
+        },
+        "AP28": {
+          "value": 37.6,
+          "formula": "=h/10"
+        },
+        "AQ28": {
+          "value": 25.0,
+          "formula": "=B_Tee_Top/10"
+        },
+        "AR28": {
+          "value": 1.2,
+          "formula": "=tf_Tee_Top/10"
+        },
+        "AS28": {
+          "value": 0.8,
+          "formula": "=AS32/10"
+        },
+        "AT28": {
+          "value": 25.0,
+          "formula": "=B_Tee_bot/10"
+        },
+        "AU28": {
+          "value": 1.2,
+          "formula": "=tf_Tee_bot/10"
+        },
+        "AX28": {
+          "value": 200.0,
+          "formula": "=tf_Tee_bot+((AQ36-(2*B_Tee_bot*tf_Tee_bot))/(2*tw))"
+        },
+        "A29": {
+          "value": "Iy="
+        },
+        "B29": {
+          "value": 3126.6042666666667,
+          "formula": "=AQ41/10000"
+        },
+        "C29": {
+          "value": "(cm4)"
+        },
+        "A30": {
+          "value": "Sx-Top ="
+        },
+        "B30": {
+          "value": 1306.6312533333332,
+          "formula": "=AQ42/1000"
+        },
+        "C30": {
+          "value": "(cm3)"
+        },
+        "AP30": {
+          "value": "E(kn/cm2)"
+        },
+        "AQ30": {
+          "value": 21000.0,
+          "formula": "=E/10"
+        },
+        "AS30": {
+          "value": "Steel density:"
+        },
+        "AT30": {
+          "value": 7850.0
+        },
+        "AU30": {
+          "value": "Kg/M3"
+        },
+        "AZ30": {
+          "value": "Plastis top"
+        },
+        "BC30": {
+          "value": "Plastis bot"
+        },
+        "A31": {
+          "value": "Sx- Bottom="
+        },
+        "B31": {
+          "value": 1306.6312533333332,
+          "formula": "=AQ43/1000"
+        },
+        "C31": {
+          "value": "(cm3)"
+        },
+        "AP31": {
+          "value": "E"
+        },
+        "AQ31": {
+          "value": 210000.0
+        },
+        "AR31": {
+          "value": "Mpa"
+        },
+        "AZ31": {
+          "value": "first cen"
+        },
+        "BA31": {
+          "value": 194.0,
+          "formula": "=AP33-AY37-(tf_Tee_Top/2)"
+        },
+        "BC31": {
+          "value": "first cen"
+        },
+        "BD31": {
+          "value": 194.0,
+          "formula": "=AY37-(tf_Tee_Top/2)"
+        },
+        "A32": {
+          "value": "Sy-Top ="
+        },
+        "B32": {
+          "value": 250.12834133333334,
+          "formula": "=AQ44/1000"
+        },
+        "C32": {
+          "value": "(cm3)"
+        },
+        "AP32": {
+          "value": 376.0,
+          "formula": "=D9"
+        },
+        "AQ32": {
+          "value": 250.0,
+          "formula": "="
+        },
+        "AR32": {
+          "value": 12.0,
+          "formula": "="
+        },
+        "AS32": {
+          "value": 8.0,
+          "formula": "="
+        },
+        "AT32": {
+          "value": 250.0,
+          "formula": "="
+        },
+        "AU32": {
+          "value": 12.0,
+          "formula": "="
+        },
+        "AW32": {
+          "value": 9008.0,
+          "formula": "=AQ36"
+        },
+        "AX32": {
+          "value": "Au"
+        },
+        "AY32": {
+          "value": 3000.0,
+          "formula": "=B_Tee_Top*tf_Tee_Top"
+        },
+        "AZ32": {
+          "value": "ser cen"
+        },
+        "BA32": {
+          "value": 94.0,
+          "formula": "=(AP33-AY37-tf_Tee_Top)/2"
+        },
+        "BC32": {
+          "value": "ser cen"
+        },
+        "BD32": {
+          "value": 94.0,
+          "formula": "=(AY37-tf_Tee_bot)/2"
+        },
+        "A33": {
+          "value": "Sy- Bottom="
+        },
+        "B33": {
+          "value": 250.12834133333334,
+          "formula": "=AQ45/1000"
+        },
+        "C33": {
+          "value": "(cm3)"
+        },
+        "D33": {
+          "value": "J"
+        },
+        "E33": {
+          "value": 35.421866666666666,
+          "formula": "=BB39/10000"
+        },
+        "F33": {
+          "value": "(cm4)"
+        },
+        "AP33": {
+          "value": 400.0,
+          "formula": "=AP32+AR32+AU32"
+        },
+        "AQ33": {
+          "value": 388.0,
+          "formula": "=h_full-(tf_Tee_Top/2)-(tf_Tee_bot/2)"
+        },
+        "AU33": {
+          "value": 31.333333333333332,
+          "formula": "=AS44/2"
+        },
+        "AW33": {
+          "value": 4504.0,
+          "formula": "=AW32/2"
+        },
+        "AX33": {
+          "value": "Ad"
+        },
+        "AY33": {
+          "value": 3000.0,
+          "formula": "=B_Tee_bot*tf_Tee_bot"
+        },
+        "AZ33": {
+          "value": "A1"
+        },
+        "BA33": {
+          "value": 3000.0,
+          "formula": "=tf_Tee_Top*B_Tee_Top"
+        },
+        "BC33": {
+          "value": "A1"
+        },
+        "BD33": {
+          "value": 3.0
+        },
+        "A34": {
+          "value": "R-xx="
+        },
+        "B34": {
+          "value": 17.032458130245185,
+          "formula": "=AQ46/10"
+        },
+        "C34": {
+          "value": "(cm)"
+        },
+        "D34": {
+          "value": "Cw"
+        },
+        "E34": {
+          "value": 1176125.0,
+          "formula": "=BB40/1000000"
+        },
+        "F34": {
+          "value": "(cm6)"
+        },
+        "G34": {
+          "value": "hc="
+        },
+        "H34": {
+          "value": 37.6,
+          "formula": "=((h_full-AQ37-tf_Tee_Top)*2)/10"
+        },
+        "I34": {
+          "value": "(cm)"
+        },
+        "AT34": {
+          "value": 12330039.506172838,
+          "formula": "=((B_Tee_Top*tf_Tee_Top^3)/12)+((AS44^2)*(B_Tee_Top*tf_Tee_Top))+((AS32*AU33^3)/12)+(AU33^2)*(AS44*AS32)"
+        },
+        "AZ34": {
+          "value": "A2"
+        },
+        "BA34": {
+          "value": 1504.0,
+          "formula": "=(AP33-AY37-tf_Tee_Top)*tw"
+        },
+        "BC34": {
+          "value": "A2"
+        },
+        "BD34": {
+          "value": 1504.0,
+          "formula": "=(AY37-tf_Tee_bot)*tw"
+        },
+        "A35": {
+          "value": "R-yy="
+        },
+        "B35": {
+          "value": 5.891450991887861,
+          "formula": "=AQ47/10"
+        },
+        "C35": {
+          "value": "(cm)"
+        },
+        "D35": {
+          "value": "ypna"
+        },
+        "E35": {
+          "value": 20.0,
+          "formula": "=ypma/10"
+        },
+        "F35": {
+          "value": "(cm)"
+        },
+        "G35": {
+          "value": "hp="
+        },
+        "H35": {
+          "value": 37.6,
+          "formula": "=((h_full-ypma-tf_Tee_Top)*2)/10"
+        },
+        "I35": {
+          "value": "(cm)"
+        },
+        "J35": {
+          "value": 20.0,
+          "formula": "=hp/2+(tft/10)"
+        },
+        "AO35": {
+          "value": "Weight"
+        },
+        "AP35": {
+          "value": "="
+        },
+        "AQ35": {
+          "value": 7071.28,
+          "formula": "=(h*tw+bft*tft+bfb*tfb)*7850/10000"
+        },
+        "AR35": {
+          "value": "kG/cm"
+        },
+        "AT35": {
+          "value": 1233.0039506172839,
+          "formula": "=AT34/10000"
+        },
+        "A36": {
+          "value": "Zx="
+        },
+        "B36": {
+          "value": 1446.752,
+          "formula": "=AY43/1000"
+        },
+        "C36": {
+          "value": "(cm3)"
+        },
+        "D36": {
+          "value": "Zy"
+        },
+        "E36": {
+          "value": 381.016,
+          "formula": "=AY44/1000"
+        },
+        "F36": {
+          "value": "(cm3)"
+        },
+        "G36": {
+          "value": "ycg="
+        },
+        "H36": {
+          "value": 20.0,
+          "formula": "=AQ37/10"
+        },
+        "I36": {
+          "value": "(cm)"
+        },
+        "AO36": {
+          "value": "A"
+        },
+        "AP36": {
+          "value": "="
+        },
+        "AQ36": {
+          "value": 9008.0,
+          "formula": "=h*tw+bft*tft+bfb*tfb"
+        },
+        "AR36": {
+          "value": "mm2"
+        },
+        "AX36": {
+          "value": "Platis section modulus"
+        },
+        "A37": {
+          "value": "Top portion properties based on based on Top  Flange with 1/3 of Web to N.Axis    "
+        },
+        "AO37": {
+          "value": "y"
+        },
+        "AP37": {
+          "value": "="
+        },
+        "AQ37": {
+          "value": 200.0,
+          "formula": "=(bft*tft*(h+tft/2+tfb)+h*tw*(h/2+tfb)+bfb*tfb*tfb/2)/AQ36"
+        },
+        "AR37": {
+          "value": "mm"
+        },
+        "AS37": {
+          "value": "x"
+        },
+        "AT37": {
+          "value": "="
+        },
+        "AU37": {
+          "value": 125.0,
+          "formula": "=(((AP32*AS32)*(AQ32/2))+((AQ32*AR32)*(AQ32/2))+((AT32*AU32)*(AQ32/2)))/((AP32*AS32)+(AQ32*AR32)+(AT32*AU32))"
+        },
+        "AV37": {
+          "value": "mm"
+        },
+        "AX37": {
+          "value": "ypma"
+        },
+        "AY37": {
+          "value": 200.0,
+          "formula": "=IF(AY32>=AW33,(h_full-AW32/(2*B_Tee_Top)),IF(AY33>=AW33*(AW32/(2*B_Tee_Top)),(AW32/(2*B_Tee_bot)),IF(AND(AY33<AW33,AY32<AW33),tf_Tee_bot+((AQ36-(2*B_Tee_bot*tf_Tee_bot))/(2*tw)))))"
+        },
+        "BA37": {
+          "value": "α"
+        },
+        "BB37": {
+          "value": 0.5,
+          "formula": "=1/(1+(((B_Tee_Top/B_Tee_bot)^3)*(tf_Tee_Top/tf_Tee_bot)))"
+        },
+        "A38": {
+          "value": "Area="
+        },
+        "B38": {
+          "value": 35.01333333333333,
+          "formula": "=AP57/100"
+        },
+        "C38": {
+          "value": "(cm2)"
+        },
+        "AO38": {
+          "value": "Ix"
+        },
+        "AP38": {
+          "value": "="
+        },
+        "AQ38": {
+          "value": 261326250.66666666,
+          "formula": "=h^3*tw/12+bft*tft^3/12+bfb*tfb^3/12+bft*tft*(h+tft+tfb-AQ37-tft/2)^2+h*tw*(h/2+tfb-AQ37)^2+bfb*tfb*(AQ37-tfb/2)^2"
+        },
+        "AR38": {
+          "value": "mm4"
+        },
+        "AS38": {
+          "value": "Iy"
+        },
+        "AT38": {
+          "value": "="
+        },
+        "AU38": {
+          "value": 31266042.666666668,
+          "formula": "=bft^3*tft/12+bfb^3*tfb/12+h*tw^3/12"
+        },
+        "AV38": {
+          "value": "mm4"
+        },
+        "AX38": {
+          "value": "Zx-Top"
+        },
+        "AY38": {
+          "value": 723376.0,
+          "formula": "=(BA31*BA33)+(BA32*BA34)"
+        },
+        "BA38": {
+          "value": "d'"
+        },
+        "BB38": {
+          "value": 388.0,
+          "formula": "=h_full-((tf_Tee_Top+tf_Tee_bot)/2)"
+        },
+        "A39": {
+          "value": "yc="
+        },
+        "B39": {
+          "value": 1.1345519167301343,
+          "formula": "=AP58/10"
+        },
+        "C39": {
+          "value": "(cm)"
+        },
+        "AO39": {
+          "value": "Sx-Top"
+        },
+        "AP39": {
+          "value": "="
+        },
+        "AQ39": {
+          "value": 1306631.2533333332,
+          "formula": "=AQ38/(h+tft+tfb-AQ37)"
+        },
+        "AR39": {
+          "value": "mm3"
+        },
+        "AS39": {
+          "value": "Sy-TOP"
+        },
+        "AT39": {
+          "value": "="
+        },
+        "AU39": {
+          "value": 250128.34133333334,
+          "formula": "=AU38/AU37"
+        },
+        "AV39": {
+          "value": "mm3"
+        },
+        "AX39": {
+          "value": "Zx-bot"
+        },
+        "AY39": {
+          "value": 141958.0,
+          "formula": "=(BD31*BD33)+(BD32*BD34)"
+        },
+        "BA39": {
+          "value": "J"
+        },
+        "BB39": {
+          "value": 354218.6666666667,
+          "formula": "=((B_Tee_Top*(tf_Tee_Top^3))+(B_Tee_bot*(tf_Tee_bot^3))+(BB38*(tw^3)))/3"
+        },
+        "BC39": {
+          "value": "mm4"
+        },
+        "A40": {
+          "value": "I-XT =    "
+        },
+        "B40": {
+          "value": 79.87641220463924,
+          "formula": "=AP53/10000"
+        },
+        "C40": {
+          "value": "(cm4)"
+        },
+        "D40": {
+          "value": " 50% OF I -YY",
+          "formula": "=\" \"&AQ54&\"%\"&\" \"&\"OF I -YY\""
+        },
+        "AO40": {
+          "value": "Zx"
+        },
+        "AP40": {
+          "value": "="
+        },
+        "AQ40": {
+          "value": 1446752.0,
+          "formula": "=2*(bft*tft*(h+tft+tfb-AQ37-tft/2)+tw*(h+tfb-AQ37)*(h+tfb-AQ37)/2)"
+        },
+        "AR40": {
+          "value": "mm3"
+        },
+        "AS40": {
+          "value": "Sy-BOT"
+        },
+        "AT40": {
+          "value": "="
+        },
+        "AU40": {
+          "value": 250128.34133333334,
+          "formula": "=AU38/(AT32/2)"
+        },
+        "AV40": {
+          "value": "mm3"
+        },
+        "AX40": {
+          "value": "Zx3"
+        },
+        "AY40": {
+          "value": 10597508.0,
+          "formula": "=(B_Tee_Top*((AP33-ypma)^2)/2)+(B_Tee_bot*((AP33-tf_Tee_Top-ypma)^2)/2)+(h*tw*(ypma-tf_Tee_bot+(h/2)))+(B_Tee_bot*(ypma-(tf_Tee_Top/2)))"
+        },
+        "BA40": {
+          "value": "Cw"
+        },
+        "BB40": {
+          "value": 1176125000000.0,
+          "formula": "=((BB38^2)*(B_Tee_Top^3)*tf_Tee_Top*BB37)/12"
+        },
+        "BC40": {
+          "value": "mm6"
+        },
+        "A41": {
+          "value": "I-YT =  "
+        },
+        "B41": {
+          "value": 1562.7673777777777,
+          "formula": "=AP54/10000"
+        },
+        "C41": {
+          "value": "(cm4)"
+        },
+        "AO41": {
+          "value": "Iy"
+        },
+        "AP41": {
+          "value": "="
+        },
+        "AQ41": {
+          "value": 31266042.666666668,
+          "formula": "=bft^3*tft/12+bfb^3*tfb/12+h*tw^3/12"
+        },
+        "AR41": {
+          "value": "mm4"
+        },
+        "AX41": {
+          "value": "Zx2"
+        },
+        "AY41": {
+          "value": 10000000.0,
+          "formula": "=(B_Tee_bot*(ypma^2)/2)+(B_Tee_bot*((tf_Tee_bot-ypma)^2)/2)+((h*tw)*(tf_Tee_bot+(h/2)-ypma))+((B_Tee_Top*tf_Tee_Top)*(AP33-(tf_Tee_Top/2)-ypma))"
+        },
+        "A42": {
+          "value": "S-YT =     "
+        },
+        "B42": {
+          "value": 125.02139022222222,
+          "formula": "=AP55/1000"
+        },
+        "C42": {
+          "value": "(cm3)"
+        },
+        "AO42": {
+          "value": "SXT"
+        },
+        "AP42": {
+          "value": "="
+        },
+        "AQ42": {
+          "value": 1306631.2533333332,
+          "formula": "=AQ39"
+        },
+        "AR42": {
+          "value": "mm3"
+        },
+        "AX42": {
+          "value": "Zx1"
+        },
+        "AY42": {
+          "value": 1446752.0,
+          "formula": "=(B_Tee_bot*(ypma^2)/2)-(((B_Tee_bot-tw)*((ypma-tf_Tee_bot)^2))/2)+(B_Tee_Top*((AP33-ypma)^2)/2)-((B_Tee_Top-tw)*((AP33-tf_Tee_Top-ypma)^2)/2)"
+        },
+        "A43": {
+          "value": "R-TT"
+        },
+        "B43": {
+          "value": 6.680830283161231,
+          "formula": "=AP56/10"
+        },
+        "C43": {
+          "value": "(cm)"
+        },
+        "AO43": {
+          "value": "SXB"
+        },
+        "AP43": {
+          "value": "="
+        },
+        "AQ43": {
+          "value": 1306631.2533333332,
+          "formula": "=AQ38/AQ37"
+        },
+        "AR43": {
+          "value": "mm3"
+        },
+        "AS43": {
+          "value": "H/3 TOP"
+        },
+        "AT43": {
+          "value": "TW TO AXE"
+        },
+        "AU43": {
+          "value": 194.0,
+          "formula": "=AP33-AQ37-(AR32/2)"
+        },
+        "AX43": {
+          "value": "Zx final"
+        },
+        "AY43": {
+          "value": 1446752.0,
+          "formula": "=IF(AY32>AW33,AY40,IF(AY33>AW33,AY41,AY42))"
+        },
+        "A44": {
+          "value": "Z-YT"
+        },
+        "B44": {
+          "value": 96.758,
+          "formula": "=AY45/1000"
+        },
+        "C44": {
+          "value": "(cm3)"
+        },
+        "AO44": {
+          "value": "SYT"
+        },
+        "AP44": {
+          "value": "="
+        },
+        "AQ44": {
+          "value": 250128.34133333334,
+          "formula": "=AU39"
+        },
+        "AR44": {
+          "value": "mm3"
+        },
+        "AS44": {
+          "value": 62.666666666666664,
+          "formula": "=(AP33-AQ37-AR32)/3"
+        },
+        "AT44": {
+          "value": 188.0,
+          "formula": "=AP33-AQ37-AR32"
+        },
+        "AU44": {
+          "value": 125.33333333333334,
+          "formula": "=AT44-AS44"
+        },
+        "AV44": {
+          "value": 31.333333333333332,
+          "formula": "=AS44/2"
+        },
+        "AW44": {
+          "value": 156.66666666666669,
+          "formula": "=AU44+AV44"
+        },
+        "AX44": {
+          "value": "Zy"
+        },
+        "AY44": {
+          "value": 381016.0,
+          "formula": "=(tf_Tee_Top*(B_Tee_Top^2)/4)+(tf_Tee_bot*(B_Tee_bot^2)/4)+(h*(tw^2)/4)"
+        },
+        "AZ44": {
+          "value": "x2"
+        },
+        "BA44": {
+          "value": 0.0,
+          "formula": "=AU37-(B_Tee_bot/2)"
+        },
+        "AO45": {
+          "value": "SYB"
+        },
+        "AP45": {
+          "value": "="
+        },
+        "AQ45": {
+          "value": 250128.34133333334,
+          "formula": "=AU40"
+        },
+        "AR45": {
+          "value": "mm3"
+        },
+        "AS45": {
+          "value": 74.66666666666666,
+          "formula": "=AS44+AR32"
+        },
+        "AX45": {
+          "value": "Ztt"
+        },
+        "AY45": {
+          "value": 96758.0,
+          "formula": "=(tf_Tee_Top*AU37)*((B_Tee_Top/2)/2)+(((tw/2)/2)*(tw/2)*h)+((BA44*tf_Tee_bot)*(B_Tee_bot/2)/2)"
+        },
+        "AO46": {
+          "value": "Rxx"
+        },
+        "AP46": {
+          "value": "="
+        },
+        "AQ46": {
+          "value": 170.32458130245186,
+          "formula": "=SQRT(AQ38/AQ36)"
+        },
+        "AR46": {
+          "value": "mm"
+        },
+        "A47": {
+          "value": "Bottom portion properties based on based on Top  Flange with 1/3 of Web to N.Axis    "
+        },
+        "AO47": {
+          "value": "Rxy"
+        },
+        "AP47": {
+          "value": "="
+        },
+        "AQ47": {
+          "value": 58.91450991887861,
+          "formula": "=SQRT(AU38/AQ36)"
+        },
+        "AR47": {
+          "value": "mm"
+        },
+        "AS47": {
+          "value": 62.666666666666664,
+          "formula": "=(AQ37-AU32)/3"
+        },
+        "A48": {
+          "value": "Area="
+        },
+        "B48": {
+          "value": 35.01333333333333,
+          "formula": "=AP57/100"
+        },
+        "C48": {
+          "value": "(cm2)"
+        },
+        "AO48": {
+          "value": "RTT"
+        },
+        "AP48": {
+          "value": "="
+        },
+        "AS48": {
+          "value": 74.66666666666666,
+          "formula": "=AS47+AU32"
+        },
+        "A49": {
+          "value": "yc="
+        },
+        "B49": {
+          "value": 1.1345519167301343,
+          "formula": "=AP58/10"
+        },
+        "C49": {
+          "value": "(cm)"
+        },
+        "A50": {
+          "value": "I-XB =    "
+        },
+        "B50": {
+          "value": 79.87641220463924,
+          "formula": "=AP59/10000"
+        },
+        "C50": {
+          "value": "(cm4)"
+        },
+        "AP50": {
+          "value": "top"
+        },
+        "AY50": {
+          "value": 3000.0,
+          "formula": "=B_Tee_Top*tf_Tee_Top"
+        },
+        "A51": {
+          "value": "I-YB =  "
+        },
+        "B51": {
+          "value": 1562.7673777777777,
+          "formula": "=AP60/10000"
+        },
+        "C51": {
+          "value": "(cm4)"
+        },
+        "AO51": {
+          "value": "A"
+        },
+        "AP51": {
+          "value": 3501.3333333333335,
+          "formula": "=(AQ32*AR32)+((AP33-AQ37-AR32)/3)*AS32"
+        },
+        "AQ51": {
+          "value": "Zx"
+        },
+        "AR51": {
+          "value": 1446752.0,
+          "formula": "=((B_Tee_Top*tf_Tee_Top)*AS51+((AP32/2)*AS32*AT51))*2"
+        },
+        "AS51": {
+          "value": 194.0,
+          "formula": "=AP33-AQ37-(tf_Tee_Top/2)"
+        },
+        "AT51": {
+          "value": 94.0,
+          "formula": "=(AP33-AQ37-tf_Tee_Top)/2"
+        },
+        "AV51": {
+          "value": "y"
+        },
+        "AW51": {
+          "value": 200.0,
+          "formula": "=h_full-AQ37"
+        },
+        "A52": {
+          "value": "S-YB =     "
+        },
+        "B52": {
+          "value": 798.7641220463925,
+          "formula": "=AP59/1000"
+        },
+        "C52": {
+          "value": "(cm3)"
+        },
+        "AO52": {
+          "value": "yc"
+        },
+        "AP52": {
+          "value": 11.345519167301344,
+          "formula": "=((tw*(h_Tee_Top^2))+(B_Tee_Top*tf_Tee_Top^2)-(tw*tf_Tee_Top^2))/(2*AP51)"
+        },
+        "AW52": {
+          "value": 376.0,
+          "formula": "=2*(AW51-tf_Tee_Top)"
+        },
+        "AY52": {
+          "value": 376.0,
+          "formula": "=(AQ36-(2*AY50))/tw"
+        },
+        "AO53": {
+          "value": "Ix"
+        },
+        "AP53": {
+          "value": 798764.1220463924,
+          "formula": "=(tw*(h_Tee_Top^3)/3)+((B_Tee_Top-tw)*(tf_Tee_Top^3)/3)-(AP51*(AP52^2))"
+        },
+        "A54": {
+          "value": "Weight ="
+        },
+        "B54": {
+          "value": 70.7128,
+          "formula": "=(AP28*AS28+AQ28*AR28+AT28*AU28)*AT30/10000"
+        },
+        "C54": {
+          "value": "kg/m"
+        },
+        "AO54": {
+          "value": "Iy"
+        },
+        "AP54": {
+          "value": 15627673.777777778,
+          "formula": "=(((h_Tee_Top-tf_Tee_Top)*(tw^3))/12)+((tf_Tee_Top*B_Tee_Top^3)/12)"
+        },
+        "AQ54": {
+          "value": 50.0,
+          "formula": "=ROUND(100-((AQ41-AP54)/AQ41)*100,1)"
+        },
+        "AO55": {
+          "value": "Sy"
+        },
+        "AP55": {
+          "value": 125021.39022222222,
+          "formula": "=2*AP54/B_Tee_Top"
+        },
+        "A56": {
+          "value": "2. Local Buckling "
+        },
+        "AP56": {
+          "value": 66.80830283161231,
+          "formula": "=SQRT(AP54/AP51)"
+        },
+        "A57": {
+          "value": "Flange of I-Section:  Table B4.1b Case 11"
+        },
+        "G57": {
+          "value": "Non-Compact",
+          "formula": "=IF(G58<=G59,\"Compact\",IF(G58>G59,IF(G58<=G60,\"Non-Compact\",\"Slender\")))"
+        },
+        "AO57": {
+          "value": "A"
+        },
+        "AP57": {
+          "value": 3501.333333333333,
+          "formula": "=(B_Tee_bot*tf_Tee_bot)+(h_Tee_bot*tw)-(tf_Tee_bot*tw)"
+        },
+        "AR57": {
+          "value": "Compact"
+        },
+        "AS57": {
+          "value": 3.0
+        },
+        "AT57": {
+          "value": "Compact"
+        },
+        "B58": {
+          "value": "bf / 2tf\t"
+        },
+        "F58": {
+          "value": "="
+        },
+        "G58": {
+          "value": 10.416666666666666,
+          "formula": "=bft/(2*tft)"
+        },
+        "AO58": {
+          "value": "yc"
+        },
+        "AP58": {
+          "value": 11.345519167301344,
+          "formula": "=((tw*(h_Tee_bot^2))+(B_Tee_bot*tf_Tee_bot^2)-(tw*tf_Tee_bot^2))/(2*AP57)"
+        },
+        "AR58": {
+          "value": "Non-Compact"
+        },
+        "AS58": {
+          "value": 2.0
+        },
+        "AT58": {
+          "value": "Non-Compact"
+        },
+        "B59": {
+          "value": "Compact Limit  λp=0.38 sqrt (E / Fy)"
+        },
+        "F59": {
+          "value": "="
+        },
+        "G59": {
+          "value": 9.375268112108209,
+          "formula": "=0.38*SQRT(E/Fy)"
+        },
+        "AO59": {
+          "value": "Ix"
+        },
+        "AP59": {
+          "value": 798764.1220463924,
+          "formula": "=(tw*(h_Tee_bot^3)/3)+((B_Tee_bot-tw)*(tf_Tee_bot^3)/3)-(AP57*(AP58^2))"
+        },
+        "AR59": {
+          "value": "Slender"
+        },
+        "AS59": {
+          "value": 1.0
+        },
+        "AT59": {
+          "value": "Slender"
+        },
+        "B60": {
+          "value": "Noncompact Limit  λr=1.0 sqrt (E / Fy)"
+        },
+        "F60": {
+          "value": "="
+        },
+        "G60": {
+          "value": 24.671758189758446,
+          "formula": "=1*SQRT(E/Fy)"
+        },
+        "AO60": {
+          "value": "Iy"
+        },
+        "AP60": {
+          "value": 15627673.777777778,
+          "formula": "=(((h_Tee_bot-tf_Tee_bot)*(tw^3))/12)+((tf_Tee_bot*B_Tee_bot^3)/12)"
+        },
+        "A61": {
+          "value": "For web Web of I-Section: Table B4.1b Case 16"
+        },
+        "G61": {
+          "value": "Compact",
+          "formula": "=IF(G62<=G63,\"Compact\",IF(G62>G63,IF(G62<=G64,\"Non-Compact\",\"Slender\")))"
+        },
+        "AO61": {
+          "value": "Sx"
+        },
+        "AP61": {
+          "value": 125021.39022222222,
+          "formula": "=2*AP60/B_Tee_bot"
+        },
+        "B62": {
+          "value": "hc / tw\t"
+        },
+        "F62": {
+          "value": "="
+        },
+        "G62": {
+          "value": 47.0,
+          "formula": "=hc/C23"
+        },
+        "AO62": {
+          "value": "R-xx"
+        },
+        "AP62": {
+          "value": 15.104019775529512,
+          "formula": "=SQRT(AP59/AP57)"
+        },
+        "AR62": {
+          "value": "Non-Compact",
+          "formula": "=VLOOKUP(G57,AR57:AS59,1)"
+        },
+        "AT62": {
+          "value": 2.0,
+          "formula": "=IF(AR62=\"Non-Compact\",2,IF(AR62=\"Compact\",3,1))"
+        },
+        "B63": {
+          "value": "Compact Limit λp"
+        },
+        "F63": {
+          "value": "="
+        },
+        "G63": {
+          "value": 92.76581079349175,
+          "formula": "=3.76*SQRT(E/Fy)"
+        },
+        "AR63": {
+          "value": "Compact",
+          "formula": "=VLOOKUP(G61,AR57:AS59,1)"
+        },
+        "AT63": {
+          "value": 3.0,
+          "formula": "=IF(AR63=\"Non-Compact\",2,IF(AR63=\"Compact\",3,1))"
+        },
+        "B64": {
+          "value": "Noncompact Limit λr=5.7 sqrt (E / Fy)"
+        },
+        "F64": {
+          "value": "="
+        },
+        "G64": {
+          "value": 140.62902168162316,
+          "formula": "=5.7*SQRT(E/Fy)"
+        },
+        "J64": {
+          "value": "**** kiểm tra lại phương trình ổn định cục bộ mục 16"
+        },
+        "AT64": {
+          "value": 2.0,
+          "formula": "=MIN(AT62:AT63)"
+        },
+        "A66": {
+          "value": "Section classification:  "
+        },
+        "C66": {
+          "value": "Non-Compact",
+          "formula": "=IF(AT64=3,AT57,IF(AT64=2,AT58,AT59))"
+        },
+        "F66": {
+          "value": null,
+          "formula": "=IF(C66=\"Slender\",\"PLATE GIRDERS\",\"\")"
+        },
+        "J66": {
+          "value": 95.63766080909782,
+          "formula": "=((hc/hp)*(SQRT(E_kn_cm2/Fy_Kn_cm2)))/((((0.54*AR96)/Myc)-0.09)^2)"
+        },
+        "A68": {
+          "value": "3. Axial Compression Under Total Longitudnal Force "
+        },
+        "A69": {
+          "value": "Axial load is assummed to be carried only by top flange."
+        },
+        "AP69": {
+          "value": 1.0
+        },
+        "A70": {
+          "value": "Slender Unstiffened Elements Qs = "
+        },
+        "D70": {
+          "value": 0.9592653913043475,
+          "formula": "=IF(D71<=D72,AP69,IF(D71<D73,AP71,AP70))"
+        },
+        "F70": {
+          "value": "(AISC 360 - 10 Eq E7-8)"
+        },
+        "AP70": {
+          "value": 1.2159027674879854,
+          "formula": "=1.415-(0.65*((B_Tee_Top/10)/(tf_Tee_Top/10))*SQRT(Fy_Kn_cm2/(E*D74)))"
+        },
+        "A71": {
+          "value": "b/t="
+        },
+        "D71": {
+          "value": 20.833333333333332,
+          "formula": "=B_Tee_Top/tf_Tee_Top"
+        },
+        "AP71": {
+          "value": 0.9592653913043475,
+          "formula": "=(0.9*E_kn_cm2*D74)/(Fy_Kn_cm2*(((B_Tee_Top/10)/(tf_Tee_Top/10))^2))"
+        },
+        "A72": {
+          "value": "0.64(E*kc/Fy)^1/2"
+        },
+        "D72": {
+          "value": 13.765337690704522,
+          "formula": "=0.64*SQRT((E*D74)/Fy)"
+        },
+        "A73": {
+          "value": "1.17(E*kc/Fy)^1/2"
+        },
+        "D73": {
+          "value": 25.164757965819202,
+          "formula": "=1.17*SQRT((E*D74)/Fy)"
+        },
+        "A74": {
+          "value": "kc="
+        },
+        "D74": {
+          "value": 0.76,
+          "formula": "=IF((4/SQRT(h_Tee_Top/tf_Tee_Top))<0.35,0.35,IF((4/SQRT(h_Tee_Top/tf_Tee_Top))>0.76,0.76,(4/SQRT(h_Tee_Top/tf_Tee_Top))))"
+        },
+        "A76": {
+          "value": "Slender Stiffened Elements Qa = "
+        },
+        "D76": {
+          "value": 1.0
+        },
+        "F76": {
+          "value": "(AISC 360 - 10 Eq E7-16)"
+        },
+        "A77": {
+          "value": "Q= min(Qs,Qa)="
+        },
+        "C77": {
+          "value": 0.9592653913043475,
+          "formula": "=MIN(D70,D76)"
+        },
+        "A79": {
+          "value": "Elastic buckling stress Fe= ((π^2)E/(KL/r)^2)"
+        },
+        "E79": {
+          "value": 887.2338661658223,
+          "formula": "=((3.14^2)*E_kn_cm2)/(((1*H12*100)/AQ47)^2)"
+        },
+        "F79": {
+          "value": "(kN/cm2)  "
+        },
+        "A80": {
+          "value": "KL/r="
+        },
+        "D80": {
+          "value": 134.7137948210441,
+          "formula": "=(1*H12*1000)/(AP56)"
+        },
+        "G80": {
+          "value": null,
+          "formula": "=IF(D80>200,\"Slender For Top Flange Over 200\",\"\")"
+        },
+        "A81": {
+          "value": "4.71(E/Qfy)^1/2"
+        },
+        "D81": {
+          "value": 118.64559507007485,
+          "formula": "=4.71*SQRT(E_kn_cm2/(C77*Fy_Kn_cm2))"
+        },
+        "AN81": {
+          "value": 2.0,
+          "formula": "=IF(D80>D81,2,1)"
+        },
+        "A82": {
+          "value": "Fcr=Q(0.658*(Q*Fy/Fe))*Fy"
+        },
+        "D82": {
+          "value": 32.581984025647614,
+          "formula": "=C77*Fy_Kn_cm2*(0.658^((C77*Fy_Kn_cm2)/E79))"
+        },
+        "E82": {
+          "value": "(kN/cm2)  "
+        },
+        "AN82": {
+          "value": 778.1041006274262,
+          "formula": "=IF(D80>D81,D83,D82)"
+        },
+        "A83": {
+          "value": "Fcr=0.877Fe"
+        },
+        "D83": {
+          "value": 778.1041006274262,
+          "formula": "=0.877*E79"
+        },
+        "E83": {
+          "value": "(kN/cm2)  "
+        },
+        "A84": {
+          "value": "Pn="
+        },
+        "D84": {
+          "value": 13977.917975342985,
+          "formula": "=(AN82*(bft/10)*(tft/10))/1.67"
+        },
+        "E84": {
+          "value": "(kN)  "
+        },
+        "A86": {
+          "value": "Total Longitudnal Force  =    "
+        },
+        "D86": {
+          "value": 4.3,
+          "formula": "=(F22*E17/100)*I22"
+        },
+        "E86": {
+          "value": "(kN) "
+        },
+        "AP88": {
+          "value": "Pick Rpc"
+        },
+        "AQ88": {
+          "value": 1.1072381716794284,
+          "formula": "=IF(AP92>0.23,AQ90,AR104)"
+        },
+        "A89": {
+          "value": "4. Major Axis Bending Around X-X: "
+        },
+        "A90": {
+          "value": "4.1 Compression Flange Yielding:"
+        },
+        "D90": {
+          "value": "(AISC 360 - 10  F4-1)"
+        },
+        "AN90": {
+          "value": "Rpc Case"
+        },
+        "AO90": {
+          "value": 1.0,
+          "formula": "=IF(AP92>0.23,1,2)"
+        },
+        "AQ90": {
+          "value": 1.1072381716794284,
+          "formula": "=IF(AQ93<=AS95,AR98,AR101)"
+        },
+        "A91": {
+          "value": "Mn1 = Rpc*Fy*Sxc"
+        },
+        "C91": {
+          "value": 499.12944000000005,
+          "formula": "=(B92*Fy_Kn_cm2*B30)/100"
+        },
+        "D91": {
+          "value": "(kN/m)"
+        },
+        "A92": {
+          "value": "Rpc="
+        },
+        "B92": {
+          "value": 1.1072381716794284,
+          "formula": "=AQ88"
+        },
+        "AO92": {
+          "value": "Iyc/Iy="
+        },
+        "AP92": {
+          "value": 0.4998289660251357,
+          "formula": "=B41/B29"
+        },
+        "A93": {
+          "value": "λ =hc/tw"
+        },
+        "B93": {
+          "value": 9.333333333333332,
+          "formula": "=AQ93"
+        },
+        "AP93": {
+          "value": "hc/tw"
+        },
+        "AQ93": {
+          "value": 9.333333333333332,
+          "formula": "=h_Tee_Top/tw"
+        },
+        "AU93": {
+          "value": "E N.MM"
+        },
+        "AV93": {
+          "value": 210000.0,
+          "formula": "=E"
+        },
+        "AW93": {
+          "value": "hc"
+        },
+        "AX93": {
+          "value": 376.0,
+          "formula": "=hc*10"
+        },
+        "A94": {
+          "value": "4.2 Lateral Torsional Buckling Yielding:"
+        },
+        "D94": {
+          "value": "(AISC 360 - 10 F4-2)"
+        },
+        "AU94": {
+          "value": "FY"
+        },
+        "AV94": {
+          "value": 345.0,
+          "formula": "=Fy"
+        },
+        "AW94": {
+          "value": "hp"
+        },
+        "AX94": {
+          "value": 376.0,
+          "formula": "=hp*10"
+        },
+        "A95": {
+          "value": "Moment gradient Cb="
+        },
+        "C95": {
+          "value": 1.0
+        },
+        "AP95": {
+          "value": "when"
+        },
+        "AQ95": {
+          "value": "hc/tw<=λpw"
+        },
+        "AR95": {
+          "value": "λpw="
+        },
+        "AS95": {
+          "value": 92.76581079349175,
+          "formula": "=G63"
+        },
+        "AQ96": {
+          "value": "Mp=min ( Zx*Fy ,1.6*Sxc*Fy )"
+        },
+        "AR96": {
+          "value": 49912.943999999996,
+          "formula": "=MIN(Fy_Kn_cm2*B36,1.6*Sxc*Fy_Kn_cm2)"
+        },
+        "AT96": {
+          "value": "Kn.cm"
+        },
+        "AU96": {
+          "value": 499129439.99999994,
+          "formula": "=AR96*(1000)*(10)"
+        },
+        "AV96": {
+          "value": "N.MM"
+        },
+        "AW96": {
+          "value": 95.63766080909787,
+          "formula": "=((AX93/AX94)*SQRT(AV93/AV94))/((0.54*(AU96/AU97)-0.09)^2)"
+        },
+        "AQ97": {
+          "value": "Myc=Fy*Sxc"
+        },
+        "AR97": {
+          "value": 45078.77824,
+          "formula": "=Fy_Kn_cm2*Sxc"
+        },
+        "AT97": {
+          "value": "Kn.cm"
+        },
+        "AU97": {
+          "value": 450787782.40000004,
+          "formula": "=AR97*(1000)*(10)"
+        },
+        "AV97": {
+          "value": "N.MM"
+        },
+        "A98": {
+          "value": "Runway beam unbraced length Lb="
+        },
+        "D98": {
+          "value": 900.0,
+          "formula": "=H12*100"
+        },
+        "E98": {
+          "value": "(cm)"
+        },
+        "AQ98": {
+          "value": "Rpc=Mp/Myc"
+        },
+        "AR98": {
+          "value": 1.1072381716794284,
+          "formula": "=AR96/AR97"
+        },
+        "A99": {
+          "value": "The limiting laterally unbraced length for the limit state of yielding Lp=1.1*rt*sqrt(E/fy)"
+        },
+        "H99": {
+          "value": "(AISC 360  Eq F4-7)"
+        },
+        "A100": {
+          "value": "Lp="
+        },
+        "B100": {
+          "value": 184.8851270254445,
+          "formula": "=1.1*(AQ119/10)*SQRT(E_kn_cm2/Fy_Kn_cm2)"
+        },
+        "C100": {
+          "value": "(cm)"
+        },
+        "AP100": {
+          "value": "when"
+        },
+        "AQ100": {
+          "value": "hc/tw>λpw"
+        },
+        "AR100": {
+          "value": "λpw="
+        },
+        "AS100": {
+          "value": 92.76581079349175,
+          "formula": "=G63"
+        },
+        "A101": {
+          "value": "The limiting unbraced length for the limit state of inelastic lateral-torsional buckling Lr"
+        },
+        "AQ101": {
+          "value": "Rpc="
+        },
+        "AR101": {
+          "value": 1.2941697664365015,
+          "formula": "=((AR96/AR97)-(((AR96/AR97)-1)*((AQ93-AS100)/(G64-AS100))))"
+        },
+        "AU101": {
+          "value": 1.1072381716794284,
+          "formula": "=AR96/Myc"
+        },
+        "AN102": {
+          "value": "Rpc Case"
+        },
+        "AO102": {
+          "value": 2.0,
+          "formula": "=IF(AP104>0.23,1,2)"
+        },
+        "AO103": {
+          "value": "Iyc/Iy="
+        },
+        "AP103": {
+          "value": 0.4998289660251357,
+          "formula": "=B41/B29"
+        },
+        "E104": {
+          "value": "="
+        },
+        "F104": {
+          "value": 701.8072004922134,
+          "formula": "=1.95*(AQ119/10)*(E_kn_cm2/B108)*SQRT((J/(B30*(h0/10)))+SQRT((J/((B30*(h0/10))^2))+(6.76*((B108/E_kn_cm2)^2))))"
+        },
+        "G104": {
+          "value": "(cm)"
+        },
+        "H104": {
+          "value": "(AISC 360  Eq F4-8)"
+        },
+        "AQ104": {
+          "value": "Rpc="
+        },
+        "AR104": {
+          "value": 1.0,
+          "formula": "=1"
+        },
+        "A107": {
+          "value": "Sxt/Sxc"
+        },
+        "B107": {
+          "value": 1.0,
+          "formula": "=B30/B31"
+        },
+        "AO107": {
+          "value": "Sxt/Sxc"
+        },
+        "AP107": {
+          "value": 1.0,
+          "formula": "=B107"
+        },
+        "A108": {
+          "value": "FL = 0.7Fy",
+          "formula": "=IF(B107>=0.7,AP108,AP109)"
+        },
+        "B108": {
+          "value": 24.15,
+          "formula": "=IF(B107>=0.7,AR108,AR109)"
+        },
+        "C108": {
+          "value": "(kn/cm2)"
+        },
+        "AP108": {
+          "value": "FL = 0.7Fy"
+        },
+        "AR108": {
+          "value": 24.15,
+          "formula": "=0.7*Fy_Kn_cm2"
+        },
+        "AP109": {
+          "value": "FL=FY*SXT/SXC"
+        },
+        "AR109": {
+          "value": 34.5,
+          "formula": "=Fy_Kn_cm2*(AP107)"
+        },
+        "A110": {
+          "value": "For Lp < Lb ≤ Lr"
+        },
+        "AR110": {
+          "value": 17.25,
+          "formula": "=0.5*Fy_Kn_cm2"
+        },
+        "E111": {
+          "value": "="
+        },
+        "F111": {
+          "value": 24516.59135860322,
+          "formula": "=Cb*((B92*AR97)-(((B92*AR97)-(B108*B30))*((D98-B100)/(F104-B100))))"
+        },
+        "G111": {
+          "value": "(Kn.cm)"
+        },
+        "H111": {
+          "value": "(AISC 360  Eq F4-8)"
+        },
+        "A114": {
+          "value": "For Lb > Lr"
+        },
+        "AQ115": {
+          "value": 1.0026666666666666,
+          "formula": "=((hc*10)*tw)/(B_Tee_Top*tf_Tee_Top)"
+        },
+        "D117": {
+          "value": "="
+        },
+        "E117": {
+          "value": 11.919762004983841,
+          "formula": "=(Cb*(3.14^2)*E_kn_cm2)/((D98/(AQ119/10))^2)*SQRT(1+((0.078*J)/(B30*(h0/10)))*((D98/AQ119)^2))"
+        },
+        "F117": {
+          "value": "(kn/cm2)"
+        },
+        "G117": {
+          "value": "(AISC 360  Eq F4-5)"
+        },
+        "AQ119": {
+          "value": 68.12541972574964,
+          "formula": "=B_Tee_Top/SQRT(12*((h0/h_full)+(AQ115/6)*((h^2)/(h0*h_full))))"
+        },
+        "AN120": {
+          "value": 3.0,
+          "formula": "=IF(D98<=B100,1,IF(D98>F104,3,2))"
+        },
+        "C121": {
+          "value": 15574.733568007081,
+          "formula": "=E117*B30"
+        },
+        "D121": {
+          "value": "(Kn.cm)"
+        },
+        "F121": {
+          "value": "(AISC 360  Eq F4-3)"
+        },
+        "A124": {
+          "value": "Lateral Torsional Buckling Norminal Strenght: Mn2"
+        },
+        "E124": {
+          "value": 155.74733568007082,
+          "formula": "=IF(D98<=B100,999999999,IF(D98>F104,C121,F111))/100"
+        },
+        "F124": {
+          "value": "(kN.m)"
+        },
+        "A127": {
+          "value": "4.3 Compression Flange Local Buckling:"
+        },
+        "E127": {
+          "value": "(AISC 360 - 10 F4-3)"
+        },
+        "B130": {
+          "value": "="
+        },
+        "C130": {
+          "value": 0.5834599659915782,
+          "formula": "=IF(AQ130<=0.35,0.35,IF(AQ130>=0.76,0.76,AQ130))"
+        },
+        "E130": {
+          "value": "="
+        },
+        "F130": {
+          "value": 10.416666666666666,
+          "formula": "=bft/(2*tft)"
+        },
+        "AQ130": {
+          "value": 0.5834599659915782,
+          "formula": "=4/SQRT((h/tw))"
+        },
+        "A134": {
+          "value": "For sections with noncompact flanges"
+        },
+        "D136": {
+          "value": "="
+        },
+        "E136": {
+          "value": 48663.128814422744,
+          "formula": "=(Rpc*Myc)-(((Rpc*Myc)-(B108*Sxc))*((F130-G59)/(G60-G59)))"
+        },
+        "F136": {
+          "value": "(kn.cm)"
+        },
+        "G136": {
+          "value": "(AISC 360  Eq F4-13)"
+        },
+        "A139": {
+          "value": "For sections with slender flanges"
+        },
+        "C141": {
+          "value": "="
+        },
+        "D141": {
+          "value": 132790.91837986952,
+          "formula": "=(0.9*E_kn_cm2*C130*Sxc)/(F130^2)"
+        },
+        "E141": {
+          "value": "(kn.cm)"
+        },
+        "G141": {
+          "value": "(AISC 360  Eq F4-14)"
+        },
+        "A144": {
+          "value": "Compression Flange Local Buckling norminal strenght Mn3="
+        },
+        "F144": {
+          "value": 486.6312881442274,
+          "formula": "=IF(G57=AT57,\"the limit state of local buckling does not\napply\",IF(G57=AT58,(E136/100),(D141/100)))"
+        },
+        "G144": {
+          "value": "(kN.m)"
+        },
+        "AN144": {
+          "value": 2.0,
+          "formula": "=IF(G57=AT57,1,IF(G57=AT58,2,3))"
+        },
+        "A150": {
+          "value": "4.3 Tension Flange Yielding:"
+        },
+        "D150": {
+          "value": "(AISC 360 - 10 F4-4)"
+        },
+        "AN151": {
+          "value": "Rpt Case"
+        },
+        "A152": {
+          "value": "hc/tw="
+        },
+        "B152": {
+          "value": 4.7,
+          "formula": "=hc/tw"
+        },
+        "AO152": {
+          "value": "Myt=Fy*Sxt"
+        },
+        "AP152": {
+          "value": 45078.77824,
+          "formula": "=Fy_Kn_cm2*Sxt"
+        },
+        "AQ152": {
+          "value": "Kn.cm"
+        },
+        "A153": {
+          "value": "λpw="
+        },
+        "B153": {
+          "value": 92.76581079349175,
+          "formula": "=G63"
+        },
+        "A155": {
+          "value": "For hc/tw<=λpw"
+        },
+        "B157": {
+          "value": "="
+        },
+        "C157": {
+          "value": 1.1072381716794284,
+          "formula": "=AR96/AP152"
+        },
+        "E157": {
+          "value": "(AISC 360  Eq F4-16a)"
+        },
+        "AN159": {
+          "value": 1.0,
+          "formula": "=IF(B152<=B153,1,2)"
+        },
+        "A160": {
+          "value": "For hc/tw>λpw"
+        },
+        "E162": {
+          "value": 1.2097770900648162,
+          "formula": "=(AR96/AP152)-(((AR96/AP152)-1)*((G62-G63)/(G64-G63)))"
+        },
+        "F162": {
+          "value": "(AISC 360  Eq F4-16b)"
+        },
+        "A166": {
+          "value": "Tension Flange Yielding norminal strenght "
+        },
+        "B167": {
+          "value": "="
+        },
+        "C167": {
+          "value": 49912.944,
+          "formula": "=IF(B152<=B153,C157*AP152,E162*AP152)"
+        },
+        "D167": {
+          "value": "(kn.cm)"
+        },
+        "F167": {
+          "value": "(AISC 360  Eq F4-15)"
+        },
+        "A171": {
+          "value": "Tension Flange Yielding norminal strenght Mn4="
+        },
+        "E171": {
+          "value": 499.12944000000005,
+          "formula": "=C167/100"
+        },
+        "F171": {
+          "value": "(kN.m)"
+        },
+        "A174": {
+          "value": "The nominal flexural strength, Mn Major Axis Bending Around X-X: "
+        },
+        "A176": {
+          "value": "Mn=min(Mn1,Mn2,Mn3,Mn4)"
+        },
+        "D176": {
+          "value": 93.26187765273703,
+          "formula": "=(MIN(C91,E124,F144,E171))/1.67"
+        },
+        "E176": {
+          "value": "(kN.m)"
+        },
+        "A178": {
+          "value": "5. Minor Axis Bending Y-Y: "
+        },
+        "A179": {
+          "value": "For top running crane, top flange is checked for bending about Y-Y axis"
+        },
+        "A180": {
+          "value": "5.1 Yielding:"
+        },
+        "D180": {
+          "value": "(AISC 360 - 10 F6)"
+        },
+        "C182": {
+          "value": "="
+        },
+        "D182": {
+          "value": 3338.151,
+          "formula": "=Fy_Kn_cm2*B44"
+        },
+        "F182": {
+          "value": 6901.180740266667,
+          "formula": "=1.6*Fy_Kn_cm2*B42"
+        },
+        "G182": {
+          "value": "PASS",
+          "formula": "=IF(F182>=D182,\"PASS\",\"FAIL\")"
+        },
+        "H182": {
+          "value": "(AISC 360  Eq F6-1)"
+        },
+        "AQ183": {
+          "value": "Mp="
+        },
+        "AR183": {
+          "value": 3338.151,
+          "formula": "=D182"
+        },
+        "A184": {
+          "value": "5.2 Flange Local Buckling"
+        },
+        "AQ184": {
+          "value": "Myc=Fy*Sxc"
+        },
+        "AR184": {
+          "value": 45078.77824,
+          "formula": "=Fy_Kn_cm2*Sxc"
+        },
+        "A185": {
+          "value": "Top flange compactness"
+        },
+        "C185": {
+          "value": "Non-Compact",
+          "formula": "=G57"
+        },
+        "E185": {
+          "value": null,
+          "formula": "=IF(AN189=1,\" flange local buckling does not apply\",\"\")"
+        },
+        "A187": {
+          "value": "For sections with noncompact flanges"
+        },
+        "D189": {
+          "value": "="
+        },
+        "E189": {
+          "value": 3316.441066625698,
+          "formula": "=D182-(((B192-G59)/(G60-G59))*(D182-(0.7*Fy_Kn_cm2*B42)))"
+        },
+        "F189": {
+          "value": "(kn.cm)"
+        },
+        "G189": {
+          "value": "(AISC 360  Eq F6-2)"
+        },
+        "AN189": {
+          "value": 2.0,
+          "formula": "=IF(C185=AT57,1,IF(C185=AT58,2,3))"
+        },
+        "A192": {
+          "value": "λ=b/tf="
+        },
+        "B192": {
+          "value": 10.416666666666666,
+          "formula": "=B_Tee_Top/(2*tf_Tee_Top)"
+        },
+        "AN192": {
+          "value": 3316.441066625698,
+          "formula": "=IF(AN189=1,99999999,IF(AN189=2,E189,F196))"
+        },
+        "A194": {
+          "value": "For sections with slender flanges"
+        },
+        "B196": {
+          "value": 133.53984,
+          "formula": "=(0.69*E_kn_cm2)/(B192^2)"
+        },
+        "C196": {
+          "value": "(kN/cm2)  "
+        },
+        "E196": {
+          "value": "="
+        },
+        "F196": {
+          "value": 16695.336446853118,
+          "formula": "=B196*B42"
+        },
+        "G196": {
+          "value": "(kn.cm)"
+        },
+        "H196": {
+          "value": "(AISC 360  Eq F6-3)"
+        },
+        "A199": {
+          "value": "The nominal flexural strength, Mn Minor Axis Bending Around Y-Y: "
+        },
+        "G199": {
+          "value": "Mn-y"
+        },
+        "H199": {
+          "value": 19.858928542668853,
+          "formula": "=(MIN(D182,AN192)/100)/1.67"
+        },
+        "I199": {
+          "value": "(kN.m)"
+        },
+        "A202": {
+          "value": "6.Check Biaxial Bending on Top Flange"
+        },
+        "G204": {
+          "value": "AISC 360  Eq H1-1b"
+        },
+        "A208": {
+          "value": "7.Check web capacity due to wheel load (Web yielding/Crippling/Sidesway buckling):"
+        },
+        "A210": {
+          "value": "7.1 Web Local Yielding"
+        },
+        "A211": {
+          "value": "This section applies to single-concentrated forces and both components of double concentrated forces"
+        },
+        "C213": {
+          "value": 202.4,
+          "formula": "=(Fy_Kn_cm2*(tw/10)*((5*(tf_Tee_Top/10))+(G18)))/1.5"
+        },
+        "D213": {
+          "value": "(kN)"
+        },
+        "F213": {
+          "value": "AISC 360  Eq J10-2"
+        },
+        "A215": {
+          "value": "7.2 Web Local Crippling"
+        },
+        "A216": {
+          "value": "This section applies to compressive single-concentrated forces \ncomponent of double-concentrated forces."
+        },
+        "A217": {
+          "value": "or the compressive component of double-concentrated forces."
+        },
+        "AP217": {
+          "value": "d"
+        },
+        "AQ217": {
+          "value": 40.0,
+          "formula": "=h_full/10"
+        },
+        "AP218": {
+          "value": "tw"
+        },
+        "AQ218": {
+          "value": 0.8,
+          "formula": "=tw/10"
+        },
+        "A219": {
+          "value": "+When point load distance from the member end that is greater than or equal to d/2"
+        },
+        "AP219": {
+          "value": "lb"
+        },
+        "AQ219": {
+          "value": 5.0,
+          "formula": "=G18"
+        },
+        "AP220": {
+          "value": "tf"
+        },
+        "AQ220": {
+          "value": 1.2,
+          "formula": "=tf_Tee_Top/10"
+        },
+        "D222": {
+          "value": "="
+        },
+        "E222": {
+          "value": 642.6966710375988,
+          "formula": "=(0.8*(AQ218^2)*(SQRT((E_kn_cm2*Fy_Kn_cm2*AQ220)/AQ218))*(1+((3*(AQ219/AQ217)*((AQ218/AQ220)^1.5)))))"
+        },
+        "F222": {
+          "value": "(kN)"
+        },
+        "G222": {
+          "value": "AISC 360  Eq J10-4"
+        },
+        "A225": {
+          "value": "+When point load distance from the member end that is less than d/2"
+        },
+        "D228": {
+          "value": "="
+        },
+        "E228": {
+          "value": 321.3483355187994,
+          "formula": "=(0.4*(AQ218^2)*(SQRT((E_kn_cm2*Fy_Kn_cm2*AQ220)/AQ218))*(1+((3*(AQ219/AQ217)*((AQ218/AQ220)^1.5)))))"
+        },
+        "F228": {
+          "value": "(kN)"
+        },
+        "G228": {
+          "value": "AISC 360  Eq J10-5a"
+        },
+        "A231": {
+          "value": "Web local cripling Rn="
+        },
+        "C231": {
+          "value": 160.6741677593997,
+          "formula": "=(MIN(E228,E222))/2"
+        },
+        "D231": {
+          "value": "(kN)"
+        },
+        "A233": {
+          "value": "7.3 Web Sidesway Buckling"
+        },
+        "A234": {
+          "value": "Compression flange is not restrained against rotation"
+        },
+        "B235": {
+          "value": 1.3055555555555556,
+          "formula": "=(h/tw)/((H12*1000)/B_Tee_Top)"
+        },
+        "D235": {
+          "value": null,
+          "formula": "=IF(B235>1.7,\">1.7 the limit state of web sidesway buckling does not apply\",\"\")"
+        },
+        "A237": {
+          "value": "1.5Ma="
+        },
+        "B237": {
+          "value": 15.75,
+          "formula": "=1.5*G15"
+        },
+        "J237": {
+          "value": "ASD"
+        },
+        "A238": {
+          "value": "Cr="
+        },
+        "B238": {
+          "value": 662000.0,
+          "formula": "=IF(B237>=H199,331000,662000)"
+        },
+        "AN239": {
+          "value": 2.0,
+          "formula": "=IF(D235=\">1.7 the limit state of web sidesway buckling does not apply\",1,2)"
+        },
+        "C240": {
+          "value": "="
+        },
+        "D240": {
+          "value": 145.5013093901983,
+          "formula": "=(((B238*(AP245^3)*AP249)/((AP246^2)))*((0.4*(((AP246/AP245)/(AP247/AP248))^3))))/1.76"
+        },
+        "E240": {
+          "value": "(kN)"
+        },
+        "F240": {
+          "value": "AISC 360  Eq J10-6"
+        },
+        "AN240": {
+          "value": 999999.0,
+          "formula": "=IF(AN239,999999,D240)"
+        },
+        "F244": {
+          "value": "Wheel loads ="
+        },
+        "H244": {
+          "value": 47.3,
+          "formula": "=E17+(F20*E17/100)"
+        },
+        "I244": {
+          "value": "(kN)"
+        },
+        "A245": {
+          "value": "Web capacity due to wheel load (Web yielding/Crippling/Sidesway buckling)"
+        },
+        "H245": {
+          "value": 160.6741677593997,
+          "formula": "=MIN(C213,C231,AN240)"
+        },
+        "I245": {
+          "value": "(kN)"
+        },
+        "AN245": {
+          "value": "tw"
+        },
+        "AO245": {
+          "value": 8.0,
+          "formula": "=tw"
+        },
+        "AP245": {
+          "value": 0.8,
+          "formula": "=AO245/10"
+        },
+        "AN246": {
+          "value": "h"
+        },
+        "AO246": {
+          "value": 376.0,
+          "formula": "=h"
+        },
+        "AP246": {
+          "value": 37.6,
+          "formula": "=AO246/10"
+        },
+        "A247": {
+          "value": "6. Shear along Y - Y: "
+        },
+        "C247": {
+          "value": "AISC 360-G2"
+        },
+        "AN247": {
+          "value": "Lb"
+        },
+        "AO247": {
+          "value": 900.0,
+          "formula": "=H12*100"
+        },
+        "AP247": {
+          "value": 900.0,
+          "formula": "=AO247"
+        },
+        "A248": {
+          "value": "h/tw="
+        },
+        "B248": {
+          "value": 47.0,
+          "formula": "=h/tw"
+        },
+        "E248": {
+          "value": "Strengthen for first panel in tension field zone"
+        },
+        "AN248": {
+          "value": "Bf"
+        },
+        "AO248": {
+          "value": 250.0,
+          "formula": "=B_Tee_Top"
+        },
+        "AP248": {
+          "value": 25.0,
+          "formula": "=AO248/10"
+        },
+        "A249": {
+          "value": "kv="
+        },
+        "B249": {
+          "value": 5.0
+        },
+        "E249": {
+          "value": "tw (strengthen)(1st panel)"
+        },
+        "F249": {
+          "value": 1.5
+        },
+        "G249": {
+          "value": "cm"
+        },
+        "H249": {
+          "value": "N"
+        },
+        "AN249": {
+          "value": "tf"
+        },
+        "AO249": {
+          "value": 12.0,
+          "formula": "=tf_Tee_Top"
+        },
+        "AP249": {
+          "value": 1.2,
+          "formula": "=AO249/10"
+        },
+        "A250": {
+          "value": "1.1*sqrt(kv*E/Fy)"
+        },
+        "C250": {
+          "value": 60.68450128041075,
+          "formula": "=1.1*SQRT(B249*E_kn_cm2/Fy_Kn_cm2)"
+        },
+        "AN250": {
+          "value": "tf-bit"
+        },
+        "AO250": {
+          "value": 12.0,
+          "formula": "=tf_Tee_bot"
+        },
+        "AP250": {
+          "value": 1.2,
+          "formula": "=AO250/10"
+        },
+        "A251": {
+          "value": "1.37*sqrt(kv*E/Fy)"
+        },
+        "C251": {
+          "value": 75.57978795832976,
+          "formula": "=1.37*SQRT(B249*E_kn_cm2/Fy_Kn_cm2)"
+        },
+        "AN251": {
+          "value": "d"
+        },
+        "AO251": {
+          "value": 400.0,
+          "formula": "=h_full"
+        },
+        "AP251": {
+          "value": 40.0,
+          "formula": "=AO251/10"
+        },
+        "A253": {
+          "value": "Cv=1.1*sqrt(kv*E/Fy)/(h/tw)"
+        },
+        "C253": {
+          "value": 1.291159601710867,
+          "formula": "=C250/B248"
+        },
+        "E253": {
+          "value": "AISC 360  Eq G2-4"
+        },
+        "AN253": {
+          "value": 1.0,
+          "formula": "=IF(B248<C250,1,IF(B248>C251,3,1))"
+        },
+        "AN254": {
+          "value": 1.0,
+          "formula": "=IF(B248<=C250,1,IF(B248>C251,C255,C253))"
+        },
+        "A255": {
+          "value": "Cv=1.5*kv*E/(h/tw)^2*Fy"
+        },
+        "C255": {
+          "value": 2.0804219890959907,
+          "formula": "=(1.51*B249*E_kn_cm2)/((B248^2)*Fy_Kn_cm2)"
+        },
+        "E255": {
+          "value": "AISC 360  Eq J2-5"
+        },
+        "C257": {
+          "value": 396.6467065868263,
+          "formula": "=(0.6*Fy_Kn_cm2*AN254*(AP251*(IF(H249=\"N\",AP245,F249)))/1.67)"
+        },
+        "D257": {
+          "value": "(kN)"
+        },
+        "AN258": {
+          "value": 0.0,
+          "formula": "=IF(H249=\"Y\",1,0)"
+        },
+        "A259": {
+          "value": "7. Shear along X -X: "
+        },
+        "C259": {
+          "value": "AISC 360-G7"
+        },
+        "A260": {
+          "value": "h/tw=b/tf="
+        },
+        "B260": {
+          "value": 10.416666666666666,
+          "formula": "=(B_Tee_Top/2)/tf_Tee_Top"
+        },
+        "A261": {
+          "value": "kv="
+        },
+        "B261": {
+          "value": 1.2
+        },
+        "A262": {
+          "value": "1.1*sqrt(kv*E/Fy)"
+        },
+        "C262": {
+          "value": 60.68450128041075,
+          "formula": "=1.1*SQRT(5*E_kn_cm2/Fy_Kn_cm2)"
+        },
+        "AN262": {
+          "value": 1.0,
+          "formula": "=IF(B260<C262,1,IF(B260>C263,3,2))"
+        },
+        "A263": {
+          "value": "1.37*sqrt(kv*E/Fy)"
+        },
+        "C263": {
+          "value": 75.57978795832976,
+          "formula": "=1.37*SQRT(5*E_kn_cm2/Fy_Kn_cm2)"
+        },
+        "AN263": {
+          "value": 1.0,
+          "formula": "=IF(B260<C262,1,IF(B260>C263,C267,C265))"
+        },
+        "A265": {
+          "value": "Cv=1.1*sqrt(kv*E/Fy)/(h/tw)"
+        },
+        "C265": {
+          "value": 5.825712122919432,
+          "formula": "=C262/B260"
+        },
+        "E265": {
+          "value": "AISC 360  Eq G2-4"
+        },
+        "A267": {
+          "value": "Cv=1.5*kv*E/(h/tw)^2*Fy"
+        },
+        "C267": {
+          "value": 10.164847304347829,
+          "formula": "=(1.51*B261*E_kn_cm2)/((B260^2)*Fy_Kn_cm2)"
+        },
+        "E267": {
+          "value": "AISC 360  Eq J2-5"
+        },
+        "C270": {
+          "value": 185.92814371257487,
+          "formula": "=(0.6*Fy_Kn_cm2*(((B_Tee_Top/2)/10)*AP249))/1.67"
+        },
+        "D270": {
+          "value": "(kN)"
+        },
+        "A272": {
+          "value": "8. Bottom Flange Fatigue : "
+        },
+        "A277": {
+          "value": "Fsr"
+        },
+        "B277": {
+          "value": 19.5
+        },
+        "C277": {
+          "value": "kN/m2"
+        },
+        "A278": {
+          "value": "Fth"
+        },
+        "B278": {
+          "value": 12.4
+        },
+        "C278": {
+          "value": "kN/m2"
+        },
+        "A280": {
+          "value": "9. Tension field check : "
+        },
+        "A281": {
+          "value": "Check tesnsion field action parameter"
+        },
+        "C282": {
+          "value": 47.0,
+          "formula": "=h/tw"
+        },
+        "D282": {
+          "value": 60.69252514680578,
+          "formula": "=2.46*SQRT(E_kn_cm2/Fy_Kn_cm2)"
+        },
+        "E282": {
+          "value": "stifferner not required",
+          "formula": "=IF(C282<=D282,\"stifferner not required\",\"Pass\")"
+        },
+        "B285": {
+          "value": 6.648936170212766,
+          "formula": "=H10*1000/h"
+        },
+        "C285": {
+          "value": 3.0
+        },
+        "D285": {
+          "value": "NG",
+          "formula": "=IF(B285>C285,\"NG\",\"Pass\")"
+        },
+        "C288": {
+          "value": 6.648936170212766,
+          "formula": "=H10*1000/h"
+        },
+        "D288": {
+          "value": 30.602082390221824,
+          "formula": "=(260/((h/tw)))^2"
+        },
+        "E288": {
+          "value": "Pass",
+          "formula": "=IF(C288>D288,\"NG\",\"Pass\")"
+        },
+        "C290": {
+          "value": 1.0026666666666666,
+          "formula": "=(2*h*tw)/((B_Tee_Top*tf_Tee_Top)+(B_Tee_bot*tf_Tee_bot))"
+        },
+        "D290": {
+          "value": 2.5
+        },
+        "E290": {
+          "value": "Pass",
+          "formula": "=IF(C290>D290,\"NG\",\"Pass\")"
+        },
+        "C293": {
+          "value": 1.504,
+          "formula": "=h/B_Tee_bot"
+        },
+        "D293": {
+          "value": 6.0
+        },
+        "E293": {
+          "value": "Pass",
+          "formula": "=IF(C293>D293,\"NG\",\"Pass\")"
+        },
+        "C295": {
+          "value": 1.504,
+          "formula": "=h/B_Tee_Top"
+        },
+        "D295": {
+          "value": 6.0
+        },
+        "E295": {
+          "value": "Pass",
+          "formula": "=IF(C295>D295,\"NG\",\"Pass\")"
+        },
+        "E298": {
+          "value": 437.77354452004056,
+          "formula": "=(0.6*Fy_Kn_cm2*((h/10)*(tw/10))*(AP249+((1-AP249)/(1.15*SQRT(1+(((H10*100)/(h/10))^2))))))/1.67"
+        },
+        "F298": {
+          "value": "(kN)"
+        }
+      }
+    }
+  }
+}

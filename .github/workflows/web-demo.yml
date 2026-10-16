@@ -4,12 +4,20 @@ on:
   pull_request:
     paths:
       - 'structural-platform/frontend/vue/**'
+      - 'structural-platform/section-properties/**'
+      - 'structural-platform/standards/**'
+      - 'structural-platform/tests/**'
+      - 'structural-platform/scripts/**'
       - 'structural-platform/scripts/build-web-demo.sh'
       - '.github/workflows/web-demo.yml'
   push:
     branches: [main]
     paths:
       - 'structural-platform/frontend/vue/**'
+      - 'structural-platform/section-properties/**'
+      - 'structural-platform/standards/**'
+      - 'structural-platform/tests/**'
+      - 'structural-platform/scripts/**'
       - 'structural-platform/scripts/build-web-demo.sh'
       - '.github/workflows/web-demo.yml'
 
@@ -40,6 +48,8 @@ jobs:
         run: node --test tests/geometry/hi-aisc36010-design-method.test.js
       - name: Verify ANSI/AISC 360-10 Phase A/B formula branches
         run: node --test tests/geometry/aisc36010-verified-ih.test.js
+      - name: Verify Crane Beam geometry, strength candidates and dual-sheet regression
+        run: npm run test:crane-beam
       - name: Build GitHub Pages demo
         run: npm run build -- --outDir ../../../docs --emptyOutDir
         env:

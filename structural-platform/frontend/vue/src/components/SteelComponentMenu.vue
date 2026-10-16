@@ -55,9 +55,11 @@ function openDesignStandard(code) {
 const text = {
   vi: { title: 'Chọn loại tiết diện', description: 'Chọn nhóm cấu kiện để mở chức năng tương ứng.', pending: 'Chức năng này đang được phát triển.',
     chooseStandard: 'Chọn tiêu chuẩn thiết kế', standardDescription: 'Chọn tiêu chuẩn để mở bảng tính cấu kiện.', preview: 'Đang kiểm chứng · Phase 1', comingSoon: 'Đang phát triển', dismiss: 'Đóng', previewNote: 'AISC 360-10 hiện chỉ mở bản đối chiếu Excel AISC 360-05, chưa phải công cụ thiết kế được xác minh theo tiêu chuẩn.',
+    cranePreviewNote: 'AISC 360-10 · ASD/LRFD · Bảng tính đang được kiểm chứng. Các phép kiểm tra chưa xác minh giữ trạng thái NOT VERIFIED.',
     crane_beam: 'Dầm cầu trục · I/H bất đối xứng', symmetric_i: 'Hai cánh giống nhau', asymmetric_i: 'Cánh trên và dưới độc lập', channel: 'Tiết diện U/C', angle: 'Tiết diện góc L', tee: 'Tiết diện chữ T', double_angle: 'Hai góc đối lưng', circle: 'Tròn đặc', chs: 'Ống tròn', shs_rhs: 'Hộp chữ nhật / vuông' },
   en: { title: 'Choose a section type', description: 'Choose a member family to open its workspace.', pending: 'This feature is in development.',
     chooseStandard: 'Choose design standard', standardDescription: 'Select a standard for the component calculation workspace.', preview: 'Under verification · Phase 1', comingSoon: 'Coming soon', dismiss: 'Close', previewNote: 'AISC 360-10 currently opens an AISC 360-05 Excel parity preview; it is not a code-verified design tool.',
+    cranePreviewNote: 'AISC 360-10 · ASD/LRFD · Worksheet under review. Unverified checks remain NOT VERIFIED.',
     crane_beam: 'Crane runway girder · Asymmetric I/H', symmetric_i: 'Equal flanges', asymmetric_i: 'Independent upper and lower flanges', channel: 'U/C section', angle: 'L section', tee: 'T section', double_angle: 'Back-to-back angles', circle: 'Solid circle', chs: 'Circular hollow section', shs_rhs: 'Rectangular / square hollow section' },
 }
 const t = key => text[props.locale]?.[key] ?? text.en[key]
@@ -95,7 +97,7 @@ const selected = computed(() => components.find(component => component.id === se
             <span aria-hidden="true">{{ standard.ready ? '→' : '○' }}</span>
           </button>
         </div>
-        <p class="steel-standards-warning">{{ selectedId === 'crane_beam' ? 'AISC 360-10 ASD · Bản chuyển thể Excel đang được kiểm chứng. Những điều kiện chưa đối chiếu sẽ hiển thị NOT VERIFIED.' : t('previewNote') }}</p>
+        <p class="steel-standards-warning">{{ selectedId === 'crane_beam' ? t('cranePreviewNote') : t('previewNote') }}</p>
       </section>
     </div>
     <CraneBeamView v-if="selectedId === 'crane_beam' && craneStandardOpen && !standardsDialogOpen" :locale="locale" />

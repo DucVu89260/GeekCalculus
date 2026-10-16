@@ -10,11 +10,12 @@ const design = ref(null)
 const profile = SECTION_PROFILES.find(p => p.id === 'asymmetric_i')
 const dimensions = ref({ ...profile.default_dimensions })
 const action = ref({ fy: 345, e: 200000, n_kn: 0, klx_mm: 9000, kly_mm: 4500, mx_knm: 200, my_knm: 15, vy_kn: 95, vx_kn: 20, deflection_y_mm: 8, deflection_x_mm: 5, wlmax_kn: 150, bearing_mm: 100, k_mm: 16 })
-const groups = [
- {name:'Material & axial',fields:[['fy','Fy (MPa)'],['e','E (MPa)'],['n_kn','N (kN; +tension / −compression)'],['klx_mm','KLx (mm)'],['kly_mm','KLy (mm)']]},
- {name:'Y · Vertical | Major-axis bending',fields:[['mx_knm','Mx · Major (kN·m)'],['vy_kn','Vy (kN)'],['deflection_y_mm','Deflection y (mm)']]},
- {name:'X · Horizontal | Minor-axis bending',fields:[['my_knm','My · Minor (kN·m)'],['vx_kn','Vx (kN)'],['deflection_x_mm','Deflection x (mm)']]},
- {name:'Wheel local bearing · Section J10',fields:[['wlmax_kn','WLmax · one side (kN)'],['bearing_mm','Bearing length N (mm)'],['k_mm','Distance k (mm)']]}
+const materialFields = [['fy','Fy (MPa)'],['e','E (MPa)']]
+const internalGroups = [
+ {name:'Axial / Buckling',fields:[['n_kn','N (kN; + tension / − compression)'],['klx_mm','KLx (mm)'],['kly_mm','KLy (mm)']]},
+ {name:'Y · Vertical | Major',fields:[['mx_knm','Mx · Major (kN·m)'],['vy_kn','Vy (kN)'],['deflection_y_mm','Deflection y (mm)']]},
+ {name:'X · Horizontal | Minor',fields:[['my_knm','My · Minor (kN·m)'],['vx_kn','Vx (kN)'],['deflection_x_mm','Deflection x (mm)']]},
+ {name:'Wheel local bearing · J10',fields:[['wlmax_kn','WLmax · one side (kN)'],['bearing_mm','Bearing length N (mm)'],['k_mm','Distance k (mm)']]}
 ]
 const loading = ref(false)
 const error = ref('')
@@ -104,11 +105,32 @@ async function calculate() {
         <g fill="#345670" text-anchor="middle" font-size="13"><text x="181" y="12">WLmax</text><text x="181" y="61">N</text><text x="265" y="133">t<tspan baseline-shift="sub" font-size="9">f</tspan></text><text x="206" y="192">t<tspan baseline-shift="sub" font-size="9">w</tspan></text><text x="165" y="252">Web local yielding · AISC J10.2</text></g>
       </svg><figcaption>Concentrated force acting through the rail/bearing onto the top flange. Only the local resistance is calculated here; WLmax must be supplied by the user or a future Crane Loading module.</figcaption></figure>
     </div>
-    <div class="crane-panel"><h4>01 · Input Data — Asymmetric I/H</h4>
-      <form @submit.prevent="calculate"><fieldset class="design-method"><legend>Design Method · AISC 360-10</legend><label><input v-model="method" type="radio" value="ASD"> ASD — Allowable Strength Design</label><label><input v-model="method" type="radio" value="LRFD"> LRFD — Load and Resistance Factor Design</label></fieldset><p class="drawing-note">Enter member actions corresponding to the selected ASD or LRFD load combinations. Selecting a method does not convert the applied forces.</p><div class="dimensions">
-        <label v-for="key in profile.dimensions" :key="key"><span>{{ key.replaceAll('_',' ') }} (mm)</span>
-          <input v-model.number="dimensions[key]" type="number" step="any" min="0.001" required /></label>
-      </div><h4>Material properties & section design actions</h4><div class="action-groups"><section v-for="group in groups" :key="group.name" class="action-group"><h5>{{ group.name }}</h5><div class="dimensions"><label v-for="field in group.fields" :key="field[0]"><span>{{ field[1] }}</span><input v-model.number="action[field[0]]" type="number" step="any" :min="field[0]==='n_kn' ? undefined : 0" required /></label></div></section></div><button type="submit" :disabled="loading">{{ loading ? 'Calculating…' : 'Calculate section properties' }}</button></form>
+    <div class="crane-panel"><h4>01 · Input Data — Crane Beam</h4>
+      <form @submit.prevent="calculate">
+        <fieldset class="design-method"><legend>Design Method · AISC 360-10</legend>
+          <label><input v-model="method" type="radio" value="ASD"> ASD — Allowable Strength Design</label>
+          <label><input v-model="method" type="radio" value="LRFD"> LRFD — Load and Resistance Factor Design</label>
+        </fieldset>
+        <p class="drawing-note">Use member actions from load combinations corresponding to the selected method; changing ASD/LRFD does not rescale forces.</p>
+        <div class="input-sections">
+          <section class="input-subsection"><h5>1. Material</h5>
+            <div class="dimensions"><label v-for="field in materialFields" :key="field[0]"><span>{{ field[1] }}</span>
+              <input v-model.number="action[field[0]]" type="number" min="0.001" step="any" required /></label></div>
+          </section>
+          <section class="input-subsection"><h5>2. Section · Asymmetric I/H</h5>
+            <div class="dimensions"><label v-for="key in profile.dimensions" :key="key"><span>{{ key.replaceAll('_',' ') }} (mm)</span>
+              <input v-model.number="dimensions[key]" type="number" min="0.001" step="any" required /></label></div>
+          </section>
+          <section class="input-subsection"><h5>3. Internal Forces</h5>
+            <div class="action-groups"><section v-for="group in internalGroups" :key="group.name" class="action-group">
+              <h6>{{ group.name }}</h6><div class="dimensions">
+                <label v-for="field in group.fields" :key="field[0]"><span>{{ field[1] }}</span>
+                  <input v-model.number="action[field[0]]" type="number" step="any" :min="field[0] === 'n_kn' ? undefined : 0" required /></label>
+              </div></section></div>
+          </section>
+        </div>
+        <button type="submit" :disabled="loading">{{ loading ? 'Calculating…' : 'Calculate Crane Beam' }}</button>
+      </form>
       <p v-if="error" role="alert" class="error">{{ error }}</p>
     </div>
     <div class="crane-panel"><h4>02 · Calculation Results</h4>
@@ -168,4 +190,5 @@ async function calculate() {
 .crane-beam{margin-top:18px;color:#243d55}.crane-beam>header{padding:18px 20px;background:#edf3f7;border-radius:12px}.crane-beam h3{margin:7px 0;font-size:23px}.crane-beam p{line-height:1.5}.crane-panel{padding:18px 20px;background:var(--workspace-bg);border:1px solid var(--surface-border);border-radius:12px;margin-top:14px}.crane-panel h4{margin:0 0 14px;font-size:18px}.dimensions{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}.dimensions label{display:grid;gap:6px;text-transform:capitalize}.dimensions input{padding:9px;border:1px solid #aebdcc;border-radius:6px;width:100%;box-sizing:border-box}.crane-panel button{margin-top:16px;padding:11px 18px;border:0;border-radius:6px;background:#294c70;color:white;cursor:pointer}.crane-panel button:disabled{opacity:.6}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:10px;text-align:left;border-bottom:1px solid #d8e1e8}th{font-weight:600}.error{color:#a21e1e;overflow-wrap:anywhere}
 .bearing-figure{margin:0;max-width:570px;background:#fcfbf7;border:1px solid #d8e2e9;border-radius:10px;padding:14px}.bearing-figure svg{display:block;width:100%;height:260px}.bearing-figure figcaption{font-size:13px;color:#46637a;line-height:1.5}.crane-drawings{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.crane-drawings figure{margin:0;padding:12px;background:#fcfbf7;border:1px solid #d8e2e9;border-radius:10px}.crane-drawings svg{display:block;width:100%;height:220px}.crane-drawings figcaption{font-size:13px;line-height:1.5;color:#46637a}.drawing-note{font-size:12px;color:#796b54}@media(max-width:850px){.crane-drawings{grid-template-columns:1fr}}
 .action-groups{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:14px 0}.action-group{padding:14px;border:1px solid #d1dfe8;border-radius:9px;background:#f8fbfd}.action-group h5{font-size:16px;color:#2b4d6c;margin:0 0 12px}@media(max-width:850px){.action-groups{grid-template-columns:1fr}}.design-method{display:flex;flex-wrap:wrap;gap:15px;padding:12px;border:1px solid #cedce6;border-radius:8px;margin-bottom:10px}.design-method legend{font-weight:700}.design-method label{display:inline-flex;align-items:center;gap:6px}.design-method input{accent-color:#345f84}details{margin-top:15px}details article{padding:8px 0;border-bottom:1px solid #e2e6ea}
+.input-sections{display:grid;gap:14px;margin-top:16px}.input-subsection{padding:18px;border:1px solid #cbd9e5;border-radius:10px;background:#f9fbfd}.input-subsection h5{margin:0 0 14px;font-size:18px;color:#274662}.action-group h6{font-size:15px;color:#2b4d6c;margin:0 0 12px}.input-subsection .dimensions{grid-template-columns:repeat(3,minmax(0,1fr))}@media(max-width:760px){.input-subsection .dimensions{grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}}
 </style>

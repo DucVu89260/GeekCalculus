@@ -122,32 +122,60 @@ export function calculateIH36010(input,canonical,factorLib) {
  const result={edition:'AISC360-10',mode:method,geometry_source:'Section Properties shared calculation core',
   geometry_hash:input.geometry_hash??null,classification:cls,limit_states:{},warnings:[],overall_status:'REVIEW_REQUIRED'};
  const limits=result.limit_states;
- // E3: compute Fe_x and Fe_y independently; never assume Lb is Ly.
+ // E3/E7: separate Euler buckling about x and y, then include E4 torsion.
+ // Slender section Qs and Qa follow E7-4..E7-17; effective web width uses Fcr(Q=1).
  let comp;
  const kx=member.kx,ky=member.ky,ly=member.ly_mm,lx=member.lx_mm;
  if([kx,ky,ly,lx].some(v=>!Number.isFinite(v)||v<=0)){
-  comp=status('COMPRESSION','INPUT_REQUIRED','Supply positive Kx,Ky,Lx,Ly independently of Lb.',{clause:'E2/E3'});
- }else if(cls.axial==='SLENDER'){
-  comp=status('COMPRESSION','REVIEW_REQUIRED','Slender elements need complete E7 Qs/Qa and effective-width iteration, plus E4 as applicable.',{clause:'E7'});
+  comp=status('COMPRESSION','INPUT_REQUIRED','Supply positive Kx,Ky,Lx,Ly independently of Lb.',{clause:'E2/E3/E7'});
  }else {
-  const fex=Math.PI**2*e/(kx*lx/rx)**2, fey=Math.PI**2*e/(ky*ly/ry)**2;
-  let fcrz=null;
+  const fex=Math.PI**2*e/(kx*lx/rx)**2,fey=Math.PI**2*e/(ky*ly/ry)**2;
   const lz=member.lz_mm,kz=member.kz,g=member.g_mpa;
   if([lz,kz,g].some(v=>!Number.isFinite(v)||v<=0)){
-   comp=status('COMPRESSION','INPUT_REQUIRED','Supply Kz,Lz,G to check torsional buckling E4-4; E3 flexural checks calculated provisionally.',{
-    clause:'E3/E4',trace:{fex_mpa:fex,fey_mpa:fey,fcrx_mpa:critical(fex,fy),fcry_mpa:critical(fey,fy)}
+   comp=status('COMPRESSION','INPUT_REQUIRED','Supply Kz,Lz,G to check torsional buckling E4-4.',{
+    clause:'E3/E4/E7',trace:{fex_mpa:fex,fey_mpa:fey,
+     fcrx_mpa:critical(fex,fy),fcry_mpa:critical(fey,fy)}
    });
   }else if(!(canonical.warping_constant_cw_mm6>=0 && canonical.torsion_constant_j_mm4>0)){
    comp=status('COMPRESSION','INPUT_REQUIRED','Section Properties must supply valid Cw and J for E4-4.',{clause:'E4'});
   }else {
    const fez=(Math.PI**2*e*canonical.warping_constant_cw_mm6/(kz*lz)**2+
     g*canonical.torsion_constant_j_mm4)/(ix+iy);
-   const fcrx=critical(fex,fy),fcry=critical(fey,fy);fcrz=critical(fez,fy);
-   const fcr=Math.min(fcrx,fcry,fcrz),nominal=fcr*area/1000;
-   comp=value('COMPRESSION',nominal,'E3-1 / E3-2 / E3-3 / E3-4 / E4-4',{
-    fex_mpa:fex,fey_mpa:fey,fez_mpa:fez,
-    fcrx_mpa:fcrx,fcry_mpa:fcry,fcrz_mpa:fcrz,governing_fcr_mpa:fcr});
-   comp.available=available(nominal,method,'COMPRESSION',factorLib);
+   const fe=Math.min(fex,fey,fez),baseFcr=critical(fe,fy);
+   let qs=1,qa=1,be=cls.hw;
+   if(cls.axialFlange==='SLENDER'){
+    const lf=cls.lf,ratio=section.fabrication==='BUILT_UP'?
+     lf/Math.sqrt(e*cls.kc/fy):lf/Math.sqrt(e/fy);
+    qs=section.fabrication==='BUILT_UP'
+     ? (ratio<=.64?1:ratio<=1.17?1.415-.65*ratio:.9/(ratio**2))
+     : (ratio<=.56?1:ratio<=1.03?1.415-.74*ratio:.69/(ratio**2));
+   }
+   if(cls.axialWeb==='SLENDER'){
+    const f=Math.max(1e-9,baseFcr); // E7-17: Fcr using Q = 1.0
+    const root=Math.sqrt(e/f);
+    const calc=1.92*section.tw_mm*root*
+      (1-.34*root/cls.lw);
+    if(!Number.isFinite(calc)||calc<=0)throw new Error('Invalid effective web width E7-17');
+    be=Math.min(cls.hw,calc);
+    const ae=area-(cls.hw-be)*section.tw_mm;
+    qa=ae/area;
+   }
+   const q=qs*qa;
+   if(!(q>0&&q<=1.0001)){
+    comp=status('COMPRESSION','REVIEW_REQUIRED','E7 produced invalid Q factor.',{clause:'E7',trace:{qs,qa,q}});
+   }else{
+    const fcr=cls.axial==='SLENDER'
+     ? (q*fy/fe<=2.25?q*Math.pow(.658,q*fy/fe)*fy:.877*fe)
+     : baseFcr;
+    const nominal=fcr*area/1000;
+    comp=value('COMPRESSION',nominal,cls.axial==='SLENDER'?'E7-1/E7-2/E7-3/E7-16/E7-17':'E3-1/E3-2/E3-3/E3-4/E4-4',{
+     fex_mpa:fex,fey_mpa:fey,fez_mpa:fez,
+     fcrx_mpa:critical(fex,fy),fcry_mpa:critical(fey,fy),
+     fcrz_mpa:critical(fez,fy),governing_fcr_mpa:fcr,
+     qs,qa,q,effective_web_mm:be,reference_fcr_q1_mpa:baseFcr,
+    });
+    comp.available=available(nominal,method,'COMPRESSION',factorLib);
+   }
   }
  }
  limits.compression=comp;

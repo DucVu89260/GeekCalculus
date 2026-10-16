@@ -9,7 +9,7 @@ const destination=code=>window.location.pathname+'?standard='+encodeURIComponent
   <details class="std-nav"><summary>Design Standard ▾</summary>
     <div v-if="error" role="alert">{{ error }}</div>
     <div v-for="family in families" :key="family.code" class="std-nav-family"><strong>{{ family.name }}</strong>
-      <div class="std-nav-links"><template v-for="edition in family.editions" :key="edition.code"><a v-if="edition.code === 'AISC360-10'" :href="destination(edition.code)">{{ edition.title }} · In development</a><span v-else class="std-pending" :title="'Coming soon: ' + edition.title">{{ edition.title }} · Coming soon</span></template></div>
+      <div class="std-nav-links"><template v-for="edition in family.editions" :key="edition.code"><a v-if="edition.code === 'AISC360-10'" target="_blank" rel="noopener noreferrer" :href="destination(edition.code)">{{ edition.title }} · In development</a><span v-else class="std-pending" :title="'Coming soon: ' + edition.title">{{ edition.title }} · Coming soon</span></template></div>
     </div>
     <small v-if="!families.length&&!error">Loading database…</small>
   </details>

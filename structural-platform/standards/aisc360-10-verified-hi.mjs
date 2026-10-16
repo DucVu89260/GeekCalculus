@@ -187,8 +187,46 @@ export function calculateIH36010(input,canonical,factorLib) {
   major=status('MAJOR_FLEXURE','INPUT_REQUIRED','Provide a verified major-axis unbraced Lb.',{clause:'F2'});
  }else if(cb.value===null){
   major=status('MAJOR_FLEXURE','REVIEW_REQUIRED',cb.reason,{clause:'F1-1'});
- }else if(cls.flexureWeb!=='COMPACT'){
-  major=status('MAJOR_FLEXURE','REVIEW_REQUIRED','Noncompact/slender web requires F4/F5 or an independently reviewed branch. Do not use F2/F3 capacities.',{clause:cls.flexureChapter});
+ }else if(cls.flexureWeb==='SLENDER'){
+  // Original AISC 360-10 F5: slender-web I shapes, including welded doubly-symmetric sections.
+  // The sharp-corner geometry supplies hc = h - 2tf. Rectangular flange F4-11 applies.
+  if(section.fabrication!=='BUILT_UP'){
+   major=status('MAJOR_FLEXURE','REVIEW_REQUIRED','Rolled-shape fillet and F5 clear web geometry must be verified from profile catalog.',{clause:'F5'});
+  }else {
+   const d=section.h_mm,tw=section.tw_mm,tf=section.tf_mm,bf=section.bf_mm,ho=d-tf,hc=cls.hw;
+   const aw=Math.min(10,hc*tw/(bf*tf)); // F4-12, F5-6 maximum aw=10
+   const rt=bf/Math.sqrt(12*(ho/d+aw*d*d/(6*ho*d)));
+   const lp=1.1*rt*Math.sqrt(e/fy); // F4-7 referenced in F5
+   const lr=Math.PI*rt*Math.sqrt(e/(.7*fy)); // F5-5
+   const rpg=Math.min(1,1-aw/(1200+300*aw)*(hc/tw-5.7*Math.sqrt(e/fy)));
+   if(!(rpg>0 && Number.isFinite(rt) && rt>0)){
+    major=status('MAJOR_FLEXURE','REVIEW_REQUIRED','F5 yielded an invalid Rpg or rt. Review sharp-corner geometric applicability.',{clause:'F5-6/F4-11'});
+   }else {
+    let fcrLtb=fy,ltClause='F5-1';
+    if(lb>lp && lb<=lr){
+     fcrLtb=Math.min(fy,cb.value*(fy-.3*fy*(lb-lp)/(lr-lp)));ltClause='F5-3';
+    }else if(lb>lr){
+     fcrLtb=Math.min(fy,cb.value*Math.PI**2*e/(lb/rt)**2);ltClause='F5-4';
+    }
+    let fcrFlb=fy,flClause='F5-1';
+    if(cls.flexureFlange==='NONCOMPACT'){
+     fcrFlb=fy-.3*fy*(cls.lf-cls.limits.lpFlange)/
+      (cls.limits.lrMajorFlange-cls.limits.lpFlange);flClause='F5-8';
+    }else if(cls.flexureFlange==='SLENDER'){
+     fcrFlb=.9*e*cls.kc/cls.lf**2;flClause='F5-9';
+    }
+    const nominal=Math.min(rpg*fy*sx,rpg*fcrLtb*sx,rpg*fcrFlb*sx)/1e6;
+    major=value('MAJOR_FLEXURE',nominal,'F5-1/F5-2/F5-7',{
+     cb:cb.value,cb_source:cb.source,lp_mm:lp,lr_mm:lr,rt_mm:rt,rpg,aw,
+     mn_yield_kNm:rpg*fy*sx/1e6,mn_ltb_kNm:rpg*fcrLtb*sx/1e6,
+     mn_flb_kNm:rpg*fcrFlb*sx/1e6,ltb_clause:ltClause,flb_clause:flClause,
+     tension_flange_yielding:'NOT_APPLICABLE_FOR_SYMMETRIC_I',
+    });
+    major.available=available(nominal,method,'FLEXURE',factorLib);
+   }
+  }
+ }else if(cls.flexureWeb==='NONCOMPACT'){
+  major=status('MAJOR_FLEXURE','REVIEW_REQUIRED','F4 noncompact-web plastification and flange interactions require further independent validation.',{clause:'F4'});
  }else if(!(canonical.torsion_constant_j_mm4>0 && canonical.warping_constant_cw_mm6>0)){
   major=status('MAJOR_FLEXURE','INPUT_REQUIRED','Valid J and Cw from Section Properties required.',{clause:'F2-4/F2-7'});
  }else {

@@ -1,0 +1,2485 @@
+{
+  "schema_version": 1,
+  "edition_code": "AISC360-10",
+  "source_sha256": "f9b15004cf51dbaec6c06588d81aa5256be268af87906e5ba863c289795f4e99",
+  "source_file": "ANSI/AISC 360-10, Specification for Structural Steel Buildings, June 22, 2010",
+  "source_identity": {
+    "file_name": "AISC-360-10.pdf",
+    "title": "Specification for Structural Steel Buildings",
+    "publication_date": "2010-06-22",
+    "edition_code": "AISC360-10",
+    "sha256": "f9b15004cf51dbaec6c06588d81aa5256be268af87906e5ba863c289795f4e99",
+    "physical_page_count": 612,
+    "measured_specification_start_physical_page": 57,
+    "measured_commentary_start_physical_page": 297,
+    "measured_printed_page_offset": 56
+  },
+  "source_page_convention": {
+    "pdf_page": "one-based physical PDF page number",
+    "printed_page_label": "footer label visually checked from the cited page; measured main-text offset is +56 physical pages for these entries"
+  },
+  "draft_policy": "Source-checked transcription candidates only. Every record is needs_review; source transcription does not grant engineering approval, branch coverage, or runtime eligibility.",
+  "equations": [
+    {
+      "id": "E3-1",
+      "label": "E3-1",
+      "clause_code": "E3",
+      "kind": "normative",
+      "pdf_page": 89,
+      "source_page": 89,
+      "printed_page_label": "16.1-33",
+      "source_anchor": {
+        "source_type": "equation",
+        "clause_code": "E3",
+        "equation_id": "E3-1",
+        "pdf_page": 89,
+        "printed_page_label": "16.1-33"
+      },
+      "latex": "P_n=F_{cr}A_g",
+      "visual_source_checked": true,
+      "variables": [
+        {
+          "symbol": "P_n",
+          "definition": "nominal compressive strength",
+          "unit": "N",
+          "dimension": "force"
+        },
+        {
+          "symbol": "F_cr",
+          "definition": "critical stress",
+          "unit": "MPa",
+          "dimension": "pressure"
+        },
+        {
+          "symbol": "A_g",
+          "definition": "gross cross-sectional area",
+          "unit": "mm^2",
+          "dimension": "area"
+        }
+      ],
+      "conditions": [
+        "Nonslender-element compression members; nominal compressive strength based on flexural buckling."
+      ],
+      "design_methods": [
+        "ASD",
+        "LRFD"
+      ],
+      "dependencies": [],
+      "implementation_key": "E3-1",
+      "verification_status": "needs_review",
+      "notes": "Source transcription visually checked against the cited Specification page. This record remains a review draft: independent engineering validation and branch coverage are pending; it must not be executed or represented as approved solely because the source was transcribed."
+    },
+    {
+      "id": "E3-2",
+      "label": "E3-2",
+      "clause_code": "E3",
+      "kind": "normative",
+      "pdf_page": 89,
+      "source_page": 89,
+      "printed_page_label": "16.1-33",
+      "source_anchor": {
+        "source_type": "equation",
+        "clause_code": "E3",
+        "equation_id": "E3-2",
+        "pdf_page": 89,
+        "printed_page_label": "16.1-33"
+      },
+      "latex": "F_{cr}=0.658^{F_y/F_e}F_y",
+      "visual_source_checked": true,
+      "variables": [
+        {
+          "symbol": "F_cr",
+          "definition": "critical stress",
+          "unit": "MPa",
+          "dimension": "pressure"
+        },
+        {
+          "symbol": "F_y",
+          "definition": "specified minimum yield stress",
+          "unit": "MPa",
+          "dimension": "pressure"
+        },
+        {
+          "symbol": "F_e",
+          "definition": "elastic buckling stress",
+          "unit": "MPa",
+          "dimension": "pressure"
+        },
+        {
+          "symbol": "E",
+          "definition": "modulus of elasticity of steel",
+          "unit": "MPa",
+          "dimension": "pressure"
+        },
+        {
+          "symbol": "K",
+          "definition": "effective length factor for flexural buckling about the applicable axis",
+          "unit": "1",
+          "dimension": "dimensionless"
+        },
+        {
+          "symbol": "L",
+          "definition": "unbraced member length for the applicable buckling axis",
+          "unit": "mm",
+          "dimension": "length"
+        },
+        {
+          "symbol": "r",
+          "definition": "radius of gyration about the applicable buckling axis",
+          "unit": "mm",
+          "dimension": "length"
+        }
+      ],
+      "conditions": [
+        "Inelastic flexural buckling branch: F_y/F_e <= 2.25 (equivalently KL/r <= 4.71 sqrt(E/F_y))."
+      ],
+      "design_methods": [
+        "ASD",
+        "LRFD"
+      ],
+      "dependencies": [
+        "E3-4"
+      ],
+      "implementation_key": "E3-2",
+      "verification_status": "needs_review",
+      "notes": "Source transcription visually checked against the cited Specification page. This record remains a review draft: independent engineering validation and branch coverage are pending; it must not be executed or represented as approved solely because the source was transcribed."
+    },
+    {
+      "id": "E3-3",
+      "label": "E3-3",
+      "clause_code": "E3",
+      "kind": "normative",
+      "pdf_page": 89,
+      "source_page": 89,
+      "printed_page_label": "16.1-33",
+      "source_anchor": {
+        "source_type": "equation",
+        "clause_code": "E3",
+        "equation_id": "E3-3",
+        "pdf_page": 89,
+        "printed_page_label": "16.1-33"
+      },
+      "latex": "F_{cr}=0.877F_e",
+      "visual_source_checked": true,
+      "variables": [
+        {
+          "symbol": "F_cr",
+          "definition": "critical stress",
+          "unit": "MPa",
+          "dimension": "pressure"
+        },
+        {
+          "symbol": "F_e",
+          "definition": "elastic buckling stress",
+          "unit": "MPa",
+          "dimension": "pressure"
+        },
+        {
+          "symbol": "E",
+          "definition": "modulus of elasticity of steel",
+          "unit": "MPa",
+          "dimension": "pressure"
+        },
+        {
+          "symbol": "F_y",
+          "definition": "specified minimum yield stress",
+          "unit": "MPa",
+          "dimension": "pressure"
+        },
+        {
+          "symbol": "K",
+          "definition": "effective length factor for flexural buckling about the applicable axis",
+          "unit": "1",
+          "dimension": "dimensionless"
+        },
+        {
+          "symbol": "L",
+          "definition": "unbraced member length for the applicable buckling axis",
+          "unit": "mm",
+          "dimension": "length"
+        },
+        {
+          "symbol": "r",
+          "definition": "radius of gyration about the applicable buckling axis",
+          "unit": "mm",
+          "dimension": "length"
+        }
+      ],
+      "conditions": [
+        "Elastic flexural buckling branch: F_y/F_e > 2.25 (equivalently KL/r > 4.71 sqrt(E/F_y))."
+      ],
+      "design_methods": [
+        "ASD",
+        "LRFD"
+      ],
+      "dependencies": [
+        "E3-4"
+      ],
+      "implementation_key": "E3-3",
+      "verification_status": "needs_review",
+      "notes": "Source transcription visually checked against the cited Specification page. This record remains a review draft: independent engineering validation and branch coverage are pending; it must not be executed or represented as approved solely because the source was transcribed."
+    },
+    {
+      "id": "E3-4",
+      "label": "E3-4",
+      "clause_code": "E3",
+      "kind": "normative",
+      "pdf_page": 89,
+      "source_page": 89,
+      "printed_page_label": "16.1-33",
+      "source_anchor": {
+        "source_type": "equation",
+        "clause_code": "E3",
+        "equation_id": "E3-4",
+        "pdf_page": 89,
+        "printed_page_label": "16.1-33"
+      },
+      "latex": "F_e=\\frac{\\pi^2E}{(KL/r)^2}",
+      "visual_source_checked": true,
+      "variables": [
+        {
+          "symbol": "F_e",
+          "definition": "elastic buckling stress",
+          "unit": "MPa",
+          "dimension": "pressure"
+        },
+        {
+          "symbol": "E",
+          "definition": "modulus of elasticity of steel",
+          "unit": "MPa",
+          "dimension": "pressure"
+        },
+        {
+          "symbol": "K",
+          "definition": "effective length factor for flexural buckling about the applicable axis",
+          "unit": "1",
+          "dimension": "dimensionless"
+        },
+        {
+          "symbol": "L",
+          "definition": "unbraced member length for the applicable buckling axis",
+          "unit": "mm",
+          "dimension": "length"
+        },
+        {
+          "symbol": "r",
+          "definition": "radius of gyration about the applicable buckling axis",
+          "unit": "mm",
+          "dimension": "length"
+        }
+      ],
+      "conditions": [
+        "Elastic Euler buckling stress for the applicable principal-axis flexural buckling mode."
+      ],
+      "design_methods": [
+        "ASD",
+        "LRFD"
+      ],
+      "dependencies": [],
+      "implementation_key": "E3-4",
+      "verification_status": "needs_review",
+      "notes": "Source transcription visually checked against the cited Specification page. This record remains a review draft: independent engineering validation and branch coverage are pending; it must not be executed or represented as approved solely because the source was transcribed."
+    },
+    {
+      "id": "E4-4",
+      "label": "E4-4",
+      "clause_code": "E4",
+      "kind": "normative",
+      "pdf_page": 90,
+      "source_page": 90,
+      "printed_page_label": "16.1-34",
+      "source_anchor": {
+        "source_type": "equation",
+        "clause_code": "E4",
+        "equation_id": "E4-4",
+        "pdf_page": 90,
+        "printed_page_label": "16.1-34"
+      },
+      "latex": "F_{ez}=\\frac{\\frac{\\pi^2EC_w}{(K_zL_z)^2}+GJ}{I_x+I_y}",
+      "visual_source_checked": true,
+      "variables": [
+        {
+          "symbol": "F_ez",
+          "definition": "torsional elastic buckling stress for a doubly symmetric member",
+          "unit": "MPa",
+          "dimension": "pressure"
+        },
+        {
+          "symbol": "E",
+          "definition": "modulus of elasticity of steel",
+          "unit": "MPa",
+          "dimension": "pressure"
+        },
+        {
+          "symbol": "C_w",
+          "definition": "warping constant",
+          "unit": "mm^6",
+          "dimension": "warping_inertia"
+        },
+        {
+          "symbol": "K_z",
+          "definition": "effective length factor for torsional buckling",
+          "unit": "1",
+          "dimension": "dimensionless"
+        },
+        {
+          "symbol": "L_z",
+          "definition": "torsional unbraced length",
+          "unit": "mm",
+          "dimension": "length"
+        },
+        {
+          "symbol": "G",
+          "definition": "shear modulus of elasticity of steel",
+          "unit": "MPa",
+          "dimension": "pressure"
+        },
+        {
+          "symbol": "J",
+          "definition": "torsional constant",
+          "unit": "mm^4",
+          "dimension": "inertia4"
+        },
+        {
+          "symbol": "I_x",
+          "definition": "moment of inertia about the x principal axis",
+          "unit": "mm^4",
+          "dimension": "inertia4"
+        },
+        {
+          "symbol": "I_y",
+          "definition": "moment of inertia about the y principal axis",
+          "unit": "mm^4",
+          "dimension": "inertia4"
+        }
+      ],
+      "conditions": [
+        "Doubly symmetric members without slender elements where the torsional unbraced length exceeds the lateral unbraced length; use this elastic stress with E3-2 or E3-3."
+      ],
+      "design_methods": [
+        "ASD",
+        "LRFD"
+      ],
+      "dependencies": [
+        "E3-2",
+        "E3-3"
+      ],
+      "implementation_key": "E4-4",
+      "verification_status": "needs_review",
+      "notes": "Source transcription visually checked against the cited Specification page. This record remains a review draft: independent engineering validation and branch coverage are pending; it must not be executed or represented as approved solely because the source was transcribed."
+    },
+    {
+      "id": "F1-1",
+      "label": "F1-1",
+      "clause_code": "F1",
+      "kind": "normative",
+      "pdf_page": 102,
+      "source_page": 102,
+      "printed_page_label": "16.1-46",
+      "source_anchor": {
+        "source_type": "equation",
+        "clause_code": "F1",
+        "equation_id": "F1-1",
+        "pdf_page": 102,
+        "printed_page_label": "16.1-46"
+      },
+      "latex": "C_b=\\frac{12.5M_{max}}{2.5M_{max}+3M_A+4M_B+3M_C}",
+      "visual_source_checked": true,
+      "variables": [
+        {
+          "symbol": "C_b",
+          "definition": "lateral-torsional buckling modification factor for a nonuniform moment diagram",
+          "unit": "1",
+          "dimension": "dimensionless"
+        },
+        {
+          "symbol": "M_max",
+          "definition": "absolute value of maximum moment in the unbraced segment",
+          "unit": "N·mm",
+          "dimension": "moment"
+        },
+        {
+          "symbol": "M_A",
+          "definition": "absolute moment at the quarter point of the unbraced segment",
+          "unit": "N·mm",
+          "dimension": "moment"
+        },
+        {
+          "symbol": "M_B",
+          "definition": "absolute moment at the centerline of the unbraced segment",
+          "unit": "N·mm",
+          "dimension": "moment"
+        },
+        {
+          "symbol": "M_C",
+          "definition": "absolute moment at the three-quarter point of the unbraced segment",
+          "unit": "N·mm",
+          "dimension": "moment"
+        }
+      ],
+      "conditions": [
+        "Singly symmetric members in single curvature and all doubly symmetric members when both ends of the same unbraced segment are braced; each M is an absolute moment value.",
+        "For a cantilever or overhang with an unbraced free end, the Specification separately sets C_b=1.0."
+      ],
+      "design_methods": [
+        "ASD",
+        "LRFD"
+      ],
+      "dependencies": [],
+      "implementation_key": "F1-1",
+      "verification_status": "needs_review",
+      "notes": "Source transcription visually checked against the cited Specification page. This record remains a review draft: independent engineering validation and branch coverage are pending; it must not be executed or represented as approved solely because the source was transcribed."
+    },
+    {
+      "id": "F2-1",
+      "label": "F2-1",
+      "clause_code": "F2",
+      "kind": "normative",
+      "pdf_page": 103,
+      "source_page": 103,
+      "printed_page_label": "16.1-47",
+      "source_anchor": {
+        "source_type": "equation",
+        "clause_code": "F2",
+        "equation_id": "F2-1",
+        "pdf_page": 103,
+        "printed_page_label": "16.1-47"
+      },
+      "latex": "M_n=M_p=F_yZ_x",
+      "visual_source_checked": true,
+      "variables": [
+        {
+          "symbol": "M_n",
+          "definition": "nominal flexural strength",
+          "unit": "N·mm",
+          "dimension": "moment"
+        },
+        {
+          "symbol": "M_p",
+          "definition": "plastic flexural strength",
+          "unit": "N·mm",
+          "dimension": "moment"
+        },
+        {
+          "symbol": "F_y",
+          "definition": "specified minimum yield stress",
+          "unit": "MPa",
+          "dimension": "pressure"
+        },
+        {
+          "symbol": "Z_x",
+          "definition": "plastic section modulus about the x axis",
+          "unit": "mm^3",
+          "dimension": "section_modulus"
+        }
+      ],
+      "conditions": [
+        "Doubly symmetric compact I-shaped members and channels bent about the major axis; yielding limit state."
+      ],
+      "design_methods": [
+        "ASD",
+        "LRFD"
+      ],
+      "dependencies": [],
+      "implementation_key": "F2-1",
+      "verification_status": "needs_review",
+      "notes": "Source transcription visually checked against the cited Specification page. This record remains a review draft: independent engineering validation and branch coverage are pending; it must not be executed or represented as approved solely because the source was transcribed."
+    },
+    {
+      "id": "F2-2",
+      "label": "F2-2",
+      "clause_code": "F2",
+      "kind": "normative",
+      "pdf_page": 103,
+      "source_page": 103,
+      "printed_page_label": "16.1-47",
+      "source_anchor": {
+        "source_type": "equation",
+        "clause_code": "F2",
+        "equation_id": "F2-2",
+        "pdf_page": 103,
+        "printed_page_label": "16.1-47"
+      },
+      "latex": "M_n=C_b\\left[M_p-(M_p-0.7F_yS_x)\\frac{L_b-L_p}{L_r-L_p}\\right]\\le M_p",
+      "visual_source_checked": true,
+      "variables": [
+        {
+          "symbol": "M_n",
+          "definition": "nominal flexural strength",
+          "unit": "N·mm",
+          "dimension": "moment"
+        },
+        {
+          "symbol": "C_b",
+          "definition": "lateral-torsional buckling modification factor for a nonuniform moment diagram",
+          "unit": "1",
+          "dimension": "dimensionless"
+        },
+        {
+          "symbol": "M_p",
+          "definition": "plastic flexural strength",
+          "unit": "N·mm",
+          "dimension": "moment"
+        },
+        {
+          "symbol": "F_y",
+          "definition": "specified minimum yield stress",
+          "unit": "MPa",
+          "dimension": "pressure"
+        },
+        {
+          "symbol": "S_x",
+          "definition": "elastic section modulus about the x axis",
+          "unit": "mm^3",
+          "dimension": "section_modulus"
+        },
+        {
+          "symbol": "L_b",
+          "definition": "unbraced length between points braced against compression-flange lateral displacement or section twist",
+          "unit": "mm",
+          "dimension": "length"
+        },
+        {
+          "symbol": "L_p",
+          "definition": "limiting laterally unbraced length for yielding",
+          "unit": "mm",
+          "dimension": "length"
+        },
+        {
+          "symbol": "L_r",
+          "definition": "limiting laterally unbraced length for inelastic lateral-torsional buckling",
+          "unit": "mm",
+          "dimension": "length"
+        }
+      ],
+      "conditions": [
+        "Doubly symmetric compact I-shaped members and channels bent about the major axis; L_p < L_b <= L_r."
+      ],
+      "design_methods": [
+        "ASD",
+        "LRFD"
+      ],
+      "dependencies": [
+        "F2-5",
+        "F2-6"
+      ],
+      "implementation_key": "F2-2",
+      "verification_status": "needs_review",
+      "notes": "Source transcription visually checked against the cited Specification page. This record remains a review draft: independent engineering validation and branch coverage are pending; it must not be executed or represented as approved solely because the source was transcribed."
+    },
+    {
+      "id": "F2-3",
+      "label": "F2-3",
+      "clause_code": "F2",
+      "kind": "normative",
+      "pdf_page": 103,
+      "source_page": 103,
+      "printed_page_label": "16.1-47",
+      "source_anchor": {
+        "source_type": "equation",
+        "clause_code": "F2",
+        "equation_id": "F2-3",
+        "pdf_page": 103,
+        "printed_page_label": "16.1-47"
+      },
+      "latex": "M_n=F_{cr}S_x\\le M_p",
+      "visual_source_checked": true,
+      "variables": [
+        {
+          "symbol": "M_n",
+          "definition": "nominal flexural strength",
+          "unit": "N·mm",
+          "dimension": "moment"
+        },
+        {
+          "symbol": "F_cr",
+          "definition": "critical stress",
+          "unit": "MPa",
+          "dimension": "pressure"
+        },
+        {
+          "symbol": "S_x",
+          "definition": "elastic section modulus about the x axis",
+          "unit": "mm^3",
+          "dimension": "section_modulus"
+        },
+        {
+          "symbol": "M_p",
+          "definition": "plastic flexural strength",
+          "unit": "N·mm",
+          "dimension": "moment"
+        }
+      ],
+      "conditions": [
+        "Doubly symmetric compact I-shaped members and channels bent about the major axis; L_b > L_r."
+      ],
+      "design_methods": [
+        "ASD",
+        "LRFD"
+      ],
+      "dependencies": [
+        "F2-4",
+        "F2-6"
+      ],
+      "implementation_key": "F2-3",
+      "verification_status": "needs_review",
+      "notes": "Source transcription visually checked against the cited Specification page. This record remains a review draft: independent engineering validation and branch coverage are pending; it must not be executed or represented as approved solely because the source was transcribed."
+    },
+    {
+      "id": "F2-4",
+      "label": "F2-4",
+      "clause_code": "F2",
+      "kind": "normative",
+      "pdf_page": 103,
+      "source_page": 103,
+      "printed_page_label": "16.1-47",
+      "source_anchor": {
+        "source_type": "equation",
+        "clause_code": "F2",
+        "equation_id": "F2-4",
+        "pdf_page": 103,
+        "printed_page_label": "16.1-47"
+      },
+      "latex": "F_{cr}=\\frac{C_b\\pi^2E}{(L_b/r_{ts})^2}\\sqrt{1+0.078\\frac{Jc}{S_xh_o}(L_b/r_{ts})^2}",
+      "visual_source_checked": true,
+      "variables": [
+        {
+          "symbol": "F_cr",
+          "definition": "critical stress",
+          "unit": "MPa",
+          "dimension": "pressure"
+        },
+        {
+          "symbol": "C_b",
+          "definition": "lateral-torsional buckling modification factor for a nonuniform moment diagram",
+          "unit": "1",
+          "dimension": "dimensionless"
+        },
+        {
+          "symbol": "E",
+          "definition": "modulus of elasticity of steel",
+          "unit": "MPa",
+          "dimension": "pressure"
+        },
+        {
+          "symbol": "L_b",
+          "definition": "unbraced length between points braced against compression-flange lateral displacement or section twist",
+          "unit": "mm",
+          "dimension": "length"
+        },
+        {
+          "symbol": "r_ts",
+          "definition": "effective radius of gyration for lateral-torsional buckling in F2",
+          "unit": "mm",
+          "dimension": "length"
+        },
+        {
+          "symbol": "J",
+          "definition": "torsional constant",
+          "unit": "mm^4",
+          "dimension": "inertia4"
+        },
+        {
+          "symbol": "c",
+          "definition": "F2-8 coefficient; equal to 1 for doubly symmetric I-shapes",
+          "unit": "1",
+          "dimension": "dimensionless"
+        },
+        {
+          "symbol": "S_x",
+          "definition": "elastic section modulus about the x axis",
+          "unit": "mm^3",
+          "dimension": "section_modulus"
+        },
+        {
+          "symbol": "h_o",
+          "definition": "distance between flange centroids",
+          "unit": "mm",
+          "dimension": "length"
+        }
+      ],
+      "conditions": [
+        "Doubly symmetric compact I-shaped members in elastic lateral-torsional buckling; for doubly symmetric I-shapes c=1 by F2-8(a)."
+      ],
+      "design_methods": [
+        "ASD",
+        "LRFD"
+      ],
+      "dependencies": [
+        "F2-8a"
+      ],
+      "implementation_key": "F2-4",
+      "verification_status": "needs_review",
+      "notes": "Source transcription visually checked against the cited Specification page. This record remains a review draft: independent engineering validation and branch coverage are pending; it must not be executed or represented as approved solely because the source was transcribed."
+    },
+    {
+      "id": "F2-5",
+      "label": "F2-5",
+      "clause_code": "F2",
+      "kind": "normative",
+      "pdf_page": 104,
+      "source_page": 104,
+      "printed_page_label": "16.1-48",
+      "source_anchor": {
+        "source_type": "equation",
+        "clause_code": "F2",
+        "equation_id": "F2-5",
+        "pdf_page": 104,
+        "printed_page_label": "16.1-48"
+      },
+      "latex": "L_p=1.76r_y\\sqrt{E/F_y}",
+      "visual_source_checked": true,
+      "variables": [
+        {
+          "symbol": "L_p",
+          "definition": "limiting laterally unbraced length for yielding",
+          "unit": "mm",
+          "dimension": "length"
+        },
+        {
+          "symbol": "r_y",
+          "definition": "radius of gyration about the y axis",
+          "unit": "mm",
+          "dimension": "length"
+        },
+        {
+          "symbol": "E",
+          "definition": "modulus of elasticity of steel",
+          "unit": "MPa",
+          "dimension": "pressure"
+        },
+        {
+          "symbol": "F_y",
+          "definition": "specified minimum yield stress",
+          "unit": "MPa",
+          "dimension": "pressure"
+        }
+      ],
+      "conditions": [
+        "Doubly symmetric compact I-shaped members and channels bent about the major axis."
+      ],
+      "design_methods": [
+        "ASD",
+        "LRFD"
+      ],
+      "dependencies": [],
+      "implementation_key": "F2-5",
+      "verification_status": "needs_review",
+      "notes": "Source transcription visually checked against the cited Specification page. This record remains a review draft: independent engineering validation and branch coverage are pending; it must not be executed or represented as approved solely because the source was transcribed."
+    },
+    {
+      "id": "F2-6",
+      "label": "F2-6",
+      "clause_code": "F2",
+      "kind": "normative",
+      "pdf_page": 104,
+      "source_page": 104,
+      "printed_page_label": "16.1-48",
+      "source_anchor": {
+        "source_type": "equation",
+        "clause_code": "F2",
+        "equation_id": "F2-6",
+        "pdf_page": 104,
+        "printed_page_label": "16.1-48"
+      },
+      "latex": "L_r=1.95r_{ts}\\frac{E}{0.7F_y}\\sqrt{q+\\sqrt{q^2+6.76(0.7F_y/E)^2}},\\quad q=\\frac{Jc}{S_xh_o}",
+      "visual_source_checked": true,
+      "variables": [
+        {
+          "symbol": "L_r",
+          "definition": "limiting laterally unbraced length for inelastic lateral-torsional buckling",
+          "unit": "mm",
+          "dimension": "length"
+        },
+        {
+          "symbol": "r_ts",
+          "definition": "effective radius of gyration for lateral-torsional buckling in F2",
+          "unit": "mm",
+          "dimension": "length"
+        },
+        {
+          "symbol": "E",
+          "definition": "modulus of elasticity of steel",
+          "unit": "MPa",
+          "dimension": "pressure"
+        },
+        {
+          "symbol": "F_y",
+          "definition": "specified minimum yield stress",
+          "unit": "MPa",
+          "dimension": "pressure"
+        },
+        {
+          "symbol": "J",
+          "definition": "torsional constant",
+          "unit": "mm^4",
+          "dimension": "inertia4"
+        },
+        {
+          "symbol": "c",
+          "definition": "F2-8 coefficient; equal to 1 for doubly symmetric I-shapes",
+          "unit": "1",
+          "dimension": "dimensionless"
+        },
+        {
+          "symbol": "S_x",
+          "definition": "elastic section modulus about the x axis",
+          "unit": "mm^3",
+          "dimension": "section_modulus"
+        },
+        {
+          "symbol": "h_o",
+          "definition": "distance between flange centroids",
+          "unit": "mm",
+          "dimension": "length"
+        }
+      ],
+      "conditions": [
+        "Doubly symmetric compact I-shaped members and channels bent about the major axis; for doubly symmetric I-shapes c=1 by F2-8(a)."
+      ],
+      "design_methods": [
+        "ASD",
+        "LRFD"
+      ],
+      "dependencies": [
+        "F2-7",
+        "F2-8a"
+      ],
+      "implementation_key": "F2-6",
+      "verification_status": "needs_review",
+      "notes": "Source transcription visually checked against the cited Specification page. This record remains a review draft: independent engineering validation and branch coverage are pending; it must not be executed or represented as approved solely because the source was transcribed."
+    },
+    {
+      "id": "F2-7",
+      "label": "F2-7",
+      "clause_code": "F2",
+      "kind": "normative",
+      "pdf_page": 104,
+      "source_page": 104,
+      "printed_page_label": "16.1-48",
+      "source_anchor": {
+        "source_type": "equation",
+        "clause_code": "F2",
+        "equation_id": "F2-7",
+        "pdf_page": 104,
+        "printed_page_label": "16.1-48"
+      },
+      "latex": "r_{ts}^{2}=\\frac{\\sqrt{I_yC_w}}{S_x}",
+      "visual_source_checked": true,
+      "variables": [
+        {
+          "symbol": "r_ts",
+          "definition": "effective radius of gyration for lateral-torsional buckling in F2",
+          "unit": "mm",
+          "dimension": "length"
+        },
+        {
+          "symbol": "I_y",
+          "definition": "moment of inertia about the y principal axis",
+          "unit": "mm^4",
+          "dimension": "inertia4"
+        },
+        {
+          "symbol": "C_w",
+          "definition": "warping constant",
+          "unit": "mm^6",
+          "dimension": "warping_inertia"
+        },
+        {
+          "symbol": "S_x",
+          "definition": "elastic section modulus about the x axis",
+          "unit": "mm^3",
+          "dimension": "section_modulus"
+        }
+      ],
+      "conditions": [
+        "Doubly symmetric I-shaped members and channels bent about the major axis."
+      ],
+      "design_methods": [
+        "ASD",
+        "LRFD"
+      ],
+      "dependencies": [],
+      "implementation_key": "F2-7",
+      "verification_status": "needs_review",
+      "notes": "Source transcription visually checked against the cited Specification page. This record remains a review draft: independent engineering validation and branch coverage are pending; it must not be executed or represented as approved solely because the source was transcribed."
+    },
+    {
+      "id": "F3-1",
+      "label": "F3-1",
+      "clause_code": "F3",
+      "kind": "normative",
+      "pdf_page": 105,
+      "source_page": 105,
+      "printed_page_label": "16.1-49",
+      "source_anchor": {
+        "source_type": "equation",
+        "clause_code": "F3",
+        "equation_id": "F3-1",
+        "pdf_page": 105,
+        "printed_page_label": "16.1-49"
+      },
+      "latex": "M_n=M_p-(M_p-0.7F_yS_x)\\frac{\\lambda_f-\\lambda_{pf}}{\\lambda_{rf}-\\lambda_{pf}}",
+      "visual_source_checked": true,
+      "variables": [
+        {
+          "symbol": "M_n",
+          "definition": "nominal flexural strength",
+          "unit": "N·mm",
+          "dimension": "moment"
+        },
+        {
+          "symbol": "M_p",
+          "definition": "plastic flexural strength",
+          "unit": "N·mm",
+          "dimension": "moment"
+        },
+        {
+          "symbol": "F_y",
+          "definition": "specified minimum yield stress",
+          "unit": "MPa",
+          "dimension": "pressure"
+        },
+        {
+          "symbol": "S_x",
+          "definition": "elastic section modulus about the x axis",
+          "unit": "mm^3",
+          "dimension": "section_modulus"
+        },
+        {
+          "symbol": "lambda_f",
+          "definition": "width-to-thickness ratio of the flange under consideration",
+          "unit": "1",
+          "dimension": "dimensionless"
+        },
+        {
+          "symbol": "lambda_pf",
+          "definition": "limiting width-to-thickness ratio for a compact flange",
+          "unit": "1",
+          "dimension": "dimensionless"
+        },
+        {
+          "symbol": "lambda_rf",
+          "definition": "limiting width-to-thickness ratio for a noncompact flange",
+          "unit": "1",
+          "dimension": "dimensionless"
+        }
+      ],
+      "conditions": [
+        "Doubly symmetric I-shaped members with compact webs and noncompact flanges bent about the major axis; flange local buckling."
+      ],
+      "design_methods": [
+        "ASD",
+        "LRFD"
+      ],
+      "dependencies": [
+        "B4.1b-10",
+        "B4.1b-11"
+      ],
+      "implementation_key": "F3-1",
+      "verification_status": "needs_review",
+      "notes": "Source transcription visually checked against the cited Specification page. This record remains a review draft: independent engineering validation and branch coverage are pending; it must not be executed or represented as approved solely because the source was transcribed."
+    },
+    {
+      "id": "F3-2",
+      "label": "F3-2",
+      "clause_code": "F3",
+      "kind": "normative",
+      "pdf_page": 105,
+      "source_page": 105,
+      "printed_page_label": "16.1-49",
+      "source_anchor": {
+        "source_type": "equation",
+        "clause_code": "F3",
+        "equation_id": "F3-2",
+        "pdf_page": 105,
+        "printed_page_label": "16.1-49"
+      },
+      "latex": "M_n=\\frac{0.9Ek_cS_x}{\\lambda_f^2}",
+      "visual_source_checked": true,
+      "variables": [
+        {
+          "symbol": "M_n",
+          "definition": "nominal flexural strength",
+          "unit": "N·mm",
+          "dimension": "moment"
+        },
+        {
+          "symbol": "E",
+          "definition": "modulus of elasticity of steel",
+          "unit": "MPa",
+          "dimension": "pressure"
+        },
+        {
+          "symbol": "k_c",
+          "definition": "flange local buckling coefficient; bounded from 0.35 to 0.76 for calculation",
+          "unit": "1",
+          "dimension": "dimensionless"
+        },
+        {
+          "symbol": "S_x",
+          "definition": "elastic section modulus about the x axis",
+          "unit": "mm^3",
+          "dimension": "section_modulus"
+        },
+        {
+          "symbol": "lambda_f",
+          "definition": "width-to-thickness ratio of the flange under consideration",
+          "unit": "1",
+          "dimension": "dimensionless"
+        }
+      ],
+      "conditions": [
+        "Doubly symmetric I-shaped members with compact webs and slender flanges bent about the major axis; flange local buckling."
+      ],
+      "design_methods": [
+        "ASD",
+        "LRFD"
+      ],
+      "dependencies": [
+        "B4.1b-10",
+        "B4.1b-11"
+      ],
+      "implementation_key": "F3-2",
+      "verification_status": "needs_review",
+      "notes": "Source transcription visually checked against the cited Specification page. This record remains a review draft: independent engineering validation and branch coverage are pending; it must not be executed or represented as approved solely because the source was transcribed."
+    },
+    {
+      "id": "F4-11",
+      "label": "F4-11",
+      "clause_code": "F4",
+      "kind": "normative",
+      "pdf_page": 108,
+      "source_page": 108,
+      "printed_page_label": "16.1-52",
+      "source_anchor": {
+        "source_type": "equation",
+        "clause_code": "F4",
+        "equation_id": "F4-11",
+        "pdf_page": 108,
+        "printed_page_label": "16.1-52"
+      },
+      "latex": "r_t=\\frac{b_{fc}}{\\sqrt{12\\left[h_o/d+(1/6)a_wh^2/(h_od)\\right]}}",
+      "visual_source_checked": true,
+      "variables": [
+        {
+          "symbol": "r_t",
+          "definition": "effective radius of gyration for lateral-torsional buckling in F4/F5",
+          "unit": "mm",
+          "dimension": "length"
+        },
+        {
+          "symbol": "b_fc",
+          "definition": "width of the compression flange",
+          "unit": "mm",
+          "dimension": "length"
+        },
+        {
+          "symbol": "h_o",
+          "definition": "distance between flange centroids",
+          "unit": "mm",
+          "dimension": "length"
+        },
+        {
+          "symbol": "d",
+          "definition": "overall member depth",
+          "unit": "mm",
+          "dimension": "length"
+        },
+        {
+          "symbol": "a_w",
+          "definition": "ratio of twice the web area in compression to the compression-flange area for the rectangular-flange expression",
+          "unit": "1",
+          "dimension": "dimensionless"
+        },
+        {
+          "symbol": "h",
+          "definition": "web clear dimension: for welded built-up sections, clear distance between flanges",
+          "unit": "mm",
+          "dimension": "length"
+        }
+      ],
+      "conditions": [
+        "F4-11 rectangular compression flange case; this draft identifies the supported sharp-corner welded doubly symmetric I geometry with h=h_c=d-2t_f. The source defines h separately by section B4.1; do not substitute overall depth d for h."
+      ],
+      "design_methods": [
+        "ASD",
+        "LRFD"
+      ],
+      "dependencies": [
+        "F4-12"
+      ],
+      "implementation_key": "F4-11",
+      "verification_status": "needs_review",
+      "notes": "F4-11 source expression contains h^2. For the represented welded built-up I case, B4.1 §1b defines h as clear distance between flanges, so the implementation maps h to h_c; the draft remains needs_review pending independent review."
+    },
+    {
+      "id": "F4-12",
+      "label": "F4-12",
+      "clause_code": "F4",
+      "kind": "normative",
+      "pdf_page": 108,
+      "source_page": 108,
+      "printed_page_label": "16.1-52",
+      "source_anchor": {
+        "source_type": "equation",
+        "clause_code": "F4",
+        "equation_id": "F4-12",
+        "pdf_page": 108,
+        "printed_page_label": "16.1-52"
+      },
+      "latex": "a_w=\\frac{h_ct_w}{b_{fc}t_{fc}}",
+      "visual_source_checked": true,
+      "variables": [
+        {
+          "symbol": "a_w",
+          "definition": "ratio of twice the web area in compression to the compression-flange area for the rectangular-flange expression",
+          "unit": "1",
+          "dimension": "dimensionless"
+        },
+        {
+          "symbol": "h_c",
+          "definition": "twice the distance from the centroid to the inside face of the compression flange for the represented welded symmetric I section",
+          "unit": "mm",
+          "dimension": "length"
+        },
+        {
+          "symbol": "t_w",
+          "definition": "web thickness",
+          "unit": "mm",
+          "dimension": "length"
+        },
+        {
+          "symbol": "b_fc",
+          "definition": "width of the compression flange",
+          "unit": "mm",
+          "dimension": "length"
+        },
+        {
+          "symbol": "t_fc",
+          "definition": "compression-flange thickness",
+          "unit": "mm",
+          "dimension": "length"
+        }
+      ],
+      "conditions": [
+        "Rectangular compression flange case; source definitions of h_c and flange dimensions apply."
+      ],
+      "design_methods": [
+        "ASD",
+        "LRFD"
+      ],
+      "dependencies": [],
+      "implementation_key": "F4-12",
+      "verification_status": "needs_review",
+      "notes": "Source transcription visually checked against the cited Specification page. This record remains a review draft: independent engineering validation and branch coverage are pending; it must not be executed or represented as approved solely because the source was transcribed."
+    },
+    {
+      "id": "F5-3",
+      "label": "F5-3",
+      "clause_code": "F5",
+      "kind": "normative",
+      "pdf_page": 110,
+      "source_page": 110,
+      "printed_page_label": "16.1-54",
+      "source_anchor": {
+        "source_type": "equation",
+        "clause_code": "F5",
+        "equation_id": "F5-3",
+        "pdf_page": 110,
+        "printed_page_label": "16.1-54"
+      },
+      "latex": "F_{cr}=C_b\\left[F_y-0.3F_y\\frac{L_b-L_p}{L_r-L_p}\\right]\\le F_y",
+      "visual_source_checked": true,
+      "variables": [
+        {
+          "symbol": "F_cr",
+          "definition": "critical stress",
+          "unit": "MPa",
+          "dimension": "pressure"
+        },
+        {
+          "symbol": "C_b",
+          "definition": "lateral-torsional buckling modification factor for a nonuniform moment diagram",
+          "unit": "1",
+          "dimension": "dimensionless"
+        },
+        {
+          "symbol": "F_y",
+          "definition": "specified minimum yield stress",
+          "unit": "MPa",
+          "dimension": "pressure"
+        },
+        {
+          "symbol": "L_b",
+          "definition": "unbraced length between points braced against compression-flange lateral displacement or section twist",
+          "unit": "mm",
+          "dimension": "length"
+        },
+        {
+          "symbol": "L_p",
+          "definition": "limiting laterally unbraced length for yielding",
+          "unit": "mm",
+          "dimension": "length"
+        },
+        {
+          "symbol": "L_r",
+          "definition": "limiting laterally unbraced length for inelastic lateral-torsional buckling",
+          "unit": "mm",
+          "dimension": "length"
+        }
+      ],
+      "conditions": [
+        "Slender-web I-shaped members bent about their major axis; L_p < L_b <= L_r; nominal flexural strength is R_pg F_cr S_xc under F5-2."
+      ],
+      "design_methods": [
+        "ASD",
+        "LRFD"
+      ],
+      "dependencies": [
+        "F4-7",
+        "F5-5",
+        "F5-2"
+      ],
+      "implementation_key": "F5-3",
+      "verification_status": "needs_review",
+      "notes": "Source transcription visually checked against the cited Specification page. This record remains a review draft: independent engineering validation and branch coverage are pending; it must not be executed or represented as approved solely because the source was transcribed."
+    },
+    {
+      "id": "F5-4",
+      "label": "F5-4",
+      "clause_code": "F5",
+      "kind": "normative",
+      "pdf_page": 110,
+      "source_page": 110,
+      "printed_page_label": "16.1-54",
+      "source_anchor": {
+        "source_type": "equation",
+        "clause_code": "F5",
+        "equation_id": "F5-4",
+        "pdf_page": 110,
+        "printed_page_label": "16.1-54"
+      },
+      "latex": "F_{cr}=C_b\\frac{\\pi^2E}{(L_b/r_t)^2}\\le F_y",
+      "visual_source_checked": true,
+      "variables": [
+        {
+          "symbol": "F_cr",
+          "definition": "critical stress",
+          "unit": "MPa",
+          "dimension": "pressure"
+        },
+        {
+          "symbol": "C_b",
+          "definition": "lateral-torsional buckling modification factor for a nonuniform moment diagram",
+          "unit": "1",
+          "dimension": "dimensionless"
+        },
+        {
+          "symbol": "E",
+          "definition": "modulus of elasticity of steel",
+          "unit": "MPa",
+          "dimension": "pressure"
+        },
+        {
+          "symbol": "L_b",
+          "definition": "unbraced length between points braced against compression-flange lateral displacement or section twist",
+          "unit": "mm",
+          "dimension": "length"
+        },
+        {
+          "symbol": "r_t",
+          "definition": "effective radius of gyration for lateral-torsional buckling in F4/F5",
+          "unit": "mm",
+          "dimension": "length"
+        },
+        {
+          "symbol": "F_y",
+          "definition": "specified minimum yield stress",
+          "unit": "MPa",
+          "dimension": "pressure"
+        }
+      ],
+      "conditions": [
+        "Slender-web I-shaped members bent about their major axis; L_b > L_r; nominal flexural strength is R_pg F_cr S_xc under F5-2."
+      ],
+      "design_methods": [
+        "ASD",
+        "LRFD"
+      ],
+      "dependencies": [
+        "F4-11",
+        "F5-2"
+      ],
+      "implementation_key": "F5-4",
+      "verification_status": "needs_review",
+      "notes": "Source transcription visually checked against the cited Specification page. This record remains a review draft: independent engineering validation and branch coverage are pending; it must not be executed or represented as approved solely because the source was transcribed."
+    },
+    {
+      "id": "G2-1",
+      "label": "G2-1",
+      "clause_code": "G2",
+      "kind": "normative",
+      "pdf_page": 123,
+      "source_page": 123,
+      "printed_page_label": "16.1-67",
+      "source_anchor": {
+        "source_type": "equation",
+        "clause_code": "G2",
+        "equation_id": "G2-1",
+        "pdf_page": 123,
+        "printed_page_label": "16.1-67"
+      },
+      "latex": "V_n=0.6F_yA_wC_v",
+      "visual_source_checked": true,
+      "variables": [
+        {
+          "symbol": "V_n",
+          "definition": "nominal shear strength",
+          "unit": "N",
+          "dimension": "force"
+        },
+        {
+          "symbol": "F_y",
+          "definition": "specified minimum yield stress",
+          "unit": "MPa",
+          "dimension": "pressure"
+        },
+        {
+          "symbol": "A_w",
+          "definition": "web area, overall depth times web thickness for G2",
+          "unit": "mm^2",
+          "dimension": "area"
+        },
+        {
+          "symbol": "C_v",
+          "definition": "web shear coefficient",
+          "unit": "1",
+          "dimension": "dimensionless"
+        }
+      ],
+      "conditions": [
+        "Unstiffened or stiffened webs of singly or doubly symmetric members and channels subject to shear in the plane of the web."
+      ],
+      "design_methods": [
+        "ASD",
+        "LRFD"
+      ],
+      "dependencies": [],
+      "implementation_key": null,
+      "verification_status": "needs_review",
+      "notes": "Source transcription visually checked against the cited Specification page. This record remains a review draft: independent engineering validation and branch coverage are pending; it must not be executed or represented as approved solely because the source was transcribed."
+    },
+    {
+      "id": "G2-2",
+      "label": "G2-2",
+      "clause_code": "G2",
+      "kind": "normative",
+      "pdf_page": 124,
+      "source_page": 124,
+      "printed_page_label": "16.1-68",
+      "source_anchor": {
+        "source_type": "equation",
+        "clause_code": "G2",
+        "equation_id": "G2-2",
+        "pdf_page": 124,
+        "printed_page_label": "16.1-68"
+      },
+      "latex": "C_v=1.0",
+      "visual_source_checked": true,
+      "variables": [
+        {
+          "symbol": "C_v",
+          "definition": "web shear coefficient",
+          "unit": "1",
+          "dimension": "dimensionless"
+        },
+        {
+          "symbol": "h",
+          "definition": "web clear dimension: for welded built-up sections, clear distance between flanges",
+          "unit": "mm",
+          "dimension": "length"
+        },
+        {
+          "symbol": "t_w",
+          "definition": "web thickness",
+          "unit": "mm",
+          "dimension": "length"
+        },
+        {
+          "symbol": "E",
+          "definition": "modulus of elasticity of steel",
+          "unit": "MPa",
+          "dimension": "pressure"
+        },
+        {
+          "symbol": "F_y",
+          "definition": "specified minimum yield stress",
+          "unit": "MPa",
+          "dimension": "pressure"
+        }
+      ],
+      "conditions": [
+        "Special rolled-I web case G2.1(a): h/t_w <= 2.24 sqrt(E/F_y); source also assigns φ_v=1.00 for LRFD and Ω_v=1.50 for ASD."
+      ],
+      "design_methods": [
+        "ASD",
+        "LRFD"
+      ],
+      "dependencies": [],
+      "implementation_key": null,
+      "verification_status": "needs_review",
+      "notes": "Source transcription visually checked against the cited Specification page. This record remains a review draft: independent engineering validation and branch coverage are pending; it must not be executed or represented as approved solely because the source was transcribed."
+    },
+    {
+      "id": "G2-3",
+      "label": "G2-3",
+      "clause_code": "G2",
+      "kind": "normative",
+      "pdf_page": 124,
+      "source_page": 124,
+      "printed_page_label": "16.1-68",
+      "source_anchor": {
+        "source_type": "equation",
+        "clause_code": "G2",
+        "equation_id": "G2-3",
+        "pdf_page": 124,
+        "printed_page_label": "16.1-68"
+      },
+      "latex": "C_v=1.0",
+      "visual_source_checked": true,
+      "variables": [
+        {
+          "symbol": "C_v",
+          "definition": "web shear coefficient",
+          "unit": "1",
+          "dimension": "dimensionless"
+        },
+        {
+          "symbol": "h",
+          "definition": "web clear dimension: for welded built-up sections, clear distance between flanges",
+          "unit": "mm",
+          "dimension": "length"
+        },
+        {
+          "symbol": "t_w",
+          "definition": "web thickness",
+          "unit": "mm",
+          "dimension": "length"
+        },
+        {
+          "symbol": "k_v",
+          "definition": "web plate shear buckling coefficient",
+          "unit": "1",
+          "dimension": "dimensionless"
+        },
+        {
+          "symbol": "E",
+          "definition": "modulus of elasticity of steel",
+          "unit": "MPa",
+          "dimension": "pressure"
+        },
+        {
+          "symbol": "F_y",
+          "definition": "specified minimum yield stress",
+          "unit": "MPa",
+          "dimension": "pressure"
+        }
+      ],
+      "conditions": [
+        "Other applicable doubly symmetric, singly symmetric, and channel webs under G2.1(b); h/t_w <= 1.10 sqrt(k_v E/F_y)."
+      ],
+      "design_methods": [
+        "ASD",
+        "LRFD"
+      ],
+      "dependencies": [],
+      "implementation_key": null,
+      "verification_status": "needs_review",
+      "notes": "Source transcription visually checked against the cited Specification page. This record remains a review draft: independent engineering validation and branch coverage are pending; it must not be executed or represented as approved solely because the source was transcribed."
+    },
+    {
+      "id": "G2-4",
+      "label": "G2-4",
+      "clause_code": "G2",
+      "kind": "normative",
+      "pdf_page": 124,
+      "source_page": 124,
+      "printed_page_label": "16.1-68",
+      "source_anchor": {
+        "source_type": "equation",
+        "clause_code": "G2",
+        "equation_id": "G2-4",
+        "pdf_page": 124,
+        "printed_page_label": "16.1-68"
+      },
+      "latex": "C_v=\\frac{1.10\\sqrt{k_vE/F_y}}{h/t_w}",
+      "visual_source_checked": true,
+      "variables": [
+        {
+          "symbol": "C_v",
+          "definition": "web shear coefficient",
+          "unit": "1",
+          "dimension": "dimensionless"
+        },
+        {
+          "symbol": "k_v",
+          "definition": "web plate shear buckling coefficient",
+          "unit": "1",
+          "dimension": "dimensionless"
+        },
+        {
+          "symbol": "E",
+          "definition": "modulus of elasticity of steel",
+          "unit": "MPa",
+          "dimension": "pressure"
+        },
+        {
+          "symbol": "F_y",
+          "definition": "specified minimum yield stress",
+          "unit": "MPa",
+          "dimension": "pressure"
+        },
+        {
+          "symbol": "h",
+          "definition": "web clear dimension: for welded built-up sections, clear distance between flanges",
+          "unit": "mm",
+          "dimension": "length"
+        },
+        {
+          "symbol": "t_w",
+          "definition": "web thickness",
+          "unit": "mm",
+          "dimension": "length"
+        }
+      ],
+      "conditions": [
+        "Other applicable webs under G2.1(b); 1.10 sqrt(k_v E/F_y) < h/t_w <= 1.37 sqrt(k_v E/F_y)."
+      ],
+      "design_methods": [
+        "ASD",
+        "LRFD"
+      ],
+      "dependencies": [
+        "G2-3",
+        "G2-5"
+      ],
+      "implementation_key": null,
+      "verification_status": "needs_review",
+      "notes": "Source transcription visually checked against the cited Specification page. This record remains a review draft: independent engineering validation and branch coverage are pending; it must not be executed or represented as approved solely because the source was transcribed."
+    },
+    {
+      "id": "G2-5",
+      "label": "G2-5",
+      "clause_code": "G2",
+      "kind": "normative",
+      "pdf_page": 124,
+      "source_page": 124,
+      "printed_page_label": "16.1-68",
+      "source_anchor": {
+        "source_type": "equation",
+        "clause_code": "G2",
+        "equation_id": "G2-5",
+        "pdf_page": 124,
+        "printed_page_label": "16.1-68"
+      },
+      "latex": "C_v=\\frac{1.51k_vE}{F_y(h/t_w)^2}",
+      "visual_source_checked": true,
+      "variables": [
+        {
+          "symbol": "C_v",
+          "definition": "web shear coefficient",
+          "unit": "1",
+          "dimension": "dimensionless"
+        },
+        {
+          "symbol": "k_v",
+          "definition": "web plate shear buckling coefficient",
+          "unit": "1",
+          "dimension": "dimensionless"
+        },
+        {
+          "symbol": "E",
+          "definition": "modulus of elasticity of steel",
+          "unit": "MPa",
+          "dimension": "pressure"
+        },
+        {
+          "symbol": "F_y",
+          "definition": "specified minimum yield stress",
+          "unit": "MPa",
+          "dimension": "pressure"
+        },
+        {
+          "symbol": "h",
+          "definition": "web clear dimension: for welded built-up sections, clear distance between flanges",
+          "unit": "mm",
+          "dimension": "length"
+        },
+        {
+          "symbol": "t_w",
+          "definition": "web thickness",
+          "unit": "mm",
+          "dimension": "length"
+        }
+      ],
+      "conditions": [
+        "Other applicable webs under G2.1(b); h/t_w > 1.37 sqrt(k_v E/F_y)."
+      ],
+      "design_methods": [
+        "ASD",
+        "LRFD"
+      ],
+      "dependencies": [
+        "G2-4"
+      ],
+      "implementation_key": null,
+      "verification_status": "needs_review",
+      "notes": "Source transcription visually checked against the cited Specification page. This record remains a review draft: independent engineering validation and branch coverage are pending; it must not be executed or represented as approved solely because the source was transcribed."
+    },
+    {
+      "id": "H1-1a",
+      "label": "H1-1a",
+      "clause_code": "H1",
+      "kind": "normative",
+      "pdf_page": 129,
+      "source_page": 129,
+      "printed_page_label": "16.1-73",
+      "source_anchor": {
+        "source_type": "equation",
+        "clause_code": "H1",
+        "equation_id": "H1-1a",
+        "pdf_page": 129,
+        "printed_page_label": "16.1-73"
+      },
+      "latex": "\\frac{P_r}{P_c}+\\frac{8}{9}\\left(\\frac{M_{rx}}{M_{cx}}+\\frac{M_{ry}}{M_{cy}}\\right)\\le 1.0",
+      "visual_source_checked": true,
+      "variables": [
+        {
+          "symbol": "P_r",
+          "definition": "required axial strength",
+          "unit": "N",
+          "dimension": "force"
+        },
+        {
+          "symbol": "P_c",
+          "definition": "available axial strength",
+          "unit": "N",
+          "dimension": "force"
+        },
+        {
+          "symbol": "M_rx",
+          "definition": "required flexural strength about x",
+          "unit": "N·mm",
+          "dimension": "moment"
+        },
+        {
+          "symbol": "M_cx",
+          "definition": "available flexural strength about x",
+          "unit": "N·mm",
+          "dimension": "moment"
+        },
+        {
+          "symbol": "M_ry",
+          "definition": "required flexural strength about y",
+          "unit": "N·mm",
+          "dimension": "moment"
+        },
+        {
+          "symbol": "M_cy",
+          "definition": "available flexural strength about y",
+          "unit": "N·mm",
+          "dimension": "moment"
+        }
+      ],
+      "conditions": [
+        "Doubly/singly symmetric members constrained to bend about a geometric axis and subject to compression and flexure; P_r/P_c >= 0.2."
+      ],
+      "design_methods": [
+        "ASD",
+        "LRFD"
+      ],
+      "dependencies": [],
+      "implementation_key": "H1-1a",
+      "verification_status": "needs_review",
+      "notes": "Source transcription visually checked against the cited Specification page. This record remains a review draft: independent engineering validation and branch coverage are pending; it must not be executed or represented as approved solely because the source was transcribed."
+    },
+    {
+      "id": "H1-1b",
+      "label": "H1-1b",
+      "clause_code": "H1",
+      "kind": "normative",
+      "pdf_page": 129,
+      "source_page": 129,
+      "printed_page_label": "16.1-73",
+      "source_anchor": {
+        "source_type": "equation",
+        "clause_code": "H1",
+        "equation_id": "H1-1b",
+        "pdf_page": 129,
+        "printed_page_label": "16.1-73"
+      },
+      "latex": "\\frac{P_r}{2P_c}+\\frac{M_{rx}}{M_{cx}}+\\frac{M_{ry}}{M_{cy}}\\le 1.0",
+      "visual_source_checked": true,
+      "variables": [
+        {
+          "symbol": "P_r",
+          "definition": "required axial strength",
+          "unit": "N",
+          "dimension": "force"
+        },
+        {
+          "symbol": "P_c",
+          "definition": "available axial strength",
+          "unit": "N",
+          "dimension": "force"
+        },
+        {
+          "symbol": "M_rx",
+          "definition": "required flexural strength about x",
+          "unit": "N·mm",
+          "dimension": "moment"
+        },
+        {
+          "symbol": "M_cx",
+          "definition": "available flexural strength about x",
+          "unit": "N·mm",
+          "dimension": "moment"
+        },
+        {
+          "symbol": "M_ry",
+          "definition": "required flexural strength about y",
+          "unit": "N·mm",
+          "dimension": "moment"
+        },
+        {
+          "symbol": "M_cy",
+          "definition": "available flexural strength about y",
+          "unit": "N·mm",
+          "dimension": "moment"
+        }
+      ],
+      "conditions": [
+        "Doubly/singly symmetric members constrained to bend about a geometric axis and subject to compression and flexure; P_r/P_c < 0.2."
+      ],
+      "design_methods": [
+        "ASD",
+        "LRFD"
+      ],
+      "dependencies": [],
+      "implementation_key": "H1-1b",
+      "verification_status": "needs_review",
+      "notes": "Source transcription visually checked against the cited Specification page. This record remains a review draft: independent engineering validation and branch coverage are pending; it must not be executed or represented as approved solely because the source was transcribed."
+    }
+  ],
+  "parameters": [
+    {
+      "id": "compression.phi_c",
+      "parameter_key": "compression.phi_c",
+      "label": "compression.phi_c",
+      "clause_code": "E1",
+      "kind": "normative",
+      "pdf_page": 87,
+      "source_page": 87,
+      "printed_page_label": "16.1-31",
+      "source_anchor": {
+        "source_type": "provision",
+        "clause_code": "E1",
+        "parameter_key": "compression.phi_c",
+        "pdf_page": 87,
+        "printed_page_label": "16.1-31"
+      },
+      "symbol": "φ_c",
+      "value": 0.9,
+      "data_type": "number",
+      "unit": "1",
+      "dimension": "dimensionless",
+      "design_methods": [
+        "LRFD"
+      ],
+      "conditions": [
+        "Compression design strength for Chapter E provisions."
+      ],
+      "implementation_key": "COMPRESSION.phi",
+      "verification_status": "needs_review",
+      "notes": "Source transcription visually checked against the cited Specification page. This record remains a review draft: independent engineering validation and branch coverage are pending; it must not be executed or represented as approved solely because the source was transcribed."
+    },
+    {
+      "id": "compression.Omega_c",
+      "parameter_key": "compression.Omega_c",
+      "label": "compression.Omega_c",
+      "clause_code": "E1",
+      "kind": "normative",
+      "pdf_page": 87,
+      "source_page": 87,
+      "printed_page_label": "16.1-31",
+      "source_anchor": {
+        "source_type": "provision",
+        "clause_code": "E1",
+        "parameter_key": "compression.Omega_c",
+        "pdf_page": 87,
+        "printed_page_label": "16.1-31"
+      },
+      "symbol": "Ω_c",
+      "value": 1.67,
+      "data_type": "number",
+      "unit": "1",
+      "dimension": "dimensionless",
+      "design_methods": [
+        "ASD"
+      ],
+      "conditions": [
+        "Compression allowable strength for Chapter E provisions."
+      ],
+      "implementation_key": "COMPRESSION.omega",
+      "verification_status": "needs_review",
+      "notes": "Source transcription visually checked against the cited Specification page. This record remains a review draft: independent engineering validation and branch coverage are pending; it must not be executed or represented as approved solely because the source was transcribed."
+    },
+    {
+      "id": "flexure.phi_b",
+      "parameter_key": "flexure.phi_b",
+      "label": "flexure.phi_b",
+      "clause_code": "F1",
+      "kind": "normative",
+      "pdf_page": 102,
+      "source_page": 102,
+      "printed_page_label": "16.1-46",
+      "source_anchor": {
+        "source_type": "provision",
+        "clause_code": "F1",
+        "parameter_key": "flexure.phi_b",
+        "pdf_page": 102,
+        "printed_page_label": "16.1-46"
+      },
+      "symbol": "φ_b",
+      "value": 0.9,
+      "data_type": "number",
+      "unit": "1",
+      "dimension": "dimensionless",
+      "design_methods": [
+        "LRFD"
+      ],
+      "conditions": [
+        "Flexural design strength for provisions in Chapter F."
+      ],
+      "implementation_key": "FLEXURE.phi",
+      "verification_status": "needs_review",
+      "notes": "Source transcription visually checked against the cited Specification page. This record remains a review draft: independent engineering validation and branch coverage are pending; it must not be executed or represented as approved solely because the source was transcribed."
+    },
+    {
+      "id": "flexure.Omega_b",
+      "parameter_key": "flexure.Omega_b",
+      "label": "flexure.Omega_b",
+      "clause_code": "F1",
+      "kind": "normative",
+      "pdf_page": 102,
+      "source_page": 102,
+      "printed_page_label": "16.1-46",
+      "source_anchor": {
+        "source_type": "provision",
+        "clause_code": "F1",
+        "parameter_key": "flexure.Omega_b",
+        "pdf_page": 102,
+        "printed_page_label": "16.1-46"
+      },
+      "symbol": "Ω_b",
+      "value": 1.67,
+      "data_type": "number",
+      "unit": "1",
+      "dimension": "dimensionless",
+      "design_methods": [
+        "ASD"
+      ],
+      "conditions": [
+        "Flexural allowable strength for provisions in Chapter F."
+      ],
+      "implementation_key": "FLEXURE.omega",
+      "verification_status": "needs_review",
+      "notes": "Source transcription visually checked against the cited Specification page. This record remains a review draft: independent engineering validation and branch coverage are pending; it must not be executed or represented as approved solely because the source was transcribed."
+    },
+    {
+      "id": "shear.general.phi_v",
+      "parameter_key": "shear.general.phi_v",
+      "label": "shear.general.phi_v",
+      "clause_code": "G1",
+      "kind": "normative",
+      "pdf_page": 123,
+      "source_page": 123,
+      "printed_page_label": "16.1-67",
+      "source_anchor": {
+        "source_type": "provision",
+        "clause_code": "G1",
+        "parameter_key": "shear.general.phi_v",
+        "pdf_page": 123,
+        "printed_page_label": "16.1-67"
+      },
+      "symbol": "φ_v",
+      "value": 0.9,
+      "data_type": "number",
+      "unit": "1",
+      "dimension": "dimensionless",
+      "design_methods": [
+        "LRFD"
+      ],
+      "conditions": [
+        "All Chapter G provisions except G2.1(a)."
+      ],
+      "implementation_key": "SHEAR_GENERAL.phi",
+      "verification_status": "needs_review",
+      "notes": "Source transcription visually checked against the cited Specification page. This record remains a review draft: independent engineering validation and branch coverage are pending; it must not be executed or represented as approved solely because the source was transcribed."
+    },
+    {
+      "id": "shear.general.Omega_v",
+      "parameter_key": "shear.general.Omega_v",
+      "label": "shear.general.Omega_v",
+      "clause_code": "G1",
+      "kind": "normative",
+      "pdf_page": 123,
+      "source_page": 123,
+      "printed_page_label": "16.1-67",
+      "source_anchor": {
+        "source_type": "provision",
+        "clause_code": "G1",
+        "parameter_key": "shear.general.Omega_v",
+        "pdf_page": 123,
+        "printed_page_label": "16.1-67"
+      },
+      "symbol": "Ω_v",
+      "value": 1.67,
+      "data_type": "number",
+      "unit": "1",
+      "dimension": "dimensionless",
+      "design_methods": [
+        "ASD"
+      ],
+      "conditions": [
+        "All Chapter G provisions except G2.1(a)."
+      ],
+      "implementation_key": "SHEAR_GENERAL.omega",
+      "verification_status": "needs_review",
+      "notes": "Source transcription visually checked against the cited Specification page. This record remains a review draft: independent engineering validation and branch coverage are pending; it must not be executed or represented as approved solely because the source was transcribed."
+    },
+    {
+      "id": "shear.rolled_I_G2_1a.phi_v",
+      "parameter_key": "shear.rolled_I_G2_1a.phi_v",
+      "label": "shear.rolled_I_G2_1a.phi_v",
+      "clause_code": "G2.1",
+      "kind": "normative",
+      "pdf_page": 124,
+      "source_page": 124,
+      "printed_page_label": "16.1-68",
+      "source_anchor": {
+        "source_type": "provision",
+        "clause_code": "G2.1(a)",
+        "parameter_key": "shear.rolled_I_G2_1a.phi_v",
+        "pdf_page": 124,
+        "printed_page_label": "16.1-68"
+      },
+      "symbol": "φ_v",
+      "value": 1.0,
+      "data_type": "number",
+      "unit": "1",
+      "dimension": "dimensionless",
+      "design_methods": [
+        "LRFD"
+      ],
+      "conditions": [
+        "Only rolled I-shaped member webs satisfying h/t_w <= 2.24 sqrt(E/F_y); source pairs this with C_v=1.0. Not a general shear factor.",
+        "Source subprovision G2.1(a); index parent G2.1, physical PDF page 124."
+      ],
+      "implementation_key": "SHEAR_ROLLED_G21A.phi",
+      "verification_status": "needs_review",
+      "notes": "Source transcription visually checked against the cited Specification page. This record remains a review draft: independent engineering validation and branch coverage are pending; it must not be executed or represented as approved solely because the source was transcribed."
+    },
+    {
+      "id": "shear.rolled_I_G2_1a.Omega_v",
+      "parameter_key": "shear.rolled_I_G2_1a.Omega_v",
+      "label": "shear.rolled_I_G2_1a.Omega_v",
+      "clause_code": "G2.1",
+      "kind": "normative",
+      "pdf_page": 124,
+      "source_page": 124,
+      "printed_page_label": "16.1-68",
+      "source_anchor": {
+        "source_type": "provision",
+        "clause_code": "G2.1(a)",
+        "parameter_key": "shear.rolled_I_G2_1a.Omega_v",
+        "pdf_page": 124,
+        "printed_page_label": "16.1-68"
+      },
+      "symbol": "Ω_v",
+      "value": 1.5,
+      "data_type": "number",
+      "unit": "1",
+      "dimension": "dimensionless",
+      "design_methods": [
+        "ASD"
+      ],
+      "conditions": [
+        "Only rolled I-shaped member webs satisfying h/t_w <= 2.24 sqrt(E/F_y); source pairs this with C_v=1.0. Not a general shear factor.",
+        "Source subprovision G2.1(a); index parent G2.1, physical PDF page 124."
+      ],
+      "implementation_key": "SHEAR_ROLLED_G21A.omega",
+      "verification_status": "needs_review",
+      "notes": "Source transcription visually checked against the cited Specification page. This record remains a review draft: independent engineering validation and branch coverage are pending; it must not be executed or represented as approved solely because the source was transcribed."
+    },
+    {
+      "id": "shear.rolled_I_G2_1a.C_v",
+      "parameter_key": "shear.rolled_I_G2_1a.C_v",
+      "label": "shear.rolled_I_G2_1a.C_v",
+      "clause_code": "G2.1",
+      "kind": "normative",
+      "pdf_page": 124,
+      "source_page": 124,
+      "printed_page_label": "16.1-68",
+      "source_anchor": {
+        "source_type": "provision",
+        "clause_code": "G2.1(a)",
+        "parameter_key": "shear.rolled_I_G2_1a.C_v",
+        "pdf_page": 124,
+        "printed_page_label": "16.1-68"
+      },
+      "symbol": "C_v",
+      "value": 1.0,
+      "data_type": "number",
+      "unit": "1",
+      "dimension": "dimensionless",
+      "design_methods": [
+        "LRFD",
+        "ASD"
+      ],
+      "conditions": [
+        "Only rolled I-shaped member webs satisfying h/t_w <= 2.24 sqrt(E/F_y).",
+        "Source subprovision G2.1(a); index parent G2.1, physical PDF page 124."
+      ],
+      "implementation_key": null,
+      "verification_status": "needs_review",
+      "notes": "The engine does not implement G2 shear; this parameter is a source transcription only."
+    }
+  ],
+  "tables": [
+    {
+      "id": "B4.1a",
+      "label": "B4.1a",
+      "clause_code": "B4.1a",
+      "kind": "normative",
+      "pdf_page": 72,
+      "source_page": 72,
+      "printed_page_label": "16.1-16",
+      "source_anchor": {
+        "source_type": "table",
+        "clause_code": "B4.1a",
+        "table_id": "B4.1a",
+        "pdf_page": 72,
+        "printed_page_label": "16.1-16"
+      },
+      "title": "Width-to-Thickness Ratios: Compression Elements — Members Subject to Axial Compression",
+      "use": "Axial compression element classification",
+      "applicability": "Axial compression element classification",
+      "coverage_type": "partial",
+      "complete_table": false,
+      "coverage": {
+        "included_case_ids": [
+          "B4.1a-case-1",
+          "B4.1a-case-2",
+          "B4.1a-case-5"
+        ],
+        "omitted_case_ids": [
+          "B4.1a-case-3",
+          "B4.1a-case-4",
+          "B4.1a-case-6",
+          "B4.1a-case-7",
+          "B4.1a-case-8",
+          "B4.1a-case-9"
+        ]
+      },
+      "columns": [
+        "case",
+        "description_of_element",
+        "width_to_thickness_ratio",
+        "lambda_p",
+        "lambda_r",
+        "examples"
+      ],
+      "rows": [
+        {
+          "id": "B4.1a-case-1",
+          "label": "Case 1",
+          "case_number": 1,
+          "kind": "normative",
+          "pdf_page": 72,
+          "source_page": 72,
+          "printed_page_label": "16.1-16",
+          "source_anchor": {
+            "source_type": "table_row",
+            "clause_code": "B4.1a",
+            "table_id": "B4.1a",
+            "row_id": "B4.1a-case-1",
+            "pdf_page": 72,
+            "printed_page_label": "16.1-16"
+          },
+          "description": "Flanges of rolled I-shaped sections, plates projecting from rolled I-shaped sections; outstanding legs of pairs of angles connected with continuous contact; flanges of channels; flanges of tees",
+          "width_to_thickness_ratio": "b/t",
+          "lambda_p_latex": null,
+          "lambda_r_latex": "0.56\\sqrt{E/F_y}",
+          "conditions": [
+            "Axial compression; unstiffened element."
+          ],
+          "footnote_refs": [],
+          "design_methods": [
+            "ASD",
+            "LRFD"
+          ],
+          "implementation_key": "B4.1a-1",
+          "verification_status": "needs_review",
+          "notes": "Partial row transcription from the table. The full table, all cases, examples/diagrams, and applicability have not been independently validated."
+        },
+        {
+          "id": "B4.1a-case-2",
+          "label": "Case 2",
+          "case_number": 2,
+          "kind": "normative",
+          "pdf_page": 72,
+          "source_page": 72,
+          "printed_page_label": "16.1-16",
+          "source_anchor": {
+            "source_type": "table_row",
+            "clause_code": "B4.1a",
+            "table_id": "B4.1a",
+            "row_id": "B4.1a-case-2",
+            "pdf_page": 72,
+            "printed_page_label": "16.1-16"
+          },
+          "description": "Flanges of built-up I-shaped sections and plates or angle legs projecting from built-up I-shaped sections",
+          "width_to_thickness_ratio": "b/t",
+          "lambda_p_latex": null,
+          "lambda_r_latex": "0.64\\sqrt{k_cE/F_y}",
+          "conditions": [
+            "Axial compression; unstiffened element."
+          ],
+          "footnote_refs": [
+            "[a]"
+          ],
+          "design_methods": [
+            "ASD",
+            "LRFD"
+          ],
+          "implementation_key": "B4.1a-2",
+          "verification_status": "needs_review",
+          "notes": "Partial row transcription from the table. The full table, all cases, examples/diagrams, and applicability have not been independently validated."
+        },
+        {
+          "id": "B4.1a-case-5",
+          "label": "Case 5",
+          "case_number": 5,
+          "kind": "normative",
+          "pdf_page": 72,
+          "source_page": 72,
+          "printed_page_label": "16.1-16",
+          "source_anchor": {
+            "source_type": "table_row",
+            "clause_code": "B4.1a",
+            "table_id": "B4.1a",
+            "row_id": "B4.1a-case-5",
+            "pdf_page": 72,
+            "printed_page_label": "16.1-16"
+          },
+          "description": "Webs of doubly symmetric I-shaped sections and channels",
+          "width_to_thickness_ratio": "h/t_w",
+          "lambda_p_latex": null,
+          "lambda_r_latex": "1.49\\sqrt{E/F_y}",
+          "conditions": [
+            "Axial compression; stiffened element."
+          ],
+          "footnote_refs": [],
+          "design_methods": [
+            "ASD",
+            "LRFD"
+          ],
+          "implementation_key": "B4.1a-5",
+          "verification_status": "needs_review",
+          "notes": "Partial row transcription from the table. The full table, all cases, examples/diagrams, and applicability have not been independently validated."
+        }
+      ],
+      "merged_cells": [
+        {
+          "column": "element_category",
+          "row_ids": [
+            "B4.1a-case-1",
+            "B4.1a-case-2",
+            "B4.1a-case-3",
+            "B4.1a-case-4"
+          ],
+          "source_text": "Unstiffened Elements",
+          "merge_extent": "cases 1–4"
+        },
+        {
+          "column": "element_category",
+          "row_ids": [
+            "B4.1a-case-5",
+            "B4.1a-case-6",
+            "B4.1a-case-7",
+            "B4.1a-case-8",
+            "B4.1a-case-9"
+          ],
+          "source_text": "Stiffened Elements",
+          "merge_extent": "cases 5–9"
+        }
+      ],
+      "footnotes": [
+        {
+          "marker": "[a]",
+          "text": "The B4.1a case 2 row bears marker [a]. The corresponding printed definition on the facing B4.1b table page defines k_c=4/sqrt(h/t_w), bounded below by 0.35 and above by 0.76 for calculation purposes. This cross-page footnote association needs review."
+        }
+      ],
+      "source_example_diagrams_included": false,
+      "design_methods": [
+        "ASD",
+        "LRFD"
+      ],
+      "implementation_key": null,
+      "verification_status": "needs_review",
+      "notes": "Only listed cases were transcribed. This partial draft does not represent the complete table and does not include/reconstruct the source example diagrams."
+    },
+    {
+      "id": "B4.1b",
+      "label": "B4.1b",
+      "clause_code": "B4.1b",
+      "kind": "normative",
+      "pdf_page": 73,
+      "source_page": 73,
+      "printed_page_label": "16.1-17",
+      "source_anchor": {
+        "source_type": "table",
+        "clause_code": "B4.1b",
+        "table_id": "B4.1b",
+        "pdf_page": 73,
+        "printed_page_label": "16.1-17"
+      },
+      "title": "Width-to-Thickness Ratios: Compression Elements — Members Subject to Flexure",
+      "use": "Flexural element classification",
+      "applicability": "Flexural element classification",
+      "coverage_type": "partial",
+      "complete_table": false,
+      "coverage": {
+        "included_case_ids": [
+          "B4.1b-case-10",
+          "B4.1b-case-11",
+          "B4.1b-case-13",
+          "B4.1b-case-15"
+        ],
+        "omitted_case_ids": [
+          "B4.1b-case-12",
+          "B4.1b-case-14",
+          "B4.1b-case-16",
+          "B4.1b-case-17",
+          "B4.1b-case-18",
+          "B4.1b-case-19",
+          "B4.1b-case-20"
+        ]
+      },
+      "columns": [
+        "case",
+        "description_of_element",
+        "width_to_thickness_ratio",
+        "lambda_p",
+        "lambda_r",
+        "examples"
+      ],
+      "rows": [
+        {
+          "id": "B4.1b-case-10",
+          "label": "Case 10",
+          "case_number": 10,
+          "kind": "normative",
+          "pdf_page": 73,
+          "source_page": 73,
+          "printed_page_label": "16.1-17",
+          "source_anchor": {
+            "source_type": "table_row",
+            "clause_code": "B4.1b",
+            "table_id": "B4.1b",
+            "row_id": "B4.1b-case-10",
+            "pdf_page": 73,
+            "printed_page_label": "16.1-17"
+          },
+          "description": "Flanges of rolled I-shaped sections, channels, and tees",
+          "width_to_thickness_ratio": "b/t",
+          "lambda_p_latex": "0.38\\sqrt{E/F_y}",
+          "lambda_r_latex": "1.0\\sqrt{E/F_y}",
+          "conditions": [
+            "Flexure; unstiffened element."
+          ],
+          "footnote_refs": [],
+          "design_methods": [
+            "ASD",
+            "LRFD"
+          ],
+          "implementation_key": "B4.1b-10",
+          "verification_status": "needs_review",
+          "notes": "Partial row transcription from the table. The full table, all cases, examples/diagrams, and applicability have not been independently validated."
+        },
+        {
+          "id": "B4.1b-case-11",
+          "label": "Case 11",
+          "case_number": 11,
+          "kind": "normative",
+          "pdf_page": 73,
+          "source_page": 73,
+          "printed_page_label": "16.1-17",
+          "source_anchor": {
+            "source_type": "table_row",
+            "clause_code": "B4.1b",
+            "table_id": "B4.1b",
+            "row_id": "B4.1b-case-11",
+            "pdf_page": 73,
+            "printed_page_label": "16.1-17"
+          },
+          "description": "Flanges of doubly and singly symmetric I-shaped built-up sections",
+          "width_to_thickness_ratio": "b/t",
+          "lambda_p_latex": "0.38\\sqrt{E/F_y}",
+          "lambda_r_latex": "0.95\\sqrt{k_cE/F_L}",
+          "conditions": [
+            "Flexure; unstiffened element.",
+            "For a doubly symmetric I section, the source footnote condition S_xt/S_xc >= 0.7 is satisfied; under footnote [b], F_L=0.7F_y."
+          ],
+          "footnote_refs": [
+            "[a]",
+            "[b]"
+          ],
+          "design_methods": [
+            "ASD",
+            "LRFD"
+          ],
+          "implementation_key": "B4.1b-11",
+          "verification_status": "needs_review",
+          "notes": "Partial row transcription from the table. The full table, all cases, examples/diagrams, and applicability have not been independently validated."
+        },
+        {
+          "id": "B4.1b-case-13",
+          "label": "Case 13",
+          "case_number": 13,
+          "kind": "normative",
+          "pdf_page": 73,
+          "source_page": 73,
+          "printed_page_label": "16.1-17",
+          "source_anchor": {
+            "source_type": "table_row",
+            "clause_code": "B4.1b",
+            "table_id": "B4.1b",
+            "row_id": "B4.1b-case-13",
+            "pdf_page": 73,
+            "printed_page_label": "16.1-17"
+          },
+          "description": "Flanges of all I-shaped sections and channels in flexure about the weak axis",
+          "width_to_thickness_ratio": "b/t",
+          "lambda_p_latex": "0.38\\sqrt{E/F_y}",
+          "lambda_r_latex": "1.0\\sqrt{E/F_y}",
+          "conditions": [
+            "Weak-axis flexure; unstiffened element."
+          ],
+          "footnote_refs": [],
+          "design_methods": [
+            "ASD",
+            "LRFD"
+          ],
+          "implementation_key": "B4.1b-13",
+          "verification_status": "needs_review",
+          "notes": "Partial row transcription from the table. The full table, all cases, examples/diagrams, and applicability have not been independently validated."
+        },
+        {
+          "id": "B4.1b-case-15",
+          "label": "Case 15",
+          "case_number": 15,
+          "kind": "normative",
+          "pdf_page": 73,
+          "source_page": 73,
+          "printed_page_label": "16.1-17",
+          "source_anchor": {
+            "source_type": "table_row",
+            "clause_code": "B4.1b",
+            "table_id": "B4.1b",
+            "row_id": "B4.1b-case-15",
+            "pdf_page": 73,
+            "printed_page_label": "16.1-17"
+          },
+          "description": "Webs of doubly symmetric I-shaped sections and channels",
+          "width_to_thickness_ratio": "h/t_w",
+          "lambda_p_latex": "3.76\\sqrt{E/F_y}",
+          "lambda_r_latex": "5.70\\sqrt{E/F_y}",
+          "conditions": [
+            "Flexure; stiffened element."
+          ],
+          "footnote_refs": [],
+          "design_methods": [
+            "ASD",
+            "LRFD"
+          ],
+          "implementation_key": "B4.1b-15",
+          "verification_status": "needs_review",
+          "notes": "Partial row transcription from the table. The full table, all cases, examples/diagrams, and applicability have not been independently validated."
+        }
+      ],
+      "merged_cells": [
+        {
+          "column": "element_category",
+          "row_ids": [
+            "B4.1b-case-10",
+            "B4.1b-case-11",
+            "B4.1b-case-12",
+            "B4.1b-case-13",
+            "B4.1b-case-14"
+          ],
+          "source_text": "Unstiffened Elements",
+          "merge_extent": "cases 10–14"
+        },
+        {
+          "column": "element_category",
+          "row_ids": [
+            "B4.1b-case-15",
+            "B4.1b-case-16",
+            "B4.1b-case-17",
+            "B4.1b-case-18",
+            "B4.1b-case-19",
+            "B4.1b-case-20"
+          ],
+          "source_text": "Stiffened Elements",
+          "merge_extent": "cases 15–20"
+        },
+        {
+          "column": "limiting_width_to_thickness_ratio_header",
+          "row_ids": [
+            "B4.1b-case-10",
+            "B4.1b-case-11",
+            "B4.1b-case-13",
+            "B4.1b-case-15"
+          ],
+          "source_text": "Limiting Width-to-Thickness Ratio",
+          "merge_extent": "subcolumns lambda_p and lambda_r"
+        }
+      ],
+      "footnotes": [
+        {
+          "marker": "[a]",
+          "text": "k_c=4/sqrt(h/t_w), but shall not be taken less than 0.35 nor greater than 0.76 for calculation purposes."
+        },
+        {
+          "marker": "[b]",
+          "text": "F_L=0.7F_y for major-axis bending of compact and noncompact web built-up I-shaped members with S_xt/S_xc >= 0.7; F_L=F_y S_xt/S_xc >= 0.5F_y for those members with S_xt/S_xc < 0.7."
+        },
+        {
+          "marker": "[c]",
+          "text": "M_y is the moment at yielding of the extreme fiber; M_p is the plastic bending moment. (Not used by the selected partial rows.)"
+        }
+      ],
+      "source_example_diagrams_included": false,
+      "design_methods": [
+        "ASD",
+        "LRFD"
+      ],
+      "implementation_key": null,
+      "verification_status": "needs_review",
+      "notes": "Only listed cases were transcribed. This partial draft does not represent the complete table and does not include/reconstruct the source example diagrams."
+    }
+  ]
+}

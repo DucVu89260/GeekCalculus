@@ -250,7 +250,7 @@ body{background:#f5f6f8;color:#202d3b}
 <header class="cardhead"><h2 id="aisc-review-header">02A &nbsp; AISC 360-10 · Formula Verification (Phase A/B)</h2>
 <small>Clause-linked calculations · Independent of Legacy Excel</small></header>
 <div class="aisc-review-body">
-<div class="aisc-review-disclaimer">Kết quả Phase A/B chỉ áp dụng cho các công thức đã đối chiếu trong phạm vi công bố. Không coi trạng thái CALCULATED là PASS toàn bộ cấu kiện. E7/F4/F5, kéo đứt và Chương G chưa đầy đủ sẽ có trạng thái REVIEW_REQUIRED / INPUT_REQUIRED.</div>
+<div class="aisc-review-disclaimer">Kết quả Phase A/B chỉ áp dụng cho các công thức đã đối chiếu trong phạm vi công bố. Không coi trạng thái CALCULATED là PASS toàn bộ cấu kiện. E7 và F5 đã có công thức riêng; F4 (bụng NONCOMPACT), kéo đứt và Chương G chưa đầy đủ sẽ có trạng thái REVIEW_REQUIRED / INPUT_REQUIRED.</div>
 <div id="aisc-review-status" role="status" aria-live="polite">Đang chờ tính toán từ Section Properties…</div>
 <div id="aisc-review-class"></div>
 <div id="aisc-review-table"></div>
@@ -763,8 +763,10 @@ async function renderAiscReview(input,canonical,generation) {
    '</tbody></table></div>'+
    '<p class="aisc-review-disclaimer">Sức kháng uốn: kN·m; nén: kN; H1: tỷ số. Khi thiếu dữ liệu giằng hoặc gặp nhánh tiêu chuẩn chưa triển khai, không công bố D/C hoàn chỉnh.</p>';
   const used=['B4.1a-1','B4.1a-2','B4.1a-5','B4.1b-10','B4.1b-11','B4.1b-13','B4.1b-15',
-    'E3-1','E3-2','E3-3','E3-4','E4-4','F1-1','F2-1','F2-2','F2-3','F2-4','F2-5','F2-6','F2-7',
-    'F3-1','F3-2','F6-1','F6-2','F6-3','F6-4','H1-1a','H1-1b'];
+    'E3-1','E3-2','E3-3','E3-4','E4-4','E7-1','E7-2','E7-3','E7-4/E7-6','E7-7/E7-9','E7-16','E7-17',
+    'F1-1','F2-1','F2-2','F2-3','F2-4','F2-5','F2-6','F2-7',
+    'F3-1','F3-2','F4-7','F4-11','F4-12','F5-1','F5-2','F5-3','F5-4','F5-5','F5-6','F5-7','F5-8','F5-9',
+    'F6-1','F6-2','F6-3','F6-4','H1-1a','H1-1b'];
   document.getElementById('aisc-review-formulas').innerHTML='<div class="tablewrap"><table class="aisc-results"><thead><tr><th>Clause</th><th>Expression</th><th>Conditions</th></tr></thead><tbody>'+
    used.map(k=>{const f=module.FORMULAS[k];return '<tr><td>'+safe(f.clause)+'</td><td class="aisc-formula-text">'+safe(f.expression)+'</td><td>'+safe(f.applies)+'</td></tr>'}).join('')+
    '</tbody></table></div>';

@@ -2,7 +2,7 @@
 <html lang="vi"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>GeekCalculus | Combo Generator v5 · SAP2000 New Model</title>
 <style>
-:root{font-family:Calibri,'Segoe UI',Arial,sans-serif;color:#223042;background:#eef1f5;font-size:13px;--bd:#d7dde5;--blue:#2c5fa8;--text:#283445;--shadow:0 3px 12px #192f4712}
+:root{font-family:Calibri,'Segoe UI',Arial,sans-serif;color:#223042;background:#123754;font-size:13px;--bd:#d7dde5;--blue:#2c5fa8;--text:#283445;--shadow:0 3px 12px #192f4712}
 *{box-sizing:border-box}body{margin:0;min-width:720px}button,select,input{font:inherit}button{cursor:pointer}button:disabled{cursor:not-allowed;opacity:.5}
 .topbar{height:54px;background:#17283f;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 18px;gap:14px}
 .brand{display:flex;align-items:center;gap:10px}.brand-symbol{background:#3c8ee1;border-radius:7px;width:31px;height:31px;display:grid;place-items:center;font-size:18px}.brand strong{font-size:15px;letter-spacing:.1px}.brand span{opacity:.66;margin-left:10px;font-size:12px}
@@ -38,6 +38,9 @@ main{padding:12px 14px 0}.section{background:#fff;border:1px solid #d8e0eb;borde
 .gc-embedded .top-actions {flex-wrap:wrap;justify-content:flex-end}
 .gc-embedded main {padding:10px 0 0}
 .gc-embedded .foot {padding:10px}
+
+/* Shared navy page surround; keep the matrix and fields light. */
+.foot{color:#c1d6e6}
 </style></head>
 <body>
 <header class="topbar"><div class="brand"><div class="brand-symbol">▦</div><div><strong>GeekCalculus</strong><span>/ Structural Analysis / Combo Generator</span></div></div><div class="top-actions"><button class="btn ghost-dark" id="btn-import">↥ Nhập JSON</button><button class="btn ghost-dark" id="btn-export">⇩ Xuất JSON</button><button class="btn primary" id="btn-export-s2k" title="Xuất Load Patterns, Linear Static Cases và Load Combinations cho mô hình SAP2000 mới">⇩ Xuất SAP2000 (.s2k) · Model mới</button></div></header>

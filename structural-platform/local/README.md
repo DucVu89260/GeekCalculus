@@ -11,7 +11,7 @@ Both use the existing section engine. Host-only session cookies have different n
 
 ## Start
 
-Requirements: Docker Compose v2, Node 24/npm, Bash (Git Bash/WSL on Windows), an existing prepared default Compose stack (including the built section-engine image), and dependencies/app key initialized by `bash scripts/setup.sh`. Keep `.env` and the existing SQLite database.
+Requirements: Docker Compose v2, Bash (Git Bash/WSL on Windows), an existing prepared default Compose stack (including the built section-engine image), and dependencies/app key initialized by `bash scripts/setup.sh`. Keep `.env` and the existing SQLite database. The script builds using the `node:24-alpine` container; Node/npm is not required on Ubuntu/WSL itself.
 
 On the machine running the browser, add this line to the hosts file with administrator rights:
 
@@ -19,10 +19,14 @@ On the machine running the browser, add this line to the hosts file with adminis
 127.0.0.1 geekcalculus.com geekcalculus.test
 ```
 
+The mapping must not start with `#` (that makes it a comment). Enter it without surrounding quotation marks.
+
 Hosts file locations:
 
 - Windows: `C:\Windows\System32\drivers\etc\hosts` (open the editor as Administrator).
 - Linux/macOS: `/etc/hosts` (requires administrator rights).
+
+If Docker runs in Ubuntu/WSL and the browser runs on Windows, edit the **Windows** hosts file. Edit `/etc/hosts` as well if you also want to resolve these names from Ubuntu.
 
 These mappings affect only that machine. This setup uses **HTTP**; open the complete addresses above.
 

@@ -1,12 +1,12 @@
 # Repository implementation plan
 
-Baseline `main`: `991342d`, audited 2026-10-16. This is a dependency/acceptance plan, not a claim that all modules are finished. Current milestone: **Context Foundation**, drafted in this branch. Update status/evidence as work is actually accepted; keep one bounded implementation slice active per owner.
+Baseline `main`: `991342d`, audited 2026-10-16. This is a dependency/acceptance plan, not a claim that all modules are finished. Current milestone: **Context Foundation**, implemented in [PR #20](https://github.com/DucVu89260/GeekCalculus/pull/20) for review. Update status/evidence as work is actually accepted; keep one bounded implementation slice active per owner.
 
 ## 0 — Context Foundation and immediate integration
 
 | ID | Status | Work / files | Acceptance evidence / dependency |
 | --- | --- | --- | --- |
-| CTX-01 | In review preparation | Root/scoped AGENTS, four repository Skills, GOALS/ARCHITECTURE/AUDIT/PLAN/HANDOFF | Every current-state statement anchored to code or dated PR evidence; links/frontmatter/scopes checked; no application changes; current task |
+| CTX-01 | Implemented / PR #20 review | Root/scoped AGENTS, four repository Skills, GOALS/ARCHITECTURE/AUDIT/PLAN/HANDOFF | Every current-state statement anchored to code or dated PR evidence; links/frontmatter/scopes checked; no application changes; current task |
 | BUILD-01 | Implemented in open PR #19 | Isolated engine/browser/library builder; Docker + CI | 270 Python and 96 Node tests, exact Docker CI and installed-wheel smoke already passed on that PR; merge/update context remains separate |
 | STD-01 | Blocked integration / Draft PR #18 | Reconcile AISC private/review registry with main ASCE source corpus | Compare migrations/importers/routes/source-page contexts, preserve both editions/readers, then fresh/disposable migration + import/idempotence/auth/edition tests; no overwrite-only conflict resolution |
 | SOURCE-01 | Decision pending | Define per-artifact public/private source policy | Main includes full public ASCE PDF plus private Laravel corpus; inventory both paths/copies and intended distribution before publication changes; do not delete history in a docs task |

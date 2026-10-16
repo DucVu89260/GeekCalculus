@@ -46,6 +46,8 @@ Cb nằm ở module riêng, không nằm trong panel/API nội lực. Panel hi�
 
 ### Khi gặp lỗi
 
+Nếu trang đã mở nhưng `/model` trả 503, chạy `diagnose-sap2000.cmd` trong cùng thư mục. Script chỉ đọc: phiên bản/bitness Python, khả năng attach COM, kết quả GetVersion, tên file và trạng thái khóa. Không chạy analysis, sửa model hoặc in token. Gửi lại các dòng kết quả chẩn đoán, đặc biệt tên bước lỗi và HRESULT. Console connector cũng in lỗi cụ thể sau mỗi 503. Không kết luận lỗi phiên bản hay lỗi phân tích chỉ từ HTTP 503.
+
 - **Không mở được trang/không kết nối connector:** kiểm tra cửa sổ launcher còn chạy và cổng 8010 không bị một connector cũ chiếm. Chỉ chạy một connector cho một SAP2000.
 - **Không tìm thấy SAP2000:** mở SAP2000 trước, cùng tài khoản Windows và cùng mức quyền với connector; kiểm tra cài đặt OAPI `SAP2000v1.Helper`.
 - **Sai phiên bản:** API chỉ chấp nhận 26.2.0, không tự coi bản 26 khác là tương thích.

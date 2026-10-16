@@ -33,7 +33,7 @@ class ExtractionRequest(Model):
 
 def outputs(result, count):
     if not isinstance(result, (tuple, list)) or len(result) != count + 1 or result[-1] != 0:
-        raise SapError('SAP2000 API operation failed or returned an unsupported COM signature')
+        raise SapError('SAP2000 API operation failed or returned an unsupported COM signature; run diagnose-sap2000.cmd to inspect GetVersion and COM attachment')
     return result[:-1]
 
 
@@ -47,9 +47,9 @@ class Sap2000:
         self.model = model
 
     def verify_version(self):
-        version, version_number = outputs(self.model.GetVersion(), 2)
+        version, version_number = outputs(com_operation('SAP2000_GET_VERSION', self.model.GetVersion), 2)
         if not isinstance(version, str) or not re.search(r'(?<![\d.])26\.2\.0(?![\d.])', version):
-            raise SapError('API_IF_SAP26.2.0_V1 requires SAP2000 ' + TARGET_SAP2000_VERSION)
+            raise SapError('API_IF_SAP26.2.0_V1 requires SAP2000 ' + TARGET_SAP2000_VERSION + '; reported version: ' + str(version)[:100])
         return TARGET_SAP2000_VERSION
 
     def model_info(self):
@@ -189,25 +189,36 @@ class Sap2000:
         return Dataset(model=model_filename, extracted_at=datetime.now(timezone.utc).isoformat(), rows=rows)
 
 
+def com_operation(stage, operation):
+    try:
+        return operation()
+    except Exception as error:
+        hresult = getattr(error, 'hresult', None)
+        code = f' HRESULT=0x{hresult & 0xffffffff:08X}' if isinstance(hresult, int) else ''
+        raise SapError(f'{stage}: {type(error).__name__}{code}. Run diagnose-sap2000.cmd; check the SAP2000 Windows session and elevation level.') from error
+
+
 @contextmanager
 def connect():
     try:
         import comtypes
         import comtypes.client
     except ImportError as error:
-        raise SapError('Windows connector requires comtypes and an installed SAP2000 API') from error
-    comtypes.CoInitialize()
+        raise SapError('COM_IMPORT: Cannot import comtypes. Run diagnose-sap2000.cmd and check Python/Windows compatibility.') from error
+    com_operation('COM_INITIALIZE', comtypes.CoInitialize)
     try:
-        helper = comtypes.client.CreateObject('SAP2000v1.Helper')
-        from comtypes.gen import SAP2000v1
-        helper = helper.QueryInterface(SAP2000v1.cHelper)
-        application = helper.GetObject('CSI.SAP2000.API.SapObject')
+        helper = com_operation('COM_HELPER_CREATE', lambda: comtypes.client.CreateObject('SAP2000v1.Helper'))
+        import importlib
+        library = com_operation('COM_TYPE_LIBRARY', lambda: importlib.import_module('comtypes.gen.SAP2000v1'))
+        helper = com_operation('COM_HELPER_INTERFACE', lambda: helper.QueryInterface(library.cHelper))
+        application = com_operation('SAP2000_ATTACH', lambda: helper.GetObject('CSI.SAP2000.API.SapObject'))
         if application is None:
-            raise SapError('Open SAP2000 and its analyzed model before connecting')
-        yield Sap2000(application.SapModel)
+            raise SapError('SAP2000_ATTACH: No active SAP2000 instance. Open SAP2000 in the same Windows user session and elevation level as this connector.')
+        model = com_operation('SAP2000_MODEL', lambda: application.SapModel)
+        yield Sap2000(model)
     except SapError:
         raise
     except Exception as error:
-        raise SapError('Cannot read the running SAP2000 instance; check API installation, Windows session and COM compatibility') from error
+        raise SapError('SAP2000_READ: Cannot read SAP2000. Run diagnose-sap2000.cmd for the failing step.') from error
     finally:
         comtypes.CoUninitialize()

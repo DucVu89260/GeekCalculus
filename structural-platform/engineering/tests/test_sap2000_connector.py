@@ -205,3 +205,16 @@ def test_model_change_during_extraction_discards_results_and_restores_state():
     with pytest.raises(SapError, match='changed during'):
         Sap2000(model).extract(request(expected_model='model.sdb'))
     assert model.units == 9 and model.case_selected['DEAD']
+
+
+def test_com_diagnostics_report_stage_and_hresult_without_exception_details():
+    from structural_engine.member_forces.sap2000 import com_operation
+    class FakeComError(Exception):
+        hresult = -2147221021
+    def fail():
+        raise FakeComError('private exception details')
+    with pytest.raises(SapError) as error:
+        com_operation('SAP2000_ATTACH', fail)
+    assert 'SAP2000_ATTACH' in str(error.value)
+    assert '0x800401E3' in str(error.value)
+    assert 'private exception details' not in str(error.value)

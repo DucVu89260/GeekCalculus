@@ -1,5 +1,6 @@
 """Windows-only loopback API. Start in the same user session as SAP2000."""
 import os
+import logging
 import secrets
 import threading
 from fastapi import Depends, FastAPI, HTTPException
@@ -35,6 +36,7 @@ def create_app(token=None, gateway=connect):
                     sap.verify_version()
                     return operation(sap)
             except SapError as error:
+                logging.getLogger('uvicorn.error').warning('SAP2000 connection/read failed: %s', error)
                 raise HTTPException(503, str(error)) from error
 
     @app.get('/', include_in_schema=False)

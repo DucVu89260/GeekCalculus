@@ -12,4 +12,6 @@ The kit contains source, a local web panel and a Windows launcher. It is not an 
 
 Cloud validation: 297 Python tests passed; browser smoke checks passed using a simulated SAP2000 interface. Real COM integration still requires acceptance testing on Windows with SAP2000 26.2.0. See `SAP2000-API.md` and `BAT-DAU.txt` inside the ZIP.
 
-SHA256: `6e245e1e4ce8f6b8fbef572e1a00ea215fe90b48c83c7555f2148601f7c04e9b`
+SHA256: `58b3272eb691146c6a307b3123a6f0adf135b1b109dce9946ba2b090814648c8`
+
+If the panel opens but model connection returns HTTP 503, run `diagnose-sap2000.cmd` from the same folder. It reports the failing COM stage and HRESULT without exposing tokens.

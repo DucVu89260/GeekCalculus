@@ -92,17 +92,20 @@ class StandardsReviewDraftsTest extends TestCase
             $admin = User::factory()->create(['role' => 'admin']);
             $this->actingAs($admin);
             $equationId = (int) DB::table('standard_equations')->where('label', 'E3-1')->value('id');
+            $version = (int) DB::table('standard_equations')->where('id', $equationId)->value('record_version');
             $this->patchJson('/api/v1/admin/standards/AISC360-10/equations/'.$equationId, [
-                'notes' => 'Admin transcription correction',
+                'expected_version' => $version, 'notes' => 'Admin transcription correction',
                 'data' => ['latex' => 'P_n = F_{cr}A_g'],
             ])->assertOk();
             $this->postJson('/api/v1/admin/standards/AISC360-10/equations/'.$equationId.'/review', [
                 'status' => 'verified',
             ])->assertUnprocessable();
             $this->postJson('/api/v1/admin/standards/AISC360-10/equations/'.$equationId.'/review', [
-                'status' => 'verified', 'notes' => 'Compared against source page 16.1-33',
+                'expected_version' => $version + 1, 'source_comparison' => ['compared' => true, 'document_id' => $documentId, 'pdf_page' => 89, 'source_sha256' => $inspection['source_sha256'], 'latex_sha256' => hash('sha256', 'P_n = F_{cr}A_g')],
+                'status' => 'verified', 'notes' => 'Compared against synthetic source page 16.1-33',
             ])->assertOk()->assertJsonPath('data.verification_status', 'verified');
             $this->postJson('/api/v1/admin/standards/AISC360-10/equations/'.$equationId.'/review', [
+                'expected_version' => $version + 2, 'source_comparison' => ['compared' => true, 'document_id' => $documentId, 'pdf_page' => 89, 'source_sha256' => $inspection['source_sha256'], 'latex_sha256' => hash('sha256', 'P_n = F_{cr}A_g')],
                 'status' => 'published', 'notes' => 'Reviewed implementation mapping',
             ])->assertOk()->assertJsonPath('data.verification_status', 'published');
 
@@ -119,7 +122,7 @@ class StandardsReviewDraftsTest extends TestCase
                 'status' => 'verified', 'notes' => 'Verified transcribed cases and recorded omitted cases',
             ])->assertOk()->assertJsonPath('data.verification_status', 'verified');
             $this->patchJson('/api/v1/admin/standards/AISC360-10/equations/'.$equationId, [
-                'notes' => 'Must not edit after publication', 'data' => ['latex' => '0'],
+                'expected_version' => $version + 3, 'notes' => 'Must not edit after publication', 'data' => ['latex' => '0'],
             ])->assertStatus(409);
             $this->getJson('/api/v1/standards/AISC360-10/rules?implementation_key=E3-1')
                 ->assertOk()->assertJsonPath('data.0.verification_status', 'published')
@@ -309,7 +312,7 @@ class StandardsReviewDraftsTest extends TestCase
                 'id' => 'E3-1', 'label' => 'E3-1', 'clause_code' => 'E3', 'kind' => 'normative',
                 'pdf_page' => 89, 'source_page' => 89, 'printed_page_label' => '16.1-33',
                 'source_anchor' => $pageAnchor('equation', 'E3', 89, '16.1-33', 'equation_id', 'E3-1'),
-                'latex' => 'P_n=F_{cr}A_g', 'variables' => [['symbol' => 'P_n', 'definition' => 'Nominal strength']],
+                'latex' => 'P_n=F_{cr}A_g', 'variables' => [['symbol' => 'P_n', 'definition' => 'Nominal strength', 'unit' => 'N'], ['symbol' => 'F_{cr}', 'definition' => 'Critical stress', 'unit' => 'MPa'], ['symbol' => 'A_g', 'definition' => 'Gross area', 'unit' => 'mm2']],
                 'conditions' => ['Axial compression'], 'design_methods' => ['ASD', 'LRFD'],
                 'dependencies' => [], 'implementation_key' => 'E3-1', 'verification_status' => 'needs_review',
                 'notes' => 'Requires independent validation.',

@@ -27,11 +27,12 @@ class StandardsReviewService
         'deprecated' => [],
     ];
 
-    public function edit(int $editionId, string $resource, int $recordId, array $content, int $reviewerId, string $notes): object
+    public function edit(int $editionId, string $resource, int $recordId, array $content, int $reviewerId, string $notes, ?int $expectedVersion = null): object
     {
         $table = $this->table($resource);
-        $updated = DB::transaction(function () use ($editionId, $resource, $recordId, $content, $reviewerId, $notes, $table) {
+        $updated = DB::transaction(function () use ($editionId, $resource, $recordId, $content, $reviewerId, $notes, $table, $expectedVersion) {
             $row = $this->find($editionId, $resource, $recordId, true);
+            $this->assertVersion($resource, $row, $expectedVersion);
             if (!in_array($row->verification_status, ['candidate', 'index_only', 'needs_review'], true)) {
                 throw new RuntimeException('Verified, published, and deprecated records are immutable. Add a new source revision to correct them.');
             }
@@ -42,7 +43,7 @@ class StandardsReviewService
 
             $before = $this->snapshot($row);
             foreach ($attrs as $field => $value) {
-                if (in_array($field, ['variables', 'conditions', 'value', 'dimensions', 'columns', 'rows', 'footnotes', 'applicability', 'merged_cells', 'source_anchor', 'coverage', 'design_methods'], true)) {
+                if (in_array($field, ['variables', 'conditions', 'asd_lrfd_factors', 'dependencies', 'value', 'dimensions', 'columns', 'rows', 'footnotes', 'applicability', 'merged_cells', 'source_anchor', 'coverage', 'design_methods'], true)) {
                     $attrs[$field] = $value === null ? null : json_encode($value, JSON_THROW_ON_ERROR);
                 }
             }
@@ -62,11 +63,12 @@ class StandardsReviewService
         return $updated;
     }
 
-    public function transition(int $editionId, string $resource, int $recordId, string $status, int $reviewerId, ?string $notes): object
+    public function transition(int $editionId, string $resource, int $recordId, string $status, int $reviewerId, ?string $notes, ?int $expectedVersion = null, ?array $comparison = null): object
     {
         $this->table($resource);
-        $updated = DB::transaction(function () use ($editionId, $resource, $recordId, $status, $reviewerId, $notes) {
+        $updated = DB::transaction(function () use ($editionId, $resource, $recordId, $status, $reviewerId, $notes, $expectedVersion, $comparison) {
             $row = $this->find($editionId, $resource, $recordId, true);
+            $this->assertVersion($resource, $row, $expectedVersion);
             $current = $row->verification_status;
             if (!in_array($status, self::TRANSITIONS[$current] ?? [], true)) {
                 throw new RuntimeException("Invalid review transition from {$current} to {$status}.");
@@ -76,24 +78,72 @@ class StandardsReviewService
                     throw ValidationException::withMessages(['notes' => 'Add a review reason with source evidence before verifying or publishing.']);
                 }
                 $this->assertReviewable($resource, $row, $status);
+                if ($resource === 'equations') {
+                    if (($comparison['compared'] ?? null) !== true ||
+                        ($comparison['document_id'] ?? null) !== (int) $row->document_id ||
+                        ($comparison['pdf_page'] ?? null) !== (int) $row->pdf_page ||
+                        ($comparison['source_sha256'] ?? null) !== $row->source_sha256 ||
+                        ($comparison['latex_sha256'] ?? null) !== hash('sha256', trim((string) $row->latex))) {
+                        throw ValidationException::withMessages(['source_comparison' => 'Explicitly compare this expression/version with the exact source artifact and physical page before approval.']);
+                    }
+                }
             }
             if ($status === 'deprecated' && trim((string) $notes) === '') {
                 throw ValidationException::withMessages(['notes' => 'A reason is required when deprecating a record.']);
             }
 
             $table = self::TABLES[$resource];
-            DB::table($table)->where('id', $recordId)->update([
+            $attrs = [
                 'verification_status' => $status,
                 'updated_at' => now(),
-            ]);
+            ];
+            if ($resource === 'equations') { $attrs['record_version'] = (int) $row->record_version + 1; }
+            DB::table($table)->where('id', $recordId)->update($attrs);
             $updated = $this->find($editionId, $resource, $recordId);
+            $snapshot = $this->snapshot($updated);
+            if ($resource === 'equations' && in_array($status, ['verified', 'published'], true)) {
+                $snapshot['_source_comparison'] = $comparison;
+                $snapshot['_content_sha256'] = $this->fingerprint($updated);
+            }
             $this->appendHistory($editionId, $resource, $recordId, $row->document_id ?? null,
-                $reviewerId, $current, $status, $notes, $this->snapshot($updated));
+                $reviewerId, $current, $status, $notes, $snapshot);
             return $updated;
         });
         app(StandardsRegistryCache::class)->invalidate($editionId);
 
         return $updated;
+    }
+
+    private function assertVersion(string $resource, object $row, ?int $expected): void
+    {
+        if ($resource === 'equations' && ($expected === null || $expected !== (int) $row->record_version)) {
+            throw new RuntimeException('This equation changed. Reload it and compare the current version before saving or reviewing.');
+        }
+    }
+
+    /** Approval is evidence tied to immutable content, not a status string alone. */
+    public function isApprovedEquation(int $editionId, object $row): bool
+    {
+        if (!in_array($row->verification_status, ['verified', 'published'], true)) { return false; }
+        $event = DB::table('standard_review_history')->where('edition_id', $editionId)
+            ->where('record_type', 'equations')->where('record_id', $row->id)
+            ->where('to_status', $row->verification_status)->whereNotNull('reviewer_id')->orderByDesc('id')->first();
+        $snapshot = $this->decode($event->content_snapshot ?? null);
+        // Query consumers may join display-only clause/document columns. Fingerprint the stored record.
+        $stored = $this->find($editionId, 'equations', (int) $row->id);
+        if (!is_array($snapshot) || ($snapshot['_source_comparison']['compared'] ?? false) !== true ||
+            !hash_equals($this->fingerprint($stored), (string) ($snapshot['_content_sha256'] ?? ''))) { return false; }
+        try { $this->assertReviewable('equations', $stored, $stored->verification_status); }
+        catch (RuntimeException) { return false; }
+        return true;
+    }
+
+    private function fingerprint(object $row): string
+    {
+        $snapshot = $this->snapshot($row);
+        unset($snapshot['updated_at'], $snapshot['created_at'], $snapshot['verification_status']);
+        ksort($snapshot);
+        return hash('sha256', json_encode($snapshot, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
     }
 
     public function history(int $editionId, string $resource, int $recordId, ?int $limit = 100): array
@@ -157,6 +207,8 @@ class StandardsReviewService
             ],
             'equations' => [
                 'latex' => ['sometimes', 'nullable', 'string', 'max:20000'],
+                'asd_lrfd_factors' => ['sometimes', 'nullable', 'array'],
+                'dependencies' => ['sometimes', 'nullable', 'array'],
                 'variables' => ['sometimes', 'nullable', 'array'],
                 'conditions' => ['sometimes', 'nullable', 'array'],
                 'design_method' => ['sometimes', 'nullable', 'in:ASD,LRFD,both'],
@@ -250,10 +302,12 @@ class StandardsReviewService
             if (trim((string) $row->latex) === '' || !is_array($variables) || $variables === [] || !$this->hasJsonValue($row->conditions)) {
                 throw new RuntimeException('An equation needs a transcription, variable definitions, conditions, and source anchor before approval.');
             }
+            FormulaLatexValidator::assertUsable((string) $row->latex);
             foreach ($variables as $variable) {
                 if (!is_array($variable) || trim((string) ($variable['symbol'] ?? '')) === '' ||
-                    trim((string) ($variable['definition'] ?? '')) === '') {
-                    throw new RuntimeException('Each equation variable needs a symbol and definition before approval.');
+                    trim((string) ($variable['definition'] ?? '')) === '' ||
+                    trim((string) ($variable['unit'] ?? $variable['units'] ?? '')) === '') {
+                    throw new RuntimeException('Each equation variable needs a symbol, definition, and unit (or dimensionless) before approval.');
                 }
             }
         } elseif ($resource === 'parameters') {
@@ -368,7 +422,7 @@ class StandardsReviewService
     private function snapshot(object $row): array
     {
         $snapshot = (array) $row;
-        foreach (['metadata', 'source_identity', 'import_report', 'source_anchor', 'source_metadata', 'variables', 'conditions', 'dependencies', 'value', 'dimensions', 'columns', 'rows', 'footnotes', 'applicability', 'merged_cells', 'coverage', 'design_methods'] as $field) {
+        foreach (['asd_lrfd_factors', 'metadata', 'source_identity', 'import_report', 'source_anchor', 'source_metadata', 'variables', 'conditions', 'dependencies', 'value', 'dimensions', 'columns', 'rows', 'footnotes', 'applicability', 'merged_cells', 'coverage', 'design_methods'] as $field) {
             if (array_key_exists($field, $snapshot)) {
                 $snapshot[$field] = $this->decode($snapshot[$field]);
             }

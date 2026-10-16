@@ -5,6 +5,7 @@ import StandardSourceCorpus from './StandardSourceCorpus.vue'
 import { asce710Equations, asce710WindFormulas } from '../standards-library.js'
 import StandardsToc from './StandardsToc.vue'
 import PrivateStandardPdf from './PrivateStandardPdf.vue'
+import StandardEquationReview from './StandardEquationReview.vue'
 import StandardEquation from './StandardEquation.vue'
 import StandardTable from './StandardTable.vue'
 
@@ -36,6 +37,16 @@ const notesLoading = ref(false)
 const noteSaving = ref(false)
 const noteError = ref('')
 const sourcePanel = ref(null)
+const reviewEquation = ref(null)
+function beginReview(equation) { reviewEquation.value = equation; sourceForEquation(equation) }
+function equationSaved(record) {
+  const normalized = { ...reviewEquation.value, ...record }
+  for (const field of ['variables', 'conditions', 'asd_lrfd_factors', 'dependencies', 'source_metadata', 'source_anchor']) {
+    if (typeof normalized[field] === 'string') { try { normalized[field] = JSON.parse(normalized[field]) } catch { /* retain visible source text */ } }
+  }
+  equations.value = equations.value.map(e => e.id === normalized.id ? normalized : e)
+  reviewEquation.value = normalized
+}
 
 const text = computed(() => props.locale === 'vi' ? {
   subtitle: 'Thư viện tiêu chuẩn kỹ thuật · dữ liệu từ cơ sở dữ liệu',
@@ -256,6 +267,7 @@ async function loadEdition(code = selectedCode.value) {
   noteError.value = ''
   error.value = ''
   detail.value = null
+  reviewEquation.value = null
   clauses.value = []
   equations.value = []
   parameters.value = []
@@ -482,7 +494,7 @@ onMounted(loadCatalog)
               <section class="std-main-section">
                 <header class="std-section-heading"><h3>{{ text.tabEquations }}</h3><label><span class="sr-only">{{ text.searchEquations }}</span><input v-model="equationSearch" type="search" :placeholder="text.searchEquations" /></label></header>
                 <p v-if="!equationsForClause.length" class="std-empty">{{ text.noEquation }} <span>{{ text.noEquationExpression }}</span></p>
-                <StandardEquation v-for="equation in visibleEquations" :key="equation.id || `${equation.clause_code}-${equation.label}`" :equation="equation" :locale="locale" :printed-page="printedPageForEquation(equation)" :can-navigate="Boolean(findDocumentFor(equation, equation.kind))" @source="sourceForEquation" />
+                <StandardEquation v-for="equation in visibleEquations" :key="equation.id || `${equation.clause_code}-${equation.label}`" :equation="equation" :locale="locale" :printed-page="printedPageForEquation(equation)" :can-navigate="Boolean(findDocumentFor(equation, equation.kind))" :can-edit="canEdit && !demoMode" @review="beginReview" @source="sourceForEquation" />
               </section>
             </template>
             <p v-else class="std-empty">{{ text.noClause }}</p>
@@ -491,7 +503,7 @@ onMounted(loadCatalog)
           <section v-else-if="viewTab === 'equations'" class="std-main-section">
             <header class="std-section-heading"><h3>{{ text.tabEquations }}</h3><label><span class="sr-only">{{ text.searchEquations }}</span><input v-model="equationSearch" type="search" :placeholder="text.searchEquations" /></label></header>
             <p v-if="!equationsForClause.length" class="std-empty">{{ text.noEquation }} <span>{{ text.noEquationExpression }}</span></p>
-            <StandardEquation v-for="equation in visibleEquations" :key="equation.id || `${equation.clause_code}-${equation.label}`" :equation="equation" :locale="locale" :printed-page="printedPageForEquation(equation)" :can-navigate="Boolean(findDocumentFor(equation, equation.kind))" @source="sourceForEquation" />
+            <StandardEquation v-for="equation in visibleEquations" :key="equation.id || `${equation.clause_code}-${equation.label}`" :equation="equation" :locale="locale" :printed-page="printedPageForEquation(equation)" :can-navigate="Boolean(findDocumentFor(equation, equation.kind))" :can-edit="canEdit && !demoMode" @review="beginReview" @source="sourceForEquation" />
           </section>
 
           <section v-else-if="viewTab === 'parameters'" class="std-main-section">
@@ -511,6 +523,7 @@ onMounted(loadCatalog)
           </section>
 
           <nav v-if="['outline', 'equations'].includes(viewTab) && equationsForClause.length" aria-label="Equation pages"><button type="button" :disabled="equationPage <= 1" @click="equationPage--">Previous</button> {{ equationsForClause.length }} labels · {{ equationPage }}/{{ equationPages }} <button type="button" :disabled="equationPage >= equationPages" @click="equationPage++">Next</button></nav>
+          <StandardEquationReview v-if="canEdit && !demoMode && reviewEquation" :key="`${selectedCode}-${reviewEquation.id}`" :code="selectedCode" :equation="reviewEquation" :documents="detail.documents" :locale="locale" @saved="equationSaved" @close="reviewEquation = null" />
           <section ref="sourcePanel" class="std-source-section" :class="{ 'std-source-selected': viewTab === 'source' }">
             <header><h3>{{ text.sourceTitle }}</h3><span v-if="selectedClause">{{ selectedClause.code }} · {{ selectedClause.title }}</span></header>
             <p v-if="selectedClause && !mappedSourcePage" class="std-source-warning" role="note">{{ text.sourcePageMissing }}</p>
@@ -561,7 +574,7 @@ onMounted(loadCatalog)
             <p v-if="!selectedClause?.extraction_method && !selectedClause?.source_anchor" class="std-review-muted">{{ locale === 'vi' ? 'Chưa có thêm chẩn đoán trích xuất cho điều khoản đang chọn.' : 'No additional extraction diagnostics are available for the selected clause.' }}</p>
           </section>
 
-          <section v-if="selectedClause" class="std-review-section std-notes">
+          <section v-if="!demoMode && Number.isInteger(selectedClause?.id)" class="std-review-section std-notes">
             <h4>{{ text.notesTitle }}</h4>
             <p v-if="notesLoading" role="status">{{ locale === 'vi' ? 'Đang tải ghi chú…' : 'Loading notes…' }}</p>
             <ul v-else-if="notes.length" class="std-note-list"><li v-for="note in notes" :key="note.id || note.created_at"><p>{{ note.body }}</p><small>{{ note.created_at || '' }}</small></li></ul>

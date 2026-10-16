@@ -7,6 +7,7 @@ pdfjs.GlobalWorkerOptions.workerSrc = pdfWorkerUrl
 
 const props = defineProps({
   editionCode: { type: String, default: '' },
+  fileUrl: { type: String, default: '' },
   documentId: { type: [Number, String], default: null },
   page: { type: Number, default: 1 },
   pageCount: { type: Number, default: null },
@@ -34,9 +35,9 @@ const words = computed(() => props.locale === 'vi' ? {
   retry: 'Retry', pageInput: 'PDF page number',
 })
 
-const documentUrl = computed(() => props.editionCode && props.documentId
+const documentUrl = computed(() => props.fileUrl || (props.editionCode && props.documentId
   ? `/api/v1/standards/${encodeURIComponent(props.editionCode)}/documents/${encodeURIComponent(props.documentId)}/file`
-  : '')
+  : ''))
 const shownPageCount = computed(() => actualPageCount.value || Number(props.pageCount) || 0)
 const pageLabel = computed(() => `${words.value.physical} ${currentPage.value}${shownPageCount.value ? ` ${words.value.of} ${shownPageCount.value}` : ''}`)
 

@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use RuntimeException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class StandardsReviewController extends Controller
 {
@@ -18,10 +19,13 @@ class StandardsReviewController extends Controller
         $data = Validator::make($request->all(), [
             'notes' => ['required', 'string', 'min:1', 'max:5000'],
             'data' => ['required', 'array'],
+            'expected_version' => [$resource === 'equations' ? 'required' : 'nullable', 'integer', 'min:1'],
         ])->validate();
 
         try {
-            $record = $review->edit((int) $edition->id, $resource, $id, $data['data'], (int) $request->user()->id, $data['notes']);
+            $record = $review->edit((int) $edition->id, $resource, $id, $data['data'], (int) $request->user()->id, $data['notes'], $data['expected_version'] ?? null);
+        } catch (HttpException $exception) {
+            throw $exception;
         } catch (RuntimeException $exception) {
             return response()->json(['message' => $exception->getMessage()], 409);
         }
@@ -36,10 +40,14 @@ class StandardsReviewController extends Controller
         $data = Validator::make($request->all(), [
             'status' => ['required', 'in:needs_review,verified,published,deprecated'],
             'notes' => ['required_if:status,verified,published', 'nullable', 'string', 'min:10', 'max:5000'],
+            'expected_version' => [$resource === 'equations' ? 'required' : 'nullable', 'integer', 'min:1'],
+            'source_comparison' => ['nullable', 'array'],
         ])->validate();
 
         try {
-            $record = $review->transition((int) $edition->id, $resource, $id, $data['status'], (int) $request->user()->id, $data['notes'] ?? null);
+            $record = $review->transition((int) $edition->id, $resource, $id, $data['status'], (int) $request->user()->id, $data['notes'] ?? null, $data['expected_version'] ?? null, $data['source_comparison'] ?? null);
+        } catch (HttpException $exception) {
+            throw $exception;
         } catch (RuntimeException $exception) {
             return response()->json(['message' => $exception->getMessage()], 409);
         }

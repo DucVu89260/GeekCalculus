@@ -1,10 +1,10 @@
 <script setup>
 import { computed } from 'vue'
-import katex from 'katex'
+import { renderStandardMath } from '../standards-math.js'
 import 'katex/dist/katex.min.css'
 
-const props = defineProps({ equation: { type: Object, required: true }, locale: { type: String, default: 'en' }, canNavigate: Boolean, printedPage: { type: [Number, String], default: null } })
-const emit = defineEmits(['source'])
+const props = defineProps({ equation: { type: Object, required: true }, locale: { type: String, default: 'en' }, canNavigate: Boolean, canEdit: Boolean, printedPage: { type: [Number, String], default: null } })
+const emit = defineEmits(['source', 'review'])
 const words = computed(() => props.locale === 'vi' ? {
   source: 'Mở nguồn', pdf: 'PDF p.', printed: 'Trang in', noExpression: 'Chưa có biểu thức toán học được nhập.',
   renderError: 'Không thể hiển thị biểu thức đã trích xuất.', variables: 'Định nghĩa biến', conditions: 'Điều kiện áp dụng',
@@ -68,13 +68,9 @@ const designMethods = computed(() => {
 const factors = computed(() => parseValue(props.equation.design_parameters ?? props.equation.resistance_factors ?? props.equation.asd_lrfd_factors ?? props.equation.factors).map(asText).filter(Boolean))
 const dependencies = computed(() => parseValue(props.equation.dependencies ?? props.equation.cross_references).map(asText).filter(Boolean))
 const latex = computed(() => typeof props.equation.latex === 'string' ? props.equation.latex.trim() : '')
-const mathHtml = computed(() => {
-  if (!latex.value) return ''
-  try {
-    return katex.renderToString(latex.value, { displayMode: true, throwOnError: false, trust: false, strict: 'warn', output: 'htmlAndMathml' })
-  } catch { return '' }
-})
-const rendered = computed(() => Boolean(mathHtml.value) && !mathHtml.value.includes('katex-error'))
+const math = computed(() => renderStandardMath(latex.value))
+const mathHtml = computed(() => math.value.html)
+const rendered = computed(() => math.value.usable)
 const physicalPage = computed(() => props.equation.pdf_page)
 const printedPage = computed(() => props.printedPage ?? props.equation.printed_page_label ?? props.equation.printed_page)
 </script>
@@ -90,6 +86,8 @@ const printedPage = computed(() => props.printedPage ?? props.equation.printed_p
       <span class="std-verification" :class="approved ? 'is-approved' : 'needs-review'"><strong>{{ verificationLabel }}</strong><span> · {{ approved ? words.approved : words.review }}</span></span>
     </header>
 
+    <p class="std-equation-provenance">{{ equation.clause_code }}<span v-if="equation.extraction_confidence != null"> · {{ locale === 'vi' ? 'Độ tin cậy trích xuất' : 'Extraction confidence' }} {{ Math.round(equation.extraction_confidence * 100) }}%</span></p>
+    <button v-if="canEdit && Number.isInteger(equation.id)" type="button" @click="emit('review', equation)">{{ locale === 'vi' ? 'Biên tập / Duyệt nguồn' : 'Edit / Review source' }}</button>
     <div v-if="rendered" class="std-equation-math" v-html="mathHtml"></div>
     <p v-else-if="latex" class="std-equation-unrendered" role="note">{{ words.renderError }} <code>{{ latex }}</code></p>
     <p v-else class="std-equation-unrendered" role="note">{{ words.noExpression }}</p>

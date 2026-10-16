@@ -114,6 +114,7 @@ class StandardsController extends Controller
             });
         }
         if ($code === 'ASCE7-10') {
+            $filters['per_page'] = $request->hasAny(['page', 'per_page']) ? $filters['per_page'] : max(1, count($this->asce710Library()['equations']));
             $rows = collect($this->asce710Library()['equations'])->keyBy('label')
                 ->merge($query->get()->map(fn ($row) => $this->equationPayload($row))->keyBy('label'))->values()->all();
             return $this->asceIndexPage($rows, $filters);
@@ -243,7 +244,7 @@ class StandardsController extends Controller
             'page' => (int) ($data['page'] ?? 1),
             'per_page' => (int) ($data['per_page'] ?? 50),
         ];
-        $result = $this->remember($edition, 'approved-rules', $filters, function () use ($edition, $filters) {
+        $result = (function () use ($edition, $filters) {
             $editionPayload = [
                 'family_code' => DB::table('standard_families')->where('id', $edition->family_id)->value('code'),
                 'code' => $edition->code,
@@ -263,7 +264,8 @@ class StandardsController extends Controller
                 if ($method) { $equations->whereIn('e.design_method', [$method, 'both']); }
                 if ($clauses) { $equations->where('c.code', $clauses); }
                 $equationRows = $equations->get(['e.*', 'c.code as clause_code', 'c.kind', 'd.revision as source_revision', 'd.kind as source_document_kind'])
-                    ->map(fn ($row) => $this->approvedPayload('equation', $row, $editionPayload))->all();
+                    ->filter(fn ($row) => app(\App\Services\Standards\StandardsReviewService::class)->isApprovedEquation((int) $edition->id, $row))
+                    ->map(fn ($row) => $this->approvedPayload('equation', $row, $editionPayload))->values()->all();
             }
 
             $parameterRows = [];
@@ -289,9 +291,9 @@ class StandardsController extends Controller
                 'meta' => ['current_page' => $page, 'per_page' => $perPage, 'total' => $count, 'last_page' => max(1, (int) ceil($count / $perPage))],
                 'edition' => $editionPayload,
             ];
-        });
+        })();
 
-        return response()->json($result);
+        return response()->json($result)->header('Cache-Control', 'private, no-store');
     }
 
     public function notes(Request $request, string $code): JsonResponse
@@ -535,7 +537,7 @@ class StandardsController extends Controller
         foreach (['variables', 'conditions'] as $field) {
             if (array_key_exists($field, $payload)) { $payload[$field] = $this->decode($payload[$field]); }
         }
-        foreach (['dependencies', 'source_metadata'] as $field) {
+        foreach (['dependencies', 'source_metadata', 'asd_lrfd_factors'] as $field) {
             if (array_key_exists($field, $payload)) { $payload[$field] = $this->decode($payload[$field]); }
         }
         if (array_key_exists('source_anchor', $payload)) { $payload['source_anchor'] = $this->decode($payload['source_anchor']); }
@@ -596,7 +598,7 @@ class StandardsController extends Controller
                 'extraction_method' => $payload['extraction_method'] ?? null,
             ],
             'content' => $type === 'equation'
-                ? ['label' => $payload['label'], 'latex' => $payload['latex'], 'variables' => $payload['variables'], 'conditions' => $payload['conditions']]
+                ? ['label' => $payload['label'], 'latex' => $payload['latex'], 'variables' => $payload['variables'], 'conditions' => $payload['conditions'], 'asd_lrfd_factors' => $payload['asd_lrfd_factors'] ?? []]
                 : ['parameter_key' => $payload['parameter_key'], 'data_type' => $payload['data_type'], 'value' => $payload['value'], 'units' => $payload['units'], 'conditions' => $payload['conditions']],
         ];
     }

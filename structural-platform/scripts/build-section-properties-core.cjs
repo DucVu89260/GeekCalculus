@@ -30,6 +30,11 @@ esbuild.buildSync({
   nodePaths: [path.join(root, 'frontend/vue/node_modules')], logLevel: 'info',
 })
 
+// Python engine builds do not include the browser-specific entrypoints below.
+if (process.env.SECTION_CORE_ONLY === '1') {
+  process.exit(0)
+}
+
 // Browser ESM adapter: Steel Design consumes the same canonical core, including
 // advanced mechanics and the versioned formula report. Vite copies this asset
 // from public/ into docs/ during the published demo build.

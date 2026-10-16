@@ -66,17 +66,20 @@ export function calculateCraneStrength(section: SectionResult, dimensions: Numer
   } else pending('flexure_f4_yield','F4','Strong-axis yielding','Plastic modulus Zx not available from shared engine.')
   pending('flexure_f4_governing','F4','Governing major-axis flexure','Missing Lb/Cb, Sxc, Sxt, hc/hp, Cw, J and complete F4 state selection; do not claim F4 capacity.')
 
-  // F6 yielding component for doubly/singly symmetric I-section about minor axis.
-  // Further flange local buckling can govern and remains unverified here.
-  if (plastic && positive(plastic.zy)) {
-    const sy = Math.min(elastic.sy_positive,elastic.sy_negative)
-    const mny = Math.min(a.fy * plastic.zy, 1.6 * a.fy * sy) / 1e6
-    check('flexure_f6_yield','F6','Minor-axis yielding component only',Math.abs(a.my_knm),mny,
-      'FLEXURE','Mny = min(Fy Zy, 1.6 Fy Sy)','COMPONENT_ONLY',
-      ['Compression flange local buckling F6 must also be checked.'])
-  } else pending('flexure_f6_yield','F6','Weak-axis yielding','Plastic modulus Zy not available.')
-  pending('flexure_f6_governing','F6','Governing minor-axis flexure','F6 flange local buckling for top and bottom flanges still requires Excel parity.')
-
+  // Crane Beam minor-axis bending follows a designated T-shaped effective portion
+  // of the cross-section in the source Excel (top flange + specified web portion).
+  // Do NOT use full I-section Zy/Sy for this check.
+  // The exact web participation and T-section resistance model require worksheet
+  // and AISC Design Guide validation before calculating final F6 utilization.
+  const effectiveTWebDepth = webDepth / 3
+  const topArea = d.top_flange_width * d.top_flange_thickness
+  const tWebArea = d.web_thickness * effectiveTWebDepth
+  const tArea = topArea + tWebArea
+  const tIy = d.top_flange_thickness * d.top_flange_width ** 3 / 12
+    + effectiveTWebDepth * d.web_thickness ** 3 / 12
+  pending('flexure_minor_t_section','F6 / Crane Design Guide','Minor-axis flexure — equivalent top T section',
+    'Excel uses a T-shaped section, not full I/H. Effective web participation is tentatively 1/3 web; derive actual required T-section properties and governing equations from Excel before strength assessment.')
+  pending('flexure_f6_governing','F6','Governing minor-axis flexure','Do not use entire I-section Zy or Sy; T-section local buckling and design-guide equations remain to be implemented.')
   // G2 rolled exceptional factor is disallowed for built-up crane I sections.
   const kv = 5.0
   const lambda1 = 1.10 * Math.sqrt(kv * a.e / a.fy)
@@ -94,6 +97,6 @@ export function calculateCraneStrength(section: SectionResult, dimensions: Numer
   return { method, edition:'AISC360-10', checks,
     summary_status:'NOT VERIFIED', geometry_source:'Section Properties / Asymmetric I/H',
     factors: {flexure:factorNotation(method,'FLEXURE'),compression:factorNotation(method,'COMPRESSION'),shear:factorNotation(method,'SHEAR_GENERAL')},
-    derived:{ webLambda,flangeTopLambda,flangeBottomLambda,compressionSlender,feX,feY,fcr,cv,webDepth },
+    derived:{ webLambda,flangeTopLambda,flangeBottomLambda,compressionSlender,feX,feY,fcr,cv,webDepth,tSectionPreliminary:{area_mm2:tArea,iy_mm4:tIy,effectiveWebDepth_mm:effectiveTWebDepth,status:'GEOMETRY_ONLY_NOT_VERIFIED'}},
     note: 'Method affects RESISTANCE only; ASD and LRFD member actions require their respective load combinations.'}
 }

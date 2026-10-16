@@ -69,6 +69,25 @@ an equation. Approved lookups bypass response caching and send `private, no-stor
 No member engine is wired to evaluate draft LaTeX. Existing typed parameter review
 and execution contracts from #18 remain separate.
 
+## Test the feature branch locally
+
+The pushed branch is `feature/aisc36010-formula-digitization`; review is
+[Draft PR #21](https://github.com/DucVu89260/GeekCalculus/pull/21). Main/Pages are
+not deployed by a feature-branch push. After checking out this branch, refresh the
+frontend dependencies and restart its process so KaTeX/PDF.js and browser adapters
+are installed/generated:
+
+```sh
+# From structural-platform; include the same local-domain overrides used by your stack.
+docker compose run --rm --no-deps frontend npm ci
+docker compose up -d --no-deps --force-recreate frontend
+```
+
+If the local-domain test frontend is also running, restart `frontend-test` using
+that existing override as well. Apply the additive Laravel migrations below before
+opening the native standards review UI. Symmetric I/H reference calculations run
+in the browser; opening them does not verify/import the private standard.
+
 ## Private extraction on local Docker
 
 Use the feature branch and back up the existing database/private storage before a

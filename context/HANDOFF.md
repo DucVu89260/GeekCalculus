@@ -110,3 +110,14 @@ Do not merge/overwrite shared controller, routes, migrations or reader files fro
 Existing cloud containers and installed dependencies were reused for the audit; their processes/credentials are not guaranteed to exist in a new environment. Setup instructions are in [the platform README](../structural-platform/README.md). Main's clean engine Docker build needs the pending PR #19 fix; the current monolithic builder fails when browser source is absent. Do not delete user data to repair that build.
 
 The human's Windows repository path and cloud checkout are different machines. Pushing a branch does not change their local checkout or deploy the public website. Never put local account passwords/private artifact paths into this handoff.
+
+
+## Local domains — 2026-10-16
+
+Based on main `442919e`, current local-domain change adds optional `structural-platform/compose.local-domains.yaml`, a loopback Nginx gateway/config under `local/`, `scripts/start-local-domains.sh`, isolated test startup and `tests/local-domains-smoke.cjs`. Vite accepts only the two requested extra hosts. Main serves a native `/` production build at `http://geekcalculus.com`; test serves native Vite at `http://geekcalculus.test`. Both share source and the calculation engine; test owns a separate ignored SQLite DB, storage and cookie name. No existing app DB or private source is copied/reset. The test build is not the GitHub Pages demo.
+
+Both PHP startup scripts use `artisan serve --no-reload`: Laravel's reload mode strips container env overrides before starting its web subprocess, which otherwise defeats test DB/storage/cookie separation. Restart affected backends after .env changes. The gateway and test services have no externally exposed ports; the gateway binds only `127.0.0.1:80`.
+
+Verified in the cloud machine: the startup script completed twice without a data reset; Compose config/shell syntax checks passed; the local-domains smoke checked built-main versus Vite-test, both login pages, health/CSRF, guest rejection, separate session cookies, test HMR and unknown-host 404; a temporary table/write in the test DB was absent from read-only main and was removed afterward; test HTTP sessions appear under test storage. Nginx's readable-output permissions and loopback healthchecks are handled by setup. No native account credentials were created or printed.
+
+User action: on the machine running the browser add `127.0.0.1 geekcalculus.com geekcalculus.test` to its hosts file, then run the startup script after dependency setup. See `structural-platform/local/README.md` for Windows/Linux/macOS paths and interactive test-account creation. The cloud task cannot update the user's laptop hosts file. This does not change public DNS or GitHub Pages. Actual browser access on the user's machine is unverified until that hosts step is applied.

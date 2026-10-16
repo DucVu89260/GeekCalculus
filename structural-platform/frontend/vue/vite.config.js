@@ -8,6 +8,7 @@ export default defineConfig({
   resolve: { dedupe: ['decimal.js'] },
   base: process.env.VITE_BASE_PATH || '/',
   server: {
+    allowedHosts: ['geekcalculus.com', 'geekcalculus.test'],
     proxy: {
       '/api': {
         target: apiTarget,

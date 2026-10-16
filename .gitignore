@@ -14,3 +14,6 @@
 **/.venv/
 structural-platform/engineering/structural_engine/sectional_properties/data/section-core.mjs
 structural-platform/engineering/structural_engine/sectional_properties/data/section-registry.json
+
+# Local test app data; never commit databases, sessions or private sources.
+structural-platform/local/test-data/

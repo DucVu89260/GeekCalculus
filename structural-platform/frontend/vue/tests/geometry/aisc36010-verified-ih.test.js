@@ -27,7 +27,7 @@ const baseInput={
 const copy=()=>structuredClone(baseInput);
 const near=(a,b,tol=1e-8)=>assert.ok(Math.abs(a-b)<=tol*Math.max(1,Math.abs(a),Math.abs(b)),`Expected ${a} near ${b}`);
 test('Phase A registry preserves specific original 2010 clauses and correct B4 distinction',()=>{
- for(const id of ['B4.1a-2','B4.1b-11','E3-4','E4-4','F2-6','F3-2','F6-4','H1-1a'])
+ for(const id of ['B4.1a-2','B4.1b-11','E3-4','E4-4','E7-17','F2-6','F3-2','F5-6','F6-4','H1-1a'])
   assert.ok(FORMULAS[id]?.clause);
  const t=classifyI(copy());
  assert.equal(t.axial,'NONSLENDER');assert.equal(t.flexureWeb,'COMPACT');assert.equal(t.flexureChapter,'F2');
@@ -89,14 +89,37 @@ test('F3 compact web but noncompact/slender flange computes FLB not F2',()=>{
   assert.ok(['F3-1','F3-2'].includes(a.limit_states.major_flexure.trace.flb_clause));
  }
 });
-test('2010 B4/F5 deliberately blocks slender-web major flexure and E7',()=>{
+test('2010 E7 + F5 evaluate slender-web I branch from original equations',()=>{
  const d=copy();d.section.tw_mm=5;
  const r=calculateIH36010(d,props,lib);
  assert.equal(r.classification.flexureChapter,'F5');
- assert.equal(r.limit_states.major_flexure.status,'REVIEW_REQUIRED');
- assert.equal(r.limit_states.compression.status,'REVIEW_REQUIRED');
- assert.equal(r.limit_states.interaction.status,'INPUT_REQUIRED');
+ assert.equal(r.limit_states.major_flexure.status,'CALCULATED');
+ assert.equal(r.limit_states.compression.status,'CALCULATED');
+ assert.equal(r.limit_states.major_flexure.clause,'F5-1/F5-2/F5-7');
+ const f5=r.limit_states.major_flexure.trace;
+ const hw=d.section.h_mm-2*d.section.tf_mm;
+ const aw=Math.min(10,hw*d.section.tw_mm/(d.section.bf_mm*d.section.tf_mm));
+ const expectedRpg=1-aw/(1200+300*aw)*(hw/d.section.tw_mm-5.7*Math.sqrt(d.material.e_mpa/d.material.fy_mpa));
+ near(f5.rpg,expectedRpg);
+ assert.ok(f5.rpg>0&&f5.rpg<=1);
+ assert.ok(r.limit_states.compression.trace.qa<1);
+ assert.equal(r.limit_states.compression.trace.qs,1);
+ assert.ok(r.limit_states.compression.trace.effective_web_mm<hw);
+ assert.ok(r.limit_states.major_flexure.nominal>0);
  assert.equal(r.limit_states.minor_flexure.status,'CALCULATED');
+ assert.equal(r.overall_status,'REVIEW_REQUIRED');
+});
+test('E7 flange Qs follows built-up and rolled limits without global PASS',()=>{
+ for(const fabrication of ['BUILT_UP','ROLLED']){
+  const d=copy();d.section.fabrication=fabrication;d.section.tf_mm=3;d.section.tw_mm=24;
+  const r=calculateIH36010(d,props,lib);
+  assert.equal(r.classification.axialFlange,'SLENDER');
+  assert.equal(r.limit_states.compression.status,'CALCULATED');
+  assert.ok(r.limit_states.compression.trace.qs<1);
+  assert.ok(r.limit_states.compression.trace.qs>0);
+  assert.equal(r.limit_states.compression.trace.qa,1);
+  assert.equal(r.overall_status,'REVIEW_REQUIRED');
+ }
 });
 test('F1-1 uses absolute moment magnitudes and single-segment validation',()=>{
  const value=cbF11({mode:'QUARTER_POINTS',ends_braced:true,same_case:true,

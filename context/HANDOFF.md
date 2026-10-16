@@ -1,6 +1,13 @@
 # Repository handoff
 
-## Latest application change — 2026-10-16
+## Latest correction — left member navigation, 2026-10-16
+
+- Branch `main`, base `17c1f0d`. The user corrected their preference to **left** navigation, matching the original H/I page. Crane now places the sidebar in the left grid column with a right divider; H/I's temporary right-side override was removed. Mobile navigation, routes, calculations and persistence are unchanged.
+- Changed: `CraneBeamWorkspace.vue` styles, H/I standalone styles, existing Crane browser assertions, Plan and this Handoff. No new tests or formula changes. The smoke now explicitly verifies that both sidebars are left of the main content.
+- Executed: production demo build passed; existing `crane-workspace-smoke.cjs` passed against native Vite and the demo production build, including left-side positioning on both pages, both-direction links, legacy URLs, numerical fixtures and mobile overflow. No JavaScript errors. Prior full numerical/CI evidence remains below; those suites were not rerun for this CSS-only correction.
+- Delivery: push this correction to main and allow the existing Pages workflow to regenerate `docs`; do not edit generated Pages files manually. Local users pull main and refresh; no migration or engine rebuild.
+
+## Initial Crane workspace release — 2026-10-16 (navigation position superseded below)
 
 - Branch: `main`; UI commit: `64def77` (base `408ea8e`). Crane Beam now opens the dedicated `#/modules/steel/crane-beam` workspace, with H/I-style layout and desktop navigation on the **right**, as explicitly confirmed by the user. Both member pages link to each other. Old Crane query URLs remain supported. Mobile navigation moves above the content.
 - Changed source: `App.vue`, `modules.js`, `SteelComponentMenu.vue`, new `CraneBeamWorkspace.vue`, Crane panel IDs/layout/input names, and H/I standalone navigation/CSS/one translation. Geometry and member calculation sources are unchanged; the entire existing Crane calculation script was compared byte-for-byte with the base. Existing preliminary/NOT VERIFIED gates remain. No database/backend/auth contract or migration changed.

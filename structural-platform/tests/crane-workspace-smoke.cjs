@@ -29,7 +29,7 @@ const demo = process.env.TEST_DEMO === '1'
     const nav = crane.locator('.member-navigation')
     assert.equal(await nav.getByRole('link', { name: 'Crane Beam', exact: true }).getAttribute('aria-current'), 'page')
     let [menu, main] = await Promise.all([nav.boundingBox(), crane.locator('.member-main').boundingBox()])
-    assert.ok(menu.x >= main.x + main.width - 1, 'Crane navigation must be on the right')
+    assert.ok(menu.x + menu.width <= main.x + 1, 'Crane navigation must be on the left')
     await nav.getByRole('button', { name: /Input Parameters/ }).click()
     assert.ok(crane.url().endsWith('#/modules/steel/crane-beam'), 'contents must not destroy the SPA route')
     const values = { depth: 400, top_flange_width: 200, bottom_flange_width: 250, web_thickness: 8, top_flange_thickness: 12, bottom_flange_thickness: 16 }
@@ -58,7 +58,7 @@ const demo = process.env.TEST_DEMO === '1'
     await crane.locator('.global-nav').waitFor()
     const hiNav = crane.locator('.sidenav')
     ;[menu, main] = await Promise.all([hiNav.boundingBox(), crane.locator('.shell > .main').boundingBox()])
-    assert.ok(menu.x >= main.x + main.width - 1, 'H/I navigation must be on the right')
+    assert.ok(menu.x + menu.width <= main.x + 1, 'H/I navigation must be on the left')
     assert.equal(await hiNav.getByRole('link', { name: /H\/I Doubly Symmetric/ }).getAttribute('aria-current'), 'page')
     await hiNav.getByRole('link', { name: /Crane Beam/ }).click()
     await crane.locator('#crane-member-workspace').waitFor()
@@ -70,6 +70,6 @@ const demo = process.env.TEST_DEMO === '1'
     await crane.goto(legacy.href)
     await crane.locator('#crane-member-workspace').waitFor()
     assert.deepEqual(errors, [])
-    console.log('PASS: Crane entry/new tab, dedicated and legacy routes, right navigation both ways, contents, shared geometry, review gates, EN/VI and mobile')
+    console.log('PASS: Crane entry/new tab, dedicated and legacy routes, left navigation both ways, contents, shared geometry, review gates, EN/VI and mobile')
   } finally { await browser.close() }
 })().catch(error => { console.error(error); process.exitCode = 1 })

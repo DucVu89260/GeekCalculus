@@ -22,16 +22,16 @@ def main():
             if path.suffix == '.cmd':
                 data = path.read_text().replace('\r\n', '\n').replace('\n', '\r\n').encode()
             archive.writestr(str(path.relative_to(source)).replace('\\', '/'), data)
-        archive.writestr('BAT-DAU.txt', '''API_IF_SAP26.2.0_V1 — .NET/PID build 2026.10.16.2
-1. Giải nén toàn bộ ZIP; nếu cập nhật thì dừng connector cũ bằng Ctrl+C trước.
+        archive.writestr('BAT-DAU.txt', '''API_IF_SAP26.2.0_V1 — .NET/PID build 2026.10.16.3 — Auto PID
+1. Giải nén toàn bộ ZIP vào C:\\SAP2000-Forces; dừng connector cũ bằng Ctrl+C trước khi cập nhật.
 2. Giữ .venv đang có; launcher tự cài/cập nhật dependencies, gồm pythonnet 3.2.1.
 3. Mở SAP2000 26.2.0 và model đã phân tích. Dùng cùng tài khoản/mức quyền với connector.
-4. Xem PID của SAP2000.exe trong Task Manager > Details.
-5. Chạy start-sap2000-panel.cmd, nhập PID vào panel rồi Kết nối / Làm mới model.
-   Hoặc CMD: start-sap2000-panel.cmd --pid <PID>
+4. Chỉ giữ một SAP2000.exe đang chạy. Không cần tìm hoặc nhập PID.
+5. Chạy start-sap2000-panel.cmd: API tự tìm PID và mở panel. Kiểm tra PID và tên model.
+   PID thủ công chỉ dành cho cấu hình nâng cao: --pid <PID>.
 6. DLL: C:\\Program Files\\Computers and Structures\\SAP2000 26\\SAP2000v1.dll
 7. Chọn Output Cases, chọn frame objects trong SAP2000, quay panel và lấy nội lực.
-8. Nếu lỗi: diagnose-sap2000.cmd --pid <PID>; gửi kết quả, không gửi token.
+8. Nếu lỗi: chạy diagnose-sap2000.cmd, gửi kết quả, không gửi token.
 Không cần Repair hay đăng ký COM Helper. PID có thể đổi sau khi khởi động lại SAP2000.
 Đã kiểm tra adapter trên CLR thực và panel với SAP giả lập; cần nghiệm thu nội lực trên model thật.
 ''')

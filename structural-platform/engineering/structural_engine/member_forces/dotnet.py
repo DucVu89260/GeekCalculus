@@ -119,10 +119,10 @@ class DotNetProxy:
 
 def attach_application(helper, pid):
     from .sap2000 import SapError, com_operation
-    if pid is not None:
-        application = com_operation('SAP2000_ATTACH_PID', lambda: helper.GetObjectProcess('CSI.SAP2000.API.SapObject', pid))
-    else:
-        application = com_operation('SAP2000_ATTACH', lambda: helper.GetObject('CSI.SAP2000.API.SapObject'))
+    if pid is None:
+        from .processes import discover_sap2000_pid
+        pid = discover_sap2000_pid()
+    application = com_operation('SAP2000_ATTACH_PID', lambda: helper.GetObjectProcess('CSI.SAP2000.API.SapObject', pid))
     # An explicit PID must never silently attach to a different instance.
     if application is None:
         raise SapError('SAP2000_ATTACH: Cannot find this SAP2000 instance. Enter its current PID from Task Manager > Details. Match Windows user and elevation levels.')
@@ -134,6 +134,8 @@ def connect_dotnet(settings: ConnectionSettings):
     from .sap2000 import Sap2000, SapError, com_operation
     if os.name != 'nt':
         raise SapError('SAP2000_DOTNET_PLATFORM: Run this connector on Windows alongside SAP2000.')
+    from .processes import discover_sap2000_pid
+    pid = settings.pid if settings.pid is not None else discover_sap2000_pid()
     path = Path(settings.dll_path)
     if path.name.lower() != 'sap2000v1.dll' or not path.is_file():
         raise SapError('SAP2000_DLL_NOT_FOUND: Choose SAP2000v1.dll from the main SAP2000 26 installation folder, not NativeAPI.')
@@ -151,9 +153,9 @@ def connect_dotnet(settings: ConnectionSettings):
         com_operation('SAP2000_DLL_LOAD', lambda: clr.AddReference(str(path.resolve())))
         from SAP2000v1 import Helper, cHelper, cSapModel
         helper = com_operation('SAP2000_DOTNET_HELPER', lambda: cHelper(Helper()))
-        application = attach_application(helper, settings.pid)
+        application = attach_application(helper, pid)
         model = com_operation('SAP2000_MODEL', lambda: cSapModel(application.SapModel))
-        yield Sap2000(DotNetProxy(model, clr.GetClrType(cSapModel), System))
+        yield Sap2000(DotNetProxy(model, clr.GetClrType(cSapModel), System), connection_pid=pid)
     except SapError:
         raise
     except Exception as error:

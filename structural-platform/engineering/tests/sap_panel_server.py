@@ -11,7 +11,7 @@ from structural_engine.member_forces.sap2000 import Sap2000
 
 @contextmanager
 def gateway():
-    yield Sap2000(FakeModel())
+    yield Sap2000(FakeModel(), connection_pid=20948)
 
 
 if __name__ == '__main__':

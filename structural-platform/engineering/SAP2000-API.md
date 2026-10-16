@@ -15,14 +15,14 @@ Website cloud không thể trực tiếp gọi SAP2000 COM của máy người d
 ## Cài đặt một lần trên Windows
 
 1. Cần SAP2000 **26.2.0**, Python **64-bit >= 3.11** và Internet để tải dependencies. Khi cài Python, bật Python Launcher (`py`). Chạy connector cùng tài khoản/phiên desktop với SAP2000; không cần chạy administrator nếu SAP2000 không chạy elevated.
-2. Đặt bản mã có các thay đổi API này trên máy Windows, ví dụ `C:\GeekCalculus`. Không sao chép `.venv`, dependencies hoặc build cache từ Linux sang Windows.
-3. Trong Explorer, mở `C:\GeekCalculus\structural-platform\engineering`, nhấp đúp **`start-sap2000-panel.cmd`**. Script tạo venv, cài dependencies theo lock và chạy connector. Lần đầu có thể mất vài phút. Giữ cửa sổ console đang chạy.
+2. Đặt bản mã có các thay đổi API này trên máy Windows, thư mục cố định `C:\SAP2000-Forces`. Không sao chép `.venv`, dependencies hoặc build cache từ Linux sang Windows.
+3. Trong Explorer, mở `C:\SAP2000-Forces`, nhấp đúp **`start-sap2000-panel.cmd`**. Script tạo venv, cài dependencies theo lock và chạy connector. Lần đầu có thể mất vài phút. Giữ cửa sổ console đang chạy.
 4. Launcher tự mở trình duyệt và ghép nối panel bằng mã giữ trong phiên tab. Không cần tự nhập token. Mã không đưa vào query/HTTP access log và được xóa khỏi fragment địa chỉ sau khi trang đọc. Token giữ trong sessionStorage của tab để tải lại trang vẫn kết nối được; restart connector sinh token mới nếu không cấu hình token môi trường cố định.
 
 Nếu muốn chạy bằng PowerShell thay vì nhấp đúp:
 
 ```powershell
-cd C:\GeekCalculus\structural-platform\engineering
+cd C:\SAP2000-Forces
 py -3 -m venv .venv
 .\.venv\Scripts\python -m pip install -r requirements-test.lock -r requirements-windows.txt
 .\.venv\Scripts\python -m structural_engine.member_forces.run_connector
@@ -34,7 +34,7 @@ Không cần Node cho panel/connector nội lực. Cửa sổ launcher phải ti
 
 1. **SAP2000:** mở và lưu file `.sdb`, chạy **Analyze → Run Analysis** cho các cases cần dùng. Sau khi hoàn tất, giữ model khóa. Bản đầu nên chỉ mở một phiên SAP2000 để tránh mơ hồ instance COM.
 2. **Panel:** launcher tự mở trang **Xuất nội lực cấu kiện**. Nếu đang ở website GeekCalculus, dùng nút **SAP2000 · Nội lực (local)** để mở panel; tab mới chưa ghép nối sẽ yêu cầu token. Thuận tiện nhất là quay lại tab đã được launcher mở. Tải lại cùng tab sẽ giữ token. Nếu đã restart connector hoặc đóng tab và mất token, dùng tab mới do launcher mở để nhận mã mới.
-3. Nhập **PID SAP2000** từ **Task Manager → Details → SAP2000.exe** vào panel. Ví dụ PID từng xác nhận là `20948`, nhưng phải kiểm tra lại nếu SAP2000 đã khởi động lại. Kiểm tra đường dẫn DLL là `C:\Program Files\Computers and Structures\SAP2000 26\SAP2000v1.dll` (file ở thư mục chính, không phải NativeAPI). Bấm **Kết nối / Làm mới model**. Kiểm tra **File đang hoạt động**, đường dẫn đầy đủ, phiên bản **26.2.0** và trạng thái model. Nếu tên file sai, dừng xuất và kiểm tra SAP2000.
+3. Không cần nhập PID. API tự tìm tiến trình `SAP2000.exe` duy nhất đang chạy, rồi kết nối bằng PID đó. Kiểm tra **PID đã kết nối**, **File đang hoạt động**, đường dẫn, phiên bản và trạng thái model. Nếu chưa mở hoặc mở nhiều phiên SAP2000, panel báo lỗi và không chọn thay bạn. Ô PID/DLL thủ công nằm trong **Cấu hình kết nối nâng cao** để chẩn đoán khi cần. Nếu file sai, dừng xuất và kiểm tra SAP2000.
 4. Ở **Output Cases**, tìm theo tên và đánh dấu cases/combinations muốn xuất. Có thể chọn các mục đang hiển thị hoặc bỏ chọn tất cả. Case chưa có kết quả sẽ bị vô hiệu hóa; combinations được kiểm tra khi trích xuất.
 5. Quay sang **SAP2000**, chọn một hoặc nhiều **frame objects**. Joint/area objects không thuộc phạm vi API này.
 6. Quay lại panel. Có thể bấm **Đọc lựa chọn hiện tại** để kiểm tra danh sách; sau đó bấm **Lấy nội lực cấu kiện đang chọn**. Lệnh xuất luôn đọc lại selection tại thời điểm bấm, không dùng danh sách preview cũ. Giữ nguyên model trong lúc đang đọc.
@@ -49,7 +49,7 @@ Cb nằm ở module riêng, không nằm trong panel/API nội lực. Panel hi�
 Nếu trang đã mở nhưng `/model` trả 503, chạy `diagnose-sap2000.cmd` trong cùng thư mục. Script chỉ đọc: phiên bản/bitness Python, khả năng attach .NET theo PID, kết quả GetVersion, tên file và trạng thái khóa. Không chạy analysis, sửa model hoặc in token. Gửi lại các dòng kết quả chẩn đoán, đặc biệt tên bước lỗi và HRESULT. Console connector cũng in lỗi cụ thể sau mỗi 503. Không kết luận lỗi phiên bản hay lỗi phân tích chỉ từ HTTP 503.
 
 - **Không mở được trang/không kết nối connector:** kiểm tra cửa sổ launcher còn chạy và cổng 8010 không bị một connector cũ chiếm. Chỉ chạy một connector cho một SAP2000.
-- **Không tìm thấy SAP2000:** mở SAP2000 trước, cùng tài khoản Windows và cùng mức quyền với connector. Nhập PID hiện tại và kiểm tra DLL cài đặt. Bản này nạp Helper trực tiếp qua pythonnet, không yêu cầu ProgID Helper có sẵn trong Registry và không cần Repair.
+- **Không tìm thấy SAP2000:** mở SAP2000 trước, cùng tài khoản Windows và cùng mức quyền với connector. Chỉ mở một phiên SAP2000; kiểm tra DLL cài đặt. Bấm kết nối lại để tìm PID mới. Bản này nạp Helper trực tiếp qua pythonnet, không yêu cầu ProgID Helper có sẵn trong Registry và không cần Repair.
 - **Sai phiên bản:** API chỉ chấp nhận 26.2.0, không tự coi bản 26 khác là tương thích.
 - **Chưa có kết quả/không có lựa chọn:** chạy analysis cho cases cần lấy; chọn frame objects rồi thử lại.
 - **File đã đổi:** kết nối lại và kiểm tra tên model trước khi xuất.
@@ -183,3 +183,14 @@ Linux/cloud kiểm tra trên CLR thực bằng fixture .NET được sinh trong 
 Sửa tên hàm loại Combo thành `RespCombo.GetTypeOAPI(Name, ref ComboType)`. `LoadCases.GetTypeOAPI` có signature riêng (case type và subtype); không dùng chung mock hay xử lý tuple giữa hai interface. Bộ kiểm thử bổ sung nhiều Case/Combo cùng lúc, Combo lồng nhau, Envelope/Absolute/SRSS/Range, lỗi API và khôi phục selection/units. Có kiểm thử CLR thực cho GetTypeOAPI/GetCaseList qua .NET proxy và kiểm thử panel chọn đồng thời Case + Combo.
 
 Nếu cập nhật từ build .1: dừng connector, thay file bằng ZIP mới, giữ .venv, khởi động lại và kiểm tra đầu panel hiện `build 2026.10.16.2`. PID và DLL không thay đổi cách nhập. Envelope/statistical Combo vẫn được xuất JSON và xét extrema; không coi đó là action đồng thời để xuất liên kết CSV. Cần đối chiếu nội lực Combo với bảng SAP2000 thật.
+
+## Quy ước local — build 2026.10.16-dotnet-pid.3 (Auto PID)
+
+- Giải nén toàn bộ bộ API vào **`C:\SAP2000-Forces`**. Launcher và công cụ chẩn đoán kiểm tra vị trí này; nếu sai thư mục sẽ hướng dẫn chuyển bộ API trước khi chạy. Giữ `.venv` khi cập nhật.
+- Chỉ mở **một tiến trình `SAP2000.exe`** trong lúc dùng API. Launcher mặc định bỏ PID môi trường cũ; `--pid` vẫn là lựa chọn nâng cao rõ ràng.
+- Nhấp đúp `start-sap2000-panel.cmd`, không cần tra hoặc nhập PID. Connector dùng Windows `tasklist` có filter chính xác `SAP2000.exe`, không cần thêm thư viện dò process.
+- Mỗi lần kết nối/đọc sẽ quét lại PID nếu đang ở chế độ tự động. Không có SAP thì yêu cầu mở, nhiều SAP thì yêu cầu đóng bớt; không chọn ngẫu nhiên tiến trình đầu tiên.
+- Panel và `/model` trả PID thực tế đã gắn. Quét PID không mở/sửa/chạy phân tích model. Sau khi đổi file, vẫn làm mới model và xác nhận tên file trước khi xuất.
+- Chạy `diagnose-sap2000.cmd` không tham số để chẩn đoán theo cùng chế độ Auto PID. Không cần lưu PID cố định vào file.
+
+Cơ chế tasklist được kiểm thử ở biên subprocess với đầu ra Windows mô phỏng (không có/một/nhiều tiến trình, PID đổi sau restart, lỗi và timeout). Cần chạy bản mới trên Windows để xác nhận việc dò process thực tế.

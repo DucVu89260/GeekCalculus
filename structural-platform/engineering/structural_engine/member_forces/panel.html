@@ -8,15 +8,15 @@
 </style>
 </head>
 <body><main>
-<header><div class="badge">API_IF_SAP26.2.0_V1 · SAP2000 26.2.0 · .NET / PID · build 2026.10.16.2</div><h1>Xuất nội lực cấu kiện</h1><p class="muted">Chọn cấu kiện trong SAP2000, sau đó quay lại đây để lấy nội lực. Đơn vị: kN · m · kN.m; giữ nguyên trục local SAP2000.</p></header>
+<header><div class="badge">API_IF_SAP26.2.0_V1 · SAP2000 26.2.0 · .NET / PID · build 2026.10.16.3 · Auto PID</div><h1>Xuất nội lực cấu kiện</h1><p class="muted">Chọn cấu kiện trong SAP2000, sau đó quay lại đây để lấy nội lực. Đơn vị: kN · m · kN.m; giữ nguyên trục local SAP2000.</p></header>
 <div id="status" class="status" role="status" aria-live="polite">Đang chờ kết nối SAP2000 trên máy này.</div>
 <fieldset id="controls" aria-label="Bảng xuất nội lực SAP2000"><div class="layout"><aside>
 <section class="card"><h2>1. Kết nối model</h2>
 <div id="token-entry"><label for="token">Mã kết nối local</label><input id="token" type="password" autocomplete="off" placeholder="Token của connector"><small>Chạy launcher để trang tự nhận mã kết nối. Mã chỉ giữ trong phiên tab này; được khôi phục khi tải lại trang.</small></div>
-<label for="pid">PID SAP2000 đang mở</label><input id="pid" type="number" min="1" max="2147483647" step="1" placeholder="Ví dụ: PID trong Task Manager → Details" style="width:100%;padding:10px;margin:5px 0 12px">
-<label for="dll">Đường dẫn SAP2000v1.dll</label><input id="dll" type="text" value="C:\Program Files\Computers and Structures\SAP2000 26\SAP2000v1.dll" style="width:100%;padding:10px;margin:5px 0 12px"><small>Nhập PID để kết nối đúng phiên SAP2000. Để trống chỉ khi muốn thử tự tìm phiên đang mở. Không cần đăng ký COM Helper.</small>
+<p class="muted">Tự động tìm PID khi chỉ có một SAP2000.exe đang chạy.</p><details><summary>Cấu hình kết nối nâng cao</summary><label for="pid">PID thủ công (tùy chọn)</label><input id="pid" type="number" min="1" max="2147483647" step="1" placeholder="Để trống để tự động tìm PID" style="width:100%;padding:10px;margin:5px 0 12px">
+<label for="dll">Đường dẫn SAP2000v1.dll</label><input id="dll" type="text" value="C:\Program Files\Computers and Structures\SAP2000 26\SAP2000v1.dll" style="width:100%;padding:10px;margin:5px 0 12px"><small>Mặc định không cần nhập PID. Chỉ giữ một phiên SAP2000 đang mở. Không cần đăng ký COM Helper.</small></details>
 <div class="actions"><button id="connect" class="primary">Kết nối / Làm mới model</button></div>
-<div class="info"><div><small>File đang hoạt động</small><strong id="filename">Chưa kết nối</strong><small id="modelpath"></small></div><div><small>Trạng thái</small><strong id="modelstate">—</strong></div></div></section>
+<div class="info"><div><small>PID đã kết nối</small><strong id="detected-pid">Chưa xác định</strong></div><div><small>File đang hoạt động</small><strong id="filename">Chưa kết nối</strong><small id="modelpath"></small></div><div><small>Trạng thái</small><strong id="modelstate">—</strong></div></div></section>
 <section class="card"><h2>2. Output Cases</h2><label for="search">Tìm case / combination</label><input type="search" id="search" placeholder="Nhập tên…"><div class="actions"><button id="select-all">Chọn các mục đang hiển thị</button><button id="select-none">Bỏ chọn tất cả</button></div><p id="case-count" class="muted">0 mục được chọn</p><div id="cases" class="cases"></div></section>
 <section class="card"><h2>3. Cấu kiện trong SAP2000</h2><p class="muted">Quay sang SAP2000 và chọn một hoặc nhiều frame objects.</p><button id="selection">Đọc lựa chọn hiện tại</button><p id="frames" class="frames">Chưa đọc lựa chọn.</p><button id="extract" class="primary">Lấy nội lực cấu kiện đang chọn</button><p><small>Lệnh xuất đọc lại lựa chọn SAP2000 tại thời điểm bấm. Không thao tác model khi đang xuất.</small></p></section>
 </aside><div>
@@ -67,17 +67,17 @@ function clearResults(){dataset=null;extremeData=null;page=0;$('extreme-results'
 function download(content,name,type='application/json'){const blob=content instanceof Blob?content:new Blob([JSON.stringify(content,null,2)],{type});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
 $('connect').onclick=()=>run(async()=>{
  token=$('token').value.trim()||token;if(!token)throw new Error('Hãy chạy launcher để mở panel có mã kết nối, hoặc nhập token local.');
- model=null;cases=[];chosen.clear();clearResults();$('filename').textContent='Chưa kết nối';$('modelpath').textContent='';$('modelstate').textContent='—';$('frames').textContent='Chưa đọc lựa chọn.';renderCases();
+ model=null;cases=[];chosen.clear();clearResults();$('detected-pid').textContent='Chưa xác định';$('filename').textContent='Chưa kết nối';$('modelpath').textContent='';$('modelstate').textContent='—';$('frames').textContent='Chưa đọc lựa chọn.';renderCases();
  sessionStorage.setItem('sap2000-connector-token',token);
  const pid=$('pid').value.trim();if(pid&&(!Number.isInteger(Number(pid))||Number(pid)<=0||Number(pid)>2147483647))throw new Error('PID phải là số nguyên dương trong Task Manager → Details.');
  await api('/connection',{pid:pid?Number(pid):null,dll_path:$('dll').value.trim()},false,'PUT');
  message('Đang đọc model SAP2000 qua DLL / PID…');const info=await api('/model');const output=await api('/output-cases');model=info;cases=output.data;
- $('filename').textContent=info.filename||'Model chưa lưu';$('modelpath').textContent=info.model;$('modelstate').textContent='SAP2000 '+info.sap2000_version+' · '+(info.locked?'Model đang khóa':'Model chưa khóa — cần chạy analysis');renderCases();message('Đã kết nối. Kiểm tra tên file rồi chọn Output Cases.');
+ $('detected-pid').textContent=info.pid||'Không xác định';$('filename').textContent=info.filename||'Model chưa lưu';$('modelpath').textContent=info.model;$('modelstate').textContent='SAP2000 '+info.sap2000_version+' · '+(info.locked?'Model đang khóa':'Model chưa khóa — cần chạy analysis');renderCases();message('Đã kết nối. Kiểm tra tên file rồi chọn Output Cases.');
 });
 $('search').oninput=renderCases;
 $('select-all').onclick=()=>{for(const c of visibleCases())if(c.results_available!==false)chosen.add(caseKey(c));renderCases()};
 $('select-none').onclick=()=>{chosen.clear();renderCases()};
-$('selection').onclick=()=>run(async()=>{const result=await api('/selection');if(result.model!==model.model)throw new Error('Model đang hoạt động đã đổi. Bấm Kết nối / Làm mới model trước khi tiếp tục.');$('frames').textContent=result.frames.length+' frame: '+result.frames.join(', ');message(result.frames.length?'Đã đọc lựa chọn.':'Chưa chọn frame trong SAP2000.');});
+$('selection').onclick=()=>run(async()=>{const result=await api('/selection');if(result.model!==model.model)throw new Error('Model đang hoạt động đã đổi. Bấm Kết nối / Làm mới model trước khi tiếp tục.');$('detected-pid').textContent=result.pid||'Không xác định';$('frames').textContent=result.frames.length+' frame: '+result.frames.join(', ');message(result.frames.length?'Đã đọc lựa chọn.':'Chưa chọn frame trong SAP2000.');});
 $('extract').onclick=()=>run(async()=>{
  clearResults();message('Đang trích xuất nội lực… Giữ nguyên model cho đến khi hoàn tất.');
  const output_cases=cases.filter(c=>chosen.has(caseKey(c))).map(c=>({name:c.name,kind:c.kind}));

@@ -43,8 +43,9 @@ def checked(code):
 
 
 class Sap2000:
-    def __init__(self, model):
+    def __init__(self, model, connection_pid=None):
         self.model = model
+        self.connection_pid = connection_pid
 
     def verify_version(self):
         version, version_number = outputs(com_operation('SAP2000_GET_VERSION', self.model.GetVersion), 2)
@@ -56,7 +57,7 @@ class Sap2000:
         from .contract import API_NAME
         filename = self.model.GetModelFilename()
         return {'api_name': API_NAME, 'sap2000_version': TARGET_SAP2000_VERSION,
-                'model': filename, 'filename': PureWindowsPath(filename).name,
+                'model': filename, 'filename': PureWindowsPath(filename).name, 'pid': self.connection_pid,
                 'locked': bool(self.model.GetModelIsLocked())}
 
     def names(self, interface):

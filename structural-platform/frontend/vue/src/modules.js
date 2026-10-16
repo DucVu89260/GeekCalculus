@@ -36,6 +36,7 @@ const legacyRoutes = {
 export function resolveModuleRoute(code) {
   const normalized = legacyRoutes[code] ?? code
   const [groupCode, toolCode, extra] = String(normalized).split('/')
+  if (normalized === 'steel/crane-beam') return { group: moduleGroups.find(g => g.code === 'steel'), tool: { code: 'crane-beam', title: 'Crane Beam', description: 'steelDescription', route: 'steel/crane-beam' } }
   if (normalized === 'steel/library/standards') return { group: moduleGroups.find(g => g.code === 'steel'), tool: { code: 'standards', title: 'toolSteelLibrary', description: 'libraryDescription', route: 'steel/library/standards' } }
   if (extra !== undefined) return null
   const group = moduleGroups.find(item => item.code === groupCode)

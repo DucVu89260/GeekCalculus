@@ -1,11 +1,28 @@
 # ASCE 7-10 — private development source corpus
 
 Steel Design → Library → Design Standard → **ASCE 7-10** opens the authenticated
-Standards Explorer. **Source Corpus** searches all archived pages; **Equation
-Library** opens the unverified equation-occurrence inventory. Table and figure
-references are available in the same browser. Select a result to inspect its
-page image, native text, OCR, numeric tokens and original PDF page. The JSON
-download preserves the complete extraction for future spreadsheet development.
+Standards Explorer. The default ASCE reader shows **Document Outline** and
+**PDF Source**, matching the AISC reader layout. Select a clause to open its
+original PDF page; equations, tables and figures are read directly in the PDF.
+No equation transcription or OCR is required. Existing corpus data and wind
+calculations remain available to their backend/engineering consumers.
+
+## PDF + outline import (recommended)
+
+The bundled index is bound to the exact SHA-256 below. From `structural-platform`,
+copy your supplied file to the running backend temporarily and import it:
+
+```sh
+docker compose cp "/path/to/ASCE 7-10.pdf" backend:/tmp/asce7-10.pdf
+docker compose exec -T backend php artisan standards:import-asce710-pdf /tmp/asce7-10.pdf
+docker compose exec -T backend rm /tmp/asce7-10.pdf
+```
+
+This stores the PDF privately and indexes 875 chapter/section entries with
+page links. Repeating it is idempotent. It preserves reviewed clauses, existing
+source links and full-corpus metadata; no formulas or OCR/page images are
+created. A different PDF hash is rejected to avoid applying the wrong page map.
+The existing static Pages PDF/index remains supported separately.
 
 ## Source and coverage
 

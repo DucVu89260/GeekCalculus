@@ -7,12 +7,17 @@ Baseline `main`: `991342d`, audited 2026-10-16. This is a dependency/acceptance 
 | ID | Status | Work / files | Acceptance evidence / dependency |
 | --- | --- | --- | --- |
 | CTX-01 | Implemented / PR #20 review | Root/scoped AGENTS, four repository Skills, GOALS/ARCHITECTURE/AUDIT/PLAN/HANDOFF | Every current-state statement anchored to code or dated PR evidence; links/frontmatter/scopes checked; no application changes; current task |
+| LOCAL-01 | Implemented / locally verified | `geekcalculus.com` built native main and `geekcalculus.test` native dev share main SQLite and documents; separate sessions/cache/logs | Runtime checks confirm identical DB/document-directory inodes and different cookies. Startup/build/typecheck and app/standalone/mobile/HMR smoke passed; Test remains visible with gateway injection removed. Old test data retained. User hosts/restart/refresh steps remain local prerequisites. |
 | BUILD-01 | Implemented in open PR #19 | Isolated engine/browser/library builder; Docker + CI | 270 Python and 96 Node tests, exact Docker CI and installed-wheel smoke already passed on that PR; merge/update context remains separate |
 | STD-01 | In progress — formula-digitization feature branch | Integrate inspected PR #18 registry/reader into main 408ea8e, preserve ASCE corpus; add auditable equation approval editor, extraction/provenance diagnostics and E/F coverage | Inputs: existing source-review contracts and privately provisioned PDF (currently only on user local Docker). Acceptance: disposable additive migrations, re-import protection, admin/edition/revision rejection, approved-only lookup, KaTeX/source-page UI, native/demo builds. Actual E/F verification requires accessible matching PDF; no source-independent promotion. SQLite remains default; no live DB reset or automatic PostgreSQL migration. |
 | SOURCE-01 | Decision pending | Define per-artifact public/private source policy | Main includes full public ASCE PDF plus private Laravel corpus; inventory both paths/copies and intended distribution before publication changes; do not delete history in a docs task |
 | DB-01 | Decision pending | Decide whether/when to move native SQLite data to PostgreSQL | Inventory actual user library/private artifacts; migration/backup/restore/dialect/concurrency plan and disposable PG tests before conversion; not required for this context PR |
 
 Review BUILD-01 as the smallest runtime fix first. STD-01 needs a dedicated integration task; PostgreSQL deployment and source review approval are not implicit side effects of resolving Git conflicts.
+
+## Active UI slice — Crane Beam workspace
+
+`CRANE-UI-01` (implemented, base `408ea8e`): reuse existing `CraneBeamView` calculations in a dedicated routed workspace with the H/I-style left navigation, linked H/I/Crane entries, contents anchors and responsive input/results layout. Preserve legacy Crane query URLs and current preliminary/NOT VERIFIED statuses. Acceptance: deep links/new-tab entry, both-direction navigation, language switch, mobile layout, existing numerical output parity and unchanged calculation sources; native/demo build and targeted browser checks. Evidence: native/demo builds and typecheck passed; 92 Node tests passed; Crane browser smoke passed in native and demo modes, H/I bilingual/numeric/export smoke passed against the fresh build, and structure-group routing/shared-calculator smoke passed. Desktop navigation is on the left on both pages (user correction after the initial release); mobile navigation sits above content. This slice does not add crane design limit states.
 
 ## 1 — Independent engineering MVP slices
 
@@ -72,3 +77,9 @@ Defer until the above workflows work repeatedly. Propose a concrete unmet operat
 ## Task record for future slices
 
 Use the smallest relevant row above. A new nontrivial slice records: objective; base SHA/branch and file ownership; input/output/edition/units; changed paths; prerequisites; acceptance fixtures/commands; excluded behavior; data/rollback implications; status/evidence; next action. Completed implementation, PR review, merge and deployment have separate statuses. Transfer the current result to [Handoff](HANDOFF.md), keeping this plan as the stable dependency view.
+
+## Active standards reader slice
+
+`EQ-UI-01` (implemented / locally verified, base `8052158`): make AISC360-10 equation labels usable: reuse exact canonical implementation expressions as explicitly marked references, preserve database expressions/status, expose clause document IDs and open the selected source page visibly. No transcription/approval of missing formulas, math changes, schema changes or private PDF publication. Evidence: 6 isolated API tests (35 assertions), 3 helper tests, native typecheck/build and synthetic browser selection/source/mobile/edition checks passed. Full source transcription remains incomplete.
+
+`ASCE-READER-01` (implemented / locally verified, base `f745daf`): user requests ASCE7-10 PDF + outline only. Reuse exact SHA-bound 658-page/875-heading index, add idempotent private PDF-only import, show common outline/PDF reader without equation/kernel/corpus UI. Preserve existing corpus/review data and wind engine. Evidence: supplied SHA-matching PDF imported in cloud (658 pages/875 clauses); 10 disposable backend tests/63 assertions, typecheck, native/demo builds, native fixture reader/demo exact-PDF smoke and AISC reader regression passed.

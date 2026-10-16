@@ -167,7 +167,9 @@ body{background:#f5f6f8;color:#202d3b}
 /* Shared navy page surround; preserve a light calculation surface. */
 body{background:#123754}
 .page{width:calc(100% - 32px);margin:16px auto;border:1px solid var(--border);border-radius:16px;background:#fbfcfe}
-</style></head><body>
+
+</style><script defer src="./test-environment.js"></script>
+</head><body>
 <div class="shell">
 
 <aside class="sidenav" aria-label="Navigation and report contents">
@@ -178,10 +180,11 @@ body{background:#123754}
     <a class="navitem" href="./#/modules/steel" data-l10n="steel">▱ &nbsp; Steel Design</a>
     <a class="navitem nav-child" href="./#/modules/steel" data-l10n="component">↳ &nbsp; Component</a>
     <a class="navitem nav-child active" href="./hi-doubly-symmetric-aisc360-10.html" aria-current="page">↳ &nbsp; H/I Doubly Symmetric</a>
+    <a class="navitem nav-child" href="./#/modules/steel/crane-beam">↳ &nbsp; Crane Beam</a>
     <a class="navitem" href="./#/modules/analysis" data-l10n="sectionprops">⌘ &nbsp; Section Properties</a>
     <div class="nav-caption" data-l10n="engineering">ENGINEERING TOOLS</div>
     <a class="navitem" href="./#/modules/library" data-l10n="materiallib">≡ &nbsp; Material Library</a>
-    <a class="navitem" href="./#/modules/library" data-l10n="standardlib">⌗ &nbsp; Design Standards (Library)</a>
+    <a class="navitem" href="./#/modules/steel/library/standards" data-l10n="standardlib">⌗ &nbsp; Design Standards (Library)</a>
   </nav>
   <div class="outline-header"><strong data-l10n="contents">Contents</strong><span aria-hidden="true">⌖</span></div>
   <nav class="outline-tree" aria-label="Engineering calculation table of contents">
@@ -304,6 +307,7 @@ const HI_TRANSLATIONS = {
   "Dashboard": "Tổng quan",
   "Steel Design": "Thiết kế thép",
   "Component": "Cấu kiện",
+  "Crane Beam": "Dầm cầu trục",
   "H/I Doubly Symmetric": "I/H đối xứng hai trục",
   "Section Properties": "Đặc trưng tiết diện",
   "Engineering Tools": "Công cụ kỹ thuật",

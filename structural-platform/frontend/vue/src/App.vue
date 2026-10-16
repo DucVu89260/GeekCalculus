@@ -7,12 +7,18 @@ import InterfaceChooser from './components/InterfaceChooser.vue'
 import WorkspaceView from './components/WorkspaceView.vue'
 import AdminConsole from './components/AdminConsole.vue'
 import ModuleHub from './components/ModuleHub.vue'
+import CraneBeamWorkspace from './components/CraneBeamWorkspace.vue'
 import { moduleFromHash } from './modules'
 
 const locale = ref(localStorage.getItem('geekcalculus-locale') === 'en' ? 'en' : 'vi')
 const user = ref(null)
 const surface = ref('chooser')
 const moduleCode = ref(moduleFromHash())
+const craneWorkspace = computed(() => moduleCode.value === 'steel/crane-beam' || (
+  moduleCode.value === 'steel'
+  && new URLSearchParams(window.location.search).get('component') === 'crane-beam'
+  && new URLSearchParams(window.location.search).get('standard') === 'aisc360-10'
+))
 const authLoading = ref(true)
 const signingIn = ref(false)
 const authErrorKey = ref('')
@@ -172,6 +178,11 @@ onUnmounted(() => {
     :user="user"
     @usage="selectInterface('usage')"
     @choose-interface="selectInterface('chooser')"
+    @sign-out="signOut"
+  />
+  <CraneBeamWorkspace
+    v-else-if="surface === 'module' && craneWorkspace"
+    v-model:locale="locale"
     @sign-out="signOut"
   />
   <ModuleHub

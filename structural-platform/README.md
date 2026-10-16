@@ -56,6 +56,10 @@ không bị phục hồi khi restart hoặc chạy seed lại. Không chạy `mi
 trên database cần giữ. `.env`, SQLite, dependencies và build outputs local
 không được lưu vào Git.
 
+## Tên miền localhost cho main và test
+
+Có thể chạy main tại `http://geekcalculus.com` và bản phát triển tại `http://geekcalculus.test`, dùng chung database/tài liệu tiêu chuẩn, nhưng giữ phiên đăng nhập riêng cho test. Xem [hướng dẫn local domains](local/README.md) để thêm hosts và chạy `bash scripts/start-local-domains.sh`.
+
 ## Đăng nhập và phân quyền
 
 | Vai trò | Sau đăng nhập | Quyền |

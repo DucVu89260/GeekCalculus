@@ -1,8 +1,8 @@
 <script setup>
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { request, demoMode } from '../api'
+import { aisc36010Equations, equationDocument } from '../aisc-equation-library.mjs'
 import StandardSourceCorpus from './StandardSourceCorpus.vue'
-import { asce710Equations, asce710WindFormulas } from '../standards-library.js'
 import StandardsToc from './StandardsToc.vue'
 import PrivateStandardPdf from './PrivateStandardPdf.vue'
 import StandardEquationReview from './StandardEquationReview.vue'
@@ -226,7 +226,8 @@ function findDocumentFor(record, kind = record?.kind) {
   if (record?.source_sha256) return documents.find(document => document.sha256 === record.source_sha256) || null
   const normalizedKind = String(kind || '').toLowerCase()
   const preferredKind = normalizedKind === 'commentary' ? 'commentary' : 'specification'
-  return documents.find(document => document.kind === preferredKind) || documents[0] || null
+  const matches = documents.filter(document => document.kind === preferredKind)
+  return matches.length === 1 ? matches[0] : null
 }
 
 function printedPageForEquation(equation) {
@@ -293,20 +294,20 @@ async function loadEdition(code = selectedCode.value) {
     const legacyClauses = Array.isArray(detail.value?.clauses) ? detail.value.clauses : []
     const [clauseRows, equationRows, parameterRows, tableRows] = await Promise.all([
       fetchAllPages('clauses', { code, signal, fallback: legacyClauses }),
-      fetchAllPages('equations', { code, signal }).catch(async fetchError => {
+      (code === 'ASCE7-10' ? Promise.resolve([]) : fetchAllPages('equations', { code, signal })).catch(async fetchError => {
         if (fetchError?.name === 'AbortError') throw fetchError
         return fetchLegacyEquations(code, signal)
       }),
-      fetchAllPages('parameters', { code, signal, optional: true }),
-      fetchAllPages('tables', { code, signal, optional: true }),
+      code === 'ASCE7-10' ? Promise.resolve([]) : fetchAllPages('parameters', { code, signal, optional: true }),
+      code === 'ASCE7-10' ? Promise.resolve([]) : fetchAllPages('tables', { code, signal, optional: true }),
     ])
     if (sequence !== editionSequence) return
     clauses.value = clauseRows.length ? clauseRows : legacyClauses
-    equations.value = code === 'ASCE7-10' ? asce710Equations(equationRows) : equationRows
+    equations.value = code === 'ASCE7-10' ? [] : aisc36010Equations(equationRows)
     parameters.value = parameterRows
     tables.value = tableRows
     const initial = clauses.value.find(clause => clause.kind === 'normative') || clauseRows[0]
-    const defaultDocument = findDocumentFor(initial, initial?.kind) || (detail.value?.documents || []).find(document => document.kind === 'specification') || detail.value?.documents?.[0]
+    const defaultDocument = findDocumentFor(initial, initial?.kind) || equationDocument(detail.value?.documents || [], null)
     activeDocumentId.value = defaultDocument?.id ?? null
     activePage.value = initial?.pdf_page ? Number(initial.pdf_page) : (defaultDocument ? 1 : null)
     if (initial) {
@@ -460,11 +461,11 @@ onMounted(loadCatalog)
       <p v-if="loadingEdition" class="std-loading" role="status">{{ text.loadingEdition }}</p>
       <div v-if="!loadingEdition" class="std-reader-tabs" role="tablist" :aria-label="text.breadcrumb">
         <button type="button" role="tab" :aria-selected="viewTab === 'outline'" @click="viewTab = 'outline'">{{ text.tabOutline }}</button>
-        <button type="button" role="tab" :aria-selected="viewTab === 'equations'" @click="viewTab = 'equations'">{{ text.tabEquations }}</button>
-        <button type="button" role="tab" :aria-selected="viewTab === 'parameters'" @click="viewTab = 'parameters'">{{ text.tabParameters }}</button>
-        <button type="button" role="tab" :aria-selected="viewTab === 'tables'" @click="viewTab = 'tables'">{{ text.tabTables }}</button>
+        <button v-if="!isAsce710" type="button" role="tab" :aria-selected="viewTab === 'equations'" @click="viewTab = 'equations'">{{ text.tabEquations }}</button>
+        <button v-if="!isAsce710" type="button" role="tab" :aria-selected="viewTab === 'parameters'" @click="viewTab = 'parameters'">{{ text.tabParameters }}</button>
+        <button v-if="!isAsce710" type="button" role="tab" :aria-selected="viewTab === 'tables'" @click="viewTab = 'tables'">{{ text.tabTables }}</button>
         <button type="button" role="tab" :aria-selected="viewTab === 'source'" @click="viewTab = 'source'; nextTick(() => sourcePanel?.scrollIntoView({ block: 'start', behavior: 'smooth' }))">{{ text.tabSource }}</button>
-        <button v-if="!demoMode && detail.documents.some(d => d.extraction_summary)" type="button" role="tab" :aria-selected="viewTab === 'corpus'" @click="viewTab = 'corpus'">Source Corpus · Toàn văn / Bảng / Công thức</button>
+        <button v-if="!isAsce710 && !demoMode && detail.documents.some(d => d.extraction_summary)" type="button" role="tab" :aria-selected="viewTab === 'corpus'" @click="viewTab = 'corpus'">Source Corpus · Toàn văn / Bảng / Công thức</button>
       </div>
 
       <StandardSourceCorpus v-if="viewTab === 'corpus'" :key="selectedCode" :code="selectedCode" :documents="detail.documents" />
@@ -481,10 +482,7 @@ onMounted(loadCatalog)
         />
 
         <main class="std-main">
-          <details v-if="isAsce710 && viewTab !== 'source'" class="std-kernel"><summary>Wind kernel · 7 clause-linked calculation branches · REVIEW_REQUIRED</summary>
-            <article v-for="formula in asce710WindFormulas" :key="formula.key"><button type="button" @click="sourceForEquation(formula)">{{ formula.clause }}</button><code>{{ formula.expression }}</code><small>PDF p. {{ formula.pdf_page }} · implemented branch, not whole-building approval</small></article>
-          </details>
-          <template v-if="viewTab === 'outline'">
+          <template v-if="viewTab === 'outline' && !isAsce710">
             <template v-if="selectedClause">
               <header class="std-clause-heading">
                 <div><span>{{ kindLabel(selectedClause.kind) }}</span><h3><strong>{{ selectedClause.code }}</strong> {{ selectedClause.title }}</h3></div>
@@ -595,4 +593,8 @@ onMounted(loadCatalog)
 
 <style scoped>
 .std-registry-record dd{white-space:pre-wrap;overflow-wrap:anywhere;font-family:inherit;font-size:12px}
+</style>
+
+<style scoped>
+.std-source-selection{scroll-margin-top:24px}.std-source-selection a{display:inline-block;margin-left:8px}.std-reference-label{display:block;margin-bottom:5px;color:#866029}.std-eq-jump[aria-pressed="true"]{background:#e7edf5;outline:2px solid #24395d}.std-equation span{overflow-wrap:anywhere}@media(max-width:700px){.std-equation{grid-template-columns:80px minmax(0,1fr)}.std-equation span{grid-column:1 / -1}}
 </style>

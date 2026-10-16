@@ -1,6 +1,7 @@
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { request, demoMode } from '../api'
+import { aisc36010Equations, equationDocument } from '../aisc-equation-library.mjs'
 import StandardSourceCorpus from './StandardSourceCorpus.vue'
 import { asce710Equations, asce710WindFormulas } from '../standards-library.js'
 
@@ -14,6 +15,9 @@ const loading = ref(true)
 const error = ref('')
 const showReview = ref(true)
 const activePage = ref(null)
+const activeDocumentId = ref(null)
+const activeEquation = ref(null)
+const sourcePreview = ref(null)
 const viewTab = ref('outline')
 const sectionFilter = ref('normative')
 const activeClause = ref(null)
@@ -21,7 +25,7 @@ const equationPage = ref(1)
 const isAsce710 = computed(() => selected.value === 'ASCE7-10')
 const displayedEquations = computed(() => {
   const q = search.value.trim().toLowerCase()
-  return equations.value.filter(eq => (!q || [eq.label, eq.clause_code, eq.expression, eq.latex].join(' ').toLowerCase().includes(q))
+  return equations.value.filter(eq => (!q || [eq.label, eq.clause_code, eq.expression, eq.latex, eq.reference_expression].join(' ').toLowerCase().includes(q))
     && (viewTab.value !== 'outline' || !activeClause.value || q || eq.clause_code === activeClause.value.code || eq.clause_code.startsWith(activeClause.value.code + '.')))
 })
 const equationPages = computed(() => Math.max(1, Math.ceil(displayedEquations.value.length / 30)))
@@ -29,7 +33,7 @@ const visibleEquations = computed(() => displayedEquations.value.slice((equation
 const current = computed(() => families.value.flatMap(f => f.editions.map(e => ({ ...e, family: f }))).find(e => e.code === selected.value))
 const clauses = computed(() => (detail.value?.clauses || []).filter(c => (sectionFilter.value === 'all' || c.kind === sectionFilter.value) && (!search.value || [c.code,c.title,c.summary].join(' ').toLowerCase().includes(search.value.toLowerCase()))))
 const pdfUrl = computed(() => {
-  const doc = detail.value?.documents?.find(d => d.kind === 'specification')
+  const doc = equationDocument(detail.value?.documents || [], activeDocumentId.value)
   if (!doc || !selected.value) return ''
   if (doc.file_url) return doc.file_url + '#page=' + (activePage.value || 1)
   return '/api/v1/standards/' + encodeURIComponent(selected.value) + '/documents/' + doc.id + '/file#page=' + (activePage.value || 1)
@@ -47,7 +51,7 @@ let editionGeneration = 0
 async function loadEdition() {
   const generation = ++editionGeneration
   detail.value = null; equations.value = []; error.value = ''
-  activeClause.value = null; equationPage.value = 1; activePage.value = null; search.value = ''; viewTab.value = 'outline'
+  activeClause.value = null; equationPage.value = 1; activePage.value = null; activeDocumentId.value = null; activeEquation.value = null; search.value = ''; viewTab.value = 'outline'
   if (!selected.value) return
   try {
     const [a,b] = await Promise.all([
@@ -55,15 +59,21 @@ async function loadEdition() {
       request('/api/v1/standards/'+encodeURIComponent(selected.value)+'/equations')
     ])
     if (generation !== editionGeneration) return
-    detail.value = a.data; equations.value = selected.value === 'ASCE7-10' ? asce710Equations(b.data) : b.data
+    detail.value = a.data; equations.value = selected.value === 'ASCE7-10' ? asce710Equations(b.data) : selected.value === 'AISC360-10' ? aisc36010Equations(b.data) : b.data
     if (selected.value === 'ASCE7-10') {
       activeClause.value = a.data.clauses.find(c => c.kind === 'normative' && c.code === '26') || null
       activePage.value = activeClause.value?.pdf_page || 1
     }
   } catch(e) { if (generation === editionGeneration) error.value = e.message || 'Could not load edition.' }
 }
-function goTo(c) { activeClause.value = c; equationPage.value = 1; if (c.pdf_page) activePage.value = c.pdf_page }
-function goToEquation(eq) { if (eq.pdf_page) activePage.value = eq.pdf_page }
+function goTo(c) { activeClause.value = c; activeEquation.value = null; activeDocumentId.value = c.document_id ?? null; equationPage.value = 1; activePage.value = c.pdf_page || null }
+async function goToEquation(eq) {
+  activeEquation.value = eq
+  activeDocumentId.value = eq.document_id ?? null
+  activePage.value = eq.pdf_page || null
+  await nextTick()
+  sourcePreview.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+}
 watch([search, viewTab], () => { equationPage.value = 1 })
 watch(selected,loadEdition)
 onMounted(list)
@@ -101,13 +111,18 @@ onMounted(list)
             </details>
             <p v-if="viewTab === 'outline' && activeClause"><strong>{{ activeClause.code }} · {{ activeClause.title }}</strong></p>
           </template>
+          <p v-if="selected === 'AISC360-10' && viewTab !== 'source'" class="std-empty">{{ locale === 'vi' ? 'Import hiện lập chỉ mục mã và trang PDF, chưa phiên âm toàn bộ công thức. Một số biểu thức tham khảo được lấy từ bộ quy tắc I/H hiện có. Chọn mã để xem trang nguồn; trạng thái xác minh được giữ nguyên.' : 'Import indexes labels and PDF pages; it does not transcribe all formulas. Available implementation references come from the existing I/H rules. Select a label to view its source; review status is unchanged.' }}</p>
           <p v-if="!equations.length && viewTab !== 'source'" class="std-empty">No equation expressions available in this database yet. Only engineering-verified formulas may be used in calculations.</p>
-          <article v-for="eq in (viewTab === 'source' ? [] : visibleEquations)" :key="eq.id" class="std-equation"><button type="button" class="std-eq-jump" :disabled="!eq.pdf_page" @click="goToEquation(eq)"><strong>{{ eq.label }}</strong></button><code>{{ eq.latex || eq.expression || 'Source indexed — verify expression on the linked PDF page' }}</code><span>{{ eq.clause_code }} · {{ eq.verification_status }} · {{ eq.pdf_page ? 'PDF p. '+eq.pdf_page : 'Source unmapped' }}</span></article>
+          <article v-for="eq in (viewTab === 'source' ? [] : visibleEquations)" :key="eq.id" class="std-equation"><button type="button" class="std-eq-jump" :aria-pressed="activeEquation?.id === eq.id" @click="goToEquation(eq)"><strong>{{ eq.label }}</strong></button><code>{{ eq.latex || eq.expression || eq.reference_expression || (locale === 'vi' ? 'Chưa phiên âm biểu thức · chọn mã để xem PDF gốc' : 'Expression not transcribed · select label to view source PDF') }}</code><span><small v-if="eq.reference_expression" class="std-reference-label">{{ locale === 'vi' ? 'Tham khảo từ bộ quy tắc I/H · cần đối chiếu PDF' : 'I/H implementation reference · check against PDF' }}</small>{{ eq.clause_code }} · {{ eq.verification_status }} · {{ eq.pdf_page ? 'PDF p. '+eq.pdf_page : 'Source unmapped' }}</span></article>
           <nav v-if="viewTab !== 'source' && displayedEquations.length" class="std-equation-pages" aria-label="Equation pages"><button type="button" :disabled="equationPage <= 1" @click="equationPage--">Previous</button><span>{{ displayedEquations.length }} labels · {{ equationPage }}/{{ equationPages }}</span><button type="button" :disabled="equationPage >= equationPages" @click="equationPage++">Next</button></nav>
-          <h3>PDF Preview</h3>
+          <div ref="sourcePreview" class="std-source-selection" tabindex="-1">
+          <h3>{{ activeEquation ? (activeEquation.label || activeEquation.clause) + ' · PDF Source' : 'PDF Preview' }}</h3>
+          <p v-if="activeEquation" role="status">{{ activePage ? 'PDF p. ' + activePage : (locale === 'vi' ? 'Chưa có trang nguồn cho mục này.' : 'No source page mapped for this item.') }} <a v-if="pdfUrl && activePage" :href="pdfUrl" target="_blank" rel="noopener">{{ locale === 'vi' ? 'Mở trang PDF trong tab mới' : 'Open PDF page in new tab' }}</a></p>
+          <p v-if="activeEquation?.reference_expression"><code>{{ activeEquation.reference_expression }}</code><br /><small>{{ activeEquation.reference_citation }} · {{ activeEquation.reference_conditions }} · REVIEW_REQUIRED</small></p>
           <p v-if="isAsce710 && pdfUrl" class="std-source-provenance">ASCE 7-10 · 658 pages · <a :href="pdfUrl" target="_blank" rel="noopener">Open PDF</a> · <a :href="pdfUrl.split('#')[0]" download="ASCE 7-10.pdf">Download PDF</a><br /><small>SHA-256: {{ detail.library?.source_sha256 || detail.documents.find(d => d.kind === 'specification')?.sha256 }}</small></p>
           <iframe v-if="pdfUrl" :key="pdfUrl" :src="pdfUrl" title="Engineering standard PDF source" class="std-pdf"></iframe>
-          <p v-else class="std-empty">The private source PDF has not been imported by the backend administrator yet.</p>
+          <p v-else class="std-empty">{{ locale === 'vi' ? 'Chưa có PDF nguồn phù hợp. Quản trị viên cần import PDF và liên kết tài liệu với mục tiêu chuẩn.' : 'No unambiguous source PDF is linked. Ask an administrator to import and associate the source document.' }}</p>
+        </div>
         </section>
         <aside v-if="showReview" class="std-review"><h3>Source Review</h3><p>Equation candidates must be checked against the source PDF before use in design calculations.</p><p>Unverified catalog headings are navigation-only.</p><p>{{ demoMode ? 'PDF source and its page index are included in this library.' : 'Private corpus documentation requires authentication.' }}</p></aside>
       </div>
@@ -132,4 +147,8 @@ onMounted(list)
 .std-equation code{font-family:Cambria,'Times New Roman',serif;font-size:16px;font-weight:700}
 .std-pdf{height:75vh;min-height:580px}
 @media(max-width:900px){.std-without-review{grid-template-columns:1fr}}
+</style>
+
+<style scoped>
+.std-source-selection{scroll-margin-top:24px}.std-source-selection a{display:inline-block;margin-left:8px}.std-reference-label{display:block;margin-bottom:5px;color:#866029}.std-eq-jump[aria-pressed="true"]{background:#e7edf5;outline:2px solid #24395d}.std-equation span{overflow-wrap:anywhere}@media(max-width:700px){.std-equation{grid-template-columns:80px minmax(0,1fr)}.std-equation span{grid-column:1 / -1}}
 </style>

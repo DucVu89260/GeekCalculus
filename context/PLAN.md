@@ -77,3 +77,7 @@ Defer until the above workflows work repeatedly. Propose a concrete unmet operat
 ## Task record for future slices
 
 Use the smallest relevant row above. A new nontrivial slice records: objective; base SHA/branch and file ownership; input/output/edition/units; changed paths; prerequisites; acceptance fixtures/commands; excluded behavior; data/rollback implications; status/evidence; next action. Completed implementation, PR review, merge and deployment have separate statuses. Transfer the current result to [Handoff](HANDOFF.md), keeping this plan as the stable dependency view.
+
+## Active standards reader slice
+
+`EQ-UI-01` (implemented / locally verified, base `8052158`): make AISC360-10 equation labels usable: reuse exact canonical implementation expressions as explicitly marked references, preserve database expressions/status, expose clause document IDs and open the selected source page visibly. No transcription/approval of missing formulas, math changes, schema changes or private PDF publication. Evidence: 6 isolated API tests (35 assertions), 3 helper tests, native typecheck/build and synthetic browser selection/source/mobile/edition checks passed. Full source transcription remains incomplete.

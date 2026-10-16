@@ -23,7 +23,7 @@ class StandardsController extends Controller {
         abort_unless($edition,404);
         $clauses = DB::table('standard_clauses')->where('edition_id',$edition->id)
             ->orderByRaw('COALESCE(printed_page, 999999)')->orderBy('code')
-            ->get(['id','code','title','parent_id','kind','pdf_page','printed_page','summary','verification_status']);
+            ->get(['id','code','title','parent_id','document_id','kind','pdf_page','printed_page','summary','verification_status']);
         $documents = DB::table('standard_documents')->where('edition_id',$edition->id)
             ->get(['id','kind','original_name','page_count','processing_status','sha256','extraction_summary']);
         foreach ($documents as $doc) $doc->extraction_summary = json_decode($doc->extraction_summary ?? 'null', true);
@@ -37,7 +37,7 @@ class StandardsController extends Controller {
         abort_unless($edition,404);
         $rows = DB::table('standard_equations as e')->join('standard_clauses as c','c.id','=','e.clause_id')
             ->where('c.edition_id',$edition->id)
-            ->get(['e.id','e.label','e.pdf_page','e.latex','e.variables','e.conditions','e.verification_status','e.implementation_key','c.code as clause_code']);
+            ->get(['e.id','e.label','e.pdf_page','e.latex','e.variables','e.conditions','e.verification_status','e.implementation_key','c.code as clause_code','c.document_id']);
         if ($code === 'ASCE7-10') {
             // Shared source-label index is also available before a private PDF import.
             // Any stored engineering-reviewed row takes precedence over its candidate.

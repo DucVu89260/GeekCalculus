@@ -33,6 +33,7 @@ const tools = { concrete: ['beam', 'column', 'slab', 'foundation'], future: ['re
     <header class="module-topbar">
       <a class="wordmark" :href="homeHref" @click.prevent="emit('home')">GeekCalculus<span class="brand-dot">.</span></a>
       <div class="module-actions">
+        <a class="quiet-button" href="http://127.0.0.1:8010/" target="_blank" rel="noopener noreferrer">{{ locale === 'vi' ? 'SAP2000 · Nội lực (local)' : 'SAP2000 · Forces (local)' }}</a>
         <button type="button" class="quiet-button" @click="emit('home')">{{ t('home') }}</button>
         <button v-if="isAdmin" type="button" class="quiet-button" @click="emit('open-admin')">{{ t('openAdmin') }}</button>
         <div class="language-switch" role="group" :aria-label="t('language')"><button type="button" :aria-pressed="locale === 'vi'" @click="locale = 'vi'">VI</button><button type="button" :aria-pressed="locale === 'en'" @click="locale = 'en'">EN</button></div>

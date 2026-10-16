@@ -120,3 +120,10 @@ Xem [../README.md](../README.md) cho cấu hình Playwright và tài khoản ri�
 [docs/sectional-properties-v1.md](docs/sectional-properties-v1.md).
 
 Bộ dữ liệu cơ học mở rộng được lưu tại `section_properties.mechanics`: đặc trưng quanh trục chính, mô đun uốn có liên kết Ixy, tích phân bậc ba, Wagner, mô đun xoắn/vênh/cắt và hệ số phân bố ứng suất. Xem [package Section Properties](../section-properties/README.md) cho định nghĩa/giả thiết; không chứa quy tắc tiêu chuẩn thiết kế.
+
+## SAP2000 — nội lực cấu kiện
+
+API **API_IF_SAP26.2.0_V1**, dành cho SAP2000 **26.2.0**: connector Windows, extreme case và interchange liên kết.
+[xem hướng dẫn và contract](SAP2000-API.md). Connector đọc model đang mở;
+không chạy SAP2000 COM trong Linux/cloud. Nhấp đúp `start-sap2000-panel.cmd` trên Windows để mở panel web local; hướng dẫn thao tác từng bước nằm trong tài liệu trên. Có thêm ví dụ CLI.
+Cb AISC 360-10 là [module nội bộ riêng](CB-AISC360-10.md), không có endpoint trong API nội lực.

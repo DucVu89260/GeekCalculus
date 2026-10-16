@@ -1,0 +1,2 @@
+# Optional COM bridge; install only on the Windows machine running SAP2000.
+comtypes==1.4.13; sys_platform == 'win32'

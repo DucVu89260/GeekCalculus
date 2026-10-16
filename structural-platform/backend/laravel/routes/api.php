@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\MemberForceController;
 use App\Http\Controllers\StandardsController;
 use App\Http\Controllers\ComboGeneratorWorkspaceController;
 use App\Http\Controllers\EngineeringController;
@@ -17,6 +18,8 @@ Route::middleware('web')->group(function () {
     Route::post('/auth/login', [AuthController::class, 'login'])->middleware('throttle:10,1');
     Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::middleware('auth')->group(function () {
+        Route::post('/API_IF_SAP26.2.0_V1/{operation}', [MemberForceController::class, 'process'])
+            ->whereIn('operation', ['extremes', 'connection-export'])->middleware('throttle:30,1');
         Route::prefix('v1')->group(function () {
             Route::post('/sections/calculate', [SectionalCalculationController::class, 'calculate'])->middleware('throttle:60,1');
             Route::get('/section-types', [SectionalCalculationController::class, 'sectionTypes'])->middleware('throttle:60,1');

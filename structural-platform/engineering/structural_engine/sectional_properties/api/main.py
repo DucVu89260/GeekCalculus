@@ -9,12 +9,15 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
+from ...member_forces.api import router as member_force_router
+
 from .. import CalculationError, CalculationOptions, calculate, validate_geometry_definition
 from ..canonical import CoreUnavailableError, calculate_canonical, section_registry
 from ..models import AngleGeometry, ChannelGeometry, CircleGeometry, CircularHollowGeometry, DoubleAngleGeometry, ISectionGeometry, RectangleGeometry, RectangularHollowGeometry, TeeGeometry
 
 
 app = FastAPI(title="Sectional Properties API", version="1.0.0")
+app.include_router(member_force_router)
 
 
 def _error(

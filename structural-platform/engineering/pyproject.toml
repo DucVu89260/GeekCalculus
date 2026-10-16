@@ -18,6 +18,7 @@ where = ["."]
 include = ["structural_engine*"]
 
 [tool.setuptools.package-data]
+"structural_engine.member_forces" = ["panel.html"]
 "structural_engine.sectional_properties" = ["data/*.mjs", "data/*.json"]
 
 [tool.pytest.ini_options]

@@ -15,6 +15,9 @@ Màn hình Wind Load dùng kernel chung để tính Kz/Kh, qz/qh, hai dấu GCpi
 Nguồn PDF, ảnh trang, text/OCR và token số được lưu riêng qua Laravel;
 dữ liệu trích xuất chưa được tự động phê duyệt làm công thức thiết kế.
 
+**Import PDF/mục lục cho nhiều bộ tiêu chuẩn** (AISC, ASCE và phiên bản đã đăng ký):
+[hướng dẫn lệnh chung và định dạng JSON](standards/STANDARDS-IMPORT.md).
+
 ## Chạy local
 
 Cần Docker Engine/Desktop, Docker Compose v2 và Bash (Windows: WSL).

@@ -12,9 +12,9 @@ use RuntimeException;
 
 class ImportStandardsOutline extends Command
 {
-    protected $signature = 'standards:import-outline {json : Path to a manifest whose source document is already registered}';
+    protected $signature = 'standards:import-outline {json : Shared registered-edition outline; AISC v2 requires an inspected registered source}';
 
-    protected $description = 'Import an outline only when it matches a registered source document and page count';
+    protected $description = 'Index shared outlines; inspect registered AISC v2 sources before engineering review imports';
 
     public function handle(StandardsImportService $imports, StandardPdfInspector $inspector): int
     {

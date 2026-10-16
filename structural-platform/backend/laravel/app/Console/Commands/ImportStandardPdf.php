@@ -14,12 +14,12 @@ class ImportStandardPdf extends Command
 {
     protected $signature = 'standards:import-pdf
         {pdf : Licensed PDF available to the backend}
-        {manifest : Version 2 extraction manifest generated from this PDF}
+        {manifest : Shared outline JSON; AISC v2 additionally inspects source provenance}
         {--edition= : Optional edition code to cross-check the manifest}
         {--revision= : Optional publisher revision identifier}
         {--kind= : Optional document type override}';
 
-    protected $description = 'Inspect, privately register, and index a standards PDF with source provenance';
+    protected $description = 'Index registered standards privately; inspect AISC v2 source provenance for engineering review';
 
     public function handle(StandardPdfInspector $inspector, StandardsImportService $imports): int
     {

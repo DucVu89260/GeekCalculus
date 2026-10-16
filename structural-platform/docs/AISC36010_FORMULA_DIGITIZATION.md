@@ -3,7 +3,7 @@
 ## Delivery and source boundary
 
 This branch integrates the inspected source-review work from draft PR #18 with
-main through `efb56ee`, including its ASCE PDF/outline reader and local Docker
+main through `5da4c05`, including its ASCE PDF/outline reader and local Docker
 configuration. It extends that registry rather than introducing another equation
 library or numerical engine. SQLite remains the default. The optional PostgreSQL
 configuration inherited from #18 is not enabled by this work.
@@ -31,6 +31,15 @@ fixtures outside Git/Pages. The pre-existing public ASCE artifact is preserved;
 ASCE's UI remains PDF/outline-only.
 
 ## Database/API audit and workflow
+
+Main's shared `StandardsOutlineImporter` remains the unapproved indexing layer for
+any registered edition and legacy bookmarks/clauses JSON. `standards:import-pdf`
+and `standards:import-outline` dispatch AISC360-10 schema-v2 manifests through the
+actual-artifact inspector/versioned registry; other shared manifests retain main's
+index-only behavior. Generic indexing never supplies approval metadata, never
+promotes equations, protects manual/approved records and invalidates the reader
+cache. It does not make a generic manifest eligible for engineering execution.
+
 
 - `standard_documents`: private artifact, SHA, page count, import metadata,
   inspected edition identity and source revisions. Private paths are not user input
@@ -200,7 +209,7 @@ separately named `legacy_comparison`.
 
 | Check | Result / limit |
 | --- | --- |
-| Laravel full suite, explicit SQLite `:memory:` | 81 passed / 753 assertions at integration; final standards-focused follow-up 28 passed / 303 assertions after source-edition hardening; no application DB reset |
+| Laravel full suite, explicit SQLite `:memory:` | 90 passed / 847 assertions after integration of the shared multi-standard importer; no application DB reset |
 | Vue typecheck and complete Node suite | Passed; 108 Node tests passed |
 | Python source/index/candidate suite | 12 passed; synthetic PDFs only. Also reproduced with isolated PyMuPDF 1.26.6; missing Tesseract reproduces an OCR-only error. CI explicitly installs English OCR and uses the main requirements pin. |
 | Native and demo Vue production builds | Passed; existing large reader chunk warning remains |

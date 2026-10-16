@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\DB;
+use App\Services\Standards\StandardsRegistryCache;
 use RuntimeException;
 
 class StandardsOutlineImporter
@@ -125,10 +126,12 @@ class StandardsOutlineImporter
             foreach ($manifest['candidates'] as $eq) {
                 $identity = ['clause_id'=>$ids['normative|'.$eq['clause_code']], 'label'=>$eq['label']];
                 $prior = DB::table('standard_equations')->where($identity)->first();
-                if ($prior && $prior->verification_status !== 'candidate') continue;
+                if ($prior && ($prior->verification_status !== 'candidate' || trim((string) $prior->latex) !== '' ||
+                    DB::table('standard_review_history')->where('record_type', 'equations')->where('record_id', $prior->id)->whereNotNull('reviewer_id')->exists())) continue;
                 if ($prior) DB::table('standard_equations')->where('id',$prior->id)->update(['pdf_page'=>$eq['pdf_page'],'updated_at'=>now()]);
                 else DB::table('standard_equations')->insert($identity + ['pdf_page'=>$eq['pdf_page'],'verification_status'=>'candidate','created_at'=>now(),'updated_at'=>now()]);
             }
         });
+        app(StandardsRegistryCache::class)->invalidate((int) $manifest['edition']->id);
     }
 }

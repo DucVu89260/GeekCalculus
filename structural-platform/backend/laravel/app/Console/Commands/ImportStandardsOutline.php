@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Services\StandardsOutlineImporter;
 use App\Services\Standards\StandardsImportService;
 use App\Services\Standards\StandardPdfInspector;
 use Illuminate\Console\Command;
@@ -29,6 +30,13 @@ class ImportStandardsOutline extends Command
                 throw new RuntimeException('Manifest must contain a JSON object.');
             }
             $editionCode = $manifest['edition_code'] ?? null;
+            if ($editionCode !== 'AISC360-10' || ($manifest['schema_version'] ?? 1) < 2) {
+                $indexer = app(StandardsOutlineImporter::class);
+                $index = $indexer->read($file);
+                $indexer->import($index);
+                $this->info($index['edition']->code.': imported unapproved outline/candidate labels only.');
+                return self::SUCCESS;
+            }
             $sourceHash = strtolower((string) ($manifest['source_sha256'] ?? ''));
             if (!is_string($editionCode) || !preg_match('/^[a-f0-9]{64}$/', $sourceHash)) {
                 throw new RuntimeException('Outline must identify a configured edition and source SHA-256.');

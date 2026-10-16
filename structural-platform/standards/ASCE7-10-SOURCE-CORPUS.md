@@ -9,6 +9,10 @@ calculations remain available to their backend/engineering consumers.
 
 ## PDF + outline import (recommended)
 
+The common importer now supports both AISC and ASCE manifests. See
+[generic import commands and JSON contract](STANDARDS-IMPORT.md).
+`standards:import-asce710-pdf` remains a compatible shortcut to the same importer.
+
 The bundled index is bound to the exact SHA-256 below. From `structural-platform`,
 copy your supplied file to the running backend temporarily and import it:
 

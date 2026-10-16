@@ -1,5 +1,34 @@
 # Repository handoff
 
+## ASCE library delivery verification — 2026-10-16
+
+- Checked latest remote `main` at `0e3c7fc`; the original ASCE delivery commits
+  `eab5eaa` and `991342d` remain in its history. Fast-forwarded the existing
+  `work` checkout, preserving newer Crane/H/I updates and generated local files.
+- No application or formula changes were needed. The committed Pages build
+  retains the Steel Library ASCE link, 875 heading candidates, 310 equation
+  labels, kernel expression references and the complete 658-page PDF.
+- Executed `tests/standards-pages-smoke.cjs` from `structural-platform` against
+  the latest committed `docs` build served locally. Passed: demo sign-in,
+  Library link/new tab, counts, Eq.27.3-1 expression and PDF page 307, original
+  PDF hash, reload and 390px layout; no browser errors. Separately verified
+  matching SHA-256 for both public-source and generated-docs PDF copies and
+  ASCE references in the current hashed JS bundle. No numerical changes or
+  unrelated suites were introduced/repeated in this verification-only task.
+- Direct HTTPS live-site verification remains blocked by the cloud egress
+  proxy (403), including an approved elevated read attempt. This is not
+  evidence of an application failure or a failed Pages deployment. Git reads
+  work; do not treat them as proof of Pages/API connectivity.
+- Saved additive custom network requirements for `ducvu89260.github.io` and
+  `api.github.com` in the environment draft, preserving package-manager
+  presets. Draft persistence is confirmed; runtime activation/publication is
+  not. Next step, if automated live verification is required: save/publish the
+  environment network settings, then retry the live Pages browser check and
+  inspect its deployment status. Do not bypass proxy policy or TLS checks.
+- Full source extraction and engineering formula approval remain distinct:
+  the library integration is delivered; the wind kernel is Chapter 27 Phase A
+  with global `REVIEW_REQUIRED`, as recorded in its audit.
+
 ## Latest correction — left member navigation, 2026-10-16
 
 - Branch `main`, base `17c1f0d`. The user corrected their preference to **left** navigation, matching the original H/I page. Crane now places the sidebar in the left grid column with a right divider; H/I's temporary right-side override was removed. Mobile navigation, routes, calculations and persistence are unchanged.

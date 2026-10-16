@@ -1,4 +1,14 @@
-# Handoff — context foundation
+# Repository handoff
+
+## Latest application change — 2026-10-16
+
+- Branch: `main`; UI commit: `e309e8d`. Shared outer background is login navy `#123754` across Vue workspaces and standalone Combo/I-H pages; paper panels, light fields and navy hover remain.
+- Changed source: `frontend/vue/src/style.css` and the two standalone HTML styles in `frontend/vue/public`; numerical logic, auth and data contracts unchanged. Both standalone script blocks were checked byte-for-byte against the prior commit.
+- Executed: native and demo production builds; browser checks for login/chooser/admin/user, Steel/RC/Loading views, standalone tools and 320/390 px overflow. All passed; no browser JavaScript errors. No formula/backend suites rerun for this CSS-only change.
+- Post-audit runtime update: `main` already contains `b841602`, the minimal `SECTION_CORE_ONLY=1` Docker fix. The earlier clean-engine-build blocker is resolved on main; PR #19's broader target refactor is still a separate proposal.
+- User action after pulling main: refresh the local Vite page (Ctrl+F5 if cached); no migration, data reset or engine rebuild is needed for the palette change.
+
+## Context foundation audit (dated baseline)
 
 Updated: 2026-10-16. Baseline audited: `main` at `991342d`. Current branch: `docs/repository-context-foundation`. Review: [PR #20](https://github.com/DucVu89260/GeekCalculus/pull/20). Foundation commit: `b983e02`; current metadata/head is visible in the PR commit list. This file is a dated state transfer; inspect Git/PR status before continuing.
 

@@ -15,17 +15,17 @@ Source: **American Institute of Steel Construction**, *Specification for Structu
 | --- | --- | --- | --- |
 | Table B4.1a case 1 | Rolled flange axial λr = 0.56√(E/Fy) | Uniform axial compression | Rolled fillet geometry must be sourced |
 | Table B4.1a case 2 | Built-up flange axial λr = 0.64√(kc E/Fy) | kc = clip(4/√(h/tw),0.35,0.76) | Require real plate geometry |
-| Table B4.1a case 5 | Web axial λr = 1.49√(E/Fy) | Axial compression | E7 for slender web NOT COMPLETE |
+| Table B4.1a case 5 | Web axial λr = 1.49√(E/Fy) | Axial compression | E7 effective web width verified by E7-16/E7-17; benchmark still pending |
 | Table B4.1b cases 10,11 | Major flexure flange λp, λr | Rolled/built-up differentiated | λr for built-up uses FL=0.7Fy for symmetric I, kc |
 | Table B4.1b case 13 | Minor flexure flange λp, λr | All I shapes | No shortcut from major flange classification |
 | Table B4.1b case 15 | Web flexure λp = 3.76√(E/Fy), λr = 5.70√(E/Fy) | Doubly symmetric I-shapes | F4/F5 not completed |
 | E3-1 through E3-4 | Pn = Ag min(Fcr,x,Fcr,y) and independent Euler Fe | Nonslender axial compression | Requires Kx/Lx and Ky/Ly |
 | E4-4 | Fe,z = [π² E Cw/(Kz Lz)² + GJ]/(Ix+Iy) | Doubly symmetric torsional buckling | Requires separate Kz, Lz, G; no implicit Lb=Ly |
-| E7 | Slender-element reductions Qs and Qa | Slender axial sections | **Blocked** until all applicable Qa iterative effective widths and E4 interactions implemented |
+| E7-1–E7-17 | Qs rolled/built-up flanges; Qa effective web width; QFy/Fe compression | Slender I sections, single uniform web | Implemented; independent worked-example benchmark still required |
 | F1-1 | Cb absolute Mmax,MA,MB,MC | Same segment and consistent load case | Cb=1 explicit conservative until SAP importer; never use signed legacy values |
 | F2-1 through F2-8 | Mp, Lp, Lr, rts, elastic/inelastic LTB | Compact web and compact flange major flexure | Requires canonical J, Cw and real Lb; assumes restraint against twisting at supports |
 | F3-1, F3-2 | Noncompact/slender flange local buckling | **Compact web** I-shaped major flexure | Uses correct built-up λr and kc |
-| F4 and F5 | Other I and slender webs | Noncompact or slender web major flexure | **Blocked**, do not reuse F2/F3 |
+| F4 | Other I and noncompact webs | Noncompact web flexure | **Blocked**, do not reuse F2/F3 |\n| F5 | Slender-web I flexure, Rpg, LTB and flange local buckling | Built-up symmetric slender web | Implemented per F4-7/11/12 and F5-1–F5-9; rolled fillet requires real catalog geometry |
 | F6-1 through F6-4 | Minor-axis plastic yielding and flange local buckling | I-shaped members in minor flexure | Correct minor flange slenderness class |
 | H1-1a and H1-1b | Axial + biaxial moment interaction; **no early rounding** | Strength checks complete | Block if compression, major or minor flexure missing; D2/D3 net rupture needed if axial tension |
 | G2/G3 | Shear and transverse stiffeners/tension-field action | Axial shear | **Not in Phase B**: legacy checks must not certify |
@@ -47,4 +47,4 @@ Source: **American Institute of Steel Construction**, *Specification for Structu
 - Export retains `aisc36010_phase_ab_review` and `section_properties_shared` to preserve audit trail, not replace legacy result data.
 
 ## Next development package (NOT claimed done)
-Complete E7 Qs/Qa and torsional interactions, F4/F5 including Rpg/other limit states, D2/D3 with section-net connection model, G2/G3 and transverse stiffeners, Chapter C second-order/stability verification, independent test vectors from AISC design examples. Only then promote whole-member PASS eligibility.
+Validate E7 Qs/Qa and F5 with independent design examples, complete F4 with all required limit states, D2/D3 with section-net connection model, G2/G3 and transverse stiffeners, Chapter C second-order/stability verification, independent test vectors from AISC design examples. Only then promote whole-member PASS eligibility.

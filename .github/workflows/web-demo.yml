@@ -6,6 +6,9 @@ on:
       - 'structural-platform/frontend/vue/**'
       - 'structural-platform/standards/**'
       - 'structural-platform/scripts/build-web-demo.sh'
+      - 'structural-platform/scripts/build-section-properties-core.cjs'
+      - 'structural-platform/section-properties/**'
+      - 'structural-platform/tests/section-build-targets.test.cjs'
       - '.github/workflows/web-demo.yml'
   push:
     branches: [main]
@@ -13,6 +16,9 @@ on:
       - 'structural-platform/frontend/vue/**'
       - 'structural-platform/standards/**'
       - 'structural-platform/scripts/build-web-demo.sh'
+      - 'structural-platform/scripts/build-section-properties-core.cjs'
+      - 'structural-platform/section-properties/**'
+      - 'structural-platform/tests/section-build-targets.test.cjs'
       - '.github/workflows/web-demo.yml'
 
 permissions:
@@ -36,14 +42,8 @@ jobs:
       - run: npm ci
       - name: Type-check Vue components
         run: npm run typecheck
-      - name: Verify shared Section Properties integration for I/H
-        run: node --test tests/geometry/hi-section-properties-integration.test.js
-      - name: Verify AISC 360-10 ASD/LRFD resistance-factor modes
-        run: node --test tests/geometry/hi-aisc36010-design-method.test.js
-      - name: Verify ANSI/AISC 360-10 Phase A/B formula branches
-        run: node --test tests/geometry/aisc36010-verified-ih.test.js
-      - name: Verify ASCE 7-10 source library and wind kernel
-        run: node --test tests/geometry/asce710-library.test.js tests/geometry/asce710-wind.test.js
+      - name: Verify build isolation and shared engineering regressions
+        run: npm test
       - name: Build GitHub Pages demo
         run: npm run build -- --outDir ../../../docs --emptyOutDir
         env:

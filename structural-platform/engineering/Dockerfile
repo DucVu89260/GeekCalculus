@@ -4,7 +4,9 @@ COPY frontend/vue/package.json frontend/vue/package-lock.json ./frontend/vue/
 RUN cd frontend/vue && npm ci --no-audit --no-fund
 COPY section-properties ./section-properties
 COPY scripts/build-section-properties-core.cjs ./scripts/
-RUN node scripts/build-section-properties-core.cjs
+# Only the packaged CLI and registry are inputs to the Python adapter. Browser
+# Steel Design/AISC assets belong to the Vue build and are absent from this stage.
+RUN node scripts/build-section-properties-core.cjs --target=engine
 
 FROM python:3.12-slim@sha256:a6e34c598f2467ed0e9a8d349809fcd8b5c603269512df273a0bb1784edc11b1
 COPY --from=core-build /usr/local/bin/node /usr/local/bin/node

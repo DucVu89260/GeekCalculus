@@ -15,10 +15,18 @@ class StandardsSeeder extends Seeder {
             if (!$family) { $id = DB::table('standard_families')->insertGetId(['code'=>$code,'name'=>$name,'publisher'=>$publisher,'created_at'=>now(),'updated_at'=>now()]); }
             else $id = $family->id;
             foreach ($years as $year) {
-                DB::table('standard_editions')->updateOrInsert(['code'=>$code.'-'.substr((string)$year,-2)], [
-                    'family_id'=>$id,'year'=>$year,'title'=>$name.'-'.substr((string)$year,-2),
-                    'status'=>($code === 'AISC360' && $year === 2010) ? 'in_development' : 'coming_soon','updated_at'=>now(),
-                ]);
+                $editionCode = $code.'-'.substr((string)$year,-2);
+                if (!DB::table('standard_editions')->where('code', $editionCode)->exists()) {
+                    DB::table('standard_editions')->insert([
+                        'family_id' => $id,
+                        'code' => $editionCode,
+                        'year' => $year,
+                        'title' => $name.'-'.substr((string)$year,-2),
+                        'status' => ($year === 2010) ? 'in_development' : 'coming_soon',
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
             }
         }
         // Navigation-only clause headings grounded in the AISC 360-10 table of contents.

@@ -1,15 +1,18 @@
 <script setup>
-import { computed, reactive } from 'vue'
+import { computed, defineAsyncComponent, reactive } from 'vue'
 import { copy } from '../i18n'
 import { moduleGroups, groupTools, moduleHref, resolveModuleRoute } from '../modules'
 import { demoMode } from '../api'
 import SteelDesignView from './SteelDesignView.vue'
+import CfsDesignView from './CfsDesignView.vue'
 import SectionPropertiesPanel from './SectionPropertiesPanel.vue'
 import LibraryBrowser from './LibraryBrowser.vue'
-import StandardsExplorer from './StandardsExplorer.vue'
 import StructureIllustration from './StructureIllustration.vue'
 import ComboGeneratorView from './ComboGeneratorView.vue'
 import WindLoadView from './WindLoadView.vue'
+
+// Keep the PDF reader and math fonts out of the ordinary design workspace load.
+const StandardsExplorer = defineAsyncComponent(() => import('./StandardsExplorer.vue'))
 
 const homeHref = import.meta.env.BASE_URL
 const props = defineProps({ moduleCode: { type: String, required: true }, user: { type: Object, required: true }, isAdmin: Boolean })
@@ -48,6 +51,7 @@ const tools = { concrete: ['beam', 'column', 'slab', 'foundation'], future: ['re
     </nav>
     <header class="module-heading"><span class="workspace-group-label">{{ t(currentGroup.title) }}</span><h1>{{ t(currentTool.title) }}</h1><p>{{ t(currentTool.description) }}</p></header>
     <SteelDesignView v-if="currentGroup.code === 'steel' && currentTool.code === 'design'" :locale="locale" />
+    <CfsDesignView v-else-if="currentGroup.code === 'steel' && currentTool.code === 'cfs'" :locale="locale" :user="user" :show-add-in="moduleCode === 'steel/cfs/lapping-node'" @update-locale="locale = $event" />
     <SectionPropertiesPanel v-else-if="currentTool.code === 'section-properties'" :key="currentGroup.code" :locale="locale" />
     <section v-else-if="currentTool.code === 'standards'" class="module-panel"><p class="standards-breadcrumb"><a :href="moduleHref('steel')">Steel Design</a> / <a :href="moduleHref('steel/library')">Library</a> / <strong>Standards</strong></p><StandardsExplorer :locale="locale" :can-edit="isAdmin" /></section>
     <section v-else-if="currentTool.code === 'library'" class="module-panel"><LibraryBrowser :key="currentGroup.code" :locale="locale" :can-edit="false" /></section>
@@ -72,7 +76,8 @@ const tools = { concrete: ['beam', 'column', 'slab', 'foundation'], future: ['re
       <label class="pending-selector"><span>{{ t('tool') }}</span><select v-model="selectedTools.future"><option value="">{{ t('choose') }}</option><option v-for="tool in tools.future" :key="tool" :value="tool">{{ t(tool) }}</option></select></label>
       <p class="pending-note" role="status">{{ t('pending') }}</p>
     </section>
-    <p v-if="demoMode" class="demo-notice" role="note">{{ t('demoNotice') }}</p>
+    <p v-if="currentGroup.code === 'steel' && currentTool.code === 'cfs'" class="demo-notice" role="note">GeekCalculus Z purlin - Lapping and Node - v1</p>
+    <p v-else-if="demoMode" class="demo-notice" role="note">{{ t('demoNotice') }}</p>
   </main>
 </template>
 

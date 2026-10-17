@@ -20,5 +20,5 @@ docker compose run --rm --no-deps backend php artisan migrate --seed --force --n
 docker run --rm --user "$LOCAL_UID:$LOCAL_GID" -e npm_config_cache=/tmp/npm-cache "${node_cert_args[@]}" \
   -v "$PWD:/app" -w /app/frontend/vue node:24-alpine npm ci --no-audit --no-fund
 docker run --rm --user "$LOCAL_UID:$LOCAL_GID" -v "$PWD:/app" -w /app node:24-alpine \
-  node scripts/build-section-properties-core.cjs
+  node scripts/build-section-properties-core.cjs --target=browser
 printf 'Setup complete. Start with: docker compose up -d\n'

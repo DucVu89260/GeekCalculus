@@ -1,0 +1,35 @@
+# Optional private Standards Library runtime. No changes to the default SQLite
+# installation. Use a separate project name and ports when testing side by side.
+services:
+  postgres:
+    image: postgres:17-alpine@sha256:b0f9560a2de083e2cc7382e75f808c7381a32852a7ec49117deedb300e552b24
+    environment:
+      POSTGRES_DB: ${STANDARDS_DB_DATABASE:-geekcalculus}
+      POSTGRES_USER: ${STANDARDS_DB_USERNAME:-geekcalculus}
+      POSTGRES_PASSWORD: ${STANDARDS_DB_PASSWORD:?Set a private STANDARDS_DB_PASSWORD}
+    volumes:
+      - standards-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+  backend:
+    build:
+      context: .
+      dockerfile: docker/backend/Dockerfile
+    image: geekcalculus-backend-standards:local
+    command: ["sh", "/app/scripts/standards-backend-start.sh"]
+    environment:
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: ${STANDARDS_DB_DATABASE:-geekcalculus}
+      DB_USERNAME: ${STANDARDS_DB_USERNAME:-geekcalculus}
+      DB_PASSWORD: ${STANDARDS_DB_PASSWORD:?Set a private STANDARDS_DB_PASSWORD}
+      STANDARDS_PYTHON: /usr/bin/python3
+    depends_on:
+      postgres:
+        condition: service_healthy
+volumes:
+  standards-postgres:

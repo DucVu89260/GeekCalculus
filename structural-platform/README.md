@@ -5,6 +5,23 @@ và phân quyền **admin/user**. Trang sử dụng gồm ba không gian **Steel
 **RC Structure**, **Loading** với thẻ minh họa; trang quản trị có thư viện kỹ thuật
 và quản lý tài khoản.
 
+**CFS Design → CFS Lapping and Node Add-in**: import `.cfsa` và thư mục `SECTIONS`,
+chỉnh lapping/XT và xuất bản sao `_WEBTEST.cfsa` ngay trong trình duyệt.
+[Hướng dẫn, phạm vi thử nghiệm và kiểm thử](frontend/vue/CFS-LAPPING-NODE.md).
+
+Kernel gió **ASCE 7-10 Phase A**: [phạm vi, điều khoản nguồn và kiểm thử](standards/ASCE7-10-WIND-AUDIT.md).
+Màn hình Wind Load dùng kernel chung để tính Kz/Kh, qz/qh, hai dấu GCpi,
+áp lực tường và mái dốc dưới 10° theo Chương 27 Part 1. Kết quả giữ
+`REVIEW_REQUIRED`; chưa phải bộ tải hoàn chỉnh để xuất SAP2000.
+
+**Kho nguồn ASCE 7-10 đầy đủ 658 trang** trong Steel Design → Library → Standards:
+[cấu trúc lưu trữ, tra cứu công thức/bảng, nhập và sao lưu](standards/ASCE7-10-SOURCE-CORPUS.md).
+Nguồn PDF, ảnh trang, text/OCR và token số được lưu riêng qua Laravel;
+dữ liệu trích xuất chưa được tự động phê duyệt làm công thức thiết kế.
+
+**Import PDF/mục lục cho nhiều bộ tiêu chuẩn** (AISC, ASCE và phiên bản đã đăng ký):
+[hướng dẫn lệnh chung và định dạng JSON](standards/STANDARDS-IMPORT.md).
+
 ## Chạy local
 
 Cần Docker Engine/Desktop, Docker Compose v2 và Bash (Windows: WSL).
@@ -45,6 +62,10 @@ hiện có. Seed thư viện ban đầu chỉ chạy một lần; dữ liệu s�
 không bị phục hồi khi restart hoặc chạy seed lại. Không chạy `migrate:fresh`
 trên database cần giữ. `.env`, SQLite, dependencies và build outputs local
 không được lưu vào Git.
+
+## Tên miền localhost cho main và test
+
+Có thể chạy main tại `http://geekcalculus.com` và bản phát triển tại `http://geekcalculus.test`, dùng chung database/tài liệu tiêu chuẩn, nhưng giữ phiên đăng nhập riêng cho test. Xem [hướng dẫn local domains](local/README.md) để thêm hosts và chạy `bash scripts/start-local-domains.sh`.
 
 ## Đăng nhập và phân quyền
 

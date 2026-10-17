@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MemberForceController;
 use App\Http\Controllers\StandardsController;
+use App\Http\Controllers\StandardsReviewController;
 use App\Http\Controllers\ComboGeneratorWorkspaceController;
 use App\Http\Controllers\EngineeringController;
 use App\Http\Controllers\LibraryController;
@@ -28,9 +29,29 @@ Route::middleware('web')->group(function () {
         });
         Route::get('/v1/standards', [StandardsController::class, 'index']);
         Route::get('/v1/standards/{code}', [StandardsController::class, 'show']);
+        Route::get('/v1/standards/{code}/clauses', [StandardsController::class, 'clauses']);
         Route::get('/v1/standards/{code}/equations', [StandardsController::class, 'equations']);
+        Route::get('/v1/standards/{code}/source-pages', [StandardsController::class, 'sourcePages']);
+        Route::get('/v1/standards/{code}/source-items', [StandardsController::class, 'sourceItems']);
+        Route::get('/v1/standards/{code}/documents/{id}/pages/{page}', [StandardsController::class, 'sourcePage'])->whereNumber(['id','page']);
+        Route::get('/v1/standards/{code}/documents/{id}/pages/{page}/image', [StandardsController::class, 'sourceImage'])->whereNumber(['id','page']);
+        Route::get('/v1/standards/{code}/documents/{id}/corpus', [StandardsController::class, 'corpus'])->whereNumber('id');
+        Route::get('/v1/standards/{code}/parameters', [StandardsController::class, 'parameters']);
+        Route::get('/v1/standards/{code}/tables', [StandardsController::class, 'tables']);
+        Route::get('/v1/standards/{code}/search', [StandardsController::class, 'search']);
+        Route::get('/v1/standards/{code}/rules', [StandardsController::class, 'approvedRules']);
+        Route::get('/v1/standards/{code}/notes', [StandardsController::class, 'notes']);
+        Route::post('/v1/standards/{code}/notes', [StandardsController::class, 'createNote'])->middleware('throttle:30,1');
         Route::get('/v1/standards/{code}/documents/{id}/file', [StandardsController::class, 'document'])->whereNumber('id');
         Route::post('/v1/standards/{code}/documents', [StandardsController::class, 'upload'])->middleware(['admin','throttle:10,1']);
+        Route::prefix('v1/admin/standards/{code}')->middleware('admin')->group(function () {
+            Route::patch('/{resource}/{id}', [StandardsReviewController::class, 'edit'])
+                ->whereIn('resource', ['clauses', 'equations', 'parameters', 'tables'])->whereNumber('id');
+            Route::post('/{resource}/{id}/review', [StandardsReviewController::class, 'transition'])
+                ->whereIn('resource', ['documents', 'clauses', 'equations', 'parameters', 'tables'])->whereNumber('id');
+            Route::get('/{resource}/{id}/history', [StandardsReviewController::class, 'history'])
+                ->whereIn('resource', ['documents', 'clauses', 'equations', 'parameters', 'tables'])->whereNumber('id');
+        });
         Route::get('/catalog', [EngineeringController::class, 'catalog']);
         Route::get('/projects', [EngineeringController::class, 'index']);
         Route::post('/projects', [EngineeringController::class, 'store'])->middleware('throttle:60,1');

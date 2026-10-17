@@ -98,7 +98,7 @@ async function verifySharedCalculator(page, route) {
     assert.equal(await modulePage.evaluate(() => window.opener), null)
     assert.deepEqual(await navHashes(modulePage.locator('.workspace-group-navigation')), expectedHash(groupRoutes))
     assert.deepEqual(await navHashes(modulePage.locator('.module-navigation')), expectedHash([
-      'steel', 'steel/section-properties', 'steel/library', 'steel/future',
+      'steel', 'steel/cfs', 'steel/section-properties', 'steel/library', 'steel/future',
     ]))
 
     await modulePage.getByRole('button', { name: 'VI', exact: true }).click()

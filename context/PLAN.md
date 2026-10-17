@@ -1,5 +1,9 @@
 # Repository implementation plan
 
+## Active UI slice — CFS Design entry (2026-10-17)
+
+`CFS-UI-01` (UI implemented; package integration blocked, base `d26c656`): add CFS Design immediately after Steel Design in the Steel workspace and a matching illustrated CFS Lapping and Node Add-in entry with a stable deep link. Preserve existing Steel/RC/Loading routes and VI/EN behavior. The named `geekcalculus_cfs_z_lapping_and_node` package is absent from the checkout; source location has been requested. Until supplied, the add-in page must explicitly state pending integration and expose no fabricated calculation or executable. Evidence: typecheck and production demo build passed; targeted native and demo browser checks passed for adjacent tab order, card/hover, keyboard entry, direct link/reload/back, VI/EN, preserved Steel/RC navigation and 320/390 px overflow. No formula, backend or data changes. User will supply the portable folder; shared ChatGPT conversation URL could not be retrieved (proxy 403), so its contents have not been read. Next: inspect the actual portable source and supplied conversation/specification before implementing a runnable add-in.
+
 Baseline `main`: `991342d`, audited 2026-10-16. This is a dependency/acceptance plan, not a claim that all modules are finished. Current milestone: **Context Foundation**, implemented in [PR #20](https://github.com/DucVu89260/GeekCalculus/pull/20) for review. Update status/evidence as work is actually accepted; keep one bounded implementation slice active per owner.
 
 ## 0 — Context Foundation and immediate integration

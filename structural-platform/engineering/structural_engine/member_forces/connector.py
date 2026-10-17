@@ -96,6 +96,11 @@ def create_app(token=None, gateway=None, instance_scanner=None, operation_runner
     def selection():
         return call(lambda sap: {**sap.model_info(), 'frames': sap.selection()},'selection')
 
+    @app.get(API_PREFIX + '/members', dependencies=[Depends(authenticate)])
+    def members():
+        return call(lambda sap: {'model': sap.model_info()['model'], 'pid': sap.connection_pid,
+                                'data': [m.model_dump() for m in sap.member_info()]}, 'members')
+
     @app.post(API_PREFIX + '/frame-forces', dependencies=[Depends(authenticate)])
     def frame_forces(payload: ExtractionRequest):
         return call(lambda sap: sap.extract(payload),'extract',payload.model_dump(mode='json'))

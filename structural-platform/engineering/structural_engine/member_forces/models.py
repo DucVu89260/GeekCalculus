@@ -40,6 +40,28 @@ class MissingResult(Model):
     reason: Name
 
 
+class SectionPart(Model):
+    index: int
+    start_section: Name
+    end_section: Name
+    start_type: Name
+    end_type: Name
+    length: Number
+    length_type: int
+    ei33_variation: int
+    ei22_variation: int
+
+
+class MemberInfo(Model):
+    frame: Name
+    section: Name
+    auto_select_list: str = ''
+    section_type_code: int
+    section_type: Name
+    units_code: int
+    components: list[SectionPart] = Field(default_factory=list)
+
+
 class Dataset(Model):
     api_name: Literal['API_IF_SAP26.2.0_V1'] = 'API_IF_SAP26.2.0_V1'
     sap2000_version: Literal['26.2.0'] = '26.2.0'
@@ -50,6 +72,7 @@ class Dataset(Model):
     units: Literal['kN_m_C'] = 'kN_m_C'
     axes: Literal['SAP2000_local_123'] = 'SAP2000_local_123'
     rows: Annotated[list[ForceRow], Field(max_length=100000)]
+    members: Annotated[list[MemberInfo], Field(max_length=1000)] = Field(default_factory=list)
     missing_results: Annotated[list[MissingResult], Field(max_length=100000)] = Field(default_factory=list)
 
     @model_validator(mode='after')

@@ -8,7 +8,7 @@ from .dotnet import ConnectionSettings
 from .sap2000 import SapError
 
 MARKER=b'SAP2000_WORKER_RESULT:'
-OPERATIONS={'model','cases','selection','extract'}
+OPERATIONS={'model','cases','selection','members','extract'}
 
 
 def run_worker(operation,settings,payload=None):
@@ -51,6 +51,7 @@ def execute(request):
         sap.verify_version()
         if operation=='model':return sap.model_info()
         if operation=='cases':return sap.cases()
+        if operation=='members':return {'model':sap.model_info()['model'],'pid':sap.connection_pid,'data':[m.model_dump(mode='json') for m in sap.member_info()]}
         if operation=='selection':return {**sap.model_info(),'frames':sap.selection()}
         return sap.extract(ExtractionRequest.model_validate(request['payload'])).model_dump(mode='json')
 

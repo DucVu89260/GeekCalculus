@@ -10,7 +10,7 @@ import re
 from .contract import TARGET_SAP2000_VERSION
 from datetime import datetime, timezone
 from pathlib import PureWindowsPath
-from .models import Dataset, ForceRow, MissingResult, Model, Name
+from .models import Dataset, ForceRow, MissingResult, MemberInfo, SectionPart, Model, Name
 from pydantic import Field, ValidationError
 from typing import Annotated, Literal
 
@@ -43,9 +43,10 @@ def checked(code):
 
 
 class Sap2000:
-    def __init__(self, model, connection_pid=None):
+    def __init__(self, model, connection_pid=None, section_type_names=None):
         self.model = model
         self.connection_pid = connection_pid
+        self.section_type_names = section_type_names or {}
 
     def verify_version(self):
         version, version_number = outputs(com_operation('SAP2000_GET_VERSION', self.model.GetVersion), 2)
@@ -138,6 +139,35 @@ class Sap2000:
             raise SapError('SAP2000 returned inconsistent selection counts')
         return [n for t, n in zip(types or (), names or ()) if t == 2]
 
+    def member_info(self, frames=None):
+        frames = list(dict.fromkeys(self.selection() if frames is None else frames))
+        if len(frames) > 1000 or set(frames) - set(self.names(self.model.FrameObj)):
+            raise SapError('Invalid frame selection for section metadata')
+        definitions = {}
+        def property_type(name):
+            if name not in definitions:
+                code, = outputs(self.model.PropFrame.GetTypeOAPI(name), 1)
+                definitions[name] = (code, self.section_type_names.get(code, 'Type_'+str(code)))
+            return definitions[name]
+        result = []
+        for frame in frames:
+            section, auto = outputs(self.model.FrameObj.GetSection(frame), 2)
+            code, kind = property_type(section)
+            components = []
+            if 'NONPRISMATIC' in kind.upper().replace('_',''):
+                count, starts, ends, lengths, length_types, ei33, ei22, color, notes, guid = outputs(
+                    self.model.PropFrame.GetNonPrismatic(section), 10)
+                if count < 1 or any(len(c or ()) != count for c in (starts,ends,lengths,length_types,ei33,ei22)):
+                    raise SapError('Invalid nonprismatic section definition: '+section)
+                for i in range(count):
+                    components.append(SectionPart(index=i+1, start_section=starts[i], end_section=ends[i],
+                        start_type=property_type(starts[i])[1], end_type=property_type(ends[i])[1],
+                        length=lengths[i], length_type=length_types[i],
+                        ei33_variation=ei33[i], ei22_variation=ei22[i]))
+            result.append(MemberInfo(frame=frame, section=section, auto_select_list=auto or '',
+                section_type_code=code, section_type=kind, units_code=int(self.model.GetPresentUnits()), components=components))
+        return result
+
     def extract(self, request: ExtractionRequest):
         model_filename = self.model.GetModelFilename()
         if request.expected_model is not None and request.expected_model != model_filename:
@@ -171,6 +201,7 @@ class Sap2000:
         primary_error = None
         try:
             checked(self.model.SetPresentUnits(6))  # CSI eUnits.kN_m_C
+            member_data = self.member_info(frames)
             # Query one output at a time so case/combo names can never be conflated.
             for case in request.output_cases:
                 missing = self.missing_dependencies(case, statuses)
@@ -230,7 +261,7 @@ class Sap2000:
         if self.model.GetModelFilename() != model_filename:
             raise SapError('Active SAP2000 model changed during extraction; discard results and reconnect')
         try:
-            return Dataset(model=model_filename, extracted_at=datetime.now(timezone.utc).isoformat(), rows=rows, missing_results=missing_results)
+            return Dataset(model=model_filename, extracted_at=datetime.now(timezone.utc).isoformat(), rows=rows, missing_results=missing_results, members=member_data)
         except ValidationError as error:
             raise SapError('SAP2000_DATASET_INVALID: '+validation_details(error)) from error
 

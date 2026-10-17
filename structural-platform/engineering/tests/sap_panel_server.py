@@ -18,7 +18,7 @@ MODELS[34567].GetModelFilename=lambda:r'C:\Models\Tower B.sdb'
 def gateway(settings):
     if settings.pid not in MODELS:
         raise SapError('Không đọc được PID 56789; kiểm tra quyền Windows.')
-    yield Sap2000(MODELS[settings.pid],connection_pid=settings.pid)
+    yield Sap2000(MODELS[settings.pid],connection_pid=settings.pid,section_type_names={1:'I',99:'NONPRISMATIC'})
 
 
 def scanner(settings):
@@ -33,6 +33,7 @@ def runner(operation,settings,payload=None):
             raise SapError('SAP2000_MODEL_CHANGED: File changed; rescan.')
         if operation=='model':return sap.model_info()
         if operation=='cases':return sap.cases()
+        if operation=='members':return {'model':sap.model_info()['model'],'pid':sap.connection_pid,'data':[m.model_dump() for m in sap.member_info()]}
         if operation=='selection':return {**sap.model_info(),'frames':sap.selection()}
         return sap.extract(ExtractionRequest.model_validate(payload)).model_dump(mode='json')
 

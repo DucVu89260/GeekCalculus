@@ -64,12 +64,16 @@ def connection_export(request: ExportRequest):
     if request.format == 'json':
         return {**metadata, 'purpose': 'connection_interchange', 'warning': warning, 'rows': [r.model_dump() for r in rows]}
     stream = io.StringIO(newline='')
+    metadata.pop('members', None)
     metadata.pop('missing_results', None)  # Missing outputs are documented in JSON, never force rows.
-    fields = [*metadata.keys(), 'warning', *rows[0].model_dump().keys()]
+    member_lookup = {m.frame:m for m in request.dataset.members}
+    fields = [*metadata.keys(), 'warning', 'section', 'section_type', *rows[0].model_dump().keys()]
     writer = csv.DictWriter(stream, fieldnames=fields)
     writer.writeheader()
     for row in rows:
-        record = {**metadata, 'warning': warning, **row.model_dump()}
+        member = member_lookup.get(row.frame)
+        record = {**metadata, 'warning': warning, 'section':member.section if member else '',
+                  'section_type':member.section_type if member else '', **row.model_dump()}
         # Avoid spreadsheet formula execution from model/object/case names.
         record = {k: ("'" + v if isinstance(v, str) and v.lstrip().startswith(('=', '+', '-', '@')) else v) for k, v in record.items()}
         writer.writerow(record)

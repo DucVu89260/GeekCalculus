@@ -237,3 +237,13 @@ Nếu tất cả output đều thiếu, `rows: []` và JSON vẫn tải được
 ### Hiển thị mục thiếu và Envelope — build 2026.10.17.7
 
 Thông báo none và Case/Combo thiếu trong danh sách chọn dùng chữ đậm màu da cam. Màu được cập nhật sau mỗi lần xuất và xóa khi đổi model hoặc bắt đầu xuất lại; Case đã biết chưa có kết quả vẫn giữ dấu hiệu none. Envelope có thể xem trong bảng, tải JSON và tìm cực trị trên các dòng đã xuất. CSV liên kết chặn envelope/modal và nhãn Max/Min vì không bảo đảm các thành phần lực đồng thời. Một Combo thiếu kết quả do Case thành phần chưa phân tích là trường hợp none, khác với hạn chế CSV của Envelope.
+
+### Section, Nonprismatic và bộ lọc — build 2026.10.17.8
+
+- `GET /API_IF_SAP26.2.0_V1/members`: đọc các frame đang chọn ở PID/model đã kết nối. Cần Bearer token như các endpoint khác. Trả `model`, `pid`, `data` chứa thông tin từng frame. Endpoint chỉ đọc, giữ nguyên đơn vị SAP2000; mỗi member có `units_code` để giải thích chiều dài tuyệt đối.
+- `POST /API_IF_SAP26.2.0_V1/frame-forces`: dữ liệu JSON bổ sung `members` bên cạnh `rows` và `missing_results`. Tên frame liên kết hai danh sách. Metadata được đọc cùng lần xuất, ở đơn vị kN–m–C (`units_code: 6`); đơn vị SAP cũ được khôi phục kể cả khi đọc metadata thất bại. JSON cũ không có `members` vẫn được chấp nhận.
+- Mỗi member gồm `frame`, `section`, `auto_select_list`, `section_type_code`, `section_type`, `units_code`, `components`. Loại section lấy từ enum `eFramePropType` của DLL đang nạp, không dùng mã số phỏng đoán. Section prismatic thông thường có `components: []`.
+- Với Nonprismatic, `components` theo đúng thứ tự đoạn của `PropFrame.GetNonPrismatic`: `index`, `start_section`, `end_section`, `start_type`, `end_type`, `length`, `length_type`, `ei33_variation`, `ei22_variation`. `length_type = 1` là tỷ lệ tương đối, `2` là chiều dài tuyệt đối theo units_code. EI giữ mã CSI (1 tuyến tính, 2 parabolic, 3 cubic). Không tự nội suy thành section tương đương tại station.
+- CSV liên kết thêm cột `section`, `section_type`; đầy đủ thành phần Nonprismatic nằm trong JSON. Các quy tắc lực đồng thời và Envelope vẫn giữ nguyên.
+- Mục 4 có bộ lọc Cấu kiện, Section, Loại section, Case/Combo, Loại output và Step. Các điều kiện kết hợp bằng AND; thay bộ lọc sẽ về trang đầu. Nút Xóa bộ lọc trả toàn bộ dòng. Bộ lọc chỉ tác động bảng hiển thị; tải JSON/CSV và mục 5 vẫn dùng toàn bộ dữ liệu đã xuất, được ghi rõ trên panel.
+- Bấm Đọc lựa chọn hiện tại hoặc Lấy nội lực, rồi mở Section và thành phần Nonprismatic để xem cấu tạo từng đoạn. Cần đối chiếu trên Windows/SAP2000 26.2.0 thật; kiểm thử cloud dùng fixture API và CLR, không có DLL/SAP2000 thật.

@@ -36,6 +36,9 @@ class FakeModel:
         self.restore_fail = False
         self.locked = True
         self.FrameObj = Names(['F1', 'F2'])
+        self.FrameObj.GetSection = lambda name: ('I300' if name == 'F1' else 'NP1', '', 0)
+        self.PropFrame = SimpleNamespace(GetTypeOAPI=lambda name: (99 if name == 'NP1' else 1, 0),
+            GetNonPrismatic=lambda name: (2,['I300','I500'],['I500','I300'],[.5,.5],[1,1],[1,1],[1,1],0,'','',0))
         self.LoadCases = CaseNames(['DEAD'])
         self.RespCombo = ComboNames(['ULS', 'ENV'])
         self.Analyze = SimpleNamespace(GetCaseStatus=lambda: (1, ['DEAD'], [4], 0))
@@ -376,3 +379,47 @@ def test_all_missing_outputs_http_response_is_success_with_json_null():
     assert response.status_code == 200
     assert response.json()['rows'] == []
     assert response.json()['missing_results'][0]['result'] is None
+
+
+def test_member_sections_and_nonprismatic_segments_use_sap_enum_names():
+    model = FakeModel()
+    sap = Sap2000(model, section_type_names={1:'I',99:'NONPRISMATIC'})
+    data = sap.extract(request())
+    first, second = data.members
+    assert first.frame == 'F1' and first.section == 'I300' and first.section_type == 'I'
+    assert first.components == [] and first.units_code == 6
+    assert second.frame == 'F2' and second.section == 'NP1'
+    assert second.section_type_code == 99 and second.section_type == 'NONPRISMATIC'
+    assert [(p.start_section,p.end_section) for p in second.components] == [('I300','I500'),('I500','I300')]
+    assert all(p.start_type == 'I' and p.end_type == 'I' for p in second.components)
+    assert [p.length for p in second.components] == [.5,.5]
+    assert [p.length_type for p in second.components] == [1,1]
+    assert model.units == 9
+    from structural_engine.member_forces.models import ExportRequest
+    from structural_engine.member_forces.processing import connection_export
+    import csv, io
+    records=list(csv.DictReader(io.StringIO(connection_export(ExportRequest(dataset=data,format='csv')))))
+    assert records[-1]['section'] == 'NP1' and records[-1]['section_type'] == 'NONPRISMATIC'
+    assert 'members' not in records[-1]
+    assert connection_export(ExportRequest(dataset=data))['members'][1]['components'][1]['index'] == 2
+
+
+def test_member_endpoint_reads_selection_without_changing_units_or_output_state():
+    model = FakeModel()
+    @contextmanager
+    def gateway():
+        yield Sap2000(model, connection_pid=123,section_type_names={1:'I',99:'NONPRISMATIC'})
+    client = TestClient(create_app('x'*32, gateway))
+    response=client.get('/API_IF_SAP26.2.0_V1/members',headers={'Authorization':'Bearer '+'x'*32})
+    assert response.status_code == 200
+    assert response.json()['pid'] == 123 and len(response.json()['data']) == 2
+    assert response.json()['data'][1]['units_code'] == 9
+    assert model.units == 9 and model.case_selected['DEAD'] and model.combo_selected['ENV']
+
+
+def test_malformed_nonprismatic_definition_fails_and_restores_units():
+    model=FakeModel()
+    model.PropFrame.GetNonPrismatic=lambda name:(2,['I300'],['I500'],[.5],[1],[1],[1],0,'','',0)
+    with pytest.raises(SapError,match='Invalid nonprismatic'):
+        Sap2000(model,section_type_names={99:'NONPRISMATIC',1:'I'}).extract(request())
+    assert model.units == 9 and model.case_selected['DEAD'] and model.combo_selected['ENV']

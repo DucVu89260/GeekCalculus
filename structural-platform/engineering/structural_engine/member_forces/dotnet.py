@@ -148,11 +148,15 @@ def connect_dotnet(settings: ConnectionSettings):
         except ImportError as error:
             raise SapError('SAP2000_DOTNET_IMPORT: Install requirements-windows.txt (pythonnet) using the connector venv.') from error
         com_operation('SAP2000_DLL_LOAD', lambda: clr.AddReference(str(path.resolve())))
-        from SAP2000v1 import Helper, cHelper, cSapModel
+        from SAP2000v1 import Helper, cHelper, cSapModel, eFramePropType
         helper = com_operation('SAP2000_DOTNET_HELPER', lambda: cHelper(Helper()))
         application = attach_application(helper, pid)
         model = com_operation('SAP2000_MODEL', lambda: cSapModel(application.SapModel))
-        sap = Sap2000(DotNetProxy(model, clr.GetClrType(cSapModel), System), connection_pid=pid)
+        enum_type = clr.GetClrType(eFramePropType)
+        type_names = {int(System.Convert.ToInt32(System.Enum.Parse(enum_type, name))): str(name)
+                      for name in System.Enum.GetNames(enum_type)}
+        sap = Sap2000(DotNetProxy(model, clr.GetClrType(cSapModel), System), connection_pid=pid,
+                      section_type_names=type_names)
         if settings.expected_model is not None and sap.model.GetModelFilename() != settings.expected_model:
             raise SapError('SAP2000_MODEL_CHANGED: File trong PID đã đổi. Quét lại danh sách và chọn đúng model trước khi tiếp tục.')
         yield sap

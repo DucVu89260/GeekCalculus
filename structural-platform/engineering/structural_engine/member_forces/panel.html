@@ -24,10 +24,15 @@ button{border-color:#a6bac5;color:var(--edge);background:white}button.primary,bu
 .result-filters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:16px 0}.result-filters label{font-size:14px;min-width:0}.result-filters select{font-size:14px;margin-bottom:0}.member-details{margin:14px 0}.member-details summary{cursor:pointer;font-weight:600}.member-details ul{padding-left:20px;overflow-wrap:anywhere}@media(max-width:1100px){.result-filters{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:500px){.result-filters{grid-template-columns:minmax(0,1fr)}}
 
 .position-warning{color:#a94b00;font-weight:700}
+
+/* Use the available desktop width; wrap long case names instead of stretching force columns. */
+main{max-width:none;width:100%;padding:0 14px}.layout{grid-template-columns:minmax(225px,255px) minmax(0,1fr)}
+.forces table{font-size:13px;table-layout:auto}.forces th,.forces td{padding:8px 6px;font-variant-numeric:tabular-nums}.forces td:nth-child(7){max-width:190px;white-space:normal;overflow-wrap:anywhere}.forces th:nth-child(7){white-space:normal}.forces td:nth-child(3),.forces td:nth-child(6){white-space:normal;max-width:100px}.forces td:nth-child(n+9){white-space:nowrap}.forces .interpolated{background:#fff4df}.forces td:last-child{font-weight:600}
+@media(max-width:850px){.layout{grid-template-columns:minmax(0,1fr)}main{padding:0 10px}}
 </style>
 </head>
 <body><main>
-<header><div class="badge">API_IF_SAP26.2.0_V1 · SAP2000 26.2.0 · .NET / PID · build 2026.10.17.10 · Panel 5 bước</div><h1>Xuất nội lực cấu kiện</h1><p class="muted">Chọn cấu kiện trong SAP2000, sau đó quay lại đây để lấy nội lực. Đơn vị: kN · m · kN.m; giữ nguyên trục local SAP2000.</p></header>
+<header><div class="badge">API_IF_SAP26.2.0_V1 · SAP2000 26.2.0 · .NET / PID · build 2026.10.17.11 · Panel 5 bước</div><h1>Xuất nội lực cấu kiện</h1><p class="muted">Chọn cấu kiện trong SAP2000, sau đó quay lại đây để lấy nội lực. Đơn vị: kN · m · kN.m; giữ nguyên trục local SAP2000.</p></header>
 <div id="status" class="status" role="status" aria-live="polite">Đang chờ kết nối SAP2000 trên máy này.</div>
 <fieldset id="controls" aria-label="Bảng xuất nội lực SAP2000"><div class="layout">
 <section class="card connection" id="connection-panel"><h2>1. Kết nối model</h2>
@@ -42,7 +47,7 @@ button{border-color:#a6bac5;color:var(--edge);background:white}button.primary,bu
 </div><div class="info"><div><small>PID đã kết nối</small><strong id="detected-pid">Chưa xác định</strong></div><div><small>File đang hoạt động</small><strong id="filename">Chưa kết nối</strong><small id="modelpath"></small></div><div><small>Trạng thái</small><strong id="modelstate">—</strong></div></div></div></section>
 <section class="card outputs" id="outputs-panel"><h2>2. Output Cases &amp; Combos</h2><label for="search">Tìm case / combination</label><input type="search" id="search" placeholder="Nhập tên…"><div class="actions"><button id="select-all">Chọn các mục đang hiển thị</button><button id="select-none">Bỏ chọn tất cả</button></div><p id="case-count" class="muted">0 mục được chọn</p><div id="cases" class="cases"></div></section>
 <section class="card selected" id="selected-panel"><h2>3. Cấu kiện đã chọn</h2><div class="selection-grid"><div><p class="muted">Quay sang SAP2000 và chọn một hoặc nhiều frame objects.</p><button id="selection">Đọc lựa chọn hiện tại</button><p id="frames" class="frames">Chưa đọc lựa chọn.</p></div><div><button id="extract" class="primary">Lấy nội lực cấu kiện đang chọn</button><p><small>Lệnh xuất đọc lại lựa chọn SAP2000 tại thời điểm bấm. Không thao tác model khi đang xuất.</small></p></div></div></section>
-<section class="card forces" id="forces-panel"><h2>4. Kết quả nội lực</h2><p id="snapshot" class="result-note">Chưa có dữ liệu xuất.</p><div class="actions"><button id="json">Tải dữ liệu JSON</button><button id="csv">Xuất liên kết CSV</button></div><p class="muted result-note">Envelope vẫn hiển thị trong bảng và tải được bằng JSON. CSV liên kết chỉ nhận bộ lực đồng thời; các dòng envelope/modal hoặc Max/Min không dùng làm bộ lực thiết kế liên kết.</p>
+<section class="card forces" id="forces-panel"><h2>4. Kết quả nội lực</h2><p id="snapshot" class="result-note">Chưa có dữ liệu xuất.</p><div class="actions"><button id="json">Tải dữ liệu JSON</button><button id="csv">Xuất liên kết CSV</button><button id="position-json">Tải vị trí / nội suy JSON</button></div><p class="muted result-note">Envelope vẫn hiển thị trong bảng và tải được bằng JSON. CSV liên kết chỉ nhận bộ lực đồng thời; các dòng envelope/modal hoặc Max/Min không dùng làm bộ lực thiết kế liên kết.</p>
 <div class="result-filters" aria-label="Bộ lọc bảng nội lực">
 <label>Cấu kiện<select id="filter-frame" aria-label="Lọc cấu kiện"><option value="">Tất cả</option></select></label>
 <label>Section<select id="filter-section" aria-label="Lọc section"><option value="">Tất cả</option></select></label>
@@ -51,9 +56,9 @@ button{border-color:#a6bac5;color:var(--edge);background:white}button.primary,bu
 <label>Loại output<select id="filter-kind" aria-label="Lọc loại output"><option value="">Tất cả</option><option value="case">Case</option><option value="combination">Combo</option></select></label>
 <label>Step<select id="filter-step" aria-label="Lọc Step"><option value="">Tất cả</option></select></label>
 </div><button id="reset-filters">Xóa bộ lọc</button><p class="result-note muted">Bộ lọc chỉ áp dụng cho bảng này. JSON, CSV liên kết và mục 5 dùng toàn bộ dữ liệu đã xuất.</p>
-<p class="result-note muted">Mốc vị trí theo toàn chiều dài I–J của từng frame, chưa phải đoạn không giằng Lb. Chỉ lọc station SAP đã xuất, không nội suy hoặc lấy station gần nhất.</p><p id="position-notice" class="result-note" role="status"></p>
+<p class="result-note muted">Mốc vị trí theo toàn chiều dài I–J, chưa phải đoạn không giằng Lb. Thiếu mốc chia tư sẽ nội suy tuyến tính có giữ dấu, từ hai station kẹp mốc trong cùng element/case/step; không ngoại suy. Bảng rút gọn số hiển thị; JSON giữ đầy đủ độ chính xác.</p><p id="position-notice" class="result-note" role="status"></p>
 <details class="member-details"><summary>Section và thành phần Nonprismatic</summary><div id="member-info">Chưa đọc section.</div></details>
-<p id="missing-results" class="result-note"></p><div class="table-wrap"><table><thead><tr><th>Frame</th><th>Section</th><th>Loại section</th><th>Element</th><th>Station (m)</th><th>Vị trí I–J</th><th>Case</th><th>Step</th><th>P</th><th>V2</th><th>V3</th><th>T</th><th>M2</th><th>M3</th></tr></thead><tbody id="results"></tbody></table></div><div class="actions"><button id="prev">Trước</button><span id="page" aria-live="polite">0 dòng</span><button id="next">Sau</button></div></section>
+<p id="missing-results" class="result-note"></p><div class="table-wrap"><table><thead><tr><th>Frame</th><th>Section</th><th>Loại section</th><th>Element</th><th>Station (m)</th><th>Vị trí I–J</th><th>Case</th><th>Step</th><th>P</th><th>V2</th><th>V3</th><th>T</th><th>M2</th><th>M3</th><th>Nguồn</th></tr></thead><tbody id="results"></tbody></table></div><div class="actions"><button id="prev">Trước</button><span id="page" aria-live="polite">0 dòng</span><button id="next">Sau</button></div></section>
 <section class="card extreme" id="extreme-panel"><h2>5. Extreme Cases &amp; Combos</h2><label for="scope">Phạm vi tìm cực trị</label><select id="scope"><option value="per_frame">Theo từng cấu kiện</option><option value="global">Toàn bộ nhóm đã xuất</option></select><div class="actions"><button id="extremes">Xác định Min / Max / Absolute</button><button id="extreme-json">Tải extreme JSON</button></div><p class="result-note muted">Giữ nguyên bộ nội lực tại dòng chi phối. Cực trị chỉ xét những stations và steps đã xuất.</p><div class="table-wrap"><table><thead><tr><th>Nhóm</th><th>Thành phần</th><th>Min</th><th>Max</th><th>|Max|</th><th>Case chi phối |Max|</th></tr></thead><tbody id="extreme-results"></tbody></table></div></section>
 </div><section class="card help" id="help-panel"><details><summary>Hướng dẫn thao tác</summary><ol><li>Mở và lưu model SAP2000 26.2.0; chạy phân tích.</li><li>Kết nối model, kiểm tra tên file, chọn Output Cases.</li><li>Chọn frame objects trong SAP2000.</li><li>Quay lại panel và bấm “Lấy nội lực cấu kiện đang chọn”.</li><li>Tải JSON/CSV hoặc tìm extreme case.</li></ol><p class="muted">Panel này chạy trên máy của bạn. Chưa gửi dữ liệu lên cloud, chưa tính Cb và chưa gán/chỉnh sửa model.</p></details></section></fieldset>
 <script>
@@ -63,12 +68,13 @@ const $=id=>document.getElementById(id);
 let token=new URLSearchParams(location.hash.slice(1)).get('token')||sessionStorage.getItem('sap2000-connector-token')||'';
 if(token)sessionStorage.setItem('sap2000-connector-token',token);
 if(location.hash)history.replaceState(null,'',location.pathname+location.search);
-let instances=[],model=null,cases=[],chosen=new Set(),dataset=null,extremeData=null,page=0,busy=false;
+let instances=[],model=null,cases=[],chosen=new Set(),dataset=null,positionData=null,extremeData=null,page=0,busy=false;
 const pageSize=100;
 if(token)$('token-entry').hidden=true;
 function message(text,error=false){$('status').textContent=text;$('status').classList.toggle('error',error)}
 function syncButtons(){
  $('connect').disabled=!selectedInstance(); $('selection').disabled=!model; $('extract').disabled=!model||!model.locked||!chosen.size;
+ $('position-json').disabled=!positionData;
  $('json').disabled=!dataset;for(const id of ['csv','extremes'])$(id).disabled=!dataset||!dataset.rows.length;
  $('extreme-json').disabled=!extremeData;
  $('prev').disabled=!dataset||page===0;
@@ -96,10 +102,11 @@ function memberLookup(){return new Map((dataset?.members||[]).map(m=>[m.frame,m]
 const positionMarks=[['0',0,'End I'],['0.25',.25,'1/4 L'],['0.5',.5,'1/2 L'],['0.75',.75,'3/4 L'],['1',1,'End J']];
 function rowPositions(row,member){const length=member?.length;if(member?.units_code!==6||!Number.isFinite(length)||length<=0)return [];
  const tolerance=Math.max(1e-6,length*1e-8);return positionMarks.filter(([key,fraction])=>Math.abs(row.station-length*fraction)<=tolerance);}
-function filteredRows(ignorePosition=false){const members=memberLookup();return (dataset?.rows||[]).filter(r=>
+function filteredRows(ignorePosition=false){const members=memberLookup(),position=$('filter-position').value;
+ const rows=!ignorePosition&&position?(positionData?.data||[]).filter(s=>position==='five'||s.fraction===Number(position)).flatMap(s=>s.rows):(dataset?.rows||[]);
+ return rows.filter(r=>
  (!$('filter-frame').value||r.frame===$('filter-frame').value)&&
  (!$('filter-section').value||members.get(r.frame)?.section===$('filter-section').value)&&
- (ignorePosition||!$('filter-position').value||rowPositions(r,members.get(r.frame)).some(([key])=>$('filter-position').value==='five'||key===$('filter-position').value))&&
  (!$('filter-case').value||JSON.stringify([r.case_kind,r.output_case])===$('filter-case').value)&&
  (!$('filter-kind').value||r.case_kind===$('filter-kind').value)&&
  (!$('filter-step').value||JSON.stringify(r.step_type)===$('filter-step').value));}
@@ -113,15 +120,16 @@ function populateFilters(){resetFilters();const rows=dataset?.rows||[],members=m
  for(const [id,pairs] of Object.entries(values)){const select=$(id);select.replaceChildren();const all=document.createElement('option');all.value='';all.textContent='Tất cả';select.append(all);
  for(const [value,label] of [...new Map(pairs)].sort((a,b)=>a[1].localeCompare(b[1],undefined,{numeric:true}))){const option=document.createElement('option');option.value=value;option.textContent=label;select.append(option)}}
 }
-function renderPositionNotice(){const box=$('position-notice');box.textContent='';const selected=$('filter-position').value;if(!selected||!dataset)return;
- const members=memberLookup(),needed=positionMarks.filter(([key])=>selected==='five'||selected===key),groups=new Map();
- for(const row of filteredRows(true)){const key=JSON.stringify([row.frame,row.case_kind,row.output_case,row.step_type,row.step_num]);if(!groups.has(key))groups.set(key,{row,found:new Set()});for(const [mark] of rowPositions(row,members.get(row.frame)))groups.get(key).found.add(mark)}
- const missing=[];for(const {row,found} of groups.values()){const absent=needed.filter(([key])=>!found.has(key));if(absent.length)missing.push('Frame '+row.frame+' · '+row.output_case+' · '+(row.step_type||'Step')+' '+row.step_num+': thiếu '+absent.map(m=>m[2]).join(', '))}
- if(!groups.size)box.textContent='Không có dữ liệu phù hợp với các bộ lọc khác.';
- else if(missing.length)box.textContent=missing.length+' nhóm frame/output/step thiếu mốc: '+missing.slice(0,6).join('; ')+(missing.length>6?'; …':'')+'. Kiểm tra Output Stations trong SAP2000 rồi xuất lại; API không tạo nội lực thay thế. Nếu thiếu chiều dài, hãy xuất lại bằng bản API mới.';
- else box.textContent='Đủ các mốc đã chọn trong dữ liệu xuất. Bộ lọc chưa tính Cb.';
- box.classList.toggle('position-warning',missing.length>0);
+function sampleGroup(row){return JSON.stringify([row.frame,row.case_kind,row.output_case,row.step_type,row.step_num])}
+function renderPositionNotice(){const box=$('position-notice');box.textContent='';box.classList.remove('position-warning');const selected=$('filter-position').value;if(!selected||!dataset)return;
+ if(!positionData){box.textContent='Chưa có kết quả lấy mẫu/nội suy. Hãy xuất lại nội lực.';return}
+ const groups=new Set(filteredRows(true).map(sampleGroup));
+ const samples=positionData.data.filter(s=>groups.has(sampleGroup(s))&&(selected==='five'||s.fraction===Number(selected)));
+ const missing=samples.filter(s=>s.method==='unavailable'),linear=samples.filter(s=>s.method==='linear').length;
+ box.textContent='Mốc có dữ liệu: '+(samples.length-missing.length)+' / '+samples.length+'; nội suy tuyến tính: '+linear+'. Giữ nguyên dấu âm/dương; chưa tính Cb.';
+ if(missing.length){box.textContent+=' Thiếu '+missing.length+' mốc: '+missing.slice(0,6).map(s=>'Frame '+s.frame+' · '+s.output_case+' · '+(s.step_type||'Step')+' '+s.step_num+' · '+positionMarks.find(m=>m[1]===s.fraction)[2]+': '+s.reason).join('; ')+(missing.length>6?'; …':'');box.classList.add('position-warning')}
 }
+function displayNumber(value){return Number.isFinite(value)?Number(value.toPrecision(7)).toString():String(value)}
 function variationLabel(code){return ({1:'Linear',2:'Parabolic',3:'Cubic'})[code]||('Mã '+code)}
 function renderMemberInfo(members){const box=$('member-info');box.replaceChildren();if(!members?.length){box.textContent='Chưa đọc section.';return}
  const list=document.createElement('ul');for(const m of members){const item=document.createElement('li');item.textContent=m.frame+' · '+m.section+' · '+m.section_type+(m.length!=null?' · L='+m.length+' '+(m.units_code===6?'m':'(eUnits '+m.units_code+')'):'')+(m.auto_select_list?' · Auto-select: '+m.auto_select_list:'');
@@ -130,9 +138,13 @@ function renderMemberInfo(members){const box=$('member-info');box.replaceChildre
 for(const id of resultFilterIds)$(id).onchange=()=>{page=0;renderResults()};
 $('reset-filters').onclick=()=>{resetFilters();renderResults()};
 function renderResults(){renderPositionNotice();$('results').replaceChildren();$('missing-results').textContent=dataset?.missing_results?.length?'Không có kết quả (none): '+dataset.missing_results.map(r=>r.output_case+(r.frame?' / Frame '+r.frame:'')+' — '+r.reason).join('; '):'';if(!dataset){$('snapshot').textContent='Chưa có dữ liệu xuất.';$('page').textContent='0 dòng';return}
- const rows=filteredRows(),members=memberLookup(),start=page*pageSize;for(const r of rows.slice(start,start+pageSize))tableRow($('results'),[r.frame,members.get(r.frame)?.section||'—',members.get(r.frame)?.section_type||'—',r.element,r.station,rowPositions(r,members.get(r.frame)).map(m=>m[2]).join(', ')||'—',r.output_case,r.step_type+' '+r.step_num,r.P,r.V2,r.V3,r.T,r.M2,r.M3]);
- $('snapshot').textContent=dataset.model+' · '+rows.length+' dòng · '+new Date(dataset.extracted_at).toLocaleString('vi-VN')+' · kN / m / kN.m';$('page').textContent=rows.length?(start+1)+'–'+Math.min(start+pageSize,rows.length)+' / '+rows.length+' dòng (tổng '+dataset.rows.length+')':'0 dòng phù hợp / tổng '+dataset.rows.length;syncButtons();}
-function clearResults(){dataset=null;extremeData=null;page=0;$('extreme-results').replaceChildren();populateFilters();renderMemberInfo([]);renderResults();renderCases()}
+ const rows=filteredRows(),members=memberLookup(),start=page*pageSize;
+ const samples=new Map((positionData?.data||[]).flatMap(s=>s.rows.map(r=>[r.record_id,s])));
+ for(const r of rows.slice(start,start+pageSize)){const sample=$('filter-position').value?samples.get(r.record_id):null;tableRow($('results'),[r.frame,members.get(r.frame)?.section||'—',members.get(r.frame)?.section_type||'—',r.element,displayNumber(r.station),rowPositions(r,members.get(r.frame)).map(m=>m[2]).join(', ')||'—',r.output_case,r.step_type+' '+r.step_num,...['P','V2','V3','T','M2','M3'].map(c=>displayNumber(r[c])),sample?.method==='linear'?'Nội suy':'SAP2000']);
+ const tr=$('results').lastElementChild;tr.classList.toggle('interpolated',sample?.method==='linear');if(sample?.method==='linear')tr.title='Nội suy tuyến tính từ record '+sample.source_record_ids.join(' → ')+'; trọng số '+sample.weight;}
+
+ $('snapshot').textContent=dataset.model+' · '+rows.length+' dòng · '+new Date(dataset.extracted_at).toLocaleString('vi-VN')+' · kN / m / kN.m';$('page').textContent=rows.length?(start+1)+'–'+Math.min(start+pageSize,rows.length)+' / '+rows.length+' dòng (gốc SAP '+dataset.rows.length+')':'0 dòng phù hợp / tổng '+dataset.rows.length;syncButtons();}
+function clearResults(){dataset=null;positionData=null;extremeData=null;page=0;$('extreme-results').replaceChildren();populateFilters();renderMemberInfo([]);renderResults();renderCases()}
 function download(content,name,type='application/json'){const blob=content instanceof Blob?content:new Blob([JSON.stringify(content,null,2)],{type});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
 function selectedInstance(){return instances.find(item=>String(item.pid)===$('instance').value&&item.available)}
 function resetModel(){model=null;cases=[];chosen.clear();clearResults();$('detected-pid').textContent='Chưa xác định';$('filename').textContent='Chưa kết nối';$('modelpath').textContent='';$('modelstate').textContent='—';$('frames').textContent='Chưa đọc lựa chọn.';renderCases()}
@@ -164,8 +176,9 @@ $('selection').onclick=()=>run(async()=>{const result=await api('/selection');if
 $('extract').onclick=()=>run(async()=>{
  clearResults();message('Đang trích xuất nội lực… Giữ nguyên model cho đến khi hoàn tất.');
  const output_cases=cases.filter(c=>chosen.has(caseKey(c))).map(c=>({name:c.name,kind:c.kind}));
- dataset=await api('/frame-forces',{output_cases,expected_model:model.model});page=0;populateFilters();renderMemberInfo(dataset.members);renderResults();renderCases();const frames=[...new Set(dataset.rows.map(r=>r.frame))];$('frames').textContent=frames.length+' frame đã xuất: '+frames.join(', ');message('Đã xuất '+dataset.rows.length+' dòng nội lực từ '+frames.length+' cấu kiện; '+(dataset.missing_results?.length||0)+' mục không có kết quả (none).');
+ dataset=await api('/frame-forces',{output_cases,expected_model:model.model});page=0;populateFilters();renderMemberInfo(dataset.members);renderResults();renderCases();positionData=await api('/position-samples',{dataset});renderResults();const frames=[...new Set(dataset.rows.map(r=>r.frame))];$('frames').textContent=frames.length+' frame đã xuất: '+frames.join(', ');message('Đã xuất '+dataset.rows.length+' dòng nội lực từ '+frames.length+' cấu kiện; '+(dataset.missing_results?.length||0)+' mục không có kết quả (none).');
 });
+$('position-json').onclick=()=>download(positionData,'sap2000-position-samples.json');
 $('json').onclick=()=>download(dataset,'sap2000-forces.json');
 $('csv').onclick=()=>run(async()=>{const csv=await api('/connection-export',{dataset,format:'csv'},true);download(csv,'sap2000-connection-forces.csv','text/csv');message('Đã xuất CSV liên kết. Kiểm tra trục, dấu và vị trí mặt cắt trước khi nhập phần mềm đích.');});
 $('prev').onclick=()=>{page--;renderResults()};$('next').onclick=()=>{page++;renderResults()};

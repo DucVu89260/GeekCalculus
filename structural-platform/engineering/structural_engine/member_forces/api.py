@@ -1,7 +1,8 @@
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse, Response
 from .contract import API_NAME, API_PREFIX
-from .models import ExportRequest, ExtremeRequest
+from .models import ExportRequest, ExtremeRequest, PositionRequest
+from .positions import position_samples
 from .processing import connection_export, extremes
 
 router = APIRouter(prefix=API_PREFIX, tags=[API_NAME])
@@ -25,3 +26,8 @@ def export_connections(payload: ExportRequest):
     if isinstance(result, str):
         return Response(result, media_type='text/csv', headers={'Content-Disposition': 'attachment; filename="member-forces.csv"'})
     return result
+
+
+@router.post('/position-samples')
+def sample_positions(payload: PositionRequest):
+    return execute(position_samples, payload)

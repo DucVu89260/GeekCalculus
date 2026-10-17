@@ -261,3 +261,15 @@ Mỗi station được đối chiếu với L nhân 0, 0.25, 0.5, 0.75, 1; dung 
 Nếu thiếu station, panel nêu mốc thiếu theo từng frame/output/step trong phạm vi các bộ lọc khác. Kiểm tra Output Stations ở SAP2000 và xuất lại; API không tự sửa output station hoặc chạy analysis. Dataset cũ thiếu length vẫn mở được nhưng không giả định chiều dài từ rows, cần xuất lại để dùng bộ lọc vị trí.
 
 Các vị trí này theo toàn frame I–J, chưa phải các điểm chia tư của một đoạn không giằng Lb do người dùng xác định. API chưa tính Cb; cần xác định Lb, trục mômen và Mmax của đúng đoạn trong module tính riêng. Bộ lọc vẫn chỉ áp dụng cho bảng; JSON/CSV và mục 5 giữ toàn bộ dữ liệu trích xuất.
+
+### Panel rộng và nội suy tuyến tính có dấu — build 2026.10.17.11
+
+Panel dùng toàn chiều ngang cửa sổ; cột trái thu gọn, tên Combo dài tự xuống dòng và bảng hiển thị số với 7 chữ số có nghĩa. Số nhỏ vẫn dùng ký pháp khoa học để không biến thành 0; JSON giữ đầy đủ số thực gốc. Màn hình nhỏ vẫn cuộn bảng khi cần.
+
+Sau khi xuất SAP, panel tự gọi `POST /API_IF_SAP26.2.0_V1/position-samples` với body `{ "dataset": ... }`. Endpoint xử lý dữ liệu trong bộ nhớ, không gọi hoặc sửa SAP2000; cần Bearer token. Chọn L/4, L/2, 3L/4 hoặc Cả 5 vị trí để xem các dòng gốc/nội suy. Dòng nội suy có nhãn nguồn và nền riêng; rê chuột để xem record nguồn và trọng số. Nút Tải vị trí / nội suy JSON tải toàn bộ 5 mốc, gồm `data`, `source_rows`, `members`, `missing_results`, thời điểm trích xuất và hệ trục/đơn vị. JSON gốc và CSV liên kết vẫn lấy dataset SAP gốc; cực trị ở mục 5 cũng dùng dataset gốc.
+
+Thuật toán nhóm theo frame, loại output, tên output, StepType và StepNum. Có station đích (dung sai max(1e-6 m,L*1e-8)) thì giữ các dòng SAP gốc, kể cả hai phía khác element tại cùng tọa độ. Chỉ nội suy ba mốc chia tư còn thiếu; không ngoại suy End I/J. Lấy hai station gần nhất kẹp x; chúng phải có một nhánh element chung duy nhất và mỗi đầu có một dòng trên nhánh đó. Không vượt qua station trung gian, không chọn tùy ý giữa các dòng trùng nguồn và không lấy trung bình qua gián đoạn. Nếu không đủ điều kiện, trả `method: unavailable`, `rows: []` cùng lý do.
+
+Với t=(x-x1)/(x2-x1), từng thành phần P,V2,V3,T,M2,M3 được nội suy bằng (1-t)*F1+t*F2; giữ dấu đại số, không lấy trị tuyệt đối. `method: linear` kèm `source_record_ids`, `weight` và dòng kết quả. `method: original` giữ giá trị/ID gốc. `source_rows` cho phép đối chiếu độc lập; dữ liệu nguồn không bị thay đổi. Envelope/modal vẫn giữ concurrency và StepType gốc, không thành bộ lực đồng thời. Giới hạn 100.000 samples mỗi lần xử lý, cần giảm số frame/output nếu vượt.
+
+Mốc theo toàn frame I–J; module Cb riêng cần xác định đúng đoạn Lb, trục mômen và Mmax. Nội suy tuyến tính là xấp xỉ giữa các station xuất, không tự bổ sung tải hoặc chạy lại mô hình.

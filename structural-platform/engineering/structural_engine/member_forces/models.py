@@ -101,3 +101,7 @@ class ExtremeRequest(Filter):
 class ExportRequest(Filter):
     format: Literal['json', 'csv'] = 'json'
     record_ids: Annotated[list[Name] | None, Field(min_length=1, max_length=100000)] = None
+
+
+class PositionRequest(Model):
+    dataset: Dataset

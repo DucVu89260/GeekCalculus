@@ -19,7 +19,7 @@ Cần Node 24, Python >= 3.11. Từ `structural-platform`:
 ```sh
 cd frontend/vue
 npm ci
-node ../../scripts/build-section-properties-core.cjs
+node ../../scripts/build-section-properties-core.cjs --target=engine
 cd ../../engineering
 python -m venv .venv
 source .venv/bin/activate
@@ -51,14 +51,45 @@ docker run --rm geekcalculus-sectional-properties:1.3.0 python -m pytest -q
 docker run --rm -i geekcalculus-sectional-properties:1.3.0 node structural_engine/sectional_properties/data/section-core.mjs < engineering/examples/i-asymmetric.json
 ```
 
-Docker build Node stage bundle cùng source, rồi đóng gói Node runtime và Python
-adapter vào image. Compose chạy FastAPI nội bộ, không public port engine.
+Docker build Node stage chỉ tạo `section-core.mjs` và `section-registry.json`
+bằng `--target=engine`, rồi đóng gói Node runtime và Python adapter vào image.
+Stage này chỉ cần package `section-properties`, script build và dependency lock;
+không cần source Vue/Steel Design hoặc dữ liệu AISC. Frontend manifests cung cấp
+toolchain đã khóa phiên bản; không sao chép code frontend vào engine stage.
+Compose chạy FastAPI nội bộ, không public port engine.
 Không mount database Laravel vào engine. Khi cập nhật package/formulas, build
 lại engine và UI cùng lúc để manifest hash khớp:
 
 ```sh
 docker compose up -d --build --wait
 ```
+
+Nếu đã gặp lỗi thiếu `hi-section-properties.ts`, cập nhật bản sửa build rồi chạy
+từ `structural-platform`:
+
+```sh
+docker compose build section-engine
+docker compose up -d --build --wait
+```
+
+Không cần xóa volume, reset database hoặc cài Python/PHP trên máy host.
+Các thay đổi build không sửa công thức hoặc dữ liệu đã lưu.
+
+## Các đích build độc lập
+
+Từ `structural-platform`, sau khi cài dependency bằng `npm ci` trong `frontend/vue`:
+
+| Lệnh | Đầu ra |
+| --- | --- |
+| `node scripts/build-section-properties-core.cjs --target=engine` | Node CLI và registry đóng gói cho Python |
+| `node scripts/build-section-properties-core.cjs --target=browser` | Facade hình học và assets Steel Design/AISC cho trình duyệt |
+| `node scripts/build-section-properties-core.cjs --target=library` | Thư viện ESM dùng lại `section-properties/dist/index.mjs` |
+| `node scripts/build-section-properties-core.cjs` | Cả ba đích, giữ tương thích cho kiểm thử/caller hiện có |
+
+`npm run dev`, `npm run build`, `npm run typecheck` trong Vue chỉ chuẩn bị đích
+browser. `npm test` chuẩn bị cả ba vì kiểm thử đối chiếu CLI Python adapter,
+browser và thư viện. Python API và frontend vẫn dùng **một bộ source công thức**
+trong `section-properties`; các bundle chỉ là định dạng phân phối khác nhau.
 
 Laravel `SECTION_ENGINE_URL` trỏ tới FastAPI; ngoài Compose đặt
 `http://127.0.0.1:8001`. Engine lỗi thì tính/lưu trả 503; snapshot đã lưu vẫn đọc

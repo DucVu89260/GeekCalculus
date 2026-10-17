@@ -3,22 +3,96 @@
 namespace App\Console\Commands;
 
 use App\Services\StandardsOutlineImporter;
+use App\Services\Standards\StandardsImportService;
+use App\Services\Standards\StandardPdfInspector;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use RuntimeException;
 
 class ImportStandardsOutline extends Command
 {
-    protected $signature = 'standards:import-outline {json : JSON manifest for a registered standards edition}';
-    protected $description = 'Import a page-linked outline for any registered standards edition (AISC bookmarks or clauses JSON)';
+    protected $signature = 'standards:import-outline {json : Shared registered-edition outline; AISC v2 requires an inspected registered source}';
 
-    public function handle(StandardsOutlineImporter $importer): int
+    protected $description = 'Index shared outlines; inspect registered AISC v2 sources before engineering review imports';
+
+    public function handle(StandardsImportService $imports, StandardPdfInspector $inspector): int
     {
+        $file = (string) $this->argument('json');
+        if (!is_file($file) || !is_readable($file)) {
+            $this->error('A readable JSON manifest is required.');
+            return self::FAILURE;
+        }
+
         try {
-            $manifest = $importer->read($this->argument('json'));
-            $importer->import($manifest);
-            $this->info($manifest['edition']->code.': imported '.count($manifest['clauses']).' outline entries and '.count($manifest['candidates']).' unverified equation labels.');
+            $manifest = json_decode(file_get_contents($file), true, 512, JSON_THROW_ON_ERROR);
+            if (!is_array($manifest)) {
+                throw new RuntimeException('Manifest must contain a JSON object.');
+            }
+            $editionCode = $manifest['edition_code'] ?? null;
+            if ($editionCode !== 'AISC360-10' || ($manifest['schema_version'] ?? 1) < 2) {
+                $indexer = app(StandardsOutlineImporter::class);
+                $index = $indexer->read($file);
+                $indexer->import($index);
+                $this->info($index['edition']->code.': imported unapproved outline/candidate labels only.');
+                return self::SUCCESS;
+            }
+            $sourceHash = strtolower((string) ($manifest['source_sha256'] ?? ''));
+            if (!is_string($editionCode) || !preg_match('/^[a-f0-9]{64}$/', $sourceHash)) {
+                throw new RuntimeException('Outline must identify a configured edition and source SHA-256.');
+            }
+            $document = DB::table('standard_documents')
+                ->join('standard_editions', 'standard_editions.id', '=', 'standard_documents.edition_id')
+                ->where('standard_editions.code', $editionCode)
+                ->where('standard_documents.sha256', $sourceHash)
+                ->select('standard_documents.*')
+                ->first();
+            if (!$document) {
+                throw new RuntimeException('Outline import requires a registered source document with the same SHA-256.');
+            }
+            if (($manifest['schema_version'] ?? 1) < 2 && !in_array($document->verification_status, ['verified', 'published'], true)) {
+                throw new RuntimeException('Legacy outline manifests are accepted only for verified registered documents.');
+            }
+            if (!is_int($manifest['pdf_page_count'] ?? null) || $manifest['pdf_page_count'] !== (int) $document->page_count) {
+                throw new RuntimeException('Outline page count does not match the registered source document.');
+            }
+
+            $disk = Storage::disk((string) config('standards.private_disk', 'local'));
+            if (!$disk->exists($document->private_path)) {
+                throw new RuntimeException('Registered private source PDF is missing.');
+            }
+            $temporaryPdf = tempnam(sys_get_temp_dir(), 'standards-source-');
+            if ($temporaryPdf === false) {
+                throw new RuntimeException('Unable to create a temporary source file for inspection.');
+            }
+            try {
+                $source = $disk->readStream($document->private_path);
+                $target = fopen($temporaryPdf, 'wb');
+                if (!is_resource($source) || !is_resource($target)) {
+                    throw new RuntimeException('Unable to read the registered private source PDF.');
+                }
+                stream_copy_to_stream($source, $target);
+                fclose($source);
+                fclose($target);
+
+                $inspection = $inspector->inspect($temporaryPdf, $editionCode);
+                if (!hash_equals($sourceHash, strtolower((string) ($inspection['source_sha256'] ?? ''))) ||
+                    (int) ($inspection['pdf_page_count'] ?? 0) !== (int) $document->page_count) {
+                    throw new RuntimeException('Registered PDF failed its source SHA-256 or page-count check.');
+                }
+                $actualManifest = $inspector->extract($temporaryPdf, $editionCode);
+                if (!hash_equals($sourceHash, strtolower((string) ($actualManifest['source_sha256'] ?? ''))) ||
+                    (int) ($actualManifest['pdf_page_count'] ?? 0) !== (int) $document->page_count) {
+                    throw new RuntimeException('Re-extracted outline does not match the registered source document.');
+                }
+                $report = $imports->importRegisteredOutline($actualManifest);
+            } finally {
+                @unlink($temporaryPdf);
+            }
+            $this->line(json_encode(['status' => 'indexed', 'report' => $report], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
             return self::SUCCESS;
-        } catch (\Throwable $e) {
-            $this->error($e->getMessage());
+        } catch (\Throwable $exception) {
+            $this->error($exception->getMessage());
             return self::FAILURE;
         }
     }

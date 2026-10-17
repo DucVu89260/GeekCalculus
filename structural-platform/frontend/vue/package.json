@@ -6,16 +6,20 @@
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "build": "vite build",
-    "test": "node --test tests/geometry/*.test.js ../../tests/section-properties-core.test.cjs ../../tests/section-mechanics-advanced.test.cjs",
+    "test": "node --test tests/geometry/*.test.js ../../tests/section-properties-core.test.cjs ../../tests/section-mechanics-advanced.test.cjs ../../tests/section-build-targets.test.cjs",
+    "build:section-properties-browser": "node ../../scripts/build-section-properties-core.cjs --target=browser",
+    "build:section-properties-library": "node ../../scripts/build-section-properties-core.cjs --target=library",
     "preview": "vite preview --host 0.0.0.0",
     "typecheck": "vue-tsc --noEmit",
-    "predev": "node ../../scripts/build-section-properties-core.cjs",
-    "prebuild": "node ../../scripts/build-section-properties-core.cjs",
+    "predev": "node ../../scripts/build-section-properties-core.cjs --target=browser",
+    "prebuild": "node ../../scripts/build-section-properties-core.cjs --target=browser",
     "pretest": "node ../../scripts/build-section-properties-core.cjs",
-    "pretypecheck": "node ../../scripts/build-section-properties-core.cjs"
+    "pretypecheck": "node ../../scripts/build-section-properties-core.cjs --target=browser"
   },
   "dependencies": {
     "decimal.js": "10.6.0",
+    "katex": "^0.19.0",
+    "pdfjs-dist": "^6.4.299",
     "vue": "^3.5.13"
   },
   "devDependencies": {

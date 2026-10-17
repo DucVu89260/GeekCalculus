@@ -106,8 +106,13 @@ trusted. Existing manual records remain unchanged until explicitly saved again.
 ## Build and extend
 
 From `structural-platform/frontend/vue`, run `npm ci` then `npm run build`.
-The pre-hooks call `scripts/build-section-properties-core.cjs`: it generates the
-Node CLI/registry packaged by FastAPI and the synchronous compatibility bundle.
+The dev/build/typecheck pre-hooks call `scripts/build-section-properties-core.cjs
+--target=browser`: only the synchronous compatibility facade and Steel/AISC browser
+assets are emitted. Docker uses `--target=engine` to build the Node CLI/registry
+packaged by FastAPI, without reading browser or standard-specific source files.
+Use `--target=library` (or `npm run build:section-properties-library` from Vue)
+for the public ESM library. Omitting `--target` defaults to `all` for backward compatibility;
+the test pre-hook also builds all targets to check engine/browser/library parity.
 Generated artifacts are ignored by Git; Docker builds them from the same source.
 API path: Laravel → FastAPI → `node-cli.ts` → this package. No Python fallback.
 

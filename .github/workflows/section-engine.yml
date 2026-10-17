@@ -1,0 +1,50 @@
+name: Section Engine isolated Docker build
+
+on:
+  pull_request:
+    paths:
+      - 'structural-platform/engineering/**'
+      - 'structural-platform/section-properties/**'
+      - 'structural-platform/scripts/build-section-properties-core.cjs'
+      - 'structural-platform/frontend/vue/package*.json'
+      - 'structural-platform/.dockerignore'
+      - '.github/workflows/section-engine.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'structural-platform/engineering/**'
+      - 'structural-platform/section-properties/**'
+      - 'structural-platform/scripts/build-section-properties-core.cjs'
+      - 'structural-platform/frontend/vue/package*.json'
+      - 'structural-platform/.dockerignore'
+      - '.github/workflows/section-engine.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  engine:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build from the restricted engine stage inputs
+        run: docker build -f structural-platform/engineering/Dockerfile -t geek-section-engine:ci structural-platform
+      - name: Run engine benchmarks and HTTP integration tests
+        run: docker run --rm geek-section-engine:ci python -m pytest -q
+      - name: Verify installed wheel outside the source directory
+        run: |
+          docker run --rm --workdir /tmp geek-section-engine:ci python -c '
+          from fastapi.testclient import TestClient
+          from structural_engine.sectional_properties.api.main import app
+          from structural_engine.sectional_properties import canonical
+          assert "/site-packages/" in canonical.__file__, canonical.__file__
+          client = TestClient(app)
+          assert client.get("/health").status_code == 200
+          response = client.post("/v1/sections/calculate", json={"geometry": {"type": "rectangle", "geometry_variant": "solid", "dimensions": {"width": 200, "height": 400}}, "units": "mm"})
+          assert response.status_code == 200, response.text
+          result = response.json()
+          assert result["status"] == "success"
+          assert result["properties"]["geometric"]["area"] == 80000
+          assert result["formula_report"]
+          print("Installed wheel API, packaged registry and shared Node core passed")
+          '

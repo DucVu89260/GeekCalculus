@@ -1,0 +1,17 @@
+{
+  "AISC360-10": {
+    "active": true,
+    "family": "AISC360",
+    "edition_year": 2010,
+    "identity_patterns": ["ANSI/AISC\\s*360\\s*[-–]\\s*10", "June\\s+22,?\\s+2010"],
+    "specification_start": "CHAPTER\\s+A\\s+GENERAL\\s+PROVISIONS",
+    "commentary_start": "COMMENTARY\\s+on the Specification",
+    "printed_page_pattern": "16\\.1\\s*[–−-]\\s*(\\d+|[ivxlcdm]+)",
+    "equation_pattern": "\\(((?:C-)?(?:[A-N]\\d{1,2}-\\d+|A-\\d+-\\d+)[a-z]?)\\)"
+  },
+  "AISC360-16": {"active": false, "family": "AISC360", "edition_year": 2016},
+  "AISC360-22": {"active": false, "family": "AISC360", "edition_year": 2022},
+  "ASCE7-10": {"active": false, "family": "ASCE7", "edition_year": 2010},
+  "ASCE7-16": {"active": false, "family": "ASCE7", "edition_year": 2016},
+  "ASCE7-22": {"active": false, "family": "ASCE7", "edition_year": 2022}
+}

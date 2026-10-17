@@ -1,15 +1,17 @@
 <script setup>
-import { computed, reactive } from 'vue'
+import { computed, defineAsyncComponent, reactive } from 'vue'
 import { copy } from '../i18n'
 import { moduleGroups, groupTools, moduleHref, resolveModuleRoute } from '../modules'
 import { demoMode } from '../api'
 import SteelDesignView from './SteelDesignView.vue'
 import SectionPropertiesPanel from './SectionPropertiesPanel.vue'
 import LibraryBrowser from './LibraryBrowser.vue'
-import StandardsExplorer from './StandardsExplorer.vue'
 import StructureIllustration from './StructureIllustration.vue'
 import ComboGeneratorView from './ComboGeneratorView.vue'
 import WindLoadView from './WindLoadView.vue'
+
+// Keep the PDF reader and math fonts out of the ordinary design workspace load.
+const StandardsExplorer = defineAsyncComponent(() => import('./StandardsExplorer.vue'))
 
 const homeHref = import.meta.env.BASE_URL
 const props = defineProps({ moduleCode: { type: String, required: true }, user: { type: Object, required: true }, isAdmin: Boolean })

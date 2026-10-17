@@ -12,6 +12,7 @@ async function main() {
     const errors = []
     page.on('pageerror', error => errors.push(error.message))
     await page.goto(base)
+    await page.locator('#calculation-mode').selectOption('LEGACY')
     await page.waitForFunction(() => document.querySelector('#h1').textContent === '82.41%', null, { timeout: 10000 })
     assert.equal(await page.locator('html').getAttribute('lang'), 'en')
     const snapshot = () => page.evaluate(() => ({ input: latest.input, result: latest.result, dirty: latest.changed }))
@@ -62,6 +63,7 @@ async function main() {
     await page.locator('#steps-copy').click()
     assert.ok((await page.evaluate(() => window.copiedReport)).includes('Sức kháng nén dọc trục'))
     await page.reload()
+    await page.locator('#calculation-mode').selectOption('LEGACY')
     assert.equal(await page.locator('html').getAttribute('lang'), 'vi')
     await page.setViewportSize({ width: 390, height: 844 })
     for (const label of ['VN', 'ENG']) assert.ok(await page.getByRole('button', { name: label, exact: true }).isVisible())

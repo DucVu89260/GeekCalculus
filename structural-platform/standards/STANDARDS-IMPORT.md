@@ -81,3 +81,12 @@ Import JSON trước PDF vẫn dùng được: mục mới chưa có tài liệu
 khi nhập PDF + cùng JSON sau đó. JSON-only không tự chứng minh có PDF ở local.
 Không cần migrate/reset/reseed để nâng cấp importer này. Lệnh chỉ hoạt động
 trong Laravel local/native; GitHub Pages không có database/import backend.
+
+## AISC engineering-review integration
+
+Shared/legacy manifests continue to create unapproved indexes for registered
+editions. AISC360-10 schema-v2 manifests additionally use actual-file inspection
+and the source-version registry before formula review. Neither importer accepts
+manifest-supplied verification/implementation claims as approval. Reviewed and
+manual formula records are protected on shared re-import as well. See
+[formula digitization and source gates](../docs/AISC36010_FORMULA_DIGITIZATION.md).

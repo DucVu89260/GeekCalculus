@@ -22,7 +22,7 @@ def main():
             if path.suffix == '.cmd':
                 data = path.read_text().replace('\r\n', '\n').replace('\n', '\r\n').encode()
             archive.writestr(str(path.relative_to(source)).replace('\\', '/'), data)
-        archive.writestr('BAT-DAU.txt', '''API_IF_SAP26.2.0_V1 — .NET/PID build 2026.10.17.11 — Panel 5 bước
+        archive.writestr('BAT-DAU.txt', '''API_IF_SAP26.2.0_V1 — .NET/PID build 2026.10.17.12 — Panel 5 bước
 1. Giải nén toàn bộ ZIP vào C:\\SAP2000-Forces; dừng connector cũ bằng Ctrl+C trước khi cập nhật.
 2. Giữ .venv đang có; launcher tự cài/cập nhật dependencies, gồm pythonnet 3.2.1.
 3. Mở SAP2000 26.2.0 và model đã phân tích. Dùng cùng tài khoản/mức quyền với connector.

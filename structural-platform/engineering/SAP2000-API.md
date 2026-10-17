@@ -273,3 +273,12 @@ Thuật toán nhóm theo frame, loại output, tên output, StepType và StepNum
 Với t=(x-x1)/(x2-x1), từng thành phần P,V2,V3,T,M2,M3 được nội suy bằng (1-t)*F1+t*F2; giữ dấu đại số, không lấy trị tuyệt đối. `method: linear` kèm `source_record_ids`, `weight` và dòng kết quả. `method: original` giữ giá trị/ID gốc. `source_rows` cho phép đối chiếu độc lập; dữ liệu nguồn không bị thay đổi. Envelope/modal vẫn giữ concurrency và StepType gốc, không thành bộ lực đồng thời. Giới hạn 100.000 samples mỗi lần xử lý, cần giảm số frame/output nếu vượt.
 
 Mốc theo toàn frame I–J; module Cb riêng cần xác định đúng đoạn Lb, trục mômen và Mmax. Nội suy tuyến tính là xấp xỉ giữa các station xuất, không tự bổ sung tải hoặc chạy lại mô hình.
+
+### Chọn Case/Combo theo dải và đọc tên dài — build 2026.10.17.12
+
+- Cột Output Cases & Combos rộng khoảng 330 px trên desktop; giao diện nhỏ vẫn một cột. Danh sách giữ tên trên một dòng và có thanh cuộn ngang bên dưới.
+- Bộ lọc loại: Case & Combo / Chỉ Load Cases / Chỉ Load Combinations, kết hợp với tìm tên không phân biệt hoa thường. Bộ lọc giữ các lựa chọn đã có, kể cả khi chúng đang bị ẩn. Nút Chọn các mục đang hiển thị chỉ thêm những mục khớp cả hai bộ lọc; Bỏ chọn tất cả xóa cả mục bị ẩn.
+- Bấm mục đầu, giữ Shift rồi bấm mục cuối để chọn dải liên tiếp trong danh sách đang hiển thị. Shift+bỏ chọn mục cuối để bỏ chọn cả dải. Hỗ trợ chọn ngược chiều và Shift+Space khi checkbox có focus. Đổi bộ lọc hoặc model sẽ xóa mốc neo của dải để không chọn nhầm; tên Case trùng Combo vẫn là hai mục riêng.
+- Rê chuột lên mục để xem tooltip tên đầy đủ; tên cũng hiển thị ở ô bên dưới danh sách khi hover hoặc focus bàn phím. Mục không có kết quả vẫn giữ chữ đậm màu cam.
+
+Các thay đổi chỉ thuộc thao tác panel; không thay đổi tính toán nội lực, nội suy hoặc cấu hình output SAP2000.

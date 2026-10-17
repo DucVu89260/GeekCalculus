@@ -12,11 +12,11 @@ The kit contains source, a local web panel and a Windows launcher. It is not an 
 
 Cloud validation: 362 Python tests passed (including three real CLR fixture tests); browser smoke checks passed using a simulated SAP2000 interface. Real COM integration still requires acceptance testing on Windows with SAP2000 26.2.0. See `SAP2000-API.md` and `BAT-DAU.txt` inside the ZIP.
 
-SHA256: `804ae90eefde7c5b03fd048595d427768f17dbcf933fddfcfdd825c7eb0c0f66`
+SHA256: `6fa1c938f555f32ae9bd15acce47c4bea62b0e5010ad7b21dc027d32f674e0c7`
 
 If the panel opens but model connection returns HTTP 503, run `diagnose-sap2000.cmd` from the same folder. It reports the failing COM stage and HRESULT without exposing tokens.
 
-Current build: **2026.10.17-signed-interpolation.11**. Uses direct `SAP2000v1.dll` loading with pythonnet 3.2.1. Extract the complete kit to `C:\SAP2000-Forces`, open the SAP2000 models you want to use and double-click `start-sap2000-panel.cmd`. Click Scan SAP2000, select the model filename/PID from the dropdown and connect; no manual PID entry is needed. Does not require COM Helper registration or SAP2000 Repair. Tokens survive reload within the browser tab. Real model extraction still requires comparison against SAP2000 output tables.
+Current build: **2026.10.17-case-picker.12**. Uses direct `SAP2000v1.dll` loading with pythonnet 3.2.1. Extract the complete kit to `C:\SAP2000-Forces`, open the SAP2000 models you want to use and double-click `start-sap2000-panel.cmd`. Click Scan SAP2000, select the model filename/PID from the dropdown and connect; no manual PID entry is needed. Does not require COM Helper registration or SAP2000 Repair. Tokens survive reload within the browser tab. Real model extraction still requires comparison against SAP2000 output tables.
 
 Build .2 fixes response combination extraction using `RespCombo.GetTypeOAPI`; covers mixed cases/combinations and nested combinations. Envelope/statistical results remain nonconcurrent and cannot be exported as connection action vectors.
 

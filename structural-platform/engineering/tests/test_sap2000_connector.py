@@ -127,8 +127,8 @@ def test_invalid_model_frame_and_selection_do_not_modify_state():
 def test_combo_constituent_status_and_spectrum_classification():
     model = FakeModel()
     model.Analyze.GetCaseStatus = lambda: (1, ['DEAD'], [1], 0)
-    with pytest.raises(SapError, match='underlying'):
-        Sap2000(model).extract(request())
+    missing = Sap2000(model).extract(request())
+    assert missing.rows == [] and missing.missing_results[0].result is None
     assert model.units == 9
     model = FakeModel()
     model.LoadCases.GetTypeOAPI = lambda name: (4, 0, 0)
@@ -138,8 +138,8 @@ def test_combo_constituent_status_and_spectrum_classification():
 def test_missing_results_and_malformed_arrays_restore_state():
     model = FakeModel()
     model.Results.FrameForce = lambda *args: (0, *([[]]*13), 0)
-    with pytest.raises(SapError, match='No frame forces'):
-        Sap2000(model).extract(request())
+    empty = Sap2000(model).extract(request())
+    assert not empty.rows and len(empty.missing_results) == 2
     model.Results.FrameForce = lambda *args: (2, *([[]]*13), 0)
     with pytest.raises(SapError, match='array lengths'):
         Sap2000(model).extract(request())
@@ -256,7 +256,7 @@ def test_nested_linear_combo_and_nested_envelope_are_classified():
     model.RespCombo.GetCaseList = lambda name: (1, [1], ['ULS'], [1.0], 0) if name == 'NESTED' else (1,[0],['DEAD'],[1.0],0)
     req = ExtractionRequest(output_cases=[{'name':'NESTED','kind':'combination'}])
     assert all(r.concurrency == 'concurrent' for r in Sap2000(model).extract(req).rows)
-    model.RespCombo.GetCaseList = lambda name: (1,[1],['ENV'],[1.0],0)
+    model.RespCombo.GetCaseList = lambda name: (1,[1],['ENV'],[1.0],0) if name == 'NESTED' else (1,[0],['DEAD'],[1.0],0)
     assert all(r.concurrency == 'nonconcurrent' for r in Sap2000(model).extract(req).rows)
     assert model.units == 9 and model.combo_selected['ENV'] is True
 
@@ -329,3 +329,50 @@ def test_nullable_sap_step_label_preserves_force_vector_and_concurrency(label):
     assert model.units == 9 and model.case_selected == {'DEAD':True}
     assert model.combo_selected == {'ULS':False,'ENV':True}
     assert all(row['step_type'] == ('' if label is None else label) for row in result.model_dump(mode='json')['rows'])
+
+
+def test_missing_case_does_not_abort_other_outputs_or_extremes():
+    from structural_engine.member_forces.models import ExtremeRequest
+    from structural_engine.member_forces.processing import extremes
+    model = FakeModel()
+    model.LoadCases = CaseNames(['DEAD', 'EMPTY'])
+    model.case_selected['EMPTY'] = False
+    model.Analyze.GetCaseStatus = lambda: (2, ['DEAD','EMPTY'], [4,1], 0)
+    original = model.RespCombo.GetCaseList
+    model.RespCombo.GetCaseList = lambda name: (1,[0],['EMPTY'],[1.],0) if name == 'ENV' else original(name)
+    result = Sap2000(model).extract(ExtractionRequest(output_cases=[
+        {'name':'EMPTY','kind':'case'}, {'name':'ENV','kind':'combination'}, {'name':'ULS','kind':'combination'}]))
+    assert len(result.rows) == 4
+    assert {r.output_case for r in result.rows} == {'ULS'}
+    assert {r.output_case for r in result.missing_results} == {'EMPTY','ENV'}
+    assert all(r['result'] is None for r in result.model_dump(mode='json')['missing_results'])
+    assert all(r['absolute']['rows'][0]['output_case'] == 'ULS' for r in extremes(ExtremeRequest(dataset=result))['data'])
+    assert model.units == 9 and model.combo_selected['ENV']
+
+
+def test_nested_envelope_missing_dependency_is_none_even_after_valid_child():
+    model = FakeModel()
+    model.RespCombo.GetCaseList = lambda name: (2,[0,0],['DEAD','EMPTY'],[1.,1.],0)
+    result = Sap2000(model).extract(ExtractionRequest(output_cases=[{'name':'ENV','kind':'combination'}]))
+    assert not result.rows and 'EMPTY' in result.missing_results[0].reason
+
+
+def test_missing_zero_factor_dependency_does_not_suppress_valid_combo():
+    model = FakeModel()
+    model.RespCombo.GetCaseList = lambda name: (2,[0,0],['DEAD','EMPTY'],[1.,0.],0)
+    result = Sap2000(model).extract(request())
+    assert len(result.rows) == 4 and result.missing_results == []
+
+
+def test_all_missing_outputs_http_response_is_success_with_json_null():
+    model = FakeModel()
+    model.Analyze.GetCaseStatus = lambda: (1,['DEAD'],[1],0)
+    @contextmanager
+    def gateway():
+        yield Sap2000(model)
+    client = TestClient(create_app('x'*32, gateway))
+    response = client.post('/API_IF_SAP26.2.0_V1/frame-forces',
+        headers={'Authorization':'Bearer '+'x'*32}, json=request().model_dump())
+    assert response.status_code == 200
+    assert response.json()['rows'] == []
+    assert response.json()['missing_results'][0]['result'] is None

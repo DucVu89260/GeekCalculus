@@ -64,6 +64,7 @@ def connection_export(request: ExportRequest):
     if request.format == 'json':
         return {**metadata, 'purpose': 'connection_interchange', 'warning': warning, 'rows': [r.model_dump() for r in rows]}
     stream = io.StringIO(newline='')
+    metadata.pop('missing_results', None)  # Missing outputs are documented in JSON, never force rows.
     fields = [*metadata.keys(), 'warning', *rows[0].model_dump().keys()]
     writer = csv.DictWriter(stream, fieldnames=fields)
     writer.writeheader()

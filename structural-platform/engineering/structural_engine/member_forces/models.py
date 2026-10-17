@@ -32,6 +32,14 @@ class ForceRow(Model):
     M3: Number
 
 
+class MissingResult(Model):
+    output_case: Name
+    case_kind: Literal['case', 'combination']
+    frame: Name | None = None
+    result: None = None
+    reason: Name
+
+
 class Dataset(Model):
     api_name: Literal['API_IF_SAP26.2.0_V1'] = 'API_IF_SAP26.2.0_V1'
     sap2000_version: Literal['26.2.0'] = '26.2.0'
@@ -41,10 +49,13 @@ class Dataset(Model):
     extracted_at: Name
     units: Literal['kN_m_C'] = 'kN_m_C'
     axes: Literal['SAP2000_local_123'] = 'SAP2000_local_123'
-    rows: Annotated[list[ForceRow], Field(min_length=1, max_length=100000)]
+    rows: Annotated[list[ForceRow], Field(max_length=100000)]
+    missing_results: Annotated[list[MissingResult], Field(max_length=100000)] = Field(default_factory=list)
 
     @model_validator(mode='after')
     def unique_records(self):
+        if not self.rows and not self.missing_results:
+            raise ValueError('Dataset must contain force rows or missing results')
         if len({r.record_id for r in self.rows}) != len(self.rows):
             raise ValueError('record_id must be unique within a dataset')
         return self

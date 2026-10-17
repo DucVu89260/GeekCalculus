@@ -227,3 +227,9 @@ Cho phép tối đa 2.000 Output Cases/Combos và 100.000 dòng cho mỗi lần 
 ### StepType null từ SAP2000 — build 2026.10.17.5
 
 Ở ranh giới nhận dữ liệu SAP2000, `StepType = null` được chuyển thành chuỗi rỗng (không có nhãn bước). Các nhãn Max/Min/Mode/Step, StepNum và cả sáu thành phần nội lực được giữ nguyên. Thay đổi này không chuyển kết quả envelope/modal thành bộ lực đồng thời; quy tắc xuất CSV vẫn áp dụng. Schema JSON vẫn dùng chuỗi cho step_type.
+
+### Output không có kết quả — build 2026.10.17.6
+
+Các Case chưa có kết quả hoàn tất và Combo chứa Case như vậy được trả trong `missing_results`, với `result: null`, tên output và lý do. Mục thiếu cho toàn bộ output có `frame: null`; nếu SAP trả 0 dòng cho riêng một cấu kiện, mục thiếu ghi rõ frame. Không diễn giải việc thiếu kết quả là tải bằng 0. `rows` chỉ chứa nội lực hợp lệ; các output còn lại tiếp tục được xuất. Dependency được kiểm tra cho mọi loại Combo và Combo lồng nhau. Lỗi API, vòng lặp Combo và dữ liệu sai vẫn báo lỗi.
+
+Nếu tất cả output đều thiếu, `rows: []` và JSON vẫn tải được. Panel hiển thị các mục none; CSV và cực trị chỉ dùng rows hợp lệ, bị vô hiệu hóa nếu không có rows. CSV không chứa dòng nội lực giả cho mục none; tải JSON để xem danh sách đầy đủ.

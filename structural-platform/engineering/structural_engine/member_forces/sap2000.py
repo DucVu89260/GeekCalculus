@@ -10,7 +10,7 @@ import re
 from .contract import TARGET_SAP2000_VERSION
 from datetime import datetime, timezone
 from pathlib import PureWindowsPath
-from .models import Dataset, ForceRow, Model, Name
+from .models import Dataset, ForceRow, MissingResult, Model, Name
 from pydantic import Field, ValidationError
 from typing import Annotated, Literal
 
@@ -95,7 +95,9 @@ class Sap2000:
         count, kinds, names, factors = outputs(self.model.RespCombo.GetCaseList(case.name), 4)
         if count < 1 or any(len(x or ()) != count for x in (kinds, names, factors)):
             raise SapError('Invalid SAP2000 combination definition')
-        for kind, name in zip(kinds, names):
+        for kind, name, factor in zip(kinds, names, factors):
+            if factor == 0:
+                continue
             if kind not in (0, 1):
                 return 'unknown'
             child = OutputCase(name=name, kind='case' if kind == 0 else 'combination')
@@ -108,6 +110,27 @@ class Sap2000:
             elif self.concurrency(child, visiting | {key}, statuses) != 'concurrent':
                 return 'nonconcurrent'
         return 'concurrent'
+
+    def missing_dependencies(self, case, statuses, visiting=None):
+        visiting = set() if visiting is None else visiting
+        key = (case.name, case.kind)
+        if key in visiting:
+            raise SapError('Cyclic SAP2000 output combination')
+        if case.kind == 'case':
+            return [] if statuses.get(case.name) is True else [case.name]
+        count, kinds, names, factors = outputs(self.model.RespCombo.GetCaseList(case.name), 4)
+        if count < 1 or any(len(x or ()) != count for x in (kinds, names, factors)):
+            raise SapError('Invalid SAP2000 combination definition')
+        missing = []
+        for kind, name, factor in zip(kinds, names, factors):
+            if kind not in (0, 1):
+                raise SapError('Unsupported SAP2000 combination constituent type')
+            if factor == 0:
+                continue
+            missing.extend(self.missing_dependencies(
+                OutputCase(name=name, kind='case' if kind == 0 else 'combination'),
+                statuses, visiting | {key}))
+        return list(dict.fromkeys(missing))
 
     def selection(self):
         count, types, names = outputs(self.model.SelectObj.GetSelected(), 3)
@@ -132,8 +155,7 @@ class Sap2000:
         requested = {(c.name, c.kind) for c in request.output_cases}
         if len(requested) != len(request.output_cases) or requested - set(lookup):
             raise SapError('Output cases must be unique existing case/combination names')
-        if any(lookup[key]['results_available'] is False for key in requested):
-            raise SapError('A requested analysis case has no finished results')
+        statuses = {c['name']: c['results_available'] for c in available if c['kind'] == 'case'}
         setup = self.model.Results.Setup
         # Read all prior state before making any changes.
         previous = []
@@ -145,20 +167,32 @@ class Sap2000:
         if not isinstance(old_units, int) or old_units <= 0:
             raise SapError('Cannot determine existing SAP2000 units')
         rows = []
+        missing_results = []
         primary_error = None
         try:
             checked(self.model.SetPresentUnits(6))  # CSI eUnits.kN_m_C
             # Query one output at a time so case/combo names can never be conflated.
             for case in request.output_cases:
+                missing = self.missing_dependencies(case, statuses)
+                if missing:
+                    missing_results.append(MissingResult(output_case=case.name, case_kind=case.kind,
+                        reason=('Analysis results unavailable: '+', '.join(missing))[:500]))
+                    continue
                 checked(setup.DeselectAllCasesAndCombosForOutput())
                 setter = setup.SetCaseSelectedForOutput if case.kind == 'case' else setup.SetComboSelectedForOutput
                 checked(setter(case.name, True))
-                concurrency = self.concurrency(case)
+                concurrency = self.concurrency(case, statuses=statuses)
                 for frame in frames:
                     result = outputs(self.model.Results.FrameForce(frame, 0), 14)  # ObjectElm
                     count, *columns = result
-                    if count < 1:
-                        raise SapError('No frame forces for a requested frame/output; run analysis and check output availability')
+                    if count == 0:
+                        if any(column for column in columns):
+                            raise SapError('SAP2000 returned inconsistent empty force arrays')
+                        missing_results.append(MissingResult(output_case=case.name, case_kind=case.kind,
+                            frame=frame, reason='No frame force results returned'))
+                        continue
+                    if count < 0:
+                        raise SapError('SAP2000 returned an invalid frame force count')
                     if any(len(column or ()) != count for column in columns):
                         raise SapError('SAP2000 returned inconsistent frame force array lengths')
                     if len(rows) + count > 100000:
@@ -196,7 +230,7 @@ class Sap2000:
         if self.model.GetModelFilename() != model_filename:
             raise SapError('Active SAP2000 model changed during extraction; discard results and reconnect')
         try:
-            return Dataset(model=model_filename, extracted_at=datetime.now(timezone.utc).isoformat(), rows=rows)
+            return Dataset(model=model_filename, extracted_at=datetime.now(timezone.utc).isoformat(), rows=rows, missing_results=missing_results)
         except ValidationError as error:
             raise SapError('SAP2000_DATASET_INVALID: '+validation_details(error)) from error
 

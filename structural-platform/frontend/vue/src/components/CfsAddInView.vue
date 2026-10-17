@@ -1,12 +1,22 @@
 <script setup>
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 const props = defineProps({ locale: { type: String, required: true }, user: { type: Object, required: true } })
+const emit = defineEmits(['update-locale'])
 const frame = ref(null)
 const height = ref(1100)
-const source = import.meta.env.BASE_URL + 'cfs-lapping-node/index.html?scope=' + encodeURIComponent(props.user.id)
+const source = import.meta.env.BASE_URL + 'cfs-lapping-node/index.html?scope=' + encodeURIComponent(props.user.id) + '&locale=' + encodeURIComponent(props.locale)
+function syncLocale() {
+  frame.value?.contentWindow?.postMessage({ type: 'gc-cfs-locale', locale: props.locale }, location.origin)
+}
+watch(() => props.locale, syncLocale)
 function onMessage(event) {
-  if (event.origin !== location.origin || event.source !== frame.value?.contentWindow || event.data?.type !== 'gc-cfs-height') return
+  if (event.origin !== location.origin || event.source !== frame.value?.contentWindow) return
+  if (event.data?.type === 'gc-cfs-locale' && ['vi', 'en'].includes(event.data.locale)) {
+    emit('update-locale', event.data.locale)
+    return
+  }
+  if (event.data?.type !== 'gc-cfs-height') return
   const value = Number(event.data.height)
   if (Number.isFinite(value)) height.value = Math.min(6000, Math.max(800, value + 10))
 }
@@ -17,7 +27,7 @@ onBeforeUnmount(() => window.removeEventListener('message', onMessage))
 <template>
   <section class="cfs-add-in-view" aria-label="CFS Lapping and Node Add-in">
     <p class="cfs-browser-notice" role="note">{{ locale === 'vi' ? 'Chọn .cfsa và thư mục SECTIONS trên máy. File được xử lý trong trình duyệt; chỉ xuất bản sao TEST COPY. Định dạng CFS, mã gối và đơn vị native còn cần kiểm chứng trong CFS 11.0.2. Lần đầu tải Python khoảng 12 MB.' : 'Select a local .cfsa and its SECTIONS folder. Files are processed in your browser; export creates a TEST COPY only. CFS format, support codes and native units still require verification in CFS 11.0.2. The initial Python runtime download is about 12 MB.' }}</p>
-    <iframe ref="frame" :src="source" title="CFS Lapping and Node Add-in" :style="{ height: height + 'px' }" sandbox="allow-scripts allow-same-origin allow-downloads allow-modals" />
+    <iframe ref="frame" :src="source" title="CFS Lapping and Node Add-in" :style="{ height: height + 'px' }" sandbox="allow-scripts allow-same-origin allow-downloads allow-modals" @load="syncLocale" />
   </section>
 </template>
 

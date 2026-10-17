@@ -50,7 +50,7 @@ const tools = { concrete: ['beam', 'column', 'slab', 'foundation'], future: ['re
     </nav>
     <header class="module-heading"><span class="workspace-group-label">{{ t(currentGroup.title) }}</span><h1>{{ t(currentTool.title) }}</h1><p>{{ t(currentTool.description) }}</p></header>
     <SteelDesignView v-if="currentGroup.code === 'steel' && currentTool.code === 'design'" :locale="locale" />
-    <CfsDesignView v-else-if="currentGroup.code === 'steel' && currentTool.code === 'cfs'" :locale="locale" :user="user" :show-add-in="moduleCode === 'steel/cfs/lapping-node'" />
+    <CfsDesignView v-else-if="currentGroup.code === 'steel' && currentTool.code === 'cfs'" :locale="locale" :user="user" :show-add-in="moduleCode === 'steel/cfs/lapping-node'" @update-locale="locale = $event" />
     <SectionPropertiesPanel v-else-if="currentTool.code === 'section-properties'" :key="currentGroup.code" :locale="locale" />
     <section v-else-if="currentTool.code === 'standards'" class="module-panel"><p class="standards-breadcrumb"><a :href="moduleHref('steel')">Steel Design</a> / <a :href="moduleHref('steel/library')">Library</a> / <strong>Standards</strong></p><StandardsExplorer :locale="locale" :can-edit="isAdmin" /></section>
     <section v-else-if="currentTool.code === 'library'" class="module-panel"><LibraryBrowser :key="currentGroup.code" :locale="locale" :can-edit="false" /></section>

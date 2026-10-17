@@ -13,7 +13,7 @@ Open Steel Structure → CFS Design → CFS Lapping and Node Add-in
 
 Sau reload/Load Draft, chọn và Import lại CFSA gốc cùng SECTIONS, rồi Load Draft để khôi phục chỉnh sửa trước khi export. Hash phải khớp bản gốc; thiếu section sẽ chặn export. Chọn lại một file CFSA khác cũng yêu cầu Import trước khi export.
 
-CFSA giới hạn 10 MB. SECTIONS giới hạn 2000 file / 50 MB; tên không được trùng, kể cả khác chữ hoa/thường. JSON giới hạn 2 MB. Không cài Python Windows, không mở port 8765 và không chạy bridge khi dùng bản web. Các nút trong studio giữ ngôn ngữ gốc của package; phần điều hướng GeekCalculus hỗ trợ VI/EN.
+CFSA giới hạn 10 MB. SECTIONS giới hạn 2000 file / 50 MB; tên không được trùng, kể cả khác chữ hoa/thường. JSON giới hạn 2 MB. Không cài Python Windows, không mở port 8765 và không chạy bridge khi dùng bản web. Studio có nút VI/EN đồng bộ với trang chính. Nhãn, hướng dẫn, bảng và thông báo chuyển ngôn ngữ tại chỗ; không tải lại iframe, đổi giá trị nhập hay sửa JSON draft. Hai nút JSON ở thẻ sao lưu cuối cột bên phải, có giải thích riêng từng nút.
 
 ## Kiến trúc và nguồn
 
@@ -26,6 +26,8 @@ Pyodide **0.29.3** được pin trong package-lock. `scripts/build-cfs-browser.c
 Draft cache có key theo user ID để tránh nhầm bản nháp khi chuyển tài khoản trong UI; đây là cache cục bộ, **không** là ranh giới phân quyền server. JSON backup là cách chuyển và giữ dữ liệu lâu dài. Đóng tab/reload giải phóng project ảo; bản nháp không lưu byte gốc hoặc nội dung section.
 
 Pyodide runtime được phân phối nguyên bản theo MPL-2.0; [license](public/cfs-lapping-node/PYODIDE-LICENSE.txt), [mã nguồn phiên bản](https://github.com/pyodide/pyodide/tree/0.29.3), [gói npm](https://www.npmjs.com/package/pyodide/v/0.29.3). CPython trong runtime là 3.13.2: [license](public/cfs-lapping-node/CPYTHON-LICENSE.txt), [source](https://github.com/python/cpython/tree/v3.13.2). Không sửa các runtime artifacts.
+
+Nhãn dưới sơ đồ là **Đơn vị: m- kN** / **Units: m- kN** theo yêu cầu giao diện. Đây không phải phép quy đổi hay xác nhận đơn vị tải native: dữ liệu, metadata nguồn và các giới hạn bên dưới giữ nguyên.
 
 ## Giới hạn giữ nguyên từ portable
 

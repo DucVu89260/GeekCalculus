@@ -3,6 +3,7 @@ import { moduleHref } from '../modules'
 import CfsAddInView from './CfsAddInView.vue'
 
 const props = defineProps({ locale: { type: String, required: true }, showAddIn: Boolean, user: { type: Object, required: true } })
+const emit = defineEmits(['update-locale'])
 const words = {
   vi: {
     title: 'Chọn module CFS', description: 'Các công cụ thiết kế thép tạo hình nguội.',
@@ -44,7 +45,7 @@ const t = key => words[props.locale]?.[key] ?? words.en[key] ?? key
       <a class="cfs-back" :href="moduleHref('steel/cfs')">← {{ t('back') }}</a>
       <h2 id="cfs-add-in-title">{{ t('addIn') }}</h2>
       <p>{{ t('detail') }}</p>
-      <CfsAddInView :locale="locale" :user="user" />
+      <CfsAddInView :locale="locale" :user="user" @update-locale="emit('update-locale', $event)" />
     </section>
   </section>
 </template>

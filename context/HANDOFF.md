@@ -1,5 +1,13 @@
 # Repository handoff
 
+## Latest CFS presentation — VI/EN and JSON help, 2026-10-17
+
+- Branch `main`, base `0178b77`. Added a studio VI/EN switch, synchronized in both directions with the host through origin/source-checked messages. A separate presentation module translates static/dynamic labels, help, status, SVG accessibility labels and confirmation copy in place; it never rerenders the editor or changes input/model/option values. The iframe URL is stable during language changes.
+- Separate notes explain Import JSON Draft and Export JSON beside the two bottom backup controls; each button has `aria-describedby`. Requested diagram note is now exactly **Đơn vị: m- kN** / **Units: m- kN**. This is display copy only: native load values/metadata are not converted or newly verified. Existing export/format/unit limitations elsewhere remain; no scientific claim was inferred from a requested label.
+- Changed CFS standalone HTML plus new `cfs-i18n.js`, wrapper locale events, guide, plan and existing browser smoke. All four Python modules and nine original UI algorithms still match the uploaded source hashes; no backend, schema, formula, dependency or saved-data changes.
+- Executed: Vue typecheck and production demo build passed; 9 Python/core/hash tests passed. Existing CFS browser smoke passed in native Vite and demo production, including host↔studio language synchronization, two language round trips with exact JSON/input parity and unchanged iframe URL, English text coverage, JSON help/unit labels, original CFSA binary fixtures, XT insert/delete, source gates, no uploads and mobile sizing. Unchanged numerical/backend suites were not rerun locally for this presentation change; normal main CI still applies.
+- Release through main/Pages after push. Refresh web/standalone frame with Ctrl+F5 as needed; no dependency reinstall, migration or engine rebuild. Real CFS read-back/native-unit calibration remain the earlier unrun acceptance gates.
+
 ## Latest CFS layout adjustment — 2026-10-17
 
 - Branch `main`, follow-up to `bdedb3c`. Moved Import JSON Draft and Export JSON out of the main import/action toolbar into the final sidebar card, **06 — Sao lưu và khôi phục JSON**, below Section Resolver and protection notes. Added a brief explanation of backup/transfer/restore and the need for original CFSA/SECTIONS when exporting CFSA.

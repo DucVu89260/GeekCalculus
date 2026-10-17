@@ -54,6 +54,19 @@ class StandardsController extends Controller
                 'library' => $library ? array_intersect_key($library, array_flip(['source_sha256', 'page_count', 'summary'])) : null]];
         });
 
+        // PHP limits are runtime-specific; do not cache them with the source index.
+        $limits = [102400 * 1024];
+        foreach (['upload_max_filesize', 'post_max_size'] as $setting) {
+            $bytes = ini_parse_quantity((string) ini_get($setting));
+            if ($bytes > 0) {
+                $limits[] = max(0, $bytes - ($setting === 'post_max_size' ? 65536 : 0));
+            }
+        }
+        $result['data']['upload'] = [
+            'max_bytes' => min($limits),
+            'document_types' => config('standards.editions.'.$code.'.document_types', ['specification', 'commentary', 'errata', 'manual']),
+        ];
+
         return response()->json($result);
     }
 

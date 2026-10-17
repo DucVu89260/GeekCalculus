@@ -99,6 +99,53 @@ in the browser; opening them does not verify/import the private standard.
 
 ## Private extraction on local Docker
 
+### Register a PDF through Standards Explorer
+
+Native administrators can open the PDF source section and expand **Upload private
+source PDF** / **Tải PDF nguồn riêng tư**. Choose the file, document type (including
+**Specification and Commentary** for a combined artifact) and optional publisher
+revision, then save. This uses the existing session/CSRF-protected upload endpoint;
+ordinary users and Pages demo users have no upload control. No Windows path or SSH
+connection is required to upload through the browser.
+
+The source stays on the Laravel server receiving that request. Uploading to local
+Docker does **not** transfer it to Codex cloud. A chat attachment or accessible
+private download is still required for a cloud agent to read those source bytes.
+
+The viewer selects the exact returned document ID and displays the registered
+SHA-256. Duplicate bytes select the existing registration without changing its
+kind, revision or review status. New uploads remain `candidate` / `pending`, with
+no assumed page count, edition validation, indexing or formula approval. Use the
+inspection/import commands below next. Paging an unindexed upload cannot adopt
+clause anchors from a different document. The source-document selector also lets
+reviewers explicitly choose an older registered artifact.
+
+The API reports its PHP upload/post limits, capped at the existing 100 MiB API
+limit; the form checks file size and signature before sending. A proxy may impose
+a smaller limit, in which case HTTP 413 is reported explicitly. Large PDFs require
+appropriate PHP/proxy configuration; this change does not restart or reconfigure
+the user's containers. Original files and application databases remain private.
+
+### Next Codex engineering batches
+
+These are implementation/review targets, **not completed formulas**. Keep Cb=1;
+moment-diagram/API integration is deferred by the user.
+
+| Batch | Contract to implement after the actual source is available | Required acceptance |
+| --- | --- | --- |
+| Source baseline | Inspect the actual edition, SHA and physical/printed pages; import and compare a small E3/F2 set with the PDF. | Exact artifact/page evidence, symbol/unit/condition definitions and explicit approval; no promotion from an equation identifier alone. |
+| D2/D3 | Canonical gross area plus explicit Fu, net area, shear-lag/connection information and supported connection applicability. Keep missing connection branches blocked. | Independent gross-yield/fracture governing examples for ASD/LRFD; missing/invalid net area and connection rejection; H1 cannot consume gross yield as complete tensile strength. |
+| F4 | Complete the noncompact-web doubly symmetric I/H branch, including each applicable flange/yielding/LTB limit state and its source conditions. | Independent consistent-geometry examples, compact/noncompact/slender boundary cases and unbraced-length transitions; no F2/F5 fallback for unsupported F4 conditions. |
+| G2/G7 | Implement web and weak-axis shear separately, using source-confirmed section dimensions, shear-buckling cases and method-specific factors. | Rolled/built-up applicability and factor exceptions, positive/negative shear symmetry, slenderness transitions and omitted-force rejection. No tension-field credit in this batch. |
+| G2.2/G3 | Check stiffener geometry, strength/rigidity and panel/tension-field eligibility explicitly. | Independent eligible/ineligible panel examples and ASD/LRFD checks; failed or incomplete stiffeners cannot increase shear resistance. |
+| Integration | Re-run the changed families and their dependent H1/UI/export cases; preserve source-linked traces and input invalidation. | No global PASS for a member with any unverified or unimplemented applicable check. Keep legacy workbook comparison separate. |
+
+For each batch, record source equations/pages, assumptions, independent expected
+values, tolerances and exclusions **before** enabling the numerical branch. Update
+Draft PR #21 in reviewable commits; do not merge while source verification remains
+unresolved. Reuse prior passing unrelated checks; run the focused regression and
+consumer checks needed by the changed contract.
+
 Use the feature branch and back up the existing database/private storage before a
 normal incremental migration. Do not use `migrate:fresh`, delete volumes or reseed
 over user data. A path on Windows cannot be opened by Codex cloud without transferring

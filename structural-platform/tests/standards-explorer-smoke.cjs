@@ -43,6 +43,9 @@ const equations = [
 ]
 for (const equation of equations) { equation.record_version = 1; equation.source_sha256 = 'a'.repeat(64) }
 const reviewRequests = []
+const uploadRequests = []
+let uploadReply = 'success'
+const uploadedDocument = { id: 10, kind: 'combined', original_name: 'uploaded-source.pdf', sha256: 'b'.repeat(64), page_count: null, processing_status: 'pending', verification_status: 'candidate' }
 const tableRecords = [{
   id: 30,
   table_code: 'B4.1b',
@@ -133,6 +136,7 @@ async function enforcePageLimit(route, url) {
         { pdf_page: 5, printed_page_label: '302', kind: 'commentary' },
       ] } }],
       coverage: { indexed_clauses: 4, verified_equations: 0 },
+      upload: { max_bytes: 2048, document_types: ['specification', 'commentary', 'combined', 'errata', 'manual'] },
     } })
     if (path === '/api/v1/standards/AISC360-10/clauses' && method === 'GET') {
       if (!await enforcePageLimit(route, url)) return
@@ -177,7 +181,19 @@ async function enforcePageLimit(route, url) {
       savedNotes = [...savedNotes, note]
       return respondJson(route, { data: note }, 201)
     }
-    if (path === '/api/v1/standards/AISC360-10/documents/9/file') return route.fulfill({ status: 200, contentType: 'application/pdf', body: privatePdf })
+    if (path === '/api/v1/standards/AISC360-10/documents' && method === 'POST') {
+      assert.match(request.headers()['content-type'], /^multipart\/form-data; boundary=/)
+      assert.equal(request.headers()['x-csrf-token'], 'smoke-token')
+      const body = request.postDataBuffer().toString()
+      assert.match(body, /name="file"; filename="uploaded-source.pdf"/)
+      assert.match(body, /name="kind"\r\n\r\ncombined/)
+      assert.match(body, /name="revision"\r\n\r\nTest revision/)
+      uploadRequests.push(body)
+      if (uploadReply === 'validation') return respondJson(route, { message: 'Invalid source.', errors: { file: ['Synthetic server validation error.'] } }, 422)
+      if (uploadReply === 'duplicate') return respondJson(route, { message: 'This source document is already registered.', data: uploadedDocument }, 409)
+      return respondJson(route, { data: uploadedDocument }, 201)
+    }
+    if (/\/documents\/(9|10)\/file$/.test(path)) return route.fulfill({ status: 200, contentType: 'application/pdf', body: privatePdf })
     return respondJson(route, { message: `Unhandled smoke API route: ${method} ${path}` }, 404)
   })
 
@@ -288,11 +304,54 @@ async function enforcePageLimit(route, url) {
     await page.getByRole('heading', { name: 'Source & review' }).waitFor()
     await page.getByText('a'.repeat(64), { exact: true }).waitFor()
 
-    assert.equal(await page.locator('input[type="file"]').count(), 0, 'ordinary Standards Explorer must not expose file upload controls')
+    assert.equal(await page.locator('input[type="file"]').count(), adminReview ? 1 : 0, 'only the native administrator can see private PDF upload controls')
     assert.equal(await page.getByRole('button', { name: 'AISC 360-16' }).isDisabled(), true)
     assert.equal(await page.getByRole('button', { name: 'AISC 360-22' }).isDisabled(), true)
     assert.ok(requestedPageSizes.length >= 6, `Expected paginated clauses, equations, parameters, and tables; got ${requestedPageSizes.length} requests`)
     assert.ok(requestedPageSizes.every(size => size === 100), `Expected each pagination request to use per_page=100; got ${requestedPageSizes.join(', ')}`)
+    if (adminReview) {
+      const uploader = page.locator('.std-source-upload')
+      await uploader.locator('summary').click()
+      const file = uploader.locator('input[type=file]')
+      const submit = uploader.getByRole('button', { name: 'Save private PDF' })
+      await file.setInputFiles({ name: 'invalid.pdf', mimeType: 'application/pdf', buffer: Buffer.from('not a real PDF') })
+      await submit.click()
+      await uploader.getByRole('alert').filter({ hasText: 'valid PDF signature' }).waitFor()
+      assert.equal(uploadRequests.length, 0, 'invalid file must not leave the browser')
+      await file.setInputFiles({ name: 'large.pdf', mimeType: 'application/pdf', buffer: Buffer.alloc(2049) })
+      await submit.click()
+      await uploader.getByRole('alert').filter({ hasText: 'exceeds the server limit' }).waitFor()
+      assert.equal(uploadRequests.length, 0)
+      await uploader.getByLabel('Document type').selectOption('combined')
+      await uploader.getByLabel('Publisher revision (optional)').fill('Test revision')
+      const payload = { name: 'uploaded-source.pdf', mimeType: 'application/pdf', buffer: privatePdf }
+      await file.setInputFiles(payload)
+      uploadReply = 'validation'
+      await submit.click()
+      await uploader.getByRole('alert').filter({ hasText: 'Synthetic server validation error.' }).waitFor()
+      uploadReply = 'success'
+      await submit.click()
+      await uploader.getByRole('status').filter({ hasText: 'Private PDF saved' }).waitFor()
+      const picker = page.locator('.std-document-picker select')
+      assert.equal(await picker.inputValue(), '10')
+      await page.waitForFunction(() => document.querySelector('.std-pdf-canvas')?.width > 0)
+      assert.equal(await page.locator('.std-source-section > header span').count(), 0, 'new unindexed source must not inherit an old clause')
+      await page.locator('.std-pdf-controls input').fill('4')
+      await page.locator('.std-pdf-controls input').press('Tab')
+      assert.equal(await picker.inputValue(), '10')
+      assert.equal(await page.locator('.std-source-section > header span').count(), 0, 'paging the new artifact must not select a clause from document 9')
+      await page.getByText('PDF saved; edition inspection and indexing are pending. Existing equation labels are not mapped to this document.', { exact: true }).waitFor()
+      uploadReply = 'duplicate'
+      await file.setInputFiles(payload)
+      await submit.click()
+      await uploader.getByRole('status').filter({ hasText: 'already registered' }).waitFor()
+      assert.equal(await picker.locator('option[value="10"]').count(), 1, 'duplicate source must not create another option')
+      assert.equal(uploadRequests.length, 3)
+      await picker.selectOption('9')
+      assert.equal(await picker.inputValue(), '9')
+      await page.setViewportSize({ width: 390, height: 844 })
+      assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1), false, 'upload controls must fit on mobile')
+    }
     assert.deepEqual(errors, [], `Browser errors: ${errors.join('; ')}`)
   } finally {
     await browser.close()

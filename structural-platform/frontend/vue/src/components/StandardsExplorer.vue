@@ -8,6 +8,7 @@ import PrivateStandardPdf from './PrivateStandardPdf.vue'
 import StandardEquationReview from './StandardEquationReview.vue'
 import StandardEquation from './StandardEquation.vue'
 import StandardTable from './StandardTable.vue'
+import StandardSourceUpload from './StandardSourceUpload.vue'
 
 const props = defineProps({ locale: { type: String, default: 'vi' }, canEdit: Boolean })
 
@@ -47,6 +48,23 @@ function equationSaved(record) {
   equations.value = equations.value.map(e => e.id === normalized.id ? normalized : e)
   normalized.design_methods = normalized.design_method === 'both' ? ['ASD', 'LRFD'] : normalized.design_method ? [normalized.design_method] : []
   reviewEquation.value = normalized
+}
+
+function selectSourceDocument(id) {
+  const document = (detail.value?.documents || []).find(item => String(item.id) === String(id))
+  if (!document) return
+  activeDocumentId.value = document.id
+  activePage.value = 1
+  selectedClauseId.value = null
+  reviewEquation.value = null
+  notesController?.abort(); notesSequence++
+  notes.value = []; noteDraft.value = ''; noteError.value = ''; notesLoading.value = false
+  viewTab.value = 'source'
+}
+function sourceUploaded({ code, document }) {
+  if (code !== selectedCode.value || !detail.value || !document?.id) return
+  detail.value.documents = [...(detail.value.documents || []).filter(item => String(item.id) !== String(document.id)), document]
+  selectSourceDocument(document.id)
 }
 
 const text = computed(() => props.locale === 'vi' ? {
@@ -344,9 +362,10 @@ function sourceForEquation(equation) {
 function syncClauseToViewerPage(page) {
   if (!Number.isFinite(Number(page))) return
   activePage.value = Number(page)
-  const candidates = clauses.value.filter(clause => clause.pdf_page && (
-    clause.document_id == null || activeDocumentId.value == null || String(clause.document_id) === String(activeDocumentId.value)
-  )).sort((a, b) => Number(a.pdf_page) - Number(b.pdf_page))
+  // An unindexed upload must never inherit page anchors from another artifact.
+  const candidates = clauses.value.filter(clause => clause.pdf_page && activeDocumentId.value != null &&
+    String(findDocumentFor(clause)?.id) === String(activeDocumentId.value)
+  ).sort((a, b) => Number(a.pdf_page) - Number(b.pdf_page))
   const match = [...candidates].reverse().find(clause => Number(clause.pdf_page) <= Number(page))
   if (match) selectClause(match, { page: Number(page), documentId: activeDocumentId.value })
 }
@@ -525,6 +544,15 @@ onMounted(loadCatalog)
           <StandardEquationReview v-if="canEdit && !demoMode && reviewEquation" :key="`${selectedCode}-${reviewEquation.id}`" :code="selectedCode" :equation="reviewEquation" :documents="detail.documents" :locale="locale" @saved="equationSaved" @close="reviewEquation = null" />
           <section ref="sourcePanel" class="std-source-section" :class="{ 'std-source-selected': viewTab === 'source' }">
             <header><h3>{{ text.sourceTitle }}</h3><span v-if="selectedClause">{{ selectedClause.code }} · {{ selectedClause.title }}</span></header>
+            <StandardSourceUpload v-if="canEdit && !demoMode" :key="selectedCode" :code="selectedCode" :limits="detail.upload" :locale="locale" @uploaded="sourceUploaded" />
+            <label v-if="detail.documents?.length" class="std-document-picker">
+              {{ locale === 'vi' ? 'Tài liệu nguồn' : 'Source document' }}
+              <select :value="sourceDocument?.id ?? ''" @change="selectSourceDocument($event.target.value)">
+                <option value="" disabled>{{ locale === 'vi' ? 'Chọn tài liệu' : 'Choose a document' }}</option>
+                <option v-for="document in detail.documents" :key="document.id" :value="document.id">#{{ document.id }} · {{ document.original_name || document.kind }}{{ document.revision ? ` · ${document.revision}` : '' }} · {{ document.sha256?.slice(0, 12) }}</option>
+              </select>
+            </label>
+            <p v-if="sourceDocument?.processing_status === 'pending'" class="std-source-warning" role="note">{{ locale === 'vi' ? 'PDF đã lưu, đang chờ kiểm tra đúng phiên bản và lập chỉ mục. Các mã phương trình hiện có chưa được gắn với tài liệu này.' : 'PDF saved; edition inspection and indexing are pending. Existing equation labels are not mapped to this document.' }}</p>
             <p v-if="selectedClause && !mappedSourcePage" class="std-source-warning" role="note">{{ text.sourcePageMissing }}</p>
             <PrivateStandardPdf
               v-if="sourceDocument"
@@ -594,6 +622,7 @@ onMounted(loadCatalog)
 
 <style scoped>
 .std-registry-record dd{white-space:pre-wrap;overflow-wrap:anywhere;font-family:inherit;font-size:12px}
+.std-document-picker{display:grid;gap:6px;margin:12px 0;font-size:13px;font-weight:700}.std-document-picker select{box-sizing:border-box;max-width:100%;min-width:0;width:100%;padding:8px;border:1px solid #bac9dc;border-radius:6px;background:white;color:#243a58;font:inherit}
 </style>
 
 <style scoped>

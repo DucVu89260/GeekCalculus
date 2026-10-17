@@ -233,3 +233,7 @@ Cho phép tối đa 2.000 Output Cases/Combos và 100.000 dòng cho mỗi lần 
 Các Case chưa có kết quả hoàn tất và Combo chứa Case như vậy được trả trong `missing_results`, với `result: null`, tên output và lý do. Mục thiếu cho toàn bộ output có `frame: null`; nếu SAP trả 0 dòng cho riêng một cấu kiện, mục thiếu ghi rõ frame. Không diễn giải việc thiếu kết quả là tải bằng 0. `rows` chỉ chứa nội lực hợp lệ; các output còn lại tiếp tục được xuất. Dependency được kiểm tra cho mọi loại Combo và Combo lồng nhau. Lỗi API, vòng lặp Combo và dữ liệu sai vẫn báo lỗi.
 
 Nếu tất cả output đều thiếu, `rows: []` và JSON vẫn tải được. Panel hiển thị các mục none; CSV và cực trị chỉ dùng rows hợp lệ, bị vô hiệu hóa nếu không có rows. CSV không chứa dòng nội lực giả cho mục none; tải JSON để xem danh sách đầy đủ.
+
+### Hiển thị mục thiếu và Envelope — build 2026.10.17.7
+
+Thông báo none và Case/Combo thiếu trong danh sách chọn dùng chữ đậm màu da cam. Màu được cập nhật sau mỗi lần xuất và xóa khi đổi model hoặc bắt đầu xuất lại; Case đã biết chưa có kết quả vẫn giữ dấu hiệu none. Envelope có thể xem trong bảng, tải JSON và tìm cực trị trên các dòng đã xuất. CSV liên kết chặn envelope/modal và nhãn Max/Min vì không bảo đảm các thành phần lực đồng thời. Một Combo thiếu kết quả do Case thành phần chưa phân tích là trường hợp none, khác với hạn chế CSV của Envelope.

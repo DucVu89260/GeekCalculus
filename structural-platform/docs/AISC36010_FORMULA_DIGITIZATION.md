@@ -1,5 +1,7 @@
 # AISC 360-10 formula digitization and Symmetric I/H audit
 
+Current Component UI update (2026-10-17): [gross-member scope, C3 basis and capacity/interaction summary](../standards/AISC36010_IH_GROSS_MEMBER_REVIEW.md). The detailed connection-aware rules and historical review below remain available independently.
+
 ## Delivery and source boundary
 
 This branch integrates the inspected source-review work from draft PR #18 with

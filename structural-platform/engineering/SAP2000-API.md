@@ -213,3 +213,9 @@ Bộ kiểm thử mô phỏng nhiều model có thêm phiên không truy cập �
 Nếu launcher báo WinError 10048, connector mới chưa chạy. Khi không có tác vụ xuất đang chạy, dùng `stop-sap2000-panel.cmd` cùng mức quyền Administrator rồi chạy lại `start-sap2000-panel.cmd`. Lệnh dừng chỉ nhận diện tiến trình Python đang chạy module connector trên cổng 8010; từ chối tiến trình khác và không dừng SAP2000.
 
 Build 2026.10.17.2 đọc từng PID qua một Python worker riêng, cùng cách nạp DLL .NET như lệnh CMD đã kết nối thành công. Mỗi thao tác giữ nguyên PID/model đã chọn. Chẩn đoán attach có thông tin mức quyền và phiên Windows. Worker xuất nội lực không bị timeout cưỡng bức để có thể khôi phục đơn vị và Output Cases. Cần kiểm chứng kết nối trên Windows/SAP2000 thật.
+
+### Giao diện 5 vùng — build 2026.10.17.3
+
+Kết nối model nằm ngang phía trên. Output Cases & Combos ở cột trái; cột phải lần lượt là cấu kiện đã chọn, bảng nội lực và Extreme Cases & Combos. Màn hình hẹp tự chuyển thành một cột theo thứ tự 1–5. Hướng dẫn thao tác có thể mở ở cuối panel.
+
+Sau khi cập nhật ZIP vào `C:\SAP2000-Forces`, dừng connector cũ khi không xuất dữ liệu rồi chạy lại launcher; tải lại trình duyệt và kiểm tra build 2026.10.17.3. Không cần cài lại `.venv`.

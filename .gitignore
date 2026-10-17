@@ -22,6 +22,7 @@ structural-platform/frontend/vue/public/aisc360-10-ih-tension.mjs
 structural-platform/frontend/vue/public/aisc360-10-ih-shear.mjs
 structural-platform/frontend/vue/public/aisc360-10-ih-compliance.mjs
 structural-platform/frontend/vue/public/aisc360-10-ih-source.mjs
+structural-platform/frontend/vue/public/cfs-runtime/
 
 # Local test app data; never commit databases, sessions or private sources.
 structural-platform/local/test-data/

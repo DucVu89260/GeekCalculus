@@ -5,6 +5,10 @@ và phân quyền **admin/user**. Trang sử dụng gồm ba không gian **Steel
 **RC Structure**, **Loading** với thẻ minh họa; trang quản trị có thư viện kỹ thuật
 và quản lý tài khoản.
 
+**CFS Design → CFS Lapping and Node Add-in**: import `.cfsa` và thư mục `SECTIONS`,
+chỉnh lapping/XT và xuất bản sao `_WEBTEST.cfsa` ngay trong trình duyệt.
+[Hướng dẫn, phạm vi thử nghiệm và kiểm thử](frontend/vue/CFS-LAPPING-NODE.md).
+
 Kernel gió **ASCE 7-10 Phase A**: [phạm vi, điều khoản nguồn và kiểm thử](standards/ASCE7-10-WIND-AUDIT.md).
 Màn hình Wind Load dùng kernel chung để tính Kz/Kh, qz/qh, hai dấu GCpi,
 áp lực tường và mái dốc dưới 10° theo Chương 27 Part 1. Kết quả giữ

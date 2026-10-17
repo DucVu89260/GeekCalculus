@@ -11,8 +11,8 @@
     "build:section-properties-library": "node ../../scripts/build-section-properties-core.cjs --target=library",
     "preview": "vite preview --host 0.0.0.0",
     "typecheck": "vue-tsc --noEmit",
-    "predev": "node ../../scripts/build-section-properties-core.cjs --target=browser",
-    "prebuild": "node ../../scripts/build-section-properties-core.cjs --target=browser",
+    "predev": "node ../../scripts/build-section-properties-core.cjs --target=browser && node ../../scripts/build-cfs-browser.cjs",
+    "prebuild": "node ../../scripts/build-section-properties-core.cjs --target=browser && node ../../scripts/build-cfs-browser.cjs",
     "pretest": "node ../../scripts/build-section-properties-core.cjs",
     "pretypecheck": "node ../../scripts/build-section-properties-core.cjs --target=browser"
   },
@@ -20,6 +20,7 @@
     "decimal.js": "10.6.0",
     "katex": "^0.19.0",
     "pdfjs-dist": "^6.4.299",
+    "pyodide": "0.29.3",
     "vue": "^3.5.13"
   },
   "devDependencies": {

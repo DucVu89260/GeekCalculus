@@ -1,0 +1,21 @@
+{
+  "portable_version": "0.5D.1",
+  "archive_sha256": "9f7e542ef1703d7320b90de6bd7cf795d83c5336cff70bd4355dca2fdff56456",
+  "python_files": {
+    "cfsa_reader.py": "a1d997603b066bb46334db7a808f50bc81b81e965145d78da5c4aa97c7444342",
+    "adapter.py": "604a10672726b43da461b12692c159cb4335393e3ff85514a71b4cbd8b57ff94",
+    "cfsa_patch.py": "8181b4776f6f97afa77f4c941d81b69d198b6d74d14975ea5e24a1eb06ce2143",
+    "cfsa_insert.py": "edb0e8c690d2fae262cac6750c42ffcfed9bfa25a36edab28e5b4052e655b3b2"
+  },
+  "ui_functions": {
+    "recalc": "7111245769043d3d9ace8b756d3fde2c4acdc64d6dea2b82d53e489b6747f18f",
+    "validate": "1b8b0157d996a6288ffad561bfc736e5281679d802f70f14e054ea2889372084",
+    "bearingAtJoint": "6998fe1967c753101a82ca87201728ee20da39b1ead3db47171d38dcdcdde090",
+    "selectJoint": "f20d23a923fe03e3fe58b0391b04a12265142fae47499d74a25c0f60c7084e57",
+    "selectSupport": "ded30ff9d1be45e321c73c4e117393e2d2553626ec6ef67f901a9bc3fb3637e9",
+    "draw": "1c14d931805e6ab4a6000aeb21a079baf10266f9a2689be4cd27d54011fa2422",
+    "table": "2177a182fe054505afba6a6d0281e7142df1577a0bb76d83cba43a6c55fa2ac7",
+    "render": "06f6011270742dbdbc451a7e69fbbd3ea796cd52bdf60a0c2a5114fdcaa5f011",
+    "change": "b7dcdb14016a6b9b309a7ea65e79805d5aea76962f2e41150e002762b7fd7f14"
+  }
+}

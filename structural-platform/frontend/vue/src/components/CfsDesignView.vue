@@ -1,20 +1,19 @@
 <script setup>
 import { moduleHref } from '../modules'
+import CfsAddInView from './CfsAddInView.vue'
 
-const props = defineProps({ locale: { type: String, required: true }, showAddIn: Boolean })
+const props = defineProps({ locale: { type: String, required: true }, showAddIn: Boolean, user: { type: Object, required: true } })
 const words = {
   vi: {
     title: 'Chọn module CFS', description: 'Các công cụ thiết kế thép tạo hình nguội.',
     addIn: 'CFS Lapping and Node Add-in', detail: 'Nối chồng xà gồ Z và nút liên kết',
-    pending: 'Đang chờ tích hợp', back: 'Quay lại CFS Design',
-    note: 'Module chưa được kết nối với package tính toán. Chức năng tính toán và chạy add-in chưa khả dụng.',
+    ready: 'Mở bản web · Xuất bản sao thử nghiệm', back: 'Quay lại CFS Design',
     illustration: 'Minh họa hai tiết diện Z nối chồng bằng bu lông',
   },
   en: {
     title: 'Choose a CFS module', description: 'Cold-formed steel design tools.',
     addIn: 'CFS Lapping and Node Add-in', detail: 'Z-purlin lapping and connection nodes',
-    pending: 'Awaiting integration', back: 'Back to CFS Design',
-    note: 'This module is not connected to the calculation package yet. Calculation and add-in execution are not available.',
+    ready: 'Open web add-in · Experimental copy export', back: 'Back to CFS Design',
     illustration: 'Illustration of two Z sections joined by a bolted lap',
   },
 }
@@ -36,7 +35,7 @@ const t = key => words[props.locale]?.[key] ?? words.en[key] ?? key
             <g fill="#fffefb" stroke="#23395d" stroke-width="2"><circle cx="88" cy="52" r="4"/><circle cx="88" cy="72" r="4"/><circle cx="88" cy="92" r="4"/></g>
             <path d="M21 116H159" stroke="#b6c3cc" stroke-dasharray="4 4" />
           </svg>
-          <span class="cfs-card-copy"><strong>{{ t('addIn') }}</strong><span>{{ t('detail') }}</span><small>{{ t('pending') }}</small></span>
+          <span class="cfs-card-copy"><strong>{{ t('addIn') }}</strong><span>{{ t('detail') }}</span><small>{{ t('ready') }}</small></span>
           <span class="cfs-arrow" aria-hidden="true">→</span>
         </a>
       </div>
@@ -45,8 +44,7 @@ const t = key => words[props.locale]?.[key] ?? words.en[key] ?? key
       <a class="cfs-back" :href="moduleHref('steel/cfs')">← {{ t('back') }}</a>
       <h2 id="cfs-add-in-title">{{ t('addIn') }}</h2>
       <p>{{ t('detail') }}</p>
-      <span class="cfs-status">{{ t('pending') }}</span>
-      <p role="status">{{ t('note') }}</p>
+      <CfsAddInView :locale="locale" :user="user" />
     </section>
   </section>
 </template>

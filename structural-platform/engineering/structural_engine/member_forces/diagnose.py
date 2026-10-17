@@ -4,6 +4,7 @@ import struct
 import sys
 from .sap2000 import SapError
 from .dotnet import ConnectionSettings, connect_dotnet
+from .access import access_report, access_hint
 import argparse
 
 
@@ -19,6 +20,8 @@ def main():
     print('DLL:',settings.dll_path)
     print('Windows/platform:', platform.system(), platform.release())
     print('Python:', platform.python_version(), str(struct.calcsize('P') * 8) + '-bit')
+    if settings.pid is not None:
+        print('Access:', access_hint(access_report(settings.pid)))
     print('Keep SAP2000 open with a saved model. Match Windows user/elevation levels.')
     try:
         with connect_dotnet(settings) as sap:

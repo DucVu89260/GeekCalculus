@@ -207,3 +207,9 @@ Panel hiển thị mọi phiên tìm được, yêu cầu chọn khi có nhiều
 Sau khi đóng/mở lại SAP2000, bấm Quét để lấy PID mới. Chỉ model đã chọn mới được dùng cho Output Cases, selection và FrameForce. Việc quét tên file cần connector cùng tài khoản/mức quyền với các SAP2000 đang mở. Các tên và đường dẫn chỉ đọc trên local, không gửi cloud.
 
 Bộ kiểm thử mô phỏng nhiều model có thêm phiên không truy cập được, chọn PID thứ hai, chuyển model, giữ lựa chọn khi reload, xuất Case/Combo, reset kết quả và chặn file đã đổi. Chưa nghiệm thu quét nhiều phiên SAP2000 thật trên Windows.
+
+### Cổng 8010 đang được sử dụng / nhiều model
+
+Nếu launcher báo WinError 10048, connector mới chưa chạy. Khi không có tác vụ xuất đang chạy, dùng `stop-sap2000-panel.cmd` cùng mức quyền Administrator rồi chạy lại `start-sap2000-panel.cmd`. Lệnh dừng chỉ nhận diện tiến trình Python đang chạy module connector trên cổng 8010; từ chối tiến trình khác và không dừng SAP2000.
+
+Build 2026.10.17.2 đọc từng PID qua một Python worker riêng, cùng cách nạp DLL .NET như lệnh CMD đã kết nối thành công. Mỗi thao tác giữ nguyên PID/model đã chọn. Chẩn đoán attach có thông tin mức quyền và phiên Windows. Worker xuất nội lực không bị timeout cưỡng bức để có thể khôi phục đơn vị và Output Cases. Cần kiểm chứng kết nối trên Windows/SAP2000 thật.

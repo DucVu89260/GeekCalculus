@@ -14,6 +14,7 @@ from .sap2000 import ExtractionRequest, SapError
 from .dotnet import ConnectionSettings, connect_dotnet
 from .models import Model, Name
 from .instances import scan_instances
+from .worker import run_worker
 from pydantic import Field
 
 
@@ -23,7 +24,7 @@ class ConnectionRequest(Model):
     dll_path: str = Field(default=ConnectionSettings().dll_path, min_length=1, max_length=1000)
 
 
-def create_app(token=None, gateway=None, instance_scanner=None):
+def create_app(token=None, gateway=None, instance_scanner=None, operation_runner=None):
     token = token if token is not None else os.environ.get('SAP2000_CONNECTOR_TOKEN', '')
     if len(token) < 32:
         raise RuntimeError('Set SAP2000_CONNECTOR_TOKEN to a random token of at least 32 characters')
@@ -39,10 +40,12 @@ def create_app(token=None, gateway=None, instance_scanner=None):
     lock = threading.Lock()
     settings = ConnectionSettings.from_environment()
 
-    def call(operation):
+    def call(operation, command, payload=None):
         # Serialize all changes to SAP2000 global output selection and units.
         with lock:
             try:
+                if gateway is None:
+                    return (operation_runner or run_worker)(command,settings,payload)
                 with (gateway() if gateway is not None else connect_dotnet(settings)) as sap:
                     sap.verify_version()
                     if settings.expected_model is not None and sap.model.GetModelFilename() != settings.expected_model:
@@ -83,19 +86,19 @@ def create_app(token=None, gateway=None, instance_scanner=None):
 
     @app.get(API_PREFIX + '/model', dependencies=[Depends(authenticate)])
     def active_model():
-        return call(lambda sap: sap.model_info())
+        return call(lambda sap: sap.model_info(),'model')
 
     @app.get(API_PREFIX + '/output-cases', dependencies=[Depends(authenticate)])
     def output_cases():
-        return {'data': call(lambda sap: sap.cases())}
+        return {'data': call(lambda sap: sap.cases(),'cases')}
 
     @app.get(API_PREFIX + '/selection', dependencies=[Depends(authenticate)])
     def selection():
-        return call(lambda sap: {**sap.model_info(), 'frames': sap.selection()})
+        return call(lambda sap: {**sap.model_info(), 'frames': sap.selection()},'selection')
 
     @app.post(API_PREFIX + '/frame-forces', dependencies=[Depends(authenticate)])
     def frame_forces(payload: ExtractionRequest):
-        return call(lambda sap: sap.extract(payload))
+        return call(lambda sap: sap.extract(payload),'extract',payload.model_dump(mode='json'))
 
     app.include_router(router, dependencies=[Depends(authenticate)])
     return app

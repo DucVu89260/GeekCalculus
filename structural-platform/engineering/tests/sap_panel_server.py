@@ -25,7 +25,18 @@ def scanner(settings):
     return scan_instances(settings,pid_provider=lambda:[20948,34567,56789],opener=gateway)
 
 
+def runner(operation,settings,payload=None):
+    from structural_engine.member_forces.sap2000 import ExtractionRequest
+    with gateway(settings) as sap:
+        sap.verify_version()
+        if settings.expected_model is not None and sap.model.GetModelFilename()!=settings.expected_model:
+            raise SapError('SAP2000_MODEL_CHANGED: File changed; rescan.')
+        if operation=='model':return sap.model_info()
+        if operation=='cases':return sap.cases()
+        if operation=='selection':return {**sap.model_info(),'frames':sap.selection()}
+        return sap.extract(ExtractionRequest.model_validate(payload)).model_dump(mode='json')
+
+
 if __name__ == '__main__':
     # Test-only injection: production still uses the real direct-DLL connection factory.
-    connector.connect_dotnet=gateway
-    uvicorn.run(connector.create_app('sap-panel-browser-test-token-00000001',instance_scanner=scanner),host='127.0.0.1',port=8011)
+    uvicorn.run(connector.create_app('sap-panel-browser-test-token-00000001',instance_scanner=scanner,operation_runner=runner),host='127.0.0.1',port=8011)

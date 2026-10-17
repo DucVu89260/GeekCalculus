@@ -2,11 +2,20 @@
 import argparse
 import os
 import secrets
+import socket
 import threading
 import webbrowser
 from urllib.parse import quote
 import uvicorn
 from .connector import create_app
+
+
+def ensure_port_available():
+    try:
+        with socket.socket(socket.AF_INET,socket.SOCK_STREAM) as listener:
+            listener.bind(('127.0.0.1',8010))
+    except OSError as error:
+        raise SystemExit('Port 8010 is already in use. Run stop-sap2000-panel.cmd when no export is active, then restart. Do not stop SAP2000.') from error
 
 
 def main():
@@ -19,6 +28,7 @@ def main():
         os.environ['SAP2000_PID'] = str(args.pid)
     if args.dll:
         os.environ['SAP2000_DLL'] = args.dll
+    ensure_port_available()
     token = os.environ.setdefault('SAP2000_CONNECTOR_TOKEN', secrets.token_urlsafe(32))
     app = create_app(token)
     if not args.no_browser:

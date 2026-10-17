@@ -126,7 +126,8 @@ def attach_application(helper, pid):
     application = com_operation('SAP2000_ATTACH_PID', lambda: helper.GetObjectProcess('CSI.SAP2000.API.SapObject', pid))
     # An explicit PID must never silently attach to a different instance.
     if application is None:
-        raise SapError('SAP2000_ATTACH: PID đã chọn không còn truy cập được. Quét lại các phiên SAP2000 và chọn model. Kiểm tra cùng tài khoản và mức quyền Windows.')
+        from .access import access_report, access_hint
+        raise SapError('SAP2000_ATTACH: '+access_hint(access_report(pid)))
     return application
 
 
@@ -140,11 +141,6 @@ def connect_dotnet(settings: ConnectionSettings):
     path = Path(settings.dll_path)
     if path.name.lower() != 'sap2000v1.dll' or not path.is_file():
         raise SapError('SAP2000_DLL_NOT_FOUND: Choose SAP2000v1.dll from the main SAP2000 26 installation folder, not NativeAPI.')
-    import ctypes
-    code = ctypes.windll.ole32.CoInitialize(None)
-    # RPC_E_CHANGED_MODE means the calling thread already has a COM apartment.
-    if code not in (0, 1, -2147417850):
-        raise SapError(f'COM_INITIALIZE: HRESULT=0x{code & 0xffffffff:08X}')
     try:
         try:
             import clr
@@ -164,6 +160,3 @@ def connect_dotnet(settings: ConnectionSettings):
         raise
     except Exception as error:
         raise SapError('SAP2000_DOTNET_READ: ' + type(error).__name__ + '. Run diagnose-sap2000.cmd with the same --pid and --dll settings.') from error
-    finally:
-        if code in (0, 1):
-            ctypes.windll.ole32.CoUninitialize()

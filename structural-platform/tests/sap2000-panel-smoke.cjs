@@ -54,8 +54,15 @@ const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright')
     assert.match(await page.locator('#page').textContent(), /0 dòng phù hợp/)
     await page.click('#reset-filters')
     assert.equal(await page.locator('#results tr').count(),8)
-    await page.selectOption('#filter-section-type','Variable')
+    await page.selectOption('#filter-position','0')
     assert.equal(await page.locator('#results tr').count(),4)
+    await page.selectOption('#filter-position','0.25')
+    assert.equal(await page.locator('#results tr').count(),0)
+    assert.match(await page.locator('#position-notice').textContent(),/thiếu 1\/4 L/)
+    await page.selectOption('#filter-position','1')
+    assert.equal(await page.locator('#results tr').count(),4)
+    await page.selectOption('#filter-position','five')
+    assert.equal(await page.locator('#results tr').count(),8)
     await page.click('#reset-filters')
     await page.selectOption('#filter-kind','case')
     assert.equal(await page.locator('#results tr').count(),4)
@@ -74,7 +81,7 @@ const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright')
     await page.locator('#select-none').click()
     await page.locator('#cases label').filter({ hasText: 'ENV' }).locator('input').check()
     await page.locator('#extract').click()
-    await page.waitForFunction(() => document.querySelector('#results td:nth-child(6)')?.textContent === 'ENV')
+    await page.waitForFunction(() => document.querySelector('#results td:nth-child(7)')?.textContent === 'ENV')
     await page.locator('#csv').click()
     await page.waitForFunction(() => document.querySelector('#status').classList.contains('error') && !document.querySelector('#controls').disabled)
     assert.match(await page.locator('#status').textContent(), /Envelope/)
@@ -93,6 +100,47 @@ const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright')
     await page.selectOption('#filter-frame','F2')
     assert.equal(await page.locator('#results tr').count(),100)
     assert.equal(await page.locator('#prev').isDisabled(),true)
+    await page.unroute('**/frame-forces')
+    let positionMode='full'
+    await page.route('**/frame-forces',async route=>{
+      const response=await route.fetch(),data=await response.json()
+      for(const member of data.members)member.length=member.frame==='F1'?4:8
+      const groups=new Map(data.rows.map(r=>[JSON.stringify([r.frame,r.output_case,r.case_kind,r.step_type,r.step_num]),r]))
+      data.rows=[]
+      for(const row of groups.values()){
+        const length=row.frame==='F1'?4:8
+        for(const [i,fraction] of [0,.25,.5,.5,.75,1].entries()){
+          if(positionMode==='sparse'&&row.frame==='F1'&&fraction===.25)continue
+          data.rows.push({...row,record_id:String(data.rows.length+1),station:length*fraction+(fraction===.25?1e-9:0),element:row.element+'-'+i,M3:i===3?-100:100})
+        }
+      }
+      if(positionMode==='legacy')for(const member of data.members)delete member.length
+      await route.fulfill({response,json:data})
+    })
+    await page.click('#extract')
+    await page.waitForFunction(()=>document.querySelector('#snapshot').textContent.includes('12 dòng')&&!document.querySelector('#controls').disabled)
+    for(const [position,count] of [['0',2],['0.25',2],['0.5',4],['0.75',2],['1',2],['five',12]]){
+      await page.selectOption('#filter-position',position)
+      assert.equal(await page.locator('#results tr').count(),count)
+      assert.match(await page.locator('#position-notice').textContent(),/Đủ các mốc/)
+    }
+    await page.selectOption('#filter-position','0.5')
+    assert.ok((await page.locator('#results').textContent()).includes('-100'))
+    await page.selectOption('#filter-frame','F2')
+    assert.equal(await page.locator('#results tr').count(),2)
+    assert.equal(await page.locator('#results td:nth-child(5)').first().textContent(),'4')
+    positionMode='sparse'
+    await page.click('#extract')
+    await page.waitForFunction(()=>document.querySelector('#snapshot').textContent.includes('11 dòng')&&!document.querySelector('#controls').disabled)
+    await page.selectOption('#filter-position','0.25')
+    assert.equal(await page.locator('#results tr').count(),1)
+    assert.match(await page.locator('#position-notice').textContent(),/Frame F1.*thiếu 1\/4 L/)
+    positionMode='legacy'
+    await page.click('#extract')
+    await page.waitForFunction(()=>document.querySelector('#snapshot').textContent.includes('12 dòng')&&!document.querySelector('#controls').disabled)
+    await page.selectOption('#filter-position','1')
+    assert.equal(await page.locator('#results tr').count(),0)
+    assert.match(await page.locator('#position-notice').textContent(),/thiếu chiều dài/)
     await page.unroute('**/frame-forces')
     await page.locator('#instance').selectOption('34567')
     assert.equal(await page.locator('#results tr').count(), 0)

@@ -36,6 +36,8 @@ class FakeModel:
         self.restore_fail = False
         self.locked = True
         self.FrameObj = Names(['F1', 'F2'])
+        self.FrameObj.GetPoints = lambda name: (name+'I',name+'J',0)
+        self.PointObj = SimpleNamespace(GetCoordCartesian=lambda point, csys: (0.,0.,(4. if self.units == 6 else 4000.) if point.endswith('J') else 0.,0))
         self.FrameObj.GetSection = lambda name: ('I300' if name == 'F1' else 'NP1', '', 0)
         self.PropFrame = SimpleNamespace(GetTypeOAPI=lambda name: (99 if name == 'NP1' else 1, 0),
             GetNonPrismatic=lambda name: (2,['I300','I500'],['I500','I300'],[.5,.5],[1,1],[1,1],[1,1],0,'','',0))
@@ -430,6 +432,7 @@ def test_rf1_variable_section_returns_its_real_start_end_sections():
     model = FakeModel()
     model.FrameObj = Names(['301','305'])
     model.FrameObj.GetSection = lambda name: ('RF1','',0)
+    model.FrameObj.GetPoints = lambda name: (name+'I',name+'J',0)
     model.SelectObj.GetSelected = lambda: (2,[2,2],['301','305'],0)
     model.PropFrame.GetTypeOAPI = lambda name: (99 if name == 'RF1' else 1,0)
     model.PropFrame.GetNonPrismatic = lambda name: (1,['1200212810'],['1000212810'],[1.],[1],[2],[1],0,'','',0)
@@ -444,3 +447,26 @@ def test_rf1_variable_section_returns_its_real_start_end_sections():
         assert part.length == 1. and part.length_type == 1
         assert part.ei33_variation == 2 and part.ei22_variation == 1
     assert model.units == 9
+
+
+def test_member_length_is_ij_geometry_not_last_exported_station():
+    model = FakeModel()
+    def coordinates(point, csys):
+        assert csys == 'Global'
+        return (*((13.,24.,30.) if point.endswith('J') else (10.,20.,30.)),0)
+    model.PointObj.GetCoordCartesian = coordinates
+    data = Sap2000(model).extract(request())
+    assert all(member.length == 5. for member in data.members)
+    assert data.members[0].point_i == 'F1I' and data.members[0].point_j == 'F1J'
+    assert max(row.station for row in data.rows) == 4.
+    assert all(member.units_code == 6 for member in data.members)
+    assert model.units == 9
+
+
+def test_zero_length_member_geometry_fails_and_restores_sap_state():
+    model = FakeModel()
+    model.PointObj.GetCoordCartesian = lambda *args:(0.,0.,0.,0)
+    from pydantic import ValidationError
+    with pytest.raises(ValidationError):
+        Sap2000(model).extract(request())
+    assert model.units == 9 and model.case_selected['DEAD'] and model.combo_selected['ENV']

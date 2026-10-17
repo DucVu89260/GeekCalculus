@@ -59,6 +59,9 @@ class MemberInfo(Model):
     section_type_code: int
     section_type: Name
     units_code: int
+    length: Annotated[Number, Field(gt=0)] | None = None
+    point_i: Name | None = None
+    point_j: Name | None = None
     components: list[SectionPart] = Field(default_factory=list)
 
 

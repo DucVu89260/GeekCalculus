@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from contextlib import contextmanager
 import re
+from math import dist
 from .contract import TARGET_SAP2000_VERSION
 from datetime import datetime, timezone
 from pathlib import PureWindowsPath
@@ -153,6 +154,10 @@ class Sap2000:
         for frame in frames:
             section, auto = outputs(self.model.FrameObj.GetSection(frame), 2)
             code, kind = property_type(section)
+            point_i, point_j = outputs(self.model.FrameObj.GetPoints(frame), 2)
+            coord_i = outputs(self.model.PointObj.GetCoordCartesian(point_i, 'Global'), 3)
+            coord_j = outputs(self.model.PointObj.GetCoordCartesian(point_j, 'Global'), 3)
+            member_length = dist(coord_i, coord_j)
             components = []
             normalized_kind = kind.upper().replace('_', '').replace(' ', '')
             # SAP2000 eFramePropType names Nonprismatic properties 'Variable'.
@@ -167,7 +172,8 @@ class Sap2000:
                         length=lengths[i], length_type=length_types[i],
                         ei33_variation=ei33[i], ei22_variation=ei22[i]))
             result.append(MemberInfo(frame=frame, section=section, auto_select_list=auto or '',
-                section_type_code=code, section_type=kind, units_code=int(self.model.GetPresentUnits()), components=components))
+                section_type_code=code, section_type=kind, units_code=int(self.model.GetPresentUnits()), length=member_length,
+                point_i=point_i, point_j=point_j, components=components))
         return result
 
     def extract(self, request: ExtractionRequest):

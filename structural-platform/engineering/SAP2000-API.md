@@ -251,3 +251,13 @@ Thông báo none và Case/Combo thiếu trong danh sách chọn dùng chữ đ�
 ### Sửa nhận diện Variable / Nonprismatic — build 2026.10.17.9
 
 SAP2000 26.2.0 trả enum `Variable` cho section được định nghĩa trong hộp thoại Nonprismatic. Adapter nhận diện cả `Variable` và tên `Nonprismatic` để gọi GetNonPrismatic, thay vì để components rỗng. Giữ nguyên section_type gốc trong JSON/CSV. Panel hiển thị EI33/EI22 bằng nhãn Linear/Parabolic/Cubic; JSON vẫn giữ mã CSI nguyên bản. Kiểm thử tái tạo RF1 với section đầu 1200212810, cuối 1000212810, Length=1 Variable, EI33=Parabolic, EI22=Linear.
+
+### Lọc vị trí I–J phục vụ chuẩn bị dữ liệu Cb — build 2026.10.17.10
+
+Bộ lọc Loại section được thay bằng Vị trí dọc cấu kiện: Tất cả station, Cả 5 vị trí, End I, 1/4 L, 1/2 L, 3/4 L, End J. Bảng bổ sung cột Vị trí I–J. L là chiều dài hình học của từng frame, tính từ `FrameObj.GetPoints` và tọa độ Cartesian Global của hai PointObj; không lấy station lớn nhất làm chiều dài. Metadata members thêm `length`, `point_i`, `point_j`; chiều dài theo units_code và luôn là m trong dataset trích xuất.
+
+Mỗi station được đối chiếu với L nhân 0, 0.25, 0.5, 0.75, 1; dung sai chỉ để xử lý sai số số thực: max(1e-6 m, L*1e-8). Không nội suy, không làm tròn sang station gần nhất, không ghép hoặc trung bình các dòng khác element/case/step cùng station. Tại ranh giới phần tử có thể có nhiều dòng cùng mốc; giữ nguyên để kiểm tra lực hai phía.
+
+Nếu thiếu station, panel nêu mốc thiếu theo từng frame/output/step trong phạm vi các bộ lọc khác. Kiểm tra Output Stations ở SAP2000 và xuất lại; API không tự sửa output station hoặc chạy analysis. Dataset cũ thiếu length vẫn mở được nhưng không giả định chiều dài từ rows, cần xuất lại để dùng bộ lọc vị trí.
+
+Các vị trí này theo toàn frame I–J, chưa phải các điểm chia tư của một đoạn không giằng Lb do người dùng xác định. API chưa tính Cb; cần xác định Lb, trục mômen và Mmax của đúng đoạn trong module tính riêng. Bộ lọc vẫn chỉ áp dụng cho bảng; JSON/CSV và mục 5 giữ toàn bộ dữ liệu trích xuất.

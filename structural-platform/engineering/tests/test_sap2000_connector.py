@@ -272,3 +272,36 @@ def test_combo_type_api_failure_and_cyclic_combo_restore_settings():
     with pytest.raises(SapError, match='Cyclic'):
         Sap2000(model).extract(request())
     assert model.units == 9 and model.combo_selected['ENV']
+
+
+@pytest.mark.parametrize(('column', 'bad_value', 'field'), [(2, -0.01, 'station'), (6, None, 'step_type'), (13, float('nan'), 'M3')])
+def test_invalid_force_reports_case_frame_field_and_restores_state(column, bad_value, field):
+    model = FakeModel()
+    original = model.force
+    def invalid(frame, item_type):
+        values = list(original(frame, item_type))
+        if model.combo_selected['ENV']:
+            values[column] = [bad_value, values[column][1]]
+        return tuple(values)
+    model.Results.FrameForce = invalid
+    outputs = [{'name':'DEAD','kind':'case'}, {'name':'ULS','kind':'combination'}, {'name':'ENV','kind':'combination'}]
+    with pytest.raises(SapError) as raised:
+        Sap2000(model).extract(ExtractionRequest(output_cases=outputs))
+    message = str(raised.value)
+    assert 'SAP2000_RESULT_INVALID' in message
+    assert "combination 'ENV'" in message and "frame 'F1'" in message
+    assert field in message and 'dòng 1/2' in message
+    assert model.units == 9 and model.case_selected == {'DEAD':True}
+    assert model.combo_selected == {'ULS':False,'ENV':True}
+
+
+def test_extract_all_183_outputs_without_count_validation_failure():
+    model = FakeModel()
+    names = ['ULS'+str(i) for i in range(182)]
+    model.combo_selected = dict.fromkeys(names, False)
+    model.RespCombo = ComboNames(names)
+    result = Sap2000(model).extract(ExtractionRequest(output_cases=[
+        {'name':'DEAD','kind':'case'}, *[{'name':n,'kind':'combination'} for n in names]]))
+    assert len(result.rows) == 183*2*2
+    assert len({(r.output_case,r.case_kind) for r in result.rows}) == 183
+    assert model.units == 9 and not any(model.combo_selected.values())

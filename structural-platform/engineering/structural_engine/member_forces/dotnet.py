@@ -159,4 +159,8 @@ def connect_dotnet(settings: ConnectionSettings):
     except SapError:
         raise
     except Exception as error:
+        from pydantic import ValidationError
+        if isinstance(error, ValidationError):
+            from .sap2000 import validation_details
+            raise SapError('SAP2000_DATA_INVALID: '+validation_details(error)) from error
         raise SapError('SAP2000_DOTNET_READ: ' + type(error).__name__ + '. Run diagnose-sap2000.cmd with the same --pid and --dll settings.') from error

@@ -11,7 +11,7 @@ from .contract import TARGET_SAP2000_VERSION
 from datetime import datetime, timezone
 from pathlib import PureWindowsPath
 from .models import Dataset, ForceRow, Model, Name
-from pydantic import Field
+from pydantic import Field, ValidationError
 from typing import Annotated, Literal
 
 
@@ -163,14 +163,21 @@ class Sap2000:
                         raise SapError('SAP2000 returned inconsistent frame force array lengths')
                     if len(rows) + count > 100000:
                         raise SapError('Extraction exceeds 100000 rows; reduce frames or output cases')
-                    for values in zip(*columns):
+                    for row_index, values in enumerate(zip(*columns), start=1):
                         obj, objsta, elm, elmsta, loadcase, steptype, stepnum, p, v2, v3, t, m2, m3 = values
                         if obj != frame or loadcase != case.name:
                             raise SapError('SAP2000 returned a different frame/output case than requested')
-                        rows.append(ForceRow(record_id=str(len(rows)+1), frame=obj, element=elm,
-                            station=objsta, element_station=elmsta, output_case=loadcase, case_kind=case.kind,
-                            step_type=steptype, step_num=stepnum, concurrency=concurrency,
-                            P=p, V2=v2, V3=v3, T=t, M2=m2, M3=m3))
+                        try:
+                            rows.append(ForceRow(record_id=str(len(rows)+1), frame=obj, element=elm,
+                                station=objsta, element_station=elmsta, output_case=loadcase, case_kind=case.kind,
+                                step_type=steptype, step_num=stepnum, concurrency=concurrency,
+                                P=p, V2=v2, V3=v3, T=t, M2=m2, M3=m3))
+                        except ValidationError as error:
+                            raise SapError(
+                                f'SAP2000_RESULT_INVALID: {case.kind} {case.name!r}; frame {frame!r}; '
+                                f'dòng {row_index}/{count}. '+validation_details(error)
+                            ) from error
+
         except BaseException as error:
             primary_error = error
             raise
@@ -187,7 +194,21 @@ class Sap2000:
                 raise SapError('Could not restore SAP2000 output selection/units; verify SAP2000 settings before continuing') from primary_error
         if self.model.GetModelFilename() != model_filename:
             raise SapError('Active SAP2000 model changed during extraction; discard results and reconnect')
-        return Dataset(model=model_filename, extracted_at=datetime.now(timezone.utc).isoformat(), rows=rows)
+        try:
+            return Dataset(model=model_filename, extracted_at=datetime.now(timezone.utc).isoformat(), rows=rows)
+        except ValidationError as error:
+            raise SapError('SAP2000_DATASET_INVALID: '+validation_details(error)) from error
+
+
+def validation_details(error):
+    """Bounded field diagnostics; never dump the model or a complete force dataset."""
+    details=[]
+    for issue in error.errors(include_url=False, include_context=False)[:8]:
+        field='.'.join(str(part) for part in issue['loc'])
+        value=issue.get('input')
+        preview=repr(value)[:100] if isinstance(value,(str,int,float,bool,type(None))) else '<'+type(value).__name__+'>'
+        details.append(f"{field}: {issue['msg']} (value={preview})")
+    return '; '.join(details)
 
 
 def com_operation(stage, operation):

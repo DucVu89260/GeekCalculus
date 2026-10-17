@@ -219,3 +219,7 @@ Build 2026.10.17.2 đọc từng PID qua một Python worker riêng, cùng cách
 Kết nối model nằm ngang phía trên. Output Cases & Combos ở cột trái; cột phải lần lượt là cấu kiện đã chọn, bảng nội lực và Extreme Cases & Combos. Màn hình hẹp tự chuyển thành một cột theo thứ tự 1–5. Hướng dẫn thao tác có thể mở ở cuối panel.
 
 Sau khi cập nhật ZIP vào `C:\SAP2000-Forces`, dừng connector cũ khi không xuất dữ liệu rồi chạy lại launcher; tải lại trình duyệt và kiểm tra build 2026.10.17.3. Không cần cài lại `.venv`.
+
+### Lỗi kiểm tra dữ liệu khi xuất nhiều Case/Combo — build 2026.10.17.4
+
+Cho phép tối đa 2.000 Output Cases/Combos và 100.000 dòng cho mỗi lần xuất. Khi SAP trả về dữ liệu không đáp ứng schema, panel báo `SAP2000_RESULT_INVALID` cùng tên Case/Combo, frame, chỉ số dòng, tên trường và giá trị gây lỗi. Không tự bỏ qua Case/Combo hoặc thay dữ liệu lỗi bằng số 0. Đơn vị và lựa chọn Output được khôi phục cả khi kiểm tra dữ liệu thất bại. Nếu nhận thông báo này, gửi nguyên văn để xác định trường hợp thực tế; lệnh diagnose chỉ kiểm tra kết nối, không tái tạo dữ liệu xuất.

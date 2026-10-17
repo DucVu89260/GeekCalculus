@@ -1,7 +1,7 @@
 <script setup>
 import { computed, defineAsyncComponent, reactive } from 'vue'
 import { copy } from '../i18n'
-import { moduleGroups, groupTools, moduleHref, resolveModuleRoute } from '../modules'
+import { moduleGroups, groupTools, moduleHref, resolveModuleRoute, sap2000ApiHref } from '../modules'
 import { demoMode } from '../api'
 import SteelDesignView from './SteelDesignView.vue'
 import CfsDesignView from './CfsDesignView.vue'
@@ -36,7 +36,6 @@ const tools = { concrete: ['beam', 'column', 'slab', 'foundation'], future: ['re
     <header class="module-topbar">
       <a class="wordmark" :href="homeHref" @click.prevent="emit('home')">GeekCalculus<span class="brand-dot">.</span></a>
       <div class="module-actions">
-        <a class="quiet-button" href="http://127.0.0.1:8010/" target="_blank" rel="noopener noreferrer">{{ locale === 'vi' ? 'SAP2000 · Nội lực (local)' : 'SAP2000 · Forces (local)' }}</a>
         <button type="button" class="quiet-button" @click="emit('home')">{{ t('home') }}</button>
         <button v-if="isAdmin" type="button" class="quiet-button" @click="emit('open-admin')">{{ t('openAdmin') }}</button>
         <div class="language-switch" role="group" :aria-label="t('language')"><button type="button" :aria-pressed="locale === 'vi'" @click="locale = 'vi'">VI</button><button type="button" :aria-pressed="locale === 'en'" @click="locale = 'en'">EN</button></div>
@@ -47,11 +46,12 @@ const tools = { concrete: ['beam', 'column', 'slab', 'foundation'], future: ['re
       <a v-for="group in moduleGroups" :key="group.code" :href="moduleHref(group.code)" :class="{ active: currentGroup.code === group.code }">{{ t(group.title) }}</a>
     </nav>
     <nav class="module-navigation" :class="{ 'loading-navigation': currentGroup.code === 'loads', 'steel-navigation': currentGroup.code === 'steel' }" :aria-label="t('navigation')">
-      <a v-for="tool in navigationTools" :key="tool.code" :href="moduleHref(tool.route)" :aria-current="currentTool.code === tool.code ? 'page' : undefined">{{ t(tool.title) }}</a>
+      <a v-for="tool in navigationTools" :key="tool.code" :href="tool.external ? sap2000ApiHref(locale) : moduleHref(tool.route)" :target="tool.external ? '_blank' : undefined" :rel="tool.external ? 'noopener noreferrer' : undefined" :aria-current="currentTool.code === tool.code ? 'page' : undefined">{{ t(tool.title) }}</a>
     </nav>
     <header class="module-heading"><span class="workspace-group-label">{{ t(currentGroup.title) }}</span><h1>{{ t(currentTool.title) }}</h1><p>{{ t(currentTool.description) }}</p></header>
     <SteelDesignView v-if="currentGroup.code === 'steel' && currentTool.code === 'design'" :locale="locale" />
     <CfsDesignView v-else-if="currentGroup.code === 'steel' && currentTool.code === 'cfs'" :locale="locale" :user="user" :show-add-in="moduleCode === 'steel/cfs/lapping-node'" @update-locale="locale = $event" />
+    <section v-else-if="currentTool.code === 'sap2000-api'" class="module-panel"><a :href="sap2000ApiHref(locale)" target="_blank" rel="noopener noreferrer">SAP2000-API ↗</a><p>Compatible with SAP2000v26.2.0</p></section>
     <SectionPropertiesPanel v-else-if="currentTool.code === 'section-properties'" :key="currentGroup.code" :locale="locale" />
     <section v-else-if="currentTool.code === 'standards'" class="module-panel"><p class="standards-breadcrumb"><a :href="moduleHref('steel')">Steel Design</a> / <a :href="moduleHref('steel/library')">Library</a> / <strong>Standards</strong></p><StandardsExplorer :locale="locale" :can-edit="isAdmin" /></section>
     <section v-else-if="currentTool.code === 'library'" class="module-panel"><LibraryBrowser :key="currentGroup.code" :locale="locale" :can-edit="false" /></section>
@@ -90,7 +90,7 @@ const tools = { concrete: ['beam', 'column', 'slab', 'foundation'], future: ['re
 .workspace-group-navigation a.active { border-color: #9cb0c6; background: var(--navigation-bg); color: #23395d; }
 .workspace-group-navigation a:hover, .workspace-group-navigation a:focus-visible { background: #23395d; color: #fff; }
 .module-navigation { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 5px; padding: 6px; border: 1px solid var(--surface-border); background: var(--surface-bg); border-radius: 10px; }
-.module-navigation.loading-navigation { grid-template-columns: repeat(6, minmax(0, 1fr)); } .module-navigation.steel-navigation { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.module-navigation.loading-navigation { grid-template-columns: repeat(6, minmax(0, 1fr)); } .module-navigation.steel-navigation { grid-template-columns: repeat(6, minmax(0, 1fr)); }
 .module-navigation a { text-align: center; display: flex; justify-content: center; align-items: center; padding: 13px 9px; border-radius: 6px; color: #547491; font-size: 16px; line-height: 1.5; text-decoration: none; transition: background .15s, color .15s; }
 .module-navigation a[aria-current="page"], .module-navigation a:hover, .module-navigation a:focus-visible { color: white; background: #23395d; }
 .module-heading { padding: 28px 0 22px; }.module-heading h1 { font-size: 29px; }.module-heading p { font-size: 17px; margin: 10px 0 0; color: var(--muted-ink); }

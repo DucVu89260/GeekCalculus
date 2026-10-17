@@ -97,7 +97,9 @@ async function verifySharedCalculator(page, route) {
     assert.equal(await steelHeading.innerText(), 'Steel design')
     assert.equal(await modulePage.evaluate(() => window.opener), null)
     assert.deepEqual(await navHashes(modulePage.locator('.workspace-group-navigation')), expectedHash(groupRoutes))
-    assert.deepEqual(await navHashes(modulePage.locator('.module-navigation')), expectedHash([
+    assert.equal(await modulePage.locator('.module-navigation a').nth(2).textContent(),'SAP2000-API')
+    assert.equal(await modulePage.locator('.module-navigation a').nth(2).getAttribute('target'),'_blank')
+    assert.deepEqual((await navHashes(modulePage.locator('.module-navigation'))).filter(Boolean), expectedHash([
       'steel', 'steel/cfs', 'steel/section-properties', 'steel/library', 'steel/future',
     ]))
 
@@ -134,6 +136,7 @@ async function verifySharedCalculator(page, route) {
 
     await modulePage.goto(moduleUrl('concrete'))
     await modulePage.locator('.workspace-group-navigation a[href$="#/modules/concrete"]').waitFor()
+    assert.equal(await modulePage.locator('.module-navigation a').filter({hasText:'SAP2000-API'}).count(),0)
     assert.deepEqual(await navHashes(modulePage.locator('.module-navigation')), expectedHash([
       'concrete', 'concrete/section-properties', 'concrete/library', 'concrete/future',
     ]))

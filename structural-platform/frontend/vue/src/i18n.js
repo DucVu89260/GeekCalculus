@@ -76,7 +76,7 @@ export const copy = {
 }
 
 Object.assign(copy.vi, {
-  toolCfsDesign: 'CFS Design', cfsDescription: 'Thiết kế thép tạo hình nguội · Nối chồng và nút liên kết.',
+  toolSap2000Api: 'SAP2000-API', sap2000ApiDescription: 'Compatible with SAP2000v26.2.0', toolCfsDesign: 'CFS Design', cfsDescription: 'Thiết kế thép tạo hình nguội · Nối chồng và nút liên kết.',
   structureSteel: 'Steel Structure', structureRC: 'RC Structure', structureLoading: 'Loading',
   structureSteelDescription: 'Kết cấu thép · Thiết kế, đặc trưng tiết diện và thư viện.',
   structureRCDescription: 'Kết cấu bê tông cốt thép · Thiết kế, tiết diện và thư viện.',
@@ -97,7 +97,7 @@ Object.assign(copy.vi, {
   integrationPending: 'Đang chuẩn bị tích hợp', toolPending: 'Đang phát triển',
 })
 Object.assign(copy.en, {
-  toolCfsDesign: 'CFS Design', cfsDescription: 'Cold-formed steel design · Lapping and connection nodes.',
+  toolSap2000Api: 'SAP2000-API', sap2000ApiDescription: 'Compatible with SAP2000v26.2.0', toolCfsDesign: 'CFS Design', cfsDescription: 'Cold-formed steel design · Lapping and connection nodes.',
   structureSteel: 'Steel Structure', structureRC: 'RC Structure', structureLoading: 'Loading',
   structureSteelDescription: 'Steel structures · Design, section properties and library.',
   structureRCDescription: 'Reinforced concrete · Design, section properties and library.',

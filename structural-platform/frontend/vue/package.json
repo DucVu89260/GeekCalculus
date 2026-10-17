@@ -11,8 +11,8 @@
     "build:section-properties-library": "node ../../scripts/build-section-properties-core.cjs --target=library",
     "preview": "vite preview --host 0.0.0.0",
     "typecheck": "vue-tsc --noEmit",
-    "predev": "node ../../scripts/build-section-properties-core.cjs --target=browser && node ../../scripts/build-cfs-browser.cjs",
-    "prebuild": "node ../../scripts/build-section-properties-core.cjs --target=browser && node ../../scripts/build-cfs-browser.cjs",
+    "predev": "node ../../scripts/build-section-properties-core.cjs --target=browser && node ../../scripts/build-cfs-browser.cjs && node ../../scripts/build-sap2000-web.cjs",
+    "prebuild": "node ../../scripts/build-section-properties-core.cjs --target=browser && node ../../scripts/build-cfs-browser.cjs && node ../../scripts/build-sap2000-web.cjs",
     "pretest": "node ../../scripts/build-section-properties-core.cjs",
     "pretypecheck": "node ../../scripts/build-section-properties-core.cjs --target=browser"
   },

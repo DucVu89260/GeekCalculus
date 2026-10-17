@@ -1,0 +1,53 @@
+const assert=require('node:assert/strict'),fs=require('node:fs')
+const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright')
+const {signIn}=require('./browser-auth.cjs')
+const base=process.env.SAP_WEB_BASE||'http://127.0.0.1/GeekCalculus/'
+;(async()=>{
+ const browser=await chromium.launch({executablePath:'/usr/bin/chromium',headless:true,args:['--no-sandbox','--no-proxy-server','--host-resolver-rules=MAP geekcalculus.com 127.0.0.1']})
+ try{
+  const context=await browser.newContext(),page=await context.newPage(),errors=[]
+  context.on('page',p=>p.on('pageerror',e=>errors.push(e.message)))
+  await page.goto(base);await signIn(page,{demo:true})
+  await page.goto(base+'#/modules/steel')
+  const links=page.locator('.module-navigation a')
+  await links.nth(2).waitFor()
+  assert.equal(await links.nth(1).textContent(),'CFS Design')
+  assert.equal(await links.nth(2).textContent(),'SAP2000-API')
+  assert.equal(await links.nth(2).getAttribute('target'),'_blank')
+  const originalUrl=page.url()
+  for(const lang of ['vi','en']){
+   await page.getByRole('button',{name:lang.toUpperCase(),exact:true}).click()
+   const pending=context.waitForEvent('page');await links.nth(2).click();const panel=await pending
+   await panel.waitForLoadState('domcontentloaded')
+   assert.equal(new URL(panel.url()).pathname,new URL('sap2000-api/26.2.0/',base).pathname)
+   assert.equal(await panel.locator('html').getAttribute('lang'),lang)
+   assert.equal(await panel.locator('#sap-compatibility').textContent(),'Compatible with SAP2000v26.2.0')
+   assert.equal(await panel.locator('#forces-panel h2').textContent(),lang==='en'?'4. Internal forces':'4. Kết quả nội lực')
+   assert.equal(await panel.evaluate(()=>window.opener),null)
+   const canonical=fs.readFileSync('structural-platform/engineering/structural_engine/member_forces/panel.html','utf8').match(/<style>([\s\S]*?)<\/style>/)[1]
+   assert.equal(await panel.locator('style').first().textContent(),canonical,'Reuse package styling without redesign')
+   assert.equal(await panel.locator('#controls .layout > section').count(),5)
+   assert.equal(page.url(),originalUrl,'Main workspace must remain open')
+   await panel.setViewportSize({width:390,height:844})
+   assert.equal(await panel.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true)
+   await panel.close()
+  }
+  const kit=await page.request.get(new URL('sap2000-api/26.2.0/API_IF_SAP26.2.0_V1.zip',base).href)
+  assert.equal(kit.status(),200);const bytes=await kit.body();assert.equal(bytes.subarray(0,2).toString(),'PK');assert.ok(bytes.length<1_000_000)
+  // Real browser fetch across origins to the local fake connector; no API routing stubs.
+  const live=await context.newPage()
+  await live.goto('http://geekcalculus.com/GeekCalculus/sap2000-api/26.2.0/?lang=en#token=sap-panel-browser-test-token-00000001')
+  await live.waitForFunction(()=>document.querySelectorAll('#instance option').length===4&&!document.querySelector('#controls').disabled)
+  assert.equal(new URL(live.url()).hash,'')
+  await live.selectOption('#instance','20948');await live.click('#connect')
+  await live.waitForFunction(()=>document.querySelector('#filename').textContent==='Tower A.sdb'&&!document.querySelector('#controls').disabled)
+  await live.locator('#cases label').filter({hasText:'DEAD'}).locator('input').check()
+  await live.click('#extract')
+  await live.waitForFunction(()=>document.querySelectorAll('#results tr').length===4&&!document.querySelector('#controls').disabled)
+  await live.selectOption('#filter-position','0.25')
+  assert.equal(await live.locator('#results tr.interpolated').count(),2)
+  await live.screenshot({path:'/tmp/sap2000-web-en.png',fullPage:true})
+  assert.deepEqual(errors,[])
+  console.log('SAP web passed: CFS-adjacent button, new tab, VI/EN headings, exact package CSS, compatibility text, source-only kit, Pages subpath, mobile, authenticated real cross-origin loopback extraction/interpolation.')
+ }finally{await browser.close()}
+})().catch(e=>{console.error(e);process.exitCode=1})

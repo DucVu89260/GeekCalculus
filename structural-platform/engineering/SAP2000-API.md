@@ -294,3 +294,25 @@ Mỗi min/max/absolute thêm `locations`, song song tối đa 20 dòng `rows` pr
 Bảng có riêng dòng Min, Max, |Max| cho mỗi nhóm/thành phần, kèm frame, Case/Combo, Step, element, x local 1, x/L, vị trí và nguồn SAP/nội suy. Mở Bộ lực / Đồng hạng để xem P,V2,V3,T,M2,M3 tại từng dòng chi phối, không ghép các cực trị độc lập thành vector liên kết. Dấu và trục 1–2–3 giữ nguyên theo SAP, chưa chuyển dấu mặt đầu hoặc quy về lực nút. L vẫn theo toàn frame I–J, chưa thay cho đoạn Lb.
 
 Ví dụ tìm M3 lớn nhất ở đâu: chọn Theo toàn bộ nhóm đã xuất → Tất cả station gốc → M3. Ví dụ phục vụ liên kết đầu I: chọn Theo từng cấu kiện → End I → Tất cả thành phần, rồi mở bộ lực ở dòng chi phối để chọn các bộ lực thiết kế. Envelope/modal vẫn mang cờ nonconcurrent, không được xem như bộ lực đồng thời.
+
+### GeekCalculus web entry — build 2026.10.17.14
+
+Trong Steel Structure, SAP2000-API nằm ngay sau CFS Design và mở tab mới tới `sap2000-api/26.2.0/`, đúng base path của bản native hoặc GitHub Pages. Reuse panel từ ZIP, không đổi CSS/bố cục. Tiêu đề/nhãn theo `?lang=vi` hoặc `?lang=en` từ nút VI/EN của GeekCalculus. Dòng đầu luôn ghi Compatible with SAP2000v26.2.0. Phiên bản hiện tại cố định 26.2.0; thư mục theo version để có thể bổ sung phiên bản khác độc lập sau này.
+
+Website chỉ phục vụ HTML và ZIP Windows source-only (không .venv). Chạy SAP2000/connector trên Windows cùng mức quyền như trước. Panel web gọi trực tiếp `http://127.0.0.1:8010`, không gửi model qua Laravel hoặc server web. Cần token connector; CORS chỉ chấp nhận các origin GeekCalculus được khai báo trong connector.py, không dùng wildcard, vẫn yêu cầu Bearer token cho mọi dữ liệu. Nếu trình duyệt hỏi quyền truy cập mạng local, cho phép đối với GeekCalculus. Native panel localhost vẫn chạy như trước.
+
+Để mở web panel kèm token mà không sao chép token thủ công, dùng launcher trong CMD tại C:\SAP2000-Forces:
+
+```cmd
+start-sap2000-panel.cmd --web-url "http://geekcalculus.com/sap2000-api/26.2.0/?lang=vi"
+```
+
+Hoặc Pages:
+
+```cmd
+start-sap2000-panel.cmd --web-url "https://ducvu89260.github.io/GeekCalculus/sap2000-api/26.2.0/?lang=en"
+```
+
+--web-url chỉ chấp nhận trang versioned trên các origin đã duyệt, không nhận URL tùy ý. Token đi qua fragment, được xóa khỏi thanh địa chỉ ngay khi panel tải, không đưa vào HTTP request/URL log; chỉ giữ trong sessionStorage của tab đó. Nếu mở một tab web mới chưa có token, dùng launcher với --web-url để mở phiên được xác thực. Không đưa token vào chat, Git hoặc query string. Native launcher không tham số vẫn mở localhost.
+
+Tài liệu đầu vào: SAP2000_26.2.0-API.zip; panel, connector và processing khớp nguồn force API trước tích hợp. Manifest versioned ghi SHA256 đầu vào và bản source-only phân phối. Cần kiểm chứng trên Windows/SAP2000 thực; kiểm thử cloud dùng fake SAP và browser CORS thực.

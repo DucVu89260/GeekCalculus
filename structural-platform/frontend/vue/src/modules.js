@@ -7,6 +7,7 @@ export const groupTools = {
   steel: [
     { code: 'design', title: 'toolSteelDesign', description: 'steelDescription', route: 'steel' },
     { code: 'cfs', title: 'toolCfsDesign', description: 'cfsDescription', route: 'steel/cfs' },
+    { code: 'sap2000-api', title: 'toolSap2000Api', description: 'sap2000ApiDescription', route: 'steel/sap2000-api', external: true },
     { code: 'section-properties', title: 'toolSectionProperties', description: 'analysisDescription', route: 'steel/section-properties' },
     { code: 'library', title: 'toolSteelLibrary', description: 'libraryDescription', route: 'steel/library' },
 
@@ -47,6 +48,8 @@ export function resolveModuleRoute(code) {
 }
 export const moduleHref = code => `${import.meta.env.BASE_URL}#/modules/${code}`
 export function moduleFromHash() {
-  const match = window.location.hash.match(/^#\/modules\/([a-z]+(?:\/[a-z-]+){0,2})$/)
+  const match = window.location.hash.match(/^#\/modules\/([a-z]+(?:\/[a-z0-9-]+){0,2})$/)
   return match && resolveModuleRoute(match[1]) ? match[1] : null
 }
+
+export const sap2000ApiHref = locale => `${import.meta.env.BASE_URL}sap2000-api/26.2.0/?lang=${locale === 'en' ? 'en' : 'vi'}`

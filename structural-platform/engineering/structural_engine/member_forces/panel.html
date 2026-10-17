@@ -39,11 +39,11 @@ main{max-width:none;width:100%;padding:0 14px}.layout{grid-template-columns:minm
 </style>
 </head>
 <body><main>
-<header><div class="badge">API_IF_SAP26.2.0_V1 · SAP2000 26.2.0 · .NET / PID · build 2026.10.17.13 · Panel 5 bước</div><h1>Xuất nội lực cấu kiện</h1><p class="muted">Chọn cấu kiện trong SAP2000, sau đó quay lại đây để lấy nội lực. Đơn vị: kN · m · kN.m; giữ nguyên trục local SAP2000.</p></header>
+<header><p id="sap-compatibility" style="font-weight:700;margin:0 0 8px">Compatible with SAP2000v26.2.0</p><div class="badge">API_IF_SAP26.2.0_V1 · SAP2000 26.2.0 · .NET / PID · build 2026.10.17.14 · Panel 5 bước</div><h1>Xuất nội lực cấu kiện</h1><p class="muted">Chọn cấu kiện trong SAP2000, sau đó quay lại đây để lấy nội lực. Đơn vị: kN · m · kN.m; giữ nguyên trục local SAP2000.</p></header>
 <div id="status" class="status" role="status" aria-live="polite">Đang chờ kết nối SAP2000 trên máy này.</div>
 <fieldset id="controls" aria-label="Bảng xuất nội lực SAP2000"><div class="layout">
 <section class="card connection" id="connection-panel"><h2>1. Kết nối model</h2>
-<div class="connection-grid"><div class="connection-settings"><div id="token-entry"><label for="token">Mã kết nối local</label><input id="token" type="password" autocomplete="off" placeholder="Token của connector"><small>Chạy launcher để trang tự nhận mã kết nối. Mã chỉ giữ trong phiên tab này; được khôi phục khi tải lại trang.</small></div>
+<div class="connection-grid"><div class="connection-settings"><div id="token-entry"><label for="token">Mã kết nối local</label><input id="token" type="password" autocomplete="off" placeholder="Token của connector"><small>Với panel web, dùng launcher --web-url để mở trang có mã kết nối. Mã chỉ giữ trong phiên tab này; được khôi phục khi tải lại trang.</small></div>
 <p class="muted">Quét các phiên SAP2000 đang mở và chọn đúng file model muốn xuất nội lực.</p>
 <div class="actions"><button id="scan" class="primary">Quét SAP2000 đang mở</button></div>
 <label for="instance">File SAP2000 / PID</label><select id="instance"><option value="">Chưa quét danh sách</option></select>
@@ -81,7 +81,21 @@ main{max-width:none;width:100%;padding:0 14px}.layout{grid-template-columns:minm
 </div><section class="card help" id="help-panel"><details><summary>Hướng dẫn thao tác</summary><ol><li>Mở và lưu model SAP2000 26.2.0; chạy phân tích.</li><li>Kết nối model, kiểm tra tên file, chọn Output Cases.</li><li>Chọn frame objects trong SAP2000.</li><li>Quay lại panel và bấm “Lấy nội lực cấu kiện đang chọn”.</li><li>Tải JSON/CSV hoặc tìm extreme case.</li></ol><p class="muted">Panel này chạy trên máy của bạn. Chưa gửi dữ liệu lên cloud, chưa tính Cb và chưa gán/chỉnh sửa model.</p></details></section></fieldset>
 <script>
 'use strict';
-const prefix='/API_IF_SAP26.2.0_V1';
+const connectorBase=document.querySelector('meta[name=sap2000-connector]')?.content||'';
+const prefix=connectorBase+'/API_IF_SAP26.2.0_V1';
+
+function applyPanelLanguage(){
+ const lang=new URLSearchParams(location.search).get('lang')==='en'?'en':'vi';document.documentElement.lang=lang;
+ document.title=lang==='en'?'SAP2000 · Internal forces':'SAP2000 · Xuất nội lực';
+ const words={"Xuất nội lực cấu kiện": "Export member forces", "1. Kết nối model": "1. Connect model", "2. Output Cases & Combos": "2. Output Cases & Combos", "3. Cấu kiện đã chọn": "3. Selected members", "4. Kết quả nội lực": "4. Internal forces", "5. Extreme Cases & Combos": "5. Extreme Cases & Combos", "Mã kết nối local": "Local connector token", "Quét SAP2000 đang mở": "Scan running SAP2000", "File SAP2000 / PID": "SAP2000 file / PID", "Cấu hình DLL nâng cao": "Advanced DLL settings", "Đường dẫn SAP2000v1.dll": "SAP2000v1.dll path", "Kết nối / Làm mới model": "Connect / Refresh model", "PID đã kết nối": "Connected PID", "File đang hoạt động": "Active model file", "Trạng thái": "Status", "Tìm case / combination": "Find case / combination", "Loại output": "Output type", "Chọn các mục đang hiển thị": "Select visible items", "Bỏ chọn tất cả": "Clear all selections", "Chỉ Load Cases": "Load Cases only", "Chỉ Load Combinations": "Load Combinations only", "Đọc lựa chọn hiện tại": "Read current selection", "Lấy nội lực cấu kiện đang chọn": "Extract selected member forces", "Tải dữ liệu JSON": "Download raw JSON", "Xuất liên kết CSV": "Export connection CSV", "Tải vị trí / nội suy JSON": "Download positions / interpolation JSON", "Cấu kiện": "Member", "Vị trí dọc cấu kiện": "Member position", "Tất cả station": "All stations", "Cả 5 vị trí": "All five positions", "Loại section": "Section type", "Xóa bộ lọc": "Reset filters", "Tất cả": "All", "Section và thành phần Nonprismatic": "Sections and Nonprismatic segments", "Nhóm": "Group", "Thành phần": "Component", "Cực trị": "Extreme", "Giá trị có dấu": "Signed value", "|Giá trị|": "|Value|", "Vị trí": "Position", "Nguồn": "Source", "Bộ lực / Đồng hạng": "Force vector / Ties", "Tìm cực trị cho cấu kiện": "Member scope", "Theo từng cấu kiện": "Per member", "Theo toàn bộ nhóm đã xuất": "Entire exported group", "Vị trí khảo sát cực trị": "Extreme evaluation position", "Tất cả station gốc": "All original stations", "Thành phần nội lực": "Force component", "Tất cả: P, V2, V3, T, M2, M3": "All: P, V2, V3, T, M2, M3", "Xác định Min / Max / Absolute": "Find Min / Max / Absolute", "Tải extreme JSON": "Download extremes JSON", "Trước": "Previous", "Sau": "Next", "Hướng dẫn thao tác": "Quick instructions"};
+ const labels=lang==='en'?words:{'2. Output Cases & Combos':'2. Load Cases & Tổ hợp tải','5. Extreme Cases & Combos':'5. Cực trị Case & Combo','Frame':'Cấu kiện','Element':'Phần tử'};
+ {
+  const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT),nodes=[];let node;
+  while(node=walker.nextNode())if(!['SCRIPT','STYLE'].includes(node.parentElement?.tagName))nodes.push(node);
+  for(const text of nodes){const key=text.textContent.trim();if(labels[key])text.textContent=text.textContent.replace(key,labels[key])}
+ }
+}
+
 const $=id=>document.getElementById(id);
 let token=new URLSearchParams(location.hash.slice(1)).get('token')||sessionStorage.getItem('sap2000-connector-token')||'';
 if(token)sessionStorage.setItem('sap2000-connector-token',token);
@@ -237,5 +251,6 @@ $('extremes').onclick=()=>run(async()=>{clearExtremes();message('Đang xác đ�
  extremeData=await api('/extremes',{dataset,scope:$('scope').value,position:$('extreme-position').value,...(component?{components:[component]}:{})});renderExtremes();
  message(extremeData.data.length?'Đã xác định cực trị và vị trí local tại từng dòng chi phối. Mở bộ lực để xem Case/Combo và các dòng đồng hạng.':'Không có dữ liệu tại vị trí khảo sát. Xem lý do và tải JSON để kiểm tra.');});
 $('extreme-json').onclick=()=>download(extremeData,'sap2000-extremes.json');
+applyPanelLanguage();
 syncButtons();if(token){let ready=false;run(async()=>{const cfg=await api('/connection');$('dll').value=cfg.dll_path;await scanInstances(cfg.pid);ready=Boolean(selectedInstance())}).then(()=>{if(ready)$('connect').click()})}
 </script></main></body></html>

@@ -470,3 +470,31 @@ def test_zero_length_member_geometry_fails_and_restores_sap_state():
     with pytest.raises(ValidationError):
         Sap2000(model).extract(request())
     assert model.units == 9 and model.case_selected['DEAD'] and model.combo_selected['ENV']
+
+
+def test_web_panel_cors_is_restricted_to_geekcalculus_and_still_requires_token():
+    client=TestClient(create_app('x'*32))
+    path='/API_IF_SAP26.2.0_V1/connection'
+    for origin in ('http://geekcalculus.com','https://ducvu89260.github.io'):
+        response=client.options(path,headers={'Origin':origin,'Access-Control-Request-Method':'PUT',
+            'Access-Control-Request-Headers':'Authorization, Content-Type','Access-Control-Request-Private-Network':'true'})
+        assert response.status_code==200
+        assert response.headers['access-control-allow-origin']==origin
+        assert response.headers['access-control-allow-private-network']=='true'
+        assert client.get(path,headers={'Origin':origin}).status_code==401
+        result=client.get(path,headers={'Origin':origin,'Authorization':'Bearer '+'x'*32})
+        assert result.status_code==200
+        assert result.headers['access-control-allow-origin']==origin
+    blocked=client.options(path,headers={'Origin':'https://untrusted.example','Access-Control-Request-Method':'PUT'})
+    assert blocked.status_code==400 and 'access-control-allow-origin' not in blocked.headers
+
+
+def test_authenticated_web_launcher_targets_only_versioned_trusted_panel():
+    from structural_engine.member_forces.run_connector import checked_web_url
+    import argparse
+    assert checked_web_url('http://geekcalculus.com/sap2000-api/26.2.0/?lang=en')
+    assert checked_web_url('https://ducvu89260.github.io/GeekCalculus/sap2000-api/26.2.0/')
+    for url in ('https://evil.example/sap2000-api/26.2.0/','https://geekcalculus.com/redirect',
+                'https://geekcalculus.com.evil.example/sap2000-api/26.2.0/',
+                'https://geekcalculus.com/sap2000-api/26.2.0/#token=x'):
+        with pytest.raises(argparse.ArgumentTypeError):checked_web_url(url)

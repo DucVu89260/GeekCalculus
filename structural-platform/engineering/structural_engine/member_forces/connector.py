@@ -8,6 +8,7 @@ from fastapi.responses import FileResponse
 from pathlib import Path
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from starlette.middleware.trustedhost import TrustedHostMiddleware
+from starlette.middleware.cors import CORSMiddleware
 from .api import router
 from .contract import API_NAME, API_PREFIX, BUILD_ID
 from .sap2000 import ExtractionRequest, SapError
@@ -16,6 +17,13 @@ from .models import Model, Name
 from .instances import scan_instances
 from .worker import run_worker
 from pydantic import Field
+
+
+WEB_ORIGINS = (
+    'http://geekcalculus.com', 'https://geekcalculus.com',
+    'http://geekcalculus.test', 'https://geekcalculus.test',
+    'https://ducvu89260.github.io',
+)
 
 
 class ConnectionRequest(Model):
@@ -37,6 +45,9 @@ def create_app(token=None, gateway=None, instance_scanner=None, operation_runner
     app = FastAPI(title=API_NAME, version='1',
                   docs_url=None, redoc_url=None, openapi_url=None)
     app.add_middleware(TrustedHostMiddleware, allowed_hosts=['127.0.0.1', 'localhost', 'testserver'])
+    app.add_middleware(CORSMiddleware, allow_origins=WEB_ORIGINS,
+                       allow_methods=['GET','POST','PUT'], allow_headers=['Authorization','Content-Type'],
+                       allow_private_network=True, allow_credentials=False)
     lock = threading.Lock()
     settings = ConnectionSettings.from_environment()
 

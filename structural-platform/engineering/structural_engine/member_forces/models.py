@@ -95,6 +95,7 @@ class Filter(Model):
 
 class ExtremeRequest(Filter):
     scope: Literal['per_frame', 'global'] = 'per_frame'
+    position: Literal['all','end_i','quarter','mid','three_quarter','end_j','five'] = 'all'
     components: Annotated[list[Component], Field(min_length=1, max_length=6)] = list(COMPONENTS)
 
 

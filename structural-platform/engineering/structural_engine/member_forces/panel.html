@@ -33,10 +33,13 @@ main{max-width:none;width:100%;padding:0 14px}.layout{grid-template-columns:minm
 .layout{grid-template-columns:minmax(290px,330px) minmax(0,1fr)}
 .cases{overflow-x:scroll;overflow-y:auto;scrollbar-gutter:stable;min-width:0;padding-bottom:6px}.cases .case{width:max-content;min-width:100%;white-space:nowrap;user-select:none;cursor:pointer;padding-right:14px}.cases .case span{overflow-wrap:normal;flex:0 0 auto}.cases .case input{position:sticky;left:0;z-index:1;flex:0 0 auto}.cases::-webkit-scrollbar{width:12px;height:12px}.cases::-webkit-scrollbar-track{background:#eef3f6}.cases::-webkit-scrollbar-thumb{background:#8ca9b8;border:2px solid #eef3f6;border-radius:8px}.case:hover{background:#f0f6fa}.case.checked{background:#e7f2f7}.case.unavailable.checked{background:#fff2df}#case-preview{font-size:14px;line-height:1.45;overflow-wrap:anywhere;background:#eff5f9;border-radius:6px;padding:9px;margin:0 0 10px}#case-preview:empty{display:none}
 @media(max-width:850px){.layout{grid-template-columns:minmax(0,1fr)}}
+
+.extreme-filters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.extreme-filters label{min-width:0}.extreme-filters select{max-width:none}.extreme table{font-size:13px}.extreme th,.extreme td{padding:8px 6px}.extreme td:nth-child(7){white-space:normal;max-width:190px;overflow-wrap:anywhere}.extreme td:last-child{white-space:normal;min-width:180px;max-width:330px}.extreme td details p{overflow-wrap:anywhere;line-height:1.45;font-size:13px}.extreme .interpolated{background:#fff4df}.extreme summary{cursor:pointer}
+@media(max-width:850px){.extreme-filters{grid-template-columns:minmax(0,1fr)}}
 </style>
 </head>
 <body><main>
-<header><div class="badge">API_IF_SAP26.2.0_V1 · SAP2000 26.2.0 · .NET / PID · build 2026.10.17.12 · Panel 5 bước</div><h1>Xuất nội lực cấu kiện</h1><p class="muted">Chọn cấu kiện trong SAP2000, sau đó quay lại đây để lấy nội lực. Đơn vị: kN · m · kN.m; giữ nguyên trục local SAP2000.</p></header>
+<header><div class="badge">API_IF_SAP26.2.0_V1 · SAP2000 26.2.0 · .NET / PID · build 2026.10.17.13 · Panel 5 bước</div><h1>Xuất nội lực cấu kiện</h1><p class="muted">Chọn cấu kiện trong SAP2000, sau đó quay lại đây để lấy nội lực. Đơn vị: kN · m · kN.m; giữ nguyên trục local SAP2000.</p></header>
 <div id="status" class="status" role="status" aria-live="polite">Đang chờ kết nối SAP2000 trên máy này.</div>
 <fieldset id="controls" aria-label="Bảng xuất nội lực SAP2000"><div class="layout">
 <section class="card connection" id="connection-panel"><h2>1. Kết nối model</h2>
@@ -63,7 +66,18 @@ main{max-width:none;width:100%;padding:0 14px}.layout{grid-template-columns:minm
 <p class="result-note muted">Mốc vị trí theo toàn chiều dài I–J, chưa phải đoạn không giằng Lb. Thiếu mốc chia tư sẽ nội suy tuyến tính có giữ dấu, từ hai station kẹp mốc trong cùng element/case/step; không ngoại suy. Bảng rút gọn số hiển thị; JSON giữ đầy đủ độ chính xác.</p><p id="position-notice" class="result-note" role="status"></p>
 <details class="member-details"><summary>Section và thành phần Nonprismatic</summary><div id="member-info">Chưa đọc section.</div></details>
 <p id="missing-results" class="result-note"></p><div class="table-wrap"><table><thead><tr><th>Frame</th><th>Section</th><th>Loại section</th><th>Element</th><th>Station (m)</th><th>Vị trí I–J</th><th>Case</th><th>Step</th><th>P</th><th>V2</th><th>V3</th><th>T</th><th>M2</th><th>M3</th><th>Nguồn</th></tr></thead><tbody id="results"></tbody></table></div><div class="actions"><button id="prev">Trước</button><span id="page" aria-live="polite">0 dòng</span><button id="next">Sau</button></div></section>
-<section class="card extreme" id="extreme-panel"><h2>5. Extreme Cases &amp; Combos</h2><label for="scope">Phạm vi tìm cực trị</label><select id="scope"><option value="per_frame">Theo từng cấu kiện</option><option value="global">Toàn bộ nhóm đã xuất</option></select><div class="actions"><button id="extremes">Xác định Min / Max / Absolute</button><button id="extreme-json">Tải extreme JSON</button></div><p class="result-note muted">Giữ nguyên bộ nội lực tại dòng chi phối. Cực trị chỉ xét những stations và steps đã xuất.</p><div class="table-wrap"><table><thead><tr><th>Nhóm</th><th>Thành phần</th><th>Min</th><th>Max</th><th>|Max|</th><th>Case chi phối |Max|</th></tr></thead><tbody id="extreme-results"></tbody></table></div></section>
+<section class="card extreme" id="extreme-panel"><h2>5. Extreme Cases &amp; Combos</h2>
+<div class="extreme-filters">
+<label for="scope">Tìm cực trị cho cấu kiện<select id="scope"><option value="per_frame">Theo từng cấu kiện</option><option value="global">Theo toàn bộ nhóm đã xuất</option></select></label>
+<label for="extreme-position">Vị trí khảo sát cực trị<select id="extreme-position"><option value="all">Tất cả station gốc</option><option value="end_i">End I</option><option value="quarter">1/4 L</option><option value="mid">1/2 L</option><option value="three_quarter">3/4 L</option><option value="end_j">End J</option><option value="five">Cả 5 vị trí</option></select></label>
+<label for="extreme-component">Thành phần nội lực<select id="extreme-component"><option value="">Tất cả: P, V2, V3, T, M2, M3</option><option>P</option><option>V2</option><option>V3</option><option>T</option><option>M2</option><option>M3</option></select></label>
+</div>
+<div class="actions"><button id="extremes">Xác định Min / Max / Absolute</button><button id="extreme-json">Tải extreme JSON</button></div>
+<p class="result-note muted">x theo trục local 1, từ End I (x = 0) đến End J (x = L). Giữ dấu nội lực SAP2000. Mốc chia tư có thể nội suy tuyến tính; mốc theo toàn frame, chưa phải đoạn Lb.</p>
+<p class="result-note muted">Mỗi cực trị có bộ 6 lực tại dòng chi phối riêng. Không ghép các cực trị P/M2/M3/V2/V3 từ các dòng khác nhau thành một bộ lực liên kết. Bộ lọc mục 4 không tác động mục 5.</p>
+<p id="extreme-summary" class="result-note" role="status"></p><p id="extreme-missing" class="result-note position-warning"></p>
+<div class="table-wrap"><table><thead><tr><th>Nhóm</th><th>Thành phần</th><th>Cực trị</th><th>Giá trị có dấu</th><th>|Giá trị|</th><th>Frame</th><th>Case / Combo</th><th>Step</th><th>Element</th><th>x local 1 (m)</th><th>x/L</th><th>Vị trí</th><th>Nguồn</th><th>Bộ lực / Đồng hạng</th></tr></thead><tbody id="extreme-results"></tbody></table></div>
+<div class="actions"><button id="extreme-prev">Trước</button><span id="extreme-page">0 dòng</span><button id="extreme-next">Sau</button></div></section>
 </div><section class="card help" id="help-panel"><details><summary>Hướng dẫn thao tác</summary><ol><li>Mở và lưu model SAP2000 26.2.0; chạy phân tích.</li><li>Kết nối model, kiểm tra tên file, chọn Output Cases.</li><li>Chọn frame objects trong SAP2000.</li><li>Quay lại panel và bấm “Lấy nội lực cấu kiện đang chọn”.</li><li>Tải JSON/CSV hoặc tìm extreme case.</li></ol><p class="muted">Panel này chạy trên máy của bạn. Chưa gửi dữ liệu lên cloud, chưa tính Cb và chưa gán/chỉnh sửa model.</p></details></section></fieldset>
 <script>
 'use strict';
@@ -75,6 +89,7 @@ if(location.hash)history.replaceState(null,'',location.pathname+location.search)
 let instances=[],model=null,cases=[],chosen=new Set(),dataset=null,positionData=null,extremeData=null,page=0,busy=false;
 const pageSize=100;
 let caseAnchor=null;
+let extremePage=0;
 if(token)$('token-entry').hidden=true;
 function message(text,error=false){$('status').textContent=text;$('status').classList.toggle('error',error)}
 function syncButtons(){
@@ -82,6 +97,8 @@ function syncButtons(){
  $('position-json').disabled=!positionData;
  $('json').disabled=!dataset;for(const id of ['csv','extremes'])$(id).disabled=!dataset||!dataset.rows.length;
  $('extreme-json').disabled=!extremeData;
+ $('extreme-prev').disabled=!extremeData||extremePage===0;
+ $('extreme-next').disabled=!extremeData||(extremePage+1)*pageSize>=(extremeData.data.length*3);
  $('prev').disabled=!dataset||page===0;
  $('next').disabled=!dataset||(page+1)*pageSize>=filteredRows().length;
 }
@@ -159,7 +176,7 @@ function renderResults(){renderPositionNotice();$('results').replaceChildren();$
  const tr=$('results').lastElementChild;tr.classList.toggle('interpolated',sample?.method==='linear');if(sample?.method==='linear')tr.title='Nội suy tuyến tính từ record '+sample.source_record_ids.join(' → ')+'; trọng số '+sample.weight;}
 
  $('snapshot').textContent=dataset.model+' · '+rows.length+' dòng · '+new Date(dataset.extracted_at).toLocaleString('vi-VN')+' · kN / m / kN.m';$('page').textContent=rows.length?(start+1)+'–'+Math.min(start+pageSize,rows.length)+' / '+rows.length+' dòng (gốc SAP '+dataset.rows.length+')':'0 dòng phù hợp / tổng '+dataset.rows.length;syncButtons();}
-function clearResults(){dataset=null;positionData=null;extremeData=null;page=0;$('extreme-results').replaceChildren();populateFilters();renderMemberInfo([]);renderResults();renderCases()}
+function clearResults(){dataset=null;positionData=null;page=0;clearExtremes();populateFilters();renderMemberInfo([]);renderResults();renderCases()}
 function download(content,name,type='application/json'){const blob=content instanceof Blob?content:new Blob([JSON.stringify(content,null,2)],{type});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
 function selectedInstance(){return instances.find(item=>String(item.pid)===$('instance').value&&item.available)}
 function resetModel(){caseAnchor=null;model=null;cases=[];chosen.clear();clearResults();$('detected-pid').textContent='Chưa xác định';$('filename').textContent='Chưa kết nối';$('modelpath').textContent='';$('modelstate').textContent='—';$('frames').textContent='Chưa đọc lựa chọn.';renderCases()}
@@ -199,8 +216,26 @@ $('position-json').onclick=()=>download(positionData,'sap2000-position-samples.j
 $('json').onclick=()=>download(dataset,'sap2000-forces.json');
 $('csv').onclick=()=>run(async()=>{const csv=await api('/connection-export',{dataset,format:'csv'},true);download(csv,'sap2000-connection-forces.csv','text/csv');message('Đã xuất CSV liên kết. Kiểm tra trục, dấu và vị trí mặt cắt trước khi nhập phần mềm đích.');});
 $('prev').onclick=()=>{page--;renderResults()};$('next').onclick=()=>{page++;renderResults()};
-$('scope').onchange=()=>{extremeData=null;$('extreme-results').replaceChildren();syncButtons()};
-$('extremes').onclick=()=>run(async()=>{message('Đang xác định extreme case…');extremeData=await api('/extremes',{dataset,scope:$('scope').value});$('extreme-results').replaceChildren();for(const r of extremeData.data)tableRow($('extreme-results'),[r.group,r.component,r.min.value,r.max.value,r.absolute.value,r.absolute.rows[0].output_case+' · '+r.absolute.tie_count+' dòng đồng hạng']);message('Đã xác định cực trị. Tải extreme JSON để xem đầy đủ bộ lực và các dòng đồng hạng.');});
+function clearExtremes(){extremeData=null;extremePage=0;$('extreme-results').replaceChildren();$('extreme-summary').textContent='';$('extreme-missing').textContent='';$('extreme-page').textContent='0 dòng';syncButtons()}
+function renderExtremes(){const body=$('extreme-results');body.replaceChildren();if(!extremeData)return;
+ const entries=extremeData.data.flatMap(item=>['min','max','absolute'].map(type=>({item,type,governing:item[type]})));
+ for(const {item,type,governing:g} of entries.slice(extremePage*pageSize,(extremePage+1)*pageSize)){
+  const row=g.rows[0],loc=g.locations[0];
+  tableRow(body,[extremeData.scope==='global'?'Toàn nhóm':item.group,item.component,{min:'Min',max:'Max',absolute:'|Max|'}[type],displayNumber(row[item.component]),displayNumber(Math.abs(row[item.component])),row.frame,row.output_case,row.step_type+' '+row.step_num,row.element,displayNumber(loc.station),loc.relative_station==null?'—':displayNumber(loc.relative_station),loc.position,loc.method==='linear'?'Nội suy':'SAP2000','']);
+  const tr=body.lastElementChild;tr.classList.toggle('interpolated',loc.method==='linear');const cell=tr.lastElementChild,details=document.createElement('details'),summary=document.createElement('summary');summary.textContent=g.tie_count+' dòng · xem bộ lực';details.append(summary);
+  for(let i=0;i<g.rows.length;i++){const r=g.rows[i],l=g.locations[i],p=document.createElement('p');p.textContent='Frame '+r.frame+' · '+r.output_case+' ('+r.case_kind+') · '+r.step_type+' '+r.step_num+' · Element '+r.element+' · x='+displayNumber(l.station)+' m · '+l.position+' · '+(l.method==='linear'?'Nội suy':'SAP2000')+' · '+r.concurrency+'; '+['P','V2','V3','T','M2','M3'].map(c=>c+'='+String(r[c])).join('; ')+(l.method==='linear'?'; nguồn '+l.source_record_ids.join(' → '):'');details.append(p)}
+  if(g.rows_truncated){const p=document.createElement('p');p.textContent='Hiển thị 20 dòng đồng hạng đầu. JSON giữ đủ record_ids để đối chiếu dữ liệu gốc.';details.append(p)}cell.append(details);
+ }
+ const total=entries.length,start=extremePage*pageSize;$('extreme-page').textContent=total?(start+1)+'–'+Math.min(start+pageSize,total)+' / '+total+' dòng':'0 dòng';
+ $('extreme-summary').textContent=extremeData.data.length+' nhóm/thành phần · '+$('scope').selectedOptions[0].textContent+' · '+$('extreme-position').selectedOptions[0].textContent;
+ const missing=extremeData.unavailable_positions||[];$('extreme-missing').textContent=missing.length?missing.length+' mốc không đủ dữ liệu: '+missing.slice(0,6).map(s=>'Frame '+s.frame+' · '+s.output_case+' · '+s.step_type+' '+s.step_num+' · x/L='+s.fraction+': '+s.reason).join('; ')+(missing.length>6?'; …':''):'';
+ syncButtons();
+}
+for(const id of ['scope','extreme-position','extreme-component'])$(id).onchange=clearExtremes;
+$('extreme-prev').onclick=()=>{extremePage--;renderExtremes()};$('extreme-next').onclick=()=>{extremePage++;renderExtremes()};
+$('extremes').onclick=()=>run(async()=>{clearExtremes();message('Đang xác định extreme case…');const component=$('extreme-component').value;
+ extremeData=await api('/extremes',{dataset,scope:$('scope').value,position:$('extreme-position').value,...(component?{components:[component]}:{})});renderExtremes();
+ message(extremeData.data.length?'Đã xác định cực trị và vị trí local tại từng dòng chi phối. Mở bộ lực để xem Case/Combo và các dòng đồng hạng.':'Không có dữ liệu tại vị trí khảo sát. Xem lý do và tải JSON để kiểm tra.');});
 $('extreme-json').onclick=()=>download(extremeData,'sap2000-extremes.json');
 syncButtons();if(token){let ready=false;run(async()=>{const cfg=await api('/connection');$('dll').value=cfg.dll_path;await scanInstances(cfg.pid);ready=Boolean(selectedInstance())}).then(()=>{if(ready)$('connect').click()})}
 </script></main></body></html>

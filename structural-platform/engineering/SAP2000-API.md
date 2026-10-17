@@ -282,3 +282,15 @@ Mốc theo toàn frame I–J; module Cb riêng cần xác định đúng đoạn
 - Rê chuột lên mục để xem tooltip tên đầy đủ; tên cũng hiển thị ở ô bên dưới danh sách khi hover hoặc focus bàn phím. Mục không có kết quả vẫn giữ chữ đậm màu cam.
 
 Các thay đổi chỉ thuộc thao tác panel; không thay đổi tính toán nội lực, nội suy hoặc cấu hình output SAP2000.
+
+### Cực trị theo vị trí local của frame — build 2026.10.17.13
+
+Mục 5 tách hai bộ lọc: (1) Theo từng cấu kiện / Theo toàn bộ nhóm đã xuất, (2) Vị trí khảo sát: Tất cả station gốc, End I, End J, 1/4 L, 1/2 L, 3/4 L hoặc Cả 5 vị trí. Có thêm lựa chọn thành phần P, V2, V3, T, M2, M3 hoặc tất cả. Mục 5 độc lập với bộ lọc bảng mục 4. Thay điều kiện sẽ xóa kết quả cũ, cần bấm Xác định lại.
+
+`POST /API_IF_SAP26.2.0_V1/extremes` thêm `position` mặc định `all`; các giá trị hợp lệ: `all`, `end_i`, `quarter`, `mid`, `three_quarter`, `end_j`, `five`. `scope` vẫn là `per_frame` hoặc `global`, `components` là danh sách thành phần như trước. `all` xét mọi dòng SAP gốc. Các vị trí khác dùng thuật toán lấy mẫu/nội suy có dấu của position-samples; không ngoại suy End I/J, không trộn element/case/step. Trường hợp thiếu vị trí trả trong `unavailable_positions`; nếu toàn bộ thiếu, `data: []`, không tạo cực trị bằng 0.
+
+Mỗi min/max/absolute thêm `locations`, song song tối đa 20 dòng `rows` preview: frame, element, station (m theo local 1 từ I), element_station, relative_station=x/L, nhãn vị trí, method, source_record_ids và weight. `source_rows` kèm các dòng nguồn của các mốc khảo sát. `absolute.value` vẫn là độ lớn dương tương thích API cũ; dấu lực nằm trong rows[...][component]. Bảng hiển thị cả giá trị có dấu và độ lớn. Trường hợp đồng hạng giữ đủ record_ids, preview 20 bộ lực, có cờ rows_truncated như trước.
+
+Bảng có riêng dòng Min, Max, |Max| cho mỗi nhóm/thành phần, kèm frame, Case/Combo, Step, element, x local 1, x/L, vị trí và nguồn SAP/nội suy. Mở Bộ lực / Đồng hạng để xem P,V2,V3,T,M2,M3 tại từng dòng chi phối, không ghép các cực trị độc lập thành vector liên kết. Dấu và trục 1–2–3 giữ nguyên theo SAP, chưa chuyển dấu mặt đầu hoặc quy về lực nút. L vẫn theo toàn frame I–J, chưa thay cho đoạn Lb.
+
+Ví dụ tìm M3 lớn nhất ở đâu: chọn Theo toàn bộ nhóm đã xuất → Tất cả station gốc → M3. Ví dụ phục vụ liên kết đầu I: chọn Theo từng cấu kiện → End I → Tất cả thành phần, rồi mở bộ lực ở dòng chi phối để chọn các bộ lực thiết kế. Envelope/modal vẫn mang cờ nonconcurrent, không được xem như bộ lực đồng thời.

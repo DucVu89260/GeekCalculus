@@ -4,7 +4,7 @@ from __future__ import annotations
 import csv
 import io
 from collections import defaultdict
-from .models import COMPONENTS, ExportRequest, ExtremeRequest, Filter
+from .models import COMPONENTS, ExportRequest, ExtremeRequest, Filter, ForceRow, PositionRequest
 
 
 def select(request: Filter):
@@ -25,30 +25,61 @@ def select(request: Filter):
 
 
 def extremes(request: ExtremeRequest):
+    from .positions import position_samples
+    rows = select(request)
+    members = {m.frame:m for m in request.dataset.members}
+    provenance, unavailable, source_rows = {}, [], []
+    fractions = {'end_i':0.,'quarter':.25,'mid':.5,'three_quarter':.75,'end_j':1.}
+    if request.position != 'all':
+        sampled = position_samples(PositionRequest(dataset=request.dataset.model_copy(update={'rows':rows})))
+        samples = [s for s in sampled['data'] if request.position == 'five' or s['fraction'] == fractions[request.position]]
+        unavailable = [{k:v for k,v in s.items() if k != 'rows'} for s in samples if s['method'] == 'unavailable']
+        rows = []
+        for sample in samples:
+            for data in sample['rows']:
+                row = ForceRow.model_validate(data)
+                rows.append(row)
+                provenance[row.record_id] = {key:sample[key] for key in ('method','source_record_ids','weight')}
+        source_ids = {identifier for data in provenance.values() for identifier in data['source_record_ids']}
+        source_rows = [r for r in sampled['source_rows'] if r['record_id'] in source_ids]
     groups = defaultdict(list)
-    for row in select(request):
+    for row in rows:
         groups[row.frame if request.scope == 'per_frame' else 'all'].append(row)
+
+    def location(row):
+        member = members.get(row.frame)
+        length = member.length if member and member.units_code == 6 else None
+        marks = ((0.,'End I'),(.25,'1/4 L'),(.5,'1/2 L'),(.75,'3/4 L'),(1.,'End J'))
+        labels = [label for fraction,label in marks if length and abs(row.station-length*fraction) <= max(1e-6,length*1e-8)]
+        return {'frame':row.frame,'element':row.element,'local_axis':'local_1_from_I',
+                'station':row.station,'element_station':row.element_station,
+                'relative_station':row.station/length if length else None,
+                'position':', '.join(labels) if labels else 'Station khác',
+                **provenance.get(row.record_id,{'method':'original','source_record_ids':[row.record_id],'weight':None})}
+
     def governing(value, tied):
-        # Preserve every tie by ID without expanding full force vectors millions of times.
+        # Full tie IDs, with bounded row/location previews for readable responses.
         return {'value': value, 'record_ids': [r.record_id for r in tied],
                 'tie_count': len(tied), 'rows': [r.model_dump() for r in tied[:20]],
-                'rows_truncated': len(tied) > 20}
+                'locations':[location(r) for r in tied[:20]], 'rows_truncated': len(tied) > 20}
 
     output = []
-    for group, rows in groups.items():
+    for group, group_rows in groups.items():
         for component in dict.fromkeys(request.components):
-            low = min(getattr(r, component) for r in rows)
-            high = max(getattr(r, component) for r in rows)
+            low = min(getattr(r, component) for r in group_rows)
+            high = max(getattr(r, component) for r in group_rows)
             absolute = max(abs(low), abs(high))
             output.append({
                 'group': group, 'component': component,
-                'min': governing(low, [r for r in rows if getattr(r, component) == low]),
-                'max': governing(high, [r for r in rows if getattr(r, component) == high]),
-                'absolute': governing(absolute, [r for r in rows if abs(getattr(r, component)) == absolute]),
+                'min': governing(low, [r for r in group_rows if getattr(r, component) == low]),
+                'max': governing(high, [r for r in group_rows if getattr(r, component) == high]),
+                'absolute': governing(absolute, [r for r in group_rows if abs(getattr(r, component)) == absolute]),
             })
-    return {**request.dataset.model_dump(exclude={'rows'}), 'scope': request.scope, 'data': output,
-            'basis': 'exported_stations_only',
-            'warning': 'Extremes are limited to exported stations and steps; envelope rows are not concurrent actions.'}
+    return {**request.dataset.model_dump(exclude={'rows'}), 'scope': request.scope, 'position':request.position,
+            'components':list(dict.fromkeys(request.components)), 'data': output,
+            'unavailable_positions':unavailable,'source_rows':source_rows,
+            'basis': 'exported_stations_only' if request.position == 'all' else 'whole_frame_position_samples',
+            'warning': 'Independent component extremes are not one design action. Preserve each governing row vector; envelope/modal rows remain nonconcurrent. Position samples may use signed linear interpolation.'}
 
 
 def connection_export(request: ExportRequest):

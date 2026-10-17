@@ -25,7 +25,7 @@ button{border-color:#a6bac5;color:var(--edge);background:white}button.primary,bu
 </style>
 </head>
 <body><main>
-<header><div class="badge">API_IF_SAP26.2.0_V1 · SAP2000 26.2.0 · .NET / PID · build 2026.10.17.8 · Panel 5 bước</div><h1>Xuất nội lực cấu kiện</h1><p class="muted">Chọn cấu kiện trong SAP2000, sau đó quay lại đây để lấy nội lực. Đơn vị: kN · m · kN.m; giữ nguyên trục local SAP2000.</p></header>
+<header><div class="badge">API_IF_SAP26.2.0_V1 · SAP2000 26.2.0 · .NET / PID · build 2026.10.17.9 · Panel 5 bước</div><h1>Xuất nội lực cấu kiện</h1><p class="muted">Chọn cấu kiện trong SAP2000, sau đó quay lại đây để lấy nội lực. Đơn vị: kN · m · kN.m; giữ nguyên trục local SAP2000.</p></header>
 <div id="status" class="status" role="status" aria-live="polite">Đang chờ kết nối SAP2000 trên máy này.</div>
 <fieldset id="controls" aria-label="Bảng xuất nội lực SAP2000"><div class="layout">
 <section class="card connection" id="connection-panel"><h2>1. Kết nối model</h2>
@@ -108,9 +108,10 @@ function populateFilters(){resetFilters();const rows=dataset?.rows||[],members=m
  for(const [id,pairs] of Object.entries(values)){const select=$(id);select.replaceChildren();const all=document.createElement('option');all.value='';all.textContent='Tất cả';select.append(all);
  for(const [value,label] of [...new Map(pairs)].sort((a,b)=>a[1].localeCompare(b[1],undefined,{numeric:true}))){const option=document.createElement('option');option.value=value;option.textContent=label;select.append(option)}}
 }
+function variationLabel(code){return ({1:'Linear',2:'Parabolic',3:'Cubic'})[code]||('Mã '+code)}
 function renderMemberInfo(members){const box=$('member-info');box.replaceChildren();if(!members?.length){box.textContent='Chưa đọc section.';return}
  const list=document.createElement('ul');for(const m of members){const item=document.createElement('li');item.textContent=m.frame+' · '+m.section+' · '+m.section_type+(m.auto_select_list?' · Auto-select: '+m.auto_select_list:'');
- if(m.components?.length){const parts=document.createElement('ul');for(const part of m.components){const li=document.createElement('li');li.textContent='Đoạn '+part.index+': '+part.start_section+' ('+part.start_type+') → '+part.end_section+' ('+part.end_type+'); '+(part.length_type===1?'Tỷ lệ: ':'Chiều dài: ')+part.length+(part.length_type===1?'':' '+({1:'in',2:'ft',3:'in',4:'ft',5:'mm',6:'m',7:'mm',8:'m',9:'mm',10:'m',11:'mm',12:'m',13:'cm',14:'cm',15:'cm',16:'cm'}[m.units_code]||'(eUnits '+m.units_code+')'))+'; EI33='+part.ei33_variation+'; EI22='+part.ei22_variation;parts.append(li)}item.append(parts)}list.append(item)}box.append(list)
+ if(m.components?.length){const parts=document.createElement('ul');for(const part of m.components){const li=document.createElement('li');li.textContent='Đoạn '+part.index+': '+part.start_section+' ('+part.start_type+') → '+part.end_section+' ('+part.end_type+'); '+(part.length_type===1?'Tỷ lệ: ':'Chiều dài: ')+part.length+(part.length_type===1?'':' '+({1:'in',2:'ft',3:'in',4:'ft',5:'mm',6:'m',7:'mm',8:'m',9:'mm',10:'m',11:'mm',12:'m',13:'cm',14:'cm',15:'cm',16:'cm'}[m.units_code]||'(eUnits '+m.units_code+')'))+'; EI33='+variationLabel(part.ei33_variation)+'; EI22='+variationLabel(part.ei22_variation);parts.append(li)}item.append(parts)}list.append(item)}box.append(list)
 }
 for(const id of resultFilterIds)$(id).onchange=()=>{page=0;renderResults()};
 $('reset-filters').onclick=()=>{resetFilters();renderResults()};

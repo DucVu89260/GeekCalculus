@@ -381,15 +381,16 @@ def test_all_missing_outputs_http_response_is_success_with_json_null():
     assert response.json()['missing_results'][0]['result'] is None
 
 
-def test_member_sections_and_nonprismatic_segments_use_sap_enum_names():
+@pytest.mark.parametrize('type_name',['NONPRISMATIC','Variable'])
+def test_member_sections_and_nonprismatic_segments_use_sap_enum_names(type_name):
     model = FakeModel()
-    sap = Sap2000(model, section_type_names={1:'I',99:'NONPRISMATIC'})
+    sap = Sap2000(model, section_type_names={1:'I',99:type_name})
     data = sap.extract(request())
     first, second = data.members
     assert first.frame == 'F1' and first.section == 'I300' and first.section_type == 'I'
     assert first.components == [] and first.units_code == 6
     assert second.frame == 'F2' and second.section == 'NP1'
-    assert second.section_type_code == 99 and second.section_type == 'NONPRISMATIC'
+    assert second.section_type_code == 99 and second.section_type == type_name
     assert [(p.start_section,p.end_section) for p in second.components] == [('I300','I500'),('I500','I300')]
     assert all(p.start_type == 'I' and p.end_type == 'I' for p in second.components)
     assert [p.length for p in second.components] == [.5,.5]
@@ -399,7 +400,7 @@ def test_member_sections_and_nonprismatic_segments_use_sap_enum_names():
     from structural_engine.member_forces.processing import connection_export
     import csv, io
     records=list(csv.DictReader(io.StringIO(connection_export(ExportRequest(dataset=data,format='csv')))))
-    assert records[-1]['section'] == 'NP1' and records[-1]['section_type'] == 'NONPRISMATIC'
+    assert records[-1]['section'] == 'NP1' and records[-1]['section_type'] == type_name
     assert 'members' not in records[-1]
     assert connection_export(ExportRequest(dataset=data))['members'][1]['components'][1]['index'] == 2
 
@@ -423,3 +424,23 @@ def test_malformed_nonprismatic_definition_fails_and_restores_units():
     with pytest.raises(SapError,match='Invalid nonprismatic'):
         Sap2000(model,section_type_names={99:'NONPRISMATIC',1:'I'}).extract(request())
     assert model.units == 9 and model.case_selected['DEAD'] and model.combo_selected['ENV']
+
+
+def test_rf1_variable_section_returns_its_real_start_end_sections():
+    model = FakeModel()
+    model.FrameObj = Names(['301','305'])
+    model.FrameObj.GetSection = lambda name: ('RF1','',0)
+    model.SelectObj.GetSelected = lambda: (2,[2,2],['301','305'],0)
+    model.PropFrame.GetTypeOAPI = lambda name: (99 if name == 'RF1' else 1,0)
+    model.PropFrame.GetNonPrismatic = lambda name: (1,['1200212810'],['1000212810'],[1.],[1],[2],[1],0,'','',0)
+    sap = Sap2000(model, section_type_names={99:'Variable',1:'I'})
+    members = sap.member_info()
+    assert [m.frame for m in members] == ['301','305']
+    for member in members:
+        assert member.section == 'RF1' and member.section_type == 'Variable'
+        assert len(member.components) == 1
+        part = member.components[0]
+        assert (part.start_section,part.end_section) == ('1200212810','1000212810')
+        assert part.length == 1. and part.length_type == 1
+        assert part.ei33_variation == 2 and part.ei22_variation == 1
+    assert model.units == 9

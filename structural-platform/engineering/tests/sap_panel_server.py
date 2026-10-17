@@ -18,7 +18,7 @@ MODELS[34567].GetModelFilename=lambda:r'C:\Models\Tower B.sdb'
 def gateway(settings):
     if settings.pid not in MODELS:
         raise SapError('Không đọc được PID 56789; kiểm tra quyền Windows.')
-    yield Sap2000(MODELS[settings.pid],connection_pid=settings.pid,section_type_names={1:'I',99:'NONPRISMATIC'})
+    yield Sap2000(MODELS[settings.pid],connection_pid=settings.pid,section_type_names={1:'I',99:'Variable'})
 
 
 def scanner(settings):

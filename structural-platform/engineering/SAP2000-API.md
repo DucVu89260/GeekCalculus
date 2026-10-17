@@ -247,3 +247,7 @@ Thông báo none và Case/Combo thiếu trong danh sách chọn dùng chữ đ�
 - CSV liên kết thêm cột `section`, `section_type`; đầy đủ thành phần Nonprismatic nằm trong JSON. Các quy tắc lực đồng thời và Envelope vẫn giữ nguyên.
 - Mục 4 có bộ lọc Cấu kiện, Section, Loại section, Case/Combo, Loại output và Step. Các điều kiện kết hợp bằng AND; thay bộ lọc sẽ về trang đầu. Nút Xóa bộ lọc trả toàn bộ dòng. Bộ lọc chỉ tác động bảng hiển thị; tải JSON/CSV và mục 5 vẫn dùng toàn bộ dữ liệu đã xuất, được ghi rõ trên panel.
 - Bấm Đọc lựa chọn hiện tại hoặc Lấy nội lực, rồi mở Section và thành phần Nonprismatic để xem cấu tạo từng đoạn. Cần đối chiếu trên Windows/SAP2000 26.2.0 thật; kiểm thử cloud dùng fixture API và CLR, không có DLL/SAP2000 thật.
+
+### Sửa nhận diện Variable / Nonprismatic — build 2026.10.17.9
+
+SAP2000 26.2.0 trả enum `Variable` cho section được định nghĩa trong hộp thoại Nonprismatic. Adapter nhận diện cả `Variable` và tên `Nonprismatic` để gọi GetNonPrismatic, thay vì để components rỗng. Giữ nguyên section_type gốc trong JSON/CSV. Panel hiển thị EI33/EI22 bằng nhãn Linear/Parabolic/Cubic; JSON vẫn giữ mã CSI nguyên bản. Kiểm thử tái tạo RF1 với section đầu 1200212810, cuối 1000212810, Length=1 Variable, EI33=Parabolic, EI22=Linear.

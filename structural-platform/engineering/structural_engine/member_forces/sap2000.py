@@ -154,7 +154,9 @@ class Sap2000:
             section, auto = outputs(self.model.FrameObj.GetSection(frame), 2)
             code, kind = property_type(section)
             components = []
-            if 'NONPRISMATIC' in kind.upper().replace('_',''):
+            normalized_kind = kind.upper().replace('_', '').replace(' ', '')
+            # SAP2000 eFramePropType names Nonprismatic properties 'Variable'.
+            if normalized_kind == 'VARIABLE' or 'NONPRISMATIC' in normalized_kind:
                 count, starts, ends, lengths, length_types, ei33, ei22, color, notes, guid = outputs(
                     self.model.PropFrame.GetNonPrismatic(section), 10)
                 if count < 1 or any(len(c or ()) != count for c in (starts,ends,lengths,length_types,ei33,ei22)):

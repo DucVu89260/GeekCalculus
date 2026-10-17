@@ -224,6 +224,10 @@ body{line-height:1.55}
  .shared-stat strong{margin-left:0}
 }
 
+.fabrication-selector{padding:20px}
+#calculation-mode{width:100%;max-width:100%;min-width:0;min-height:44px;padding:8px}
+.sectiontitle{flex-wrap:wrap}
+#sap-import{white-space:normal}
 </style><script defer src="./test-environment.js"></script>
 </head><body>
 <div class="shell">
@@ -259,7 +263,7 @@ body{line-height:1.55}
  </div></header>
 <main class="page"><div class="intro"><div><h1>H/I Doubly Symmetric</h1><p>AISC 360-10 member strength · symmetric welded I/H scope · LRFD / ASD</p></div><div class="intro-actions"><div class="language-switch" role="group" aria-label="Language"><button type="button" data-locale="vi" lang="vi" aria-pressed="false" title="Tiếng Việt">VN</button><button type="button" data-locale="en" lang="en" aria-pressed="true" title="English">ENG</button></div><button class="btn" id="preset" type="button">↺ &nbsp; Sample inputs</button><button class="btn" id="import" type="button">↥ &nbsp; Import JSON</button><button class="btn" id="export" type="button">↧ &nbsp; Export inputs & results</button><input type="file" accept=".json,application/json" id="file" class="hidden"></div></div>
 
-<div class="design-method-panel"><label for="calculation-mode"><strong>Calculation source</strong></label> <select id="calculation-mode"><option value="AISC36010">AISC 360-10 · member checks</option><option value="LEGACY">Legacy Excel 360-05 · reference only</option></select><p id="primary-scope">A bounded member check for static, prismatic, doubly symmetric welded I/H sections. Every unsupported or unconfirmed limit state remains visible for review.</p></div>
+<div class="design-method-panel"><label for="calculation-mode"><strong>Calculation source</strong></label> <select id="calculation-mode"><option value="AISC36010">AISC 360-10 · member checks</option><option value="LEGACY">Legacy Excel 360-05 · reference only</option></select><p id="primary-scope">Gross-section built-up I/H member strength using the selected ASD/LRFD method.</p></div>
 <div class="workspace" id="results-start"><section class="card" id="input-card"><header class="cardhead"><h2>01 &nbsp; Input Parameters</h2><small>Units: mm / MPa / kN / kN·m</small></header>
 <fieldset class="design-method-panel" aria-label="Design method">
 <legend>Design Method / Phương pháp thiết kế</legend>
@@ -267,35 +271,37 @@ body{line-height:1.55}
 <label class="design-method-choice"><input type="radio" name="design-method" value="ASD"><span><strong>ASD</strong><small>Rn / Ω · Service-level demand</small></span></label>
 <p class="method-clarification" id="method-explanation">Select LRFD load combinations. Changing the method does not convert forces or combinations.</p>
 </fieldset>
-<div class="tabstrip" role="tablist"><button class="tab active" data-tab="geometry" role="tab" aria-selected="true">Geometry</button><button class="tab" data-tab="member" role="tab" aria-selected="false">Material & lengths</button><button class="tab" data-tab="forces" role="tab" aria-selected="false">Forces</button><button class="tab" data-tab="analysis" role="tab" aria-selected="false">Analysis basis</button><button class="tab" data-tab="tension" role="tab" aria-selected="false">Tension connection</button><button class="tab" data-tab="shear" role="tab" aria-selected="false">Shear & stiffeners</button></div>
+<div class="formgrid fabrication-selector" data-section="section"><label class="field"><span>Fabrication</span><select id="aisc-fabrication" data-key="fabrication"><option value="BUILT_UP">Built-up · continuously welded</option><option value="ROLLED" disabled>Hot-rolled · pending</option></select></label></div>
+<div class="tabstrip" role="tablist"><button class="tab active" data-tab="geometry" role="tab" aria-selected="true">Geometry</button><button class="tab" data-tab="member" role="tab" aria-selected="false">Material & lengths</button><button class="tab" data-tab="forces" role="tab" aria-selected="false">Forces</button><button class="tab" data-tab="shear" role="tab" aria-selected="false">Shear & stiffeners</button></div>
 <div class="tab-panel" id="geometry" role="tabpanel"><div class="sectiontitle"><h3>Doubly symmetric I/H section</h3><span>Sharp-corner · mm</span></div>
 <div class="shapegrid"><div class="formgrid" data-section="section">
 <label class="field"><span>Overall depth <em>h</em></span><input type="number" step="any" data-key="h_mm"></label>
 <label class="field"><span>Flange width <em>bf</em></span><input type="number" step="any" data-key="bf_mm"></label>
 <label class="field"><span>Web thickness <em>tw</em></span><input type="number" step="any" data-key="tw_mm"></label>
 <label class="field"><span>Flange thickness <em>tf</em></span><input type="number" step="any" data-key="tf_mm"></label>
-<label class="field"><span>Fabrication</span><select id="aisc-fabrication" data-key="fabrication"><option value="BUILT_UP">Built-up · continuously welded</option><option value="ROLLED">Hot-rolled · catalog review</option></select></label>
+
 <label class="field" id="web-attachment-field"><span>Web-to-flange attachment</span><select data-key="web_attachment"><option value="WELDED">Continuous welded plates</option></select></label>
 </div><div class="diagram"><svg viewBox="0 0 240 240" role="img" aria-label="I/H section diagram"><g id="section-outline"></g><g stroke="#7894a6" stroke-width="1" fill="none"><path d="M25 26h-9v188h9M35 224v8h170v-8"/></g><g fill="#557589" font-size="12" font-weight="700"><text x="11" y="119" transform="rotate(-90 11 119)" text-anchor="middle" id="diag-h">h</text><text x="120" y="239" text-anchor="middle" id="diag-b">bf</text></g></svg></div></div>
 <p class="checkmsg">Equal flanges (bf, tf) with centered web. Fillet radii are excluded. The primary calculation scope is static, prismatic, doubly symmetric welded I/H.</p>
 <div id="web-clear-height-fields" class="hidden"><div class="formgrid" data-section="section"><label class="field"><span>Rolled clear web height <em>between fillets · mm</em></span><input type="number" step="any" data-key="web_clear_height_mm" data-optional><small>Measure the clear web height excluding fillets from the profile source. Catalog properties still require separate verification.</small></label></div>
 <label class="confirmation"><input type="checkbox" data-section="section" data-key="web_clear_height_verified"><span>I verified this rolled clear web height from the applicable profile source.</span></label></div>
-<p class="checkmsg">The MemberCompliance PASS scope is continuously welded built-up rectangular-plate I/H. Rolled profiles require catalog geometry review; bolted built-up webs are outside this complete member scope.</p></div>
-<div class="tab-panel hidden" id="member" role="tabpanel"><div class="sectiontitle"><h3>Material and member parameters</h3><span>Phase 1 · Excel input</span></div>
-<div class="formgrid" data-section="material"><label class="field"><span>Yield strength <em>Fy · MPa</em></span><input type="number" step="any" data-key="fy_mpa"></label><label class="field"><span>Elastic modulus <em>E · MPa</em></span><input id="aisc-e" type="number" step="any" data-key="e_mpa"><small>Direct Analysis supported path uses E = 200,000 MPa; USER_K permits an explicit material modulus.</small></label><label class="field"><span>Tensile strength <em>Fu · MPa</em></span><input type="number" step="any" data-key="fu_mpa" data-optional><small>Use the specified material value for the adopted grade.</small></label></div>
+<p class="checkmsg">This calculator currently develops the Built-up section family. Hot-rolled sections are pending.</p></div>
+<div class="tab-panel hidden" id="member" role="tabpanel"><div class="sectiontitle"><h3>Material and member parameters</h3><span>External Direct Analysis · AISC 360-10</span></div>
+<div class="formgrid" data-section="material"><label class="field"><span>Yield strength <em>Fy · MPa</em></span><input type="number" step="any" data-key="fy_mpa"></label><label class="field"><span>Elastic modulus <em>E · MPa</em></span><input id="aisc-e" type="number" step="any" data-key="e_mpa"><small>AISC 360-10 nominal elastic modulus: E = 200,000 MPa.</small></label><label class="field"><span>Tensile strength <em>Fu · MPa</em></span><input type="number" step="any" data-key="fu_mpa" data-optional><small>Use the specified material value for the adopted grade.</small></label></div>
 <div class="fieldset-caption">Member and unbraced lengths</div><div class="formgrid" data-section="member"><label class="field"><span>Major-axis length <em>Lx · mm</em></span><input type="number" step="any" data-key="lx_mm"></label><label class="field"><span>Unbraced length <em>Lb · mm</em></span><input type="number" step="any" data-key="lb_mm"></label></div>
 <div class="fieldset-caption">AISC 360-10 · E2/E3/E4 · independent restraint lengths</div>
-<p class="checkmsg">Kx/Ky and Lx/Ly control flexural buckling. Kz/Lz/G/J/Cw control torsional buckling. Lb is used for flexure and never substitutes for Ly or Lz. The supported Direct Analysis path fixes E=200,000 MPa, G=77,200 MPa and Kx=Ky=Kz=1; USER_K permits explicit K values without a Direct Analysis compliance claim.</p>
+<p class="checkmsg">External Direct Analysis uses Kx = Ky = Kz = 1 under C3. Lx, Ly, Lz and Lb are independent restraint lengths; see the calculation notes below.</p>
 <div class="formgrid aisc-bracing-form" data-section="member">
  <label class="field"><span>Kx · E2</span><input id="aisc-kx" data-key="kx" type="number" min="0" step="any"></label>
  <label class="field"><span>Ky · E2</span><input id="aisc-ky" data-key="ky" type="number" min="0" step="any"></label>
  <label class="field"><span>Ly · compression minor axis <em>mm</em></span><input id="aisc-ly" data-key="ly_mm" type="number" min="0" step="any"></label>
  <label class="field"><span>Kz · E4</span><input id="aisc-kz" data-key="kz" type="number" min="0" step="any"></label>
  <label class="field"><span>Lz · torsional unbraced length <em>mm</em></span><input id="aisc-lz" data-key="lz_mm" type="number" min="0" step="any"></label>
- <label class="field"><span>Shear modulus <em>G · MPa</em></span><input id="aisc-g" data-key="g_mpa" type="number" min="0" step="any"><small>Direct Analysis fixes G at 77,200 MPa per §E4; USER_K allows explicit input.</small></label>
+ <label class="field"><span>Shear modulus <em>G · MPa</em></span><input id="aisc-g" data-key="g_mpa" type="number" min="0" step="any"><small>AISC 360-10 nominal shear modulus: G = 77,200 MPa.</small></label>
 </div>
 </div>
-<div class="tab-panel hidden" id="forces" role="tabpanel"><div class="sectiontitle"><h3>Design actions at the current section</h3><span>Manual input · explicit units and signs</span><button class="btn mini pending-integration" id="sap-import" type="button" disabled aria-disabled="true" title="SAP2000 model import is not connected">SAP2000 import · pending</button></div>
+<div class="tab-panel hidden" id="forces" role="tabpanel"><div class="sectiontitle"><h3>Design actions at the current section</h3><span>Manual input · explicit units and signs</span><button class="btn mini pending-integration" id="sap-import" type="button" disabled aria-disabled="true" title="Future API: import forces, section geometry and moment diagrams for AISC Cb or the selected standard's corresponding factor">Connect SAP2000 API · pending</button></div>
+<p class="contract-note">Manual forces must correspond to the ASD or LRFD design method selected above. Values are used as entered.</p>
 <div class="formgrid" data-section="forces">
 <label class="field"><span>Axial force <em>N · kN</em></span><input type="number" step="any" data-key="axial_kN"><small>Positive = tension; negative = compression</small></label>
 <label class="field"><span>Major-axis moment <em>Mx · kN·m</em></span><input type="number" step="any" data-key="moment_x_kNm"><small>Positive = bottom-flange tension; negative = top-flange tension.</small></label>
@@ -308,54 +314,6 @@ body{line-height:1.55}
  <label class="field"><span>Legacy M50 <em>kN·m</em></span><input type="number" step="any" data-key="moment_50_kNm"></label>
  <label class="field"><span>Legacy M75 <em>kN·m</em></span><input type="number" step="any" data-key="moment_75_kNm"></label>
 </div><p class="checkmsg" id="cb1-note">AISC 360-10 uses conservative Cb = 1 for this calculation. The M25/M50/M75 fields are retained for the separate legacy Excel reference only.</p></div></div>
-<div class="tab-panel hidden" id="analysis" role="tabpanel">
- <div class="sectiontitle"><h3>Analysis method, load basis and model evidence</h3><span>AISC 360-10 Chapter C</span></div>
- <div class="formgrid" data-section="analysis">
-  <label class="field"><span>Analysis method</span><select id="analysis-method" data-key="method"><option value="DIRECT">Direct Analysis Method</option><option value="USER_K">User-specified K factors</option></select><small>USER_K may calculate explicit K values but does not claim Direct Analysis compliance.</small></label>
-  <label class="field"><span>Analysis load-combination basis</span><select id="analysis-forces-method" data-key="forces_method"><option value="UNSPECIFIED">Select ASD or LRFD</option><option value="LRFD">LRFD factored combinations</option><option value="ASD">ASD service combinations</option></select><small>This must match the design method above. Enter forces as supplied; no automatic scaling is applied.</small></label>
-  <label class="field" style="grid-column:1/-1"><span>Model and combination source evidence</span><input type="text" data-key="evidence" placeholder="Model, load case/combo, analysis date, result envelope or report reference"></label>
- </div>
- <div id="load-basis-message" class="load-basis-warning" role="status">Choose an analysis load basis that matches the design method.</div>
- <p class="contract-note">Chapter C requires second-order P-Δ and P-δ effects, imperfections or prescribed notional loads, reduced stiffness (0.8 EI and 0.8τb, or the prescribed notional-load alternative), and all applicable loads in the analysis. For ASD, the Chapter C analysis load amplification is 1.6 and the resulting strengths are divided by 1.6 where required. Confirm the model evidence before relying on these checks.</p>
- <div class="confirmation-list" data-section="analysis">
-  <label class="confirmation"><input type="checkbox" data-key="second_order_global_confirmed"><span>The global second-order analysis includes frame P-Δ/P-δ effects and relevant axial, shear, flexural and other destabilizing component deformations under C2.1; no qualified-omission exception is assumed.</span></label>
-  <label class="confirmation"><input type="checkbox" data-key="member_p_delta_confirmed"><span>Member second-order analysis includes P-δ effects.</span></label>
-  <label class="confirmation"><input type="checkbox" data-key="imperfections_confirmed"><span>Initial imperfections are represented through direct modeling or the applicable notional-load procedure.</span></label>
-  <label class="confirmation"><input type="checkbox" data-key="reduced_stiffness_confirmed"><span>Reduced stiffness uses 0.8 stiffness and 0.8τb, or the applicable prescribed notional-load alternative.</span></label>
-  <label class="confirmation"><input type="checkbox" data-key="all_loads_confirmed"><span>All applicable gravity and lateral loads are included in the governing analysis combinations.</span></label>
-  <label class="confirmation"><input type="checkbox" data-key="asd_scaling_confirmed"><span>For ASD, the analysis uses the required 1.6 load amplification and the result is divided by 1.6 where applicable.</span></label>
-  <label class="confirmation"><input type="checkbox" data-key="bracing_confirmed"><span>Bracing points, restraint conditions and independent Lx/Ly/Lz/Lb lengths match the model.</span></label>
- </div>
- <div id="ack-reset-note" class="ack-reset-note" role="status">Imported analysis and compliance acknowledgments were reset. Review the current geometry, forces, source evidence and model before confirming again.</div>
-</div>
-<div class="tab-panel hidden" id="tension" role="tabpanel">
- <div class="sectiontitle"><h3>Tension rupture, net section and connection behavior</h3><span>AISC 360-10 Chapter D</span></div>
- <p class="contract-note">Hole diameters are nominal hole diameters, not bolt diameters. AISC B4.3 adds 2 mm automatically. Straight critical paths are supported; staggered paths, slots and unsupported patterns remain review items.</p>
- <fieldset class="contract-group"><legend>Hole pattern and critical section</legend>
-  <div class="formgrid" data-section="holes">
-   <label class="field"><span>Hole pattern</span><select data-key="pattern"><option value="STRAIGHT">Straight critical path</option><option value="STAGGERED">Staggered / alternate path</option></select></label>
-   <label class="field"><span>Flange hole diameter <em>nominal hole · mm</em></span><input type="number" min="0" step="any" data-key="flange_hole_diameter_mm" data-optional></label>
-   <label class="field"><span>Web hole diameter <em>nominal hole · mm</em></span><input type="number" min="0" step="any" data-key="web_hole_diameter_mm" data-optional></label>
-   <label class="field"><span>Top flange holes on path <em>integer ≥ 0</em></span><input type="number" min="0" step="1" data-key="top_flange_count"></label>
-   <label class="field"><span>Bottom flange holes on path <em>integer ≥ 0</em></span><input type="number" min="0" step="1" data-key="bottom_flange_count"></label>
-   <label class="field"><span>Web holes on path <em>integer ≥ 0</em></span><input type="number" min="0" step="1" data-key="web_count"></label>
-  </div>
-  <label class="confirmation"><input type="checkbox" data-section="holes" data-key="critical_path_confirmed"><span>I reviewed the governing straight critical path and the hole counts for the same tension connection.</span></label>
- </fieldset>
- <fieldset class="contract-group"><legend>Connection load transfer and shear lag</legend>
-  <div class="formgrid" data-section="tension_connection">
-   <label class="field"><span>Longitudinal load transfer</span><select data-key="load_transfer"><option value="">Select connection behavior</option><option value="ALL_ELEMENTS">All elements connected (case 1)</option><option value="PARTIAL_LONGITUDINAL">Only part connected longitudinally (case 2)</option></select></label>
-   <label class="field"><span>Connection length <em>l · mm</em></span><input type="number" min="0" step="any" data-key="connection_length_mm" data-optional></label>
-   <label class="field"><span>Connection eccentricity <em>x̄ · mm</em></span><input type="number" min="0" step="any" data-key="eccentricity_mm" data-optional><small>Enter the distance from the connected plane to the member centroid as defined by the connection detail.</small></label>
-  </div>
-  <div class="inline-checks" aria-label="Connected elements">
-   <label><input type="checkbox" data-connected-element="TOP">Top flange connected</label>
-   <label><input type="checkbox" data-connected-element="BOTTOM">Bottom flange connected</label>
-   <label><input type="checkbox" data-connected-element="WEB">Web connected</label>
-  </div>
-  <p class="contract-note">The connected-element selection does not automatically infer U. Case 1 requires all elements to transfer load; case 2 requires the verified connected components, connection length and x̄.</p>
- </fieldset>
-</div>
 <div class="tab-panel hidden" id="shear" role="tabpanel">
  <div class="sectiontitle"><h3>Web shear, stiffeners and optional tension-field action</h3><span>AISC 360-10 Chapter G</span></div>
  <fieldset class="contract-group"><legend>Transverse stiffener detail</legend>
@@ -400,28 +358,20 @@ body{line-height:1.55}
 </div>
 <div class="input-actions"><small id="dirtytext">Sample inputs loaded.</small><button class="btn primary" id="run" type="button">▹ &nbsp; Calculation</button></div><div class="errorbox" role="alert" id="error"></div></section>
 <section class="card" id="calculation-results" aria-live="polite"><header class="cardhead"><h2>02 &nbsp; Calculation Results</h2><small id="calc-info">Browser · not saved to DB</small></header>
+<div class="resultsection" id="member-design-summary-section"><h3>Design summary</h3><div class="tablewrap"><table class="aisc-results"><thead><tr><th>Check</th><th>Nominal</th><th>Available</th><th>D/C</th><th>Clause</th></tr></thead><tbody id="member-design-summary"></tbody></table></div></div>
 <div class="result-top"><div class="ring" id="ring"><div class="ring-center"><strong id="h1">—</strong><span>H1 · D/C</span></div></div><div><div class="result-title">Axial force–moment interaction</div><span class="status-line" id="status">REVIEW REQUIRED</span><p class="result-desc" id="overview">Loading Excel sample…</p></div></div>
 <div id="refline" class="refline"></div><div class="metrics" id="metrics"></div><div class="breakdown"><div id="factor-table" aria-live="polite"></div><div class="subheading">Demand / Capacity <span style="font-size:13px;color:#95a4b0"><span id="active-calculation-source">AISC 360-10 reference calculation</span></span></div><div id="bars"></div><small>Computed branch ratios do not establish complete member approval; missing checks remain explicit.</small></div>
 <div class="resultsection"><h3>Limit State Checks</h3><div class="tablewrap"><table><thead><tr><th>Clause / source</th><th>Limit state</th><th>Demand</th><th>Available / nominal</th><th>D/C</th><th>Status / blocker</th></tr></thead><tbody id="checkrows"></tbody></table></div></div>
 <div class="details"><details><summary>⊞ &nbsp; Classification and intermediate results</summary><div class="tracegrid" id="trace"></div></details></div>
 
 <section class="card" id="member-compliance" aria-labelledby="member-compliance-heading">
- <header class="cardhead"><h2 id="member-compliance-heading">MemberCompliance</h2><small>AISC 360-10 · bounded member scope</small></header>
- <div class="compliance-body">
-  <div id="member-compliance-status" class="compliance-status" role="status" aria-live="polite">REVIEW_REQUIRED · waiting for the current calculation</div>
-  <div class="compliance-scope"><strong>Scope limit:</strong> MemberCompliance PASS applies only to the declared static, prismatic, doubly symmetric welded I/H scope and the simultaneous governing section and combination envelope you confirm. It is not project approval. Connections, braces, J10 local concentrated effects, fatigue and serviceability must be checked externally or confirmed not applicable.</div>
-  <div id="member-compliance-blockers" class="warning-list"></div>
-  <div class="compliance-checks" id="member-compliance-checks"></div>
-  <details><summary>Member compliance utilization and trace</summary><div id="member-compliance-trace" class="compliance-trace">No current result.</div></details>
-  <fieldset class="contract-group"><legend>Bounded scope confirmation</legend>
-   <div class="confirmation-list" data-section="compliance">
-    <label class="confirmation"><input type="checkbox" data-key="scope_confirmed"><span>This is a static, prismatic, doubly symmetric continuously welded built-up I/H with rectangular plates; it has no cover plates, hybrid steel, web openings beyond ordinary round bolt holes, or moment redistribution.</span></label>
-    <label class="confirmation"><input type="checkbox" data-key="envelope_confirmed"><span>I reviewed the simultaneous governing section and load-combination envelope for all entered actions.</span></label>
-    <label class="confirmation"><input type="checkbox" data-key="other_limit_states_confirmed"><span>Connection checks (including J3/J4 bearing, net-section shear and block shear), brace members and connections, J10 concentrated-force effects, fatigue and serviceability have been checked externally or are not applicable.</span></label>
-   </div>
-  </fieldset>
- </div>
-</section>
+<header class="cardhead"><h2 id="member-compliance-heading">Gross member strength</h2></header>
+<div class="compliance-body">
+<div id="member-compliance-status" class="compliance-status" role="status" aria-live="polite">Waiting for calculation</div>
+<div id="member-compliance-blockers" class="warning-list"></div>
+<div class="compliance-checks" id="member-compliance-checks"></div>
+<details><summary>Member utilization and trace</summary><div id="member-compliance-trace" class="compliance-trace">No current result.</div></details>
+</div></section>
 <div class="minor-note">All calculations are performed locally; no input is sent to a server.</div></section></div>
 
 
@@ -478,6 +428,15 @@ body{line-height:1.55}
 <div class="warningbar hidden" id="legacy-warning"><div class="alert-icon">!</div><div><strong>Excel parity only — not approved for design</strong>The source workbook states AISC 360-05. This preview preserves legacy behavior for parity (signed Cb, weak-axis Fe and stiffeners). <b>Do not use this output for construction design or claim AISC 360-10 compliance.</b></div></div>
 </section>
 
+<div class="resultsection" id="calculation-notes"><h3>Calculation notes</h3><ul>
+<li>Built-up, doubly symmetric I/H with homogeneous steel and rectangular plates. Hybrid steel and cover plates are not included. Hot-rolled development is pending.</li>
+<li>Gross-section member properties are used. Web openings will be developed in a later phase.</li>
+<li>External Direct Analysis to AISC 360-10 C2 is assumed. Under C3, K = 1; SAP2000 must be configured for the required method. The component does not verify the structural model.</li>
+<li>Lx, Ly, Lz and Lb remain independent physical restraint lengths. Nominal E/G are used in member resistance, without repeating the analysis stiffness reductions.</li>
+<li>For ASD, the external Direct Analysis follows C2.1(4): 1.6 times ASD analysis loads, followed by division of required strengths by 1.6. This calculator does not convert forces.</li>
+<li>Cb = 1 until the SAP2000 API can supply geometry, forces and a verified moment diagram. Other standards may use a corresponding factor.</li>
+</ul><a href="./?standard=AISC360-10&amp;source_sha256=f9b15004cf51dbaec6c06588d81aa5256be268af87906e5ba863c289795f4e99&amp;pdf_page=81#/modules/steel/library/standards" target="_blank" rel="noopener">AISC 360-10 C3 · PDF page 81 · printed 16.1-25</a></div>
+
 <div class="footer-note">GeekCalculus · Steel Design / Component · H/I Doubly Symmetric · Phase 1 Browser Preview · © 2026</div></main></div></div>
 <script src="./aisc360-10-resistance.js"></script>
 <script>
@@ -488,6 +447,33 @@ body{line-height:1.55}
  */
 // English is the canonical source. Translate presentation only, never calculation data.
 const HI_TRANSLATIONS = {
+  "External Direct Analysis · AISC 360-10": "Phân tích trực tiếp bên ngoài · AISC 360-10",
+  "AISC 360-10 nominal elastic modulus: E = 200,000 MPa.": "Mô đun đàn hồi danh nghĩa AISC 360-10: E = 200,000 MPa.",
+  "AISC 360-10 nominal shear modulus: G = 77,200 MPa.": "Mô đun trượt danh nghĩa AISC 360-10: G = 77,200 MPa.",
+  "External Direct Analysis uses Kx = Ky = Kz = 1 under C3. Lx, Ly, Lz and Lb are independent restraint lengths; see the calculation notes below.": "Phân tích trực tiếp bên ngoài dùng Kx = Ky = Kz = 1 theo C3. Lx, Ly, Lz và Lb là các chiều dài giằng độc lập; xem ghi chú cuối bảng tính.",
+
+  "Gross member strength": "Sức kháng cấu kiện nguyên tiết diện",
+  "Design summary": "Tổng hợp kết quả thiết kế",
+  "Gross-section built-up I/H member strength using the selected ASD/LRFD method.": "Sức kháng cấu kiện I/H tổ hợp trên tiết diện nguyên theo phương pháp ASD/LRFD đang chọn.",
+  "This calculator currently develops the Built-up section family. Hot-rolled sections are pending.": "Bảng tính hiện phát triển cho tiết diện Built-up. Tiết diện Hot-rolled sẽ được phát triển sau.",
+  "Hot-rolled · pending": "Thép cán nóng · chờ phát triển",
+  "Connect SAP2000 API · pending": "Kết nối API SAP2000 · chờ phát triển",
+  "Manual forces must correspond to the ASD or LRFD design method selected above. Values are used as entered.": "Nội lực nhập tay phải tương ứng phương pháp ASD hoặc LRFD đã chọn ở trên. Các giá trị được dùng trực tiếp.",
+  "Major-axis flexure Mnx": "Uốn trục mạnh Mnx",
+  "Minor-axis flexure Mny": "Uốn trục yếu Mny",
+  "Compression Pc": "Sức kháng nén Pc",
+  "Gross tensile yielding Pt": "Sức kháng kéo chảy dẻo Pt",
+  "Web shear": "Cắt bụng",
+  "Flange shear": "Cắt cánh",
+  "Interaction N–Mx–My (H1)": "Tương tác N–Mx–My (H1)",
+  "Calculation notes": "Ghi chú tính toán",
+  "Built-up, doubly symmetric I/H with homogeneous steel and rectangular plates. Hybrid steel and cover plates are not included. Hot-rolled development is pending.": "Tiết diện I/H tổ hợp đối xứng hai trục, thép đồng nhất và các bản chữ nhật. Không xét thép hybrid và bản tăng cường cover plate. Tiết diện cán nóng sẽ được phát triển sau.",
+  "Gross-section member properties are used. Web openings will be developed in a later phase.": "Sử dụng đặc trưng cấu kiện trên tiết diện nguyên. Phần lỗ mở trên bụng sẽ được phát triển sau.",
+  "External Direct Analysis to AISC 360-10 C2 is assumed. Under C3, K = 1; SAP2000 must be configured for the required method. The component does not verify the structural model.": "Giả thiết nội lực từ phân tích trực tiếp bên ngoài theo AISC 360-10 C2. Theo C3 lấy K = 1; SAP2000 cần được cấu hình đúng phương pháp. Module không xác minh mô hình phân tích.",
+  "Lx, Ly, Lz and Lb remain independent physical restraint lengths. Nominal E/G are used in member resistance, without repeating the analysis stiffness reductions.": "Lx, Ly, Lz và Lb là các chiều dài giằng độc lập. Dùng E/G danh nghĩa khi tính sức kháng, không giảm độ cứng thêm lần nữa.",
+  "For ASD, the external Direct Analysis follows C2.1(4): 1.6 times ASD analysis loads, followed by division of required strengths by 1.6. This calculator does not convert forces.": "Với ASD, phân tích trực tiếp bên ngoài theo C2.1(4): phân tích với tải ASD nhân 1.6, sau đó chia nội lực yêu cầu cho 1.6. Bảng tính không tự quy đổi nội lực.",
+  "Cb = 1 until the SAP2000 API can supply geometry, forces and a verified moment diagram. Other standards may use a corresponding factor.": "Cb = 1 trong khi chờ API SAP2000 cung cấp hình học, nội lực và biểu đồ mô men đã xác định. Tiêu chuẩn khác có thể dùng hệ số tương ứng.",
+
   "Design Calculation": "Thuyết minh tính toán",
   "AISC 360-10 Verified Branches": "Các nhánh AISC 360-10 đã đối chiếu",
   "Shared Section Properties": "Đặc trưng tiết diện dùng chung",
@@ -535,7 +521,7 @@ const HI_TRANSLATIONS = {
   "I/H section diagram": "Sơ đồ tiết diện I/H",
   "Equal flanges (bf, tf), centered web. Fillet radii are not included.": "Hai cánh bằng nhau (bf, tf), bụng nằm chính giữa. Chưa xét bán kính fillet.",
   "Material & member parameters": "Thông số vật liệu & cấu kiện",
-  "Phase 1 · Excel input": "Giai đoạn 1 · Dữ liệu Excel",
+  "External Direct Analysis · AISC 360-10": "Giai đoạn 1 · Dữ liệu Excel",
   "Yield stress": "Giới hạn chảy",
   "Elastic modulus": "Đàn hồi",
   "Buckling / unbraced lengths": "Chiều dài ổn định / không giằng",
@@ -999,14 +985,12 @@ const fixture = {
     moment_50_kNm: -619.8454675496689,
     moment_75_kNm: -370.3123961538461,
   },
-  analysis: { method: 'DIRECT', forces_method: 'UNSPECIFIED', evidence: '', second_order_global_confirmed: false, member_p_delta_confirmed: false, imperfections_confirmed: false, reduced_stiffness_confirmed: false, all_loads_confirmed: false, asd_scaling_confirmed: false, bracing_confirmed: false },
-  holes: { pattern: 'STRAIGHT', top_flange_count: 0, bottom_flange_count: 0, web_count: 0, flange_hole_diameter_mm: null, web_hole_diameter_mm: null, critical_path_confirmed: false },
-  tension_connection: { load_transfer: '', connected_elements: [], connection_length_mm: null, eccentricity_mm: null },
+  assessment: { scope: 'GROSS_MEMBER', force_source: 'MANUAL' },
+  analysis: { method: 'DIRECT' },
   tension_field_action: { enabled: false, is_end_panel: false, panel_position: '', panel_position_confirmed: false, four_sides_supported: false, adjacent_panels: [
     { spacing_mm: null, shear_kN: null, is_end_panel: null, four_sides_supported: null, other_boundary_stiffeners_verified: false },
     { spacing_mm: null, shear_kN: null, is_end_panel: null, four_sides_supported: null, other_boundary_stiffeners_verified: false },
   ], bounding_stiffeners: [], same_boundaries_confirmed: false },
-  compliance: { scope_confirmed: false, envelope_confirmed: false, other_limit_states_confirmed: false },
 }
 
 
@@ -1349,7 +1333,7 @@ const checknames = {
 const fields = [...document.querySelectorAll('[data-section]')]
 function controlsIn(block){return block.matches('[data-key]')?[block]:block.querySelectorAll('[data-key]')}
 function syncAnalysisUi(){
- const direct=find('analysis-method')?.value==='DIRECT'
+ const direct=true
  for(const id of ['aisc-kx','aisc-ky','aisc-kz']){
   const node=find(id);if(!node)continue
   node.readOnly=direct;node.setAttribute('aria-readonly',String(direct))
@@ -1370,22 +1354,12 @@ function syncStiffenerUi(){
  find('angle-inertia-field')?.classList.toggle('hidden',!angle)
  find('angle-axis-check')?.classList.toggle('hidden',!angle)
 }
-function syncLoadBasisMessage(){
- const method=document.querySelector('input[name="design-method"]:checked')?.value||'LRFD'
- const basis=find('analysis-forces-method')?.value||'UNSPECIFIED'
- const node=find('load-basis-message');if(!node)return
- if(basis==='UNSPECIFIED')node.textContent='Select whether the entered force envelope comes from ASD or LRFD combinations. No automatic load scaling is applied.'
- else if(basis!==method)node.textContent=`Mismatch: the design method is ${method}, while these forces are marked ${basis}. Change one after checking the source combination.`
- else node.textContent=`Load-basis match: ${method}. The entered actions are used as provided; changing the design method does not convert them.`
- node.setAttribute('data-match',basis===method?'true':'false')
-}
 function updateInputs(){
   fields.forEach(block => controlsIn(block).forEach(node => {
     const key = node.dataset.key, value = latest.input[block.dataset.section][key]
     if(node.type==='checkbox')node.checked=Boolean(value)
     else node.value = value===null||value===undefined?'':value
   }))
-  document.querySelectorAll('[data-connected-element]').forEach(node=>node.checked=latest.input.tension_connection.connected_elements.includes(node.dataset.connectedElement))
   document.querySelectorAll('[data-tfa-panel]').forEach((group,index)=>group.querySelectorAll('[data-panel-key]').forEach(node=>{
     const value=latest.input.tension_field_action.adjacent_panels[index]?.[node.dataset.panelKey]
     if(node.type==='checkbox')node.checked=Boolean(value)
@@ -1405,7 +1379,6 @@ function updateInputs(){
   syncGeometryUi()
   syncAnalysisUi()
   syncStiffenerUi()
-  syncLoadBasisMessage()
   draw()
 }
 function readInputs(){
@@ -1428,12 +1401,8 @@ function readInputs(){
     }else value=node.value
     next[block.dataset.section][node.dataset.key] = value
   }))
-  for(const key of ['top_flange_count','bottom_flange_count','web_count']){
-    const value=next.holes[key]
-    if(!Number.isInteger(value)||value<0)throw new Error(`${key} must be a nonnegative integer.`)
-  }
-  next.holes.critical_path_confirmed=!!document.querySelector('[data-key="critical_path_confirmed"]')?.checked
-  next.tension_connection.connected_elements=[...document.querySelectorAll('[data-connected-element]:checked')].map(node=>node.dataset.connectedElement)
+  next.assessment={scope:'GROSS_MEMBER',force_source:'MANUAL'}
+  next.analysis={method:'DIRECT',forces_method:document.querySelector('input[name="design-method"]:checked')?.value||'LRFD'}
   next.stiffeners.inertia_axis_verified=!!document.querySelector('[data-key="inertia_axis_verified"]')?.checked
   next.stiffeners.attachment_details_verified=!!document.querySelector('[data-key="attachment_details_verified"]')?.checked
   const boolSelect=node=>node.value==='true'?true:node.value==='false'?false:null
@@ -1530,7 +1499,7 @@ function isAiscMode(){return find('calculation-mode').value==='AISC36010'}
 function renderPrimaryPending(message){
  find('h1').textContent='—';find('status').textContent='REVIEW REQUIRED';
  find('ring').style.background='#e9eff3';find('overview').textContent=message;
- for(const id of ['metrics','bars','checkrows','trace','warnings','factor-table','refline'])find(id).textContent='';
+ for(const id of ['metrics','bars','checkrows','trace','warnings','factor-table','refline','member-design-summary'])find(id).textContent='';
  find('member-compliance-status').textContent='REVIEW_REQUIRED · no current result';
  find('member-compliance-blockers').textContent='';find('member-compliance-checks').textContent='';find('member-compliance-trace').textContent='No current result.';
  document.getElementById('aisc-review-status').textContent=message;
@@ -1585,7 +1554,7 @@ function demandForLimitState(key,input,result){
 }
 function renderMemberCompliance(result){
  const card=result.member_compliance||{status:result.overall_status||'REVIEW_REQUIRED',checks:[],blockers:[]};
- find('member-compliance-status').textContent=`MemberCompliance ${card.status}`;
+ find('member-compliance-status').textContent=`Gross member strength · ${card.status}`;
  const blockers=Array.isArray(card.blockers)?card.blockers:[];
  find('member-compliance-blockers').innerHTML=blockers.map(item=>`<div class="warning"><strong>${safe(item.key||'REVIEW_REQUIRED')}</strong>${safe(item.reason||'Required input or review is incomplete.')}</div>`).join('');
  const checks=Array.isArray(card.checks)?card.checks:[];
@@ -1596,7 +1565,16 @@ function renderMemberCompliance(result){
  }).join('')}</tbody></table></div>`:'<p class="contract-note">No numerical compliance checks are currently available. Review blockers and limit-state statuses below.</p>';
  find('member-compliance-trace').textContent=JSON.stringify({scope:card.scope,summary:card.summary,utilization:card.utilization,approval_basis:card.approval_basis},null,2);
 }
+function renderGrossDesignSummary(result,input){
+ const names={major_flexure:'Major-axis flexure Mnx',minor_flexure:'Minor-axis flexure Mny',compression:'Compression Pc',tension:'Gross tensile yielding Pt',shear_web:'Web shear',shear_flange:'Flange shear',interaction:'Interaction N–Mx–My (H1)'};
+ find('member-design-summary').innerHTML=Object.entries(names).map(([key,label])=>{
+  const row=result.limit_states[key];if(!row)return '';
+  const demand=demandForLimitState(key,input,result),ratio=key==='interaction'?row.nominal:row.status==='CALCULATED'&&row.available>0&&Number.isFinite(demand)?demand/row.available:null;
+  return `<tr data-summary="${key}"><td><strong>${safe(label)}</strong></td><td>${unitText(row.nominal,row.unit)}</td><td>${unitText(row.available,row.unit)}</td><td>${row.status==='CALCULATED'&&Number.isFinite(ratio)?format(ratio*100,2)+'%':'—'}</td><td>${sourceMarkup(row)}</td></tr>`;
+ }).join('');
+}
 function renderAiscPrimary(result,input,canonical){
+ renderGrossDesignSummary(result,input);
  const limits=result.limit_states,interaction=limits.interaction;
  const ratio=interaction?.status==='CALCULATED'&&Number.isFinite(interaction.nominal)?interaction.nominal:null;
  const complianceStatus=result.member_compliance?.status||result.overall_status||'REVIEW_REQUIRED';
@@ -1625,7 +1603,7 @@ function renderAiscPrimary(result,input,canonical){
  find('warn-count').textContent='('+(result.warnings||[]).length+')';
  find('refline').innerHTML=`<a href="${sourceLibraryHref}" target="_blank" rel="noopener">AISC 360-10 source library</a> · Cb = 1 conservative · ${safe(result.source?.edition||'ANSI/AISC 360-10')}`;
  const factorLib=window.Aisc36010Resistance;
- const factorKeys=Object.keys(factorLib.allFactors().factors);
+ const factorKeys=Object.keys(factorLib.allFactors().factors).filter(key=>result.assessment_scope!=='GROSS_MEMBER'||key!=='TENSION_RUPTURE');
  find('factor-table').innerHTML='<h4>AISC 360-10 · '+safe(result.mode)+' · φ / Ω</h4><div class="factor-grid">'+factorKeys.map(key=>{const f=factorLib.factorNotation(result.mode,key);return '<div class="factor-item"><span>'+safe(key)+'</span><strong>'+safe(f.symbol)+' = '+format(f.value,2)+'</strong><small>'+safe(f.clause)+'</small></div>'}).join('')+'</div>';
  find('calc-info').textContent='AISC 360-10 · '+result.mode+' · current member calculation';
  find('active-calculation-source').textContent='AISC 360-10 reference calculation';
@@ -1648,7 +1626,7 @@ async function renderAiscReview(input,canonical,generation) {
   verifiedResult=verified;
   renderMemberCompliance(verified);
   if(isAiscMode()) renderAiscPrimary(verified,input,canonical.canonical);
-  node.textContent='ANSI/AISC 360-10 · '+latest.method+' · MemberCompliance '+(verified.member_compliance?.status||verified.overall_status);
+  node.textContent='ANSI/AISC 360-10 · '+latest.method+' · Gross member strength '+(verified.member_compliance?.status||verified.overall_status);
   const cls=verified.classification;
   document.getElementById('aisc-review-class').innerHTML=
    '<strong>B4.1a Compression:</strong> '+safe(cls.axial)+
@@ -1669,7 +1647,8 @@ async function renderAiscReview(input,canonical,generation) {
     return `<tr><td><strong>${safe(row.id||name)}</strong></td><td>${sourceMarkup(row)}</td><td>${unitText(stateDemand,row.unit)}</td><td>${nominal}${available!=='—'?`<small>Available ${available}</small>`:''}</td><td>${dc}</td><td>${state}</td></tr>`;
    }).join('')+
    '</tbody></table></div>';
-  const used=Object.entries(module.FORMULAS||{});
+  const connectionRules=new Set(['B4.3b','D2-2','D3-1','F13-1','H4-1']);
+  const used=Object.entries(module.FORMULAS||{}).filter(([id])=>verified.assessment_scope!=='GROSS_MEMBER'||!connectionRules.has(id));
   document.getElementById('aisc-review-formulas').innerHTML='<div class="tablewrap"><table class="aisc-results"><thead><tr><th>Clause</th><th>Expression</th><th>Applicability</th></tr></thead><tbody>'+
    used.map(([,f])=>`<tr><td>${sourceMarkup(f)}</td><td class="aisc-formula-text">${safe(f.expression||'—')}</td><td>${safe(f.applies||'—')}</td></tr>`).join('')+
    '</tbody></table></div>';
@@ -1780,6 +1759,7 @@ function run(){
   sharedResult=null;
   verifiedResult=null;
   const legacyMode=!isAiscMode();
+  find('member-design-summary-section').classList.toggle('hidden',legacyMode);
   find('legacy-warning').classList.toggle('hidden',!legacyMode);
   find('calculation-notebook').classList.toggle('hidden',!legacyMode);
   find('sidebar-step-slot').classList.toggle('hidden',!legacyMode);
@@ -1827,9 +1807,7 @@ function reset(){
  updateInputs();run()
 }
 const acknowledgementKeys=new Set([
- 'second_order_global_confirmed','member_p_delta_confirmed','imperfections_confirmed','reduced_stiffness_confirmed',
- 'all_loads_confirmed','asd_scaling_confirmed','bracing_confirmed','scope_confirmed','envelope_confirmed',
- 'other_limit_states_confirmed','critical_path_confirmed','inertia_axis_verified','attachment_details_verified','web_clear_height_verified',
+ 'inertia_axis_verified','attachment_details_verified','web_clear_height_verified',
 ])
 function isAcknowledgementControl(node){
  return (node?.dataset?.key&&acknowledgementKeys.has(node.dataset.key))||
@@ -1838,18 +1816,16 @@ function isAcknowledgementControl(node){
 function invalidateAcknowledgments(){
  document.querySelectorAll('[data-key]').forEach(node=>{if(acknowledgementKeys.has(node.dataset.key)&&node.type==='checkbox')node.checked=false})
  document.querySelectorAll('[data-panel-key="other_boundary_stiffeners_verified"],[data-same-boundaries]').forEach(node=>node.checked=false)
- if(find('ack-reset-note'))find('ack-reset-note').textContent='Changing geometry, material, forces, analysis method, connection or bracing invalidated prior confirmations. Review the current inputs and confirm again.'
+ if(find('ack-reset-note'))find('ack-reset-note').textContent='Stiffener and tension-field confirmations require review after an input change.'
  find('ack-reset-note')?.classList.add('visible')
 }
 function markChanged(event){
  const target=event?.target
  if(target&&!isAcknowledgementControl(target))invalidateAcknowledgments()
  ++sharedRequestSequence;verifiedResult=null;latest.changed=true
- if(target?.id==='analysis-method')syncAnalysisUi()
  if(target?.id==='aisc-fabrication')syncGeometryUi()
  if(target?.id==='stiffener-layout')syncStiffenerUi()
  if(target?.id==='tfa-enabled')find('tfa-inputs').classList.toggle('hidden',!target.checked)
- syncLoadBasisMessage()
  if(isAiscMode())renderPrimaryPending('Inputs changed — calculate again to update results.')
  find('dirtytext').textContent='Inputs changed · Click Calculate to update.'
  find('dirtytext').classList.add('input-changed')
@@ -2028,7 +2004,6 @@ document.querySelectorAll('.tab').forEach(button=>button.addEventListener('click
   document.querySelectorAll('.tab-panel').forEach(t=>t.classList.toggle('hidden',t.id!==button.dataset.tab))
 }))
 document.querySelectorAll('[data-key]').forEach(el=>el.addEventListener(el.tagName==='SELECT'||el.type==='checkbox'?'change':'input',event=>{
- if(event.target.id==='analysis-method')syncAnalysisUi()
  if(event.target.id==='aisc-fabrication')syncGeometryUi()
  if(event.target.id==='stiffener-layout')syncStiffenerUi()
  if(event.target.id==='tfa-enabled')find('tfa-inputs').classList.toggle('hidden',!event.target.checked)
@@ -2040,7 +2015,6 @@ document.querySelectorAll('input[name="design-method"]').forEach(el=>el.addEvent
  document.getElementById('method-explanation').textContent=event.target.value==='ASD'
   ? 'ASD: sử dụng nội lực từ tổ hợp tải trọng ASD/service. KHÔNG tự quy đổi nội lực LRFD.'
   : 'LRFD: sử dụng nội lực từ tổ hợp tải trọng LRFD/factored. KHÔNG tự quy đổi nội lực ASD.'
- syncLoadBasisMessage()
  run()
 }))
 find('run').addEventListener('click',run);find('preset').addEventListener('click',reset)
@@ -2098,19 +2072,8 @@ function sanitizeImportedInput(source){
     panel.four_sides_supported_confirmed=false
     return panel
   })
-  if(!Array.isArray(next.tension_connection.connected_elements)||next.tension_connection.connected_elements.some(value=>!['TOP','BOTTOM','WEB'].includes(value)))
-    throw new Error('tension_connection.connected_elements must contain TOP, BOTTOM or WEB values.')
-  if(!['DIRECT','USER_K'].includes(next.analysis.method))throw new Error('analysis.method must be DIRECT or USER_K.')
-  if(!['UNSPECIFIED','ASD','LRFD'].includes(next.analysis.forces_method))throw new Error('analysis.forces_method must be UNSPECIFIED, ASD or LRFD.')
-  next.analysis.second_order_global_confirmed=false
-  next.analysis.member_p_delta_confirmed=false
-  next.analysis.imperfections_confirmed=false
-  next.analysis.reduced_stiffness_confirmed=false
-  next.analysis.all_loads_confirmed=false
-  next.analysis.asd_scaling_confirmed=false
-  next.analysis.bracing_confirmed=false
-  next.compliance={scope_confirmed:false,envelope_confirmed:false,other_limit_states_confirmed:false}
-  next.holes.critical_path_confirmed=false
+  next.assessment={scope:'GROSS_MEMBER',force_source:'MANUAL'}
+  next.analysis={method:'DIRECT'}
   next.section.web_clear_height_verified=false
   next.stiffeners.inertia_axis_verified=false
   next.stiffeners.attachment_details_verified=false
@@ -2140,9 +2103,7 @@ find('file').addEventListener('change',async event=>{
     document.querySelector('input[name="design-method"][value="'+savedMethod+'"]').checked=true
     latest.method=savedMethod
     updateInputs()
-    find('ack-reset-note').textContent='Imported model inputs. Analysis, hole-path, stiffener, tension-field and compliance acknowledgments were reset; verify the current model and confirm them again.'
-    find('ack-reset-note').classList.add('visible')
-    document.querySelector('.tab[data-tab="analysis"]').click()
+    document.querySelector('.tab[data-tab="geometry"]').click()
     run()
   }catch(err){find('error').textContent='JSON import failed: '+err.message;find('error').style.display='block'}finally{event.target.value=''}
 })

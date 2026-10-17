@@ -41,47 +41,35 @@ const close = (actual, expected) => assert.ok(Math.abs(actual - expected) < 2e-5
     await page.locator('.outline-tree [href="#design-calculation"]').click()
     await page.waitForFunction(() => document.querySelector('[href="#design-calculation"]').getAttribute('aria-current') === 'location')
     assert.equal(await page.locator('#sap-import').isDisabled(), true)
-    assert.equal(await page.evaluate(() => verifiedResult.overall_status), 'REVIEW_REQUIRED')
+    assert.equal(await page.evaluate(() => verifiedResult.overall_status), 'FAIL', 'the sample now exposes its computed failing gross-member checks')
 
-    // Independent hand fixture: d300/b150/tf12/tw8, Fu450, 2 nominal Ø22
-    // holes in each flange and web. AISC B4.3b adds 2 mm per hole.
-    // Ag5808, An4272, Sx591394.56, Zx670752; source PDF74/82/120/135.
+    // Gross-member fixture: d300/b150/tf12/tw8; Ag5808, Zx670752, Zy139416.
+    // Fy345: nominal Mnx231.40944, Mny48.09852, tensile yield2003.76.
     const payload = await page.evaluate(() => {
       const input = structuredClone(latest.input)
       Object.assign(input.section, { h_mm: 300, bf_mm: 150, tf_mm: 12, tw_mm: 8, fabrication: 'BUILT_UP', web_attachment: 'WELDED' })
       Object.assign(input.material, { fy_mpa: 345, fu_mpa: 450, e_mpa: 200000 })
       Object.assign(input.member, { kx: 1, ky: 1, kz: 1, lx_mm: 3000, ly_mm: 2000, lz_mm: 2000, lb_mm: 500, g_mpa: 77200 })
-      Object.assign(input.forces, { axial_kN: 200, moment_x_kNm: 100, moment_y_kNm: 0, shear_x_kN: 0, shear_y_kN: 0, torsion_kNm: 0 })
-      Object.assign(input.holes, { pattern: 'STRAIGHT', top_flange_count: 2, bottom_flange_count: 2, web_count: 2, flange_hole_diameter_mm: 22, web_hole_diameter_mm: 22 })
-      input.tension_connection.load_transfer = 'ALL_ELEMENTS'
+      Object.assign(input.forces, { axial_kN: 200, moment_x_kNm: 100, moment_y_kNm: 10, shear_x_kN: 0, shear_y_kN: 0, torsion_kNm: 0 })
       input.stiffeners.spacing_mm = 0
       input.tension_field_action.enabled = false
-      Object.assign(input.analysis, { method: 'DIRECT', forces_method: 'LRFD', evidence: 'Independent simultaneous manual combination, source-checked hand fixture' })
+      input.assessment = { scope: 'GROSS_MEMBER', force_source: 'MANUAL' }
       return { meta: { mode: 'AISC36010_REFERENCE', design_method: 'LRFD' }, input }
     })
     await page.locator('#file').setInputFiles({ name: 'independent-source-fixture.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(payload)) })
     await page.waitForFunction(() => verifiedResult?.classification && latest.input.section.h_mm === 300)
-    assert.equal(await page.evaluate(() => verifiedResult.overall_status), 'REVIEW_REQUIRED', 'import cannot supply engineering approvals')
-    async function confirmCurrentInputs() {
-      await page.locator('[data-tab="analysis"]').click()
-      for (const key of ['second_order_global_confirmed', 'member_p_delta_confirmed', 'imperfections_confirmed', 'reduced_stiffness_confirmed', 'all_loads_confirmed', 'bracing_confirmed']) {
-        await page.locator(`[data-key="${key}"]`).check()
-      }
-      if (await page.locator('input[name="design-method"][value="ASD"]').isChecked()) await page.locator('[data-key="asd_scaling_confirmed"]').check()
-      await page.locator('[data-tab="tension"]').click()
-      await page.locator('[data-key="critical_path_confirmed"]').check()
-      for (const key of ['scope_confirmed', 'envelope_confirmed', 'other_limit_states_confirmed']) await page.locator(`[data-key="${key}"]`).check()
-      await page.locator('#run').click()
-      await page.waitForFunction(() => verifiedResult?.member_compliance)
-    }
-    await confirmCurrentInputs()
+    assert.equal(await page.locator('.tab[data-tab="analysis"]').count(), 0)
+    assert.equal(await page.locator('.tab[data-tab="tension"]').count(), 0)
     const lrfd = await page.evaluate(() => structuredClone(verifiedResult))
     assert.equal(lrfd.overall_status, 'PASS')
-    assert.equal(lrfd.member_compliance.scope, 'MEMBER_STRENGTH_WITHIN_DECLARED_SCOPE')
-    close(lrfd.limit_states.tension.available, 1441.8)
-    close(lrfd.limit_states.major_flexure.nominal, 180.96673536)
-    close(lrfd.limit_states.interaction.nominal, .683344011145367)
-    close(lrfd.limit_states.flange_hole_interaction.nominal, .752701763937641)
+    assert.equal(lrfd.member_compliance.scope, 'GROSS_SECTION_MEMBER_STRENGTH')
+    close(lrfd.limit_states.tension.available, 1803.384)
+    close(lrfd.limit_states.major_flexure.nominal, 231.40944)
+    close(lrfd.limit_states.interaction.nominal, .7666080777385834)
+    close(lrfd.limit_states.minor_flexure.available, 43.288668)
+    assert.match(await page.locator('[data-summary="interaction"]').innerText(), /76\.66%/)
+    assert.equal(lrfd.analysis_basis.analysis.trace.model_verified, false)
+    assert.ok(!lrfd.limit_states.net_section && !lrfd.limit_states.flange_hole_interaction)
     assert.notEqual(lrfd.limit_states.compression.trace.fex_mpa, lrfd.limit_states.compression.trace.fey_mpa)
     assert.equal(lrfd.limit_states.major_flexure.trace.cb, 1)
     const outputEvent = page.waitForEvent('download')
@@ -96,18 +84,18 @@ const close = (actual, expected) => assert.ok(Math.abs(actual - expected) < 2e-5
     await page.locator('input[name="design-method"][value="ASD"]').check()
     await page.waitForFunction(() => verifiedResult?.mode === 'ASD')
     assert.deepEqual(await page.evaluate(() => latest.input.forces), before, 'method selection never scales demand')
-    assert.equal(await page.evaluate(() => verifiedResult.overall_status), 'REVIEW_REQUIRED')
+    assert.equal(await page.evaluate(() => verifiedResult.analysis_basis.load_basis.status), 'CONFIRMED')
     await page.locator('[data-tab="forces"]').click()
     await page.locator('[data-key="axial_kN"]').fill('130')
     await page.locator('[data-key="moment_x_kNm"]').fill('70')
-    await page.locator('[data-tab="analysis"]').click()
-    await page.locator('#analysis-forces-method').selectOption('ASD')
-    await confirmCurrentInputs()
+    await page.locator('[data-key="moment_y_kNm"]').fill('5')
+    await page.locator('#run').click()
+    await page.waitForFunction(() => verifiedResult?.mode === 'ASD')
     const asd = await page.evaluate(() => structuredClone(verifiedResult))
     assert.equal(asd.overall_status, 'PASS')
-    close(asd.limit_states.tension.available, 961.2)
-    close(asd.limit_states.interaction.nominal, .713599287282567)
-    close(asd.limit_states.flange_hole_interaction.nominal, .781223131429049)
+    close(asd.limit_states.tension.available, 2003.76 / 1.67)
+    close(asd.limit_states.interaction.nominal, 130 / (2003.76 / 1.67) / 2 + 70 / (231.40944 / 1.67) + 5 / (48.09852 / 1.67))
+
     assert.equal(asd.limit_states.major_flexure.nominal, lrfd.limit_states.major_flexure.nominal)
 
     await page.locator('[data-tab="geometry"]').click()
@@ -125,6 +113,6 @@ const close = (actual, expected) => assert.ok(Math.abs(actual - expected) < 2e-5
     await page.setViewportSize({ width: 390, height: 844 })
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true)
     assert.deepEqual(errors, [])
-    console.log('Source-backed symmetric I/H browser fixtures passed: D2/F13/H4 LRFD and ASD, scoped compliance PASS, unconfirmed import barriers, separate Euler axes, Cb=1, explicit manual forces, export, stale rejection, legacy isolation and mobile layout.')
+    console.log('Gross-member I/H browser passed: major/minor/tension/H1 hand fixtures, one-column summary, external-analysis assumption, manual ASD/LRFD, import/export, no connection tabs, stale rejection, legacy isolation and mobile.')
   } finally { await browser.close() }
 })().catch(error => { console.error(error); process.exitCode = 1 })

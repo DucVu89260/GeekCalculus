@@ -121,6 +121,7 @@ export function classifyI(input) {
  */
 export function calculateIH36010(input,canonical,factorLib) {
  if(!input || !canonical)throw new TypeError('Input and canonical Section Properties required');
+ const grossMember=input.assessment?.scope==='GROSS_MEMBER';
  const method=input.method;
  if(method!=='ASD'&&method!=='LRFD')throw new RangeError('Expected ASD or LRFD');
  const {section,material,member={},forces={}}=input;
@@ -197,7 +198,7 @@ export function calculateIH36010(input,canonical,factorLib) {
  }
  if(comp.trace)Object.assign(comp.trace,{kx,ky,lx_mm:lx,ly_mm:ly,kz:member.kz,lz_mm:member.lz_mm,g_mpa:member.g_mpa,
   torsion_scope:section.fabrication==='BUILT_UP'||cls.axial==='SLENDER'?'E4 built-up / E7 explicit E4 reference':'Additional conservative E4 screen for rolled I; catalogue geometry requires review'});
- if(input.analysis?.method==='DIRECT' && limits.analysis.status!=='CONFIRMED'){
+ if((input.analysis?.method==='DIRECT'||grossMember) && !['CONFIRMED',...(grossMember?['ASSUMED']:[])].includes(limits.analysis.status)){
   comp=status('COMPRESSION','INPUT_REQUIRED','C2/C3 Direct Analysis prerequisites must be confirmed before using K=1 for member compression.',{clause:'C2/C3/E2',trace:{reference_only:comp,analysis:limits.analysis.reason}});
  }
  if(section.web_attachment==='BOLTED')comp=status('COMPRESSION','REVIEW_REQUIRED','Bolted built-up member attachment, fastener-line dimensions and Chapter E6 are outside the welded rectangular-plate component scope.',{clause:'B4/E6',trace:{reference_only:comp}});
@@ -286,16 +287,23 @@ export function calculateIH36010(input,canonical,factorLib) {
  }
  if(major.trace)major.trace.lb_mm=lb;
  if(section.web_attachment==='BOLTED')major=status('MAJOR_FLEXURE','REVIEW_REQUIRED','Bolted built-up flexural attachment and fastener-line clear-depth applicability require separate verification.',{clause:'B4/F13',trace:{reference_only:major}});
- const net=calculateIHNetSection(input,canonical),tension=calculateIHTension(input,canonical,factorLib,net);
- const flangeHoles=calculateIHFlangeHoles(input,canonical,factorLib,net,tension);
- limits.net_section=net;
- limits.flange_holes=flangeHoles.flexure;
- limits.flange_hole_interaction=flangeHoles.interaction;
- if(mx!==0 && ['INPUT_REQUIRED','REVIEW_REQUIRED'].includes(flangeHoles.flexure.status)){
-  major=status('MAJOR_FLEXURE',flangeHoles.flexure.status,'Gross-section flexure cannot be approved before the F13 hole condition is established. '+flangeHoles.flexure.reason,{clause:'F13.1',trace:{gross_section_reference:major}});
- }else if(major.status==='CALCULATED'&&flangeHoles.flexure.status==='CALCULATED'&&flangeHoles.flexure.nominal<major.nominal){
-  major={...major,nominal:flangeHoles.flexure.nominal,available:flangeHoles.flexure.available,clause:major.clause+' / F13-1',
-   trace:{...major.trace,gross_section_nominal_kNm:major.nominal,flange_hole_cap:flangeHoles.flexure}};
+ let net,tension;
+ if(grossMember){
+  const nominal=fy*area/1000;
+  tension={...value('TENSION_GROSS',nominal,'D2-1',{ag_mm2:area,fy_mpa:fy,assessment_scope:'GROSS_MEMBER'}),
+    available:available(nominal,method,'TENSION_GROSS',factorLib),unit:'kN'};
+ }else{
+  net=calculateIHNetSection(input,canonical);tension=calculateIHTension(input,canonical,factorLib,net);
+  const flangeHoles=calculateIHFlangeHoles(input,canonical,factorLib,net,tension);
+  limits.net_section=net;
+  limits.flange_holes=flangeHoles.flexure;
+  limits.flange_hole_interaction=flangeHoles.interaction;
+  if(mx!==0 && ['INPUT_REQUIRED','REVIEW_REQUIRED'].includes(flangeHoles.flexure.status)){
+   major=status('MAJOR_FLEXURE',flangeHoles.flexure.status,'Gross-section flexure cannot be approved before the F13 hole condition is established. '+flangeHoles.flexure.reason,{clause:'F13.1',trace:{gross_section_reference:major}});
+  }else if(major.status==='CALCULATED'&&flangeHoles.flexure.status==='CALCULATED'&&flangeHoles.flexure.nominal<major.nominal){
+   major={...major,nominal:flangeHoles.flexure.nominal,available:flangeHoles.flexure.available,clause:major.clause+' / F13-1',
+    trace:{...major.trace,gross_section_nominal_kNm:major.nominal,flange_hole_cap:flangeHoles.flexure}};
+  }
  }
  limits.major_flexure=major;
  // F6 applies to all I-shaped members bent about the minor axis, including slender web.
@@ -312,9 +320,9 @@ export function calculateIH36010(input,canonical,factorLib) {
  minor=value('MINOR_FLEXURE',nominalMinor,'F6-1 / '+flClause,{
   mp_kNm:mpY/1e6,flb_kNm:mny/1e6,flange_class:cls.minorFlange});
  minor.available=available(nominalMinor,method,'FLEXURE',factorLib);
- if(my!==0&&net.status==='CALCULATED'&&net.counts.top+net.counts.bottom>0){
+ if(!grossMember&&my!==0&&net.status==='CALCULATED'&&net.counts.top+net.counts.bottom>0){
   minor=status('MINOR_FLEXURE','REVIEW_REQUIRED','F6 gross resistance does not resolve biaxial net-section rupture at flange holes; actual hole positions/net-section stresses require separate review.',{clause:'F6/F13/H4',trace:{gross_section_reference:minor}});
- }else if(my!==0&&net.status!=='CALCULATED'){
+ }else if(!grossMember&&my!==0&&net.status!=='CALCULATED'){
   minor=status('MINOR_FLEXURE',net.status,'Declare the hole condition before minor-axis member approval. '+net.reason,{clause:'F6/B4.3',trace:{gross_section_reference:minor}});
  }
  limits.minor_flexure=minor;
@@ -324,7 +332,7 @@ export function calculateIH36010(input,canonical,factorLib) {
  if(n<0)axial=comp;
  else if(n>0)axial=tension;
  else axial=value('ZERO_AXIAL',0,'H1');
- limits.tension=n>0?axial:status('TENSION','NOT_APPLICABLE','No tensile force demand.',{clause:'D2'});
+ limits.tension=grossMember?tension:n>0?axial:status('TENSION','NOT_APPLICABLE','No tensile force demand.',{clause:'D2'});
  const shear=calculateIHShear(input,canonical,factorLib);
  for(const [key,entry] of Object.entries(shear.limit_states))if(key!=='shear_weak_axis')limits[key]=entry;
  // F13.2 is a geometric requirement in addition to F5 resistance, not an aw clamp.
@@ -337,7 +345,7 @@ export function calculateIH36010(input,canonical,factorLib) {
    source:{sha256:TENSION_SOURCE.sha256,physical_pages:[121],printed_pages:['16.1-65']}};
  }else limits.proportion_limits=status('PROPORTION_LIMITS','NOT_APPLICABLE','F13.2 slender-web proportion limits do not apply to this compact/noncompact web.',{clause:'F13.2'});
  const majorReady=mx===0||major.status==='CALCULATED',minorReady=my===0||minor.status==='CALCULATED';
- const demandBasisReady=!input.analysis||limits.load_basis.status==='CONFIRMED';
+ const demandBasisReady=(!input.analysis&&!grossMember)||limits.load_basis.status==='CONFIRMED';
  if(majorReady && minorReady && axial.status==='CALCULATED' && demandBasisReady){
   const pRatio=n===0?0:Math.abs(n)/axial.available;
   const mxRatio=mx===0?0:Math.abs(mx)/major.available,myRatio=my===0?0:Math.abs(my)/minor.available;
@@ -349,6 +357,12 @@ export function calculateIH36010(input,canonical,factorLib) {
  }
  result.member_compliance=assessIHMemberCompliance(input,result);
  result.overall_status=result.member_compliance.status;
+ if(grossMember){
+  result.assessment_scope='GROSS_MEMBER';
+  result.analysis_basis={analysis:limits.analysis,load_basis:limits.load_basis};
+  delete limits.analysis;delete limits.load_basis;
+ }
+
  for(const [key,entry] of Object.entries(limits)){
   entry.required_for_current_actions=key==='compression'?n<0:key==='tension'?n>0:key==='major_flexure'?mx!==0:key==='minor_flexure'?my!==0:true;
   if(!entry.unit)entry.unit=['major_flexure','minor_flexure','flange_holes'].includes(key)?'kN·m':key==='interaction'||key==='flange_hole_interaction'?'ratio':key.startsWith('shear')||key==='compression'||key==='tension'?'kN':null;
@@ -364,7 +378,7 @@ export function calculateIH36010(input,canonical,factorLib) {
   ...(cls.geometry_model==='SHARP_CORNER_ROLLED_APPROXIMATION'?[{code:'ROLLED_FILLET_GEOMETRY',message:'Rolled profile requires actual fillet and effective h from catalogue.'}]:[]),
  ];
  result.assumptions={cb:1,cb_basis:'Conservative fixed Cb=1; SAP2000/API integration pending.',force_signs:'N>0 tension; Mx>0 bottom flange tension; Mx<0 top flange tension; shear checked by magnitude.',
-  scope:result.member_compliance.scope,load_method:'No automatic conversion of ASD/LRFD demands.',external_analysis:'Chapter C analysis declarations are supplied by the engineer, not calculated by this module.'};
+  scope:result.member_compliance.scope,load_method:'No automatic conversion of ASD/LRFD demands.',external_analysis:grossMember?'External C2 Direct Analysis assumed; C3 K=1. No SAP model verification is asserted.':'Chapter C analysis declarations are supplied by the engineer, not calculated by this module.'};
  for(const entry of Object.values(limits))if(entry.required_for_current_actions && (entry.status==='INPUT_REQUIRED'||entry.status==='REVIEW_REQUIRED')){
   result.warnings.push({code:entry.id, message:entry.reason});
  }

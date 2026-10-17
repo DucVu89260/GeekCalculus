@@ -45,5 +45,5 @@ def discover_sap2000_pid() -> int:
         raise SapError('SAP2000_NOT_RUNNING: Chưa mở SAP2000. Hãy mở SAP2000 26.2.0 và model, rồi bấm Kết nối / Làm mới model.')
     if len(pids) != 1:
         raise SapError('SAP2000_MULTIPLE_INSTANCES: Có nhiều phiên SAP2000 đang chạy (PID: '
-                       + ', '.join(map(str, pids)) + '). Chỉ giữ một phiên SAP2000 rồi kết nối lại.')
+                       + ', '.join(map(str, pids)) + '). Quét danh sách trên panel và chọn file/PID muốn kết nối.')
     return pids[0]

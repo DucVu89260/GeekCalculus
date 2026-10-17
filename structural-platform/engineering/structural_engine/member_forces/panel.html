@@ -8,13 +8,17 @@
 </style>
 </head>
 <body><main>
-<header><div class="badge">API_IF_SAP26.2.0_V1 · SAP2000 26.2.0 · .NET / PID · build 2026.10.16.3 · Auto PID</div><h1>Xuất nội lực cấu kiện</h1><p class="muted">Chọn cấu kiện trong SAP2000, sau đó quay lại đây để lấy nội lực. Đơn vị: kN · m · kN.m; giữ nguyên trục local SAP2000.</p></header>
+<header><div class="badge">API_IF_SAP26.2.0_V1 · SAP2000 26.2.0 · .NET / PID · build 2026.10.17.1 · Chọn model theo PID</div><h1>Xuất nội lực cấu kiện</h1><p class="muted">Chọn cấu kiện trong SAP2000, sau đó quay lại đây để lấy nội lực. Đơn vị: kN · m · kN.m; giữ nguyên trục local SAP2000.</p></header>
 <div id="status" class="status" role="status" aria-live="polite">Đang chờ kết nối SAP2000 trên máy này.</div>
 <fieldset id="controls" aria-label="Bảng xuất nội lực SAP2000"><div class="layout"><aside>
 <section class="card"><h2>1. Kết nối model</h2>
 <div id="token-entry"><label for="token">Mã kết nối local</label><input id="token" type="password" autocomplete="off" placeholder="Token của connector"><small>Chạy launcher để trang tự nhận mã kết nối. Mã chỉ giữ trong phiên tab này; được khôi phục khi tải lại trang.</small></div>
-<p class="muted">Tự động tìm PID khi chỉ có một SAP2000.exe đang chạy.</p><details><summary>Cấu hình kết nối nâng cao</summary><label for="pid">PID thủ công (tùy chọn)</label><input id="pid" type="number" min="1" max="2147483647" step="1" placeholder="Để trống để tự động tìm PID" style="width:100%;padding:10px;margin:5px 0 12px">
-<label for="dll">Đường dẫn SAP2000v1.dll</label><input id="dll" type="text" value="C:\Program Files\Computers and Structures\SAP2000 26\SAP2000v1.dll" style="width:100%;padding:10px;margin:5px 0 12px"><small>Mặc định không cần nhập PID. Chỉ giữ một phiên SAP2000 đang mở. Không cần đăng ký COM Helper.</small></details>
+<p class="muted">Quét các phiên SAP2000 đang mở và chọn đúng file model muốn xuất nội lực.</p>
+<div class="actions"><button id="scan" class="primary">Quét SAP2000 đang mở</button></div>
+<label for="instance">File SAP2000 / PID</label><select id="instance"><option value="">Chưa quét danh sách</option></select>
+<p id="instance-summary" class="muted">Không cần tìm hoặc nhập PID thủ công.</p><ul id="instance-errors" class="result-note"></ul>
+<details><summary>Cấu hình DLL nâng cao</summary>
+<label for="dll">Đường dẫn SAP2000v1.dll</label><input id="dll" type="text" value="C:\Program Files\Computers and Structures\SAP2000 26\SAP2000v1.dll" style="width:100%;padding:10px;margin:5px 0 12px"><small>Chọn DLL ở thư mục cài đặt chính. Các phiên SAP2000 được đọc theo từng PID, không cần đăng ký COM Helper.</small></details>
 <div class="actions"><button id="connect" class="primary">Kết nối / Làm mới model</button></div>
 <div class="info"><div><small>PID đã kết nối</small><strong id="detected-pid">Chưa xác định</strong></div><div><small>File đang hoạt động</small><strong id="filename">Chưa kết nối</strong><small id="modelpath"></small></div><div><small>Trạng thái</small><strong id="modelstate">—</strong></div></div></section>
 <section class="card"><h2>2. Output Cases</h2><label for="search">Tìm case / combination</label><input type="search" id="search" placeholder="Nhập tên…"><div class="actions"><button id="select-all">Chọn các mục đang hiển thị</button><button id="select-none">Bỏ chọn tất cả</button></div><p id="case-count" class="muted">0 mục được chọn</p><div id="cases" class="cases"></div></section>
@@ -32,12 +36,12 @@ const $=id=>document.getElementById(id);
 let token=new URLSearchParams(location.hash.slice(1)).get('token')||sessionStorage.getItem('sap2000-connector-token')||'';
 if(token)sessionStorage.setItem('sap2000-connector-token',token);
 if(location.hash)history.replaceState(null,'',location.pathname+location.search);
-let model=null,cases=[],chosen=new Set(),dataset=null,extremeData=null,page=0,busy=false;
+let instances=[],model=null,cases=[],chosen=new Set(),dataset=null,extremeData=null,page=0,busy=false;
 const pageSize=100;
 if(token)$('token-entry').hidden=true;
 function message(text,error=false){$('status').textContent=text;$('status').classList.toggle('error',error)}
 function syncButtons(){
- $('selection').disabled=!model; $('extract').disabled=!model||!model.locked||!chosen.size;
+ $('connect').disabled=!selectedInstance(); $('selection').disabled=!model; $('extract').disabled=!model||!model.locked||!chosen.size;
  for(const id of ['json','csv','extremes'])$(id).disabled=!dataset;
  $('extreme-json').disabled=!extremeData;
  $('prev').disabled=!dataset||page===0;
@@ -65,14 +69,28 @@ function renderResults(){$('results').replaceChildren();if(!dataset){$('snapshot
  $('snapshot').textContent=dataset.model+' · '+rows.length+' dòng · '+new Date(dataset.extracted_at).toLocaleString('vi-VN')+' · kN / m / kN.m';$('page').textContent=(start+1)+'–'+Math.min(start+pageSize,rows.length)+' / '+rows.length+' dòng';syncButtons();}
 function clearResults(){dataset=null;extremeData=null;page=0;$('extreme-results').replaceChildren();renderResults()}
 function download(content,name,type='application/json'){const blob=content instanceof Blob?content:new Blob([JSON.stringify(content,null,2)],{type});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+function selectedInstance(){return instances.find(item=>String(item.pid)===$('instance').value&&item.available)}
+function resetModel(){model=null;cases=[];chosen.clear();clearResults();$('detected-pid').textContent='Chưa xác định';$('filename').textContent='Chưa kết nối';$('modelpath').textContent='';$('modelstate').textContent='—';$('frames').textContent='Chưa đọc lựa chọn.';renderCases()}
+function readToken(){token=$('token').value.trim()||token;if(!token)throw new Error('Hãy chạy launcher để mở panel có mã kết nối, hoặc nhập token local.');sessionStorage.setItem('sap2000-connector-token',token)}
+async function scanInstances(preferredPid=null){
+ readToken();const previous=preferredPid||$('instance').value;resetModel();instances=[];$('instance-summary').textContent='Chưa nhận được danh sách model mới.';$('instance').replaceChildren();$('instance-errors').replaceChildren();syncButtons();
+ await api('/connection',{pid:null,dll_path:$('dll').value.trim()},false,'PUT');
+ message('Đang quét PID và đọc tên các model SAP2000…');const result=await api('/instances');instances=result.data;
+ const empty=document.createElement('option');empty.value='';empty.textContent=instances.length?'Chọn file SAP2000 muốn kết nối…':'Không tìm thấy SAP2000 đang mở';$('instance').append(empty);
+ for(const item of instances){const option=document.createElement('option');option.value=String(item.pid);option.disabled=!item.available;option.textContent=(item.filename||'Không đọc được model')+' — PID '+item.pid+(item.available?' — '+item.model:' — Không thể kết nối');option.title=item.model||item.error||'';$('instance').append(option);if(!item.available){const li=document.createElement('li');li.textContent='PID '+item.pid+': '+(item.error||'Không đọc được model');$('instance-errors').append(li)}}
+ const previousItem=instances.find(item=>String(item.pid)===String(previous)&&item.available);
+ if(previousItem)$('instance').value=String(previousItem.pid);else if(!previous&&instances.length===1&&instances[0].available)$('instance').value=String(instances[0].pid);
+ $('instance-summary').textContent=instances.length+' phiên SAP2000; '+instances.filter(item=>item.available).length+' model có thể chọn.';
+ message(instances.length?'Đã quét xong. Chọn đúng file rồi bấm Kết nối / Làm mới model.':'Chưa có SAP2000 đang mở. Mở SAP2000 rồi bấm Quét SAP2000 đang mở.');syncButtons();
+}
+$('scan').onclick=()=>run(()=>scanInstances());
+$('instance').onchange=()=>{resetModel();message(selectedInstance()?'Đã chọn file. Bấm Kết nối / Làm mới model để đọc Output Cases.':'Chọn một model có thể kết nối trong danh sách.');syncButtons()};
 $('connect').onclick=()=>run(async()=>{
- token=$('token').value.trim()||token;if(!token)throw new Error('Hãy chạy launcher để mở panel có mã kết nối, hoặc nhập token local.');
- model=null;cases=[];chosen.clear();clearResults();$('detected-pid').textContent='Chưa xác định';$('filename').textContent='Chưa kết nối';$('modelpath').textContent='';$('modelstate').textContent='—';$('frames').textContent='Chưa đọc lựa chọn.';renderCases();
- sessionStorage.setItem('sap2000-connector-token',token);
- const pid=$('pid').value.trim();if(pid&&(!Number.isInteger(Number(pid))||Number(pid)<=0||Number(pid)>2147483647))throw new Error('PID phải là số nguyên dương trong Task Manager → Details.');
- await api('/connection',{pid:pid?Number(pid):null,dll_path:$('dll').value.trim()},false,'PUT');
- message('Đang đọc model SAP2000 qua DLL / PID…');const info=await api('/model');const output=await api('/output-cases');model=info;cases=output.data;
- $('detected-pid').textContent=info.pid||'Không xác định';$('filename').textContent=info.filename||'Model chưa lưu';$('modelpath').textContent=info.model;$('modelstate').textContent='SAP2000 '+info.sap2000_version+' · '+(info.locked?'Model đang khóa':'Model chưa khóa — cần chạy analysis');renderCases();message('Đã kết nối. Kiểm tra tên file rồi chọn Output Cases.');
+ readToken();const selected=selectedInstance();if(!selected)throw new Error('Quét SAP2000 và chọn một file model trước.');resetModel();
+ await api('/connection',{pid:selected.pid,expected_model:selected.model,dll_path:$('dll').value.trim()},false,'PUT');
+ message('Đang kết nối '+selected.filename+' — PID '+selected.pid+'…');const info=await api('/model');if(info.model!==selected.model||info.pid!==selected.pid)throw new Error('Phiên hoặc file SAP2000 đã đổi. Quét lại danh sách rồi chọn đúng model.');
+ const output=await api('/output-cases');model=info;cases=output.data;
+ $('detected-pid').textContent=info.pid;$('filename').textContent=info.filename||'Model chưa lưu';$('modelpath').textContent=info.model;$('modelstate').textContent='SAP2000 '+info.sap2000_version+' · '+(info.locked?'Model đang khóa':'Model chưa khóa — cần chạy analysis');renderCases();message('Đã kết nối đúng file và PID đã chọn. Chọn Output Cases để tiếp tục.');
 });
 $('search').oninput=renderCases;
 $('select-all').onclick=()=>{for(const c of visibleCases())if(c.results_available!==false)chosen.add(caseKey(c));renderCases()};
@@ -89,5 +107,5 @@ $('prev').onclick=()=>{page--;renderResults()};$('next').onclick=()=>{page++;ren
 $('scope').onchange=()=>{extremeData=null;$('extreme-results').replaceChildren();syncButtons()};
 $('extremes').onclick=()=>run(async()=>{message('Đang xác định extreme case…');extremeData=await api('/extremes',{dataset,scope:$('scope').value});$('extreme-results').replaceChildren();for(const r of extremeData.data)tableRow($('extreme-results'),[r.group,r.component,r.min.value,r.max.value,r.absolute.value,r.absolute.rows[0].output_case+' · '+r.absolute.tie_count+' dòng đồng hạng']);message('Đã xác định cực trị. Tải extreme JSON để xem đầy đủ bộ lực và các dòng đồng hạng.');});
 $('extreme-json').onclick=()=>download(extremeData,'sap2000-extremes.json');
-syncButtons();if(token){let ready=false;run(async()=>{const cfg=await api('/connection');$('pid').value=cfg.pid||'';$('dll').value=cfg.dll_path;ready=true}).then(()=>{if(ready)$('connect').click()})}
+syncButtons();if(token){let ready=false;run(async()=>{const cfg=await api('/connection');$('dll').value=cfg.dll_path;await scanInstances(cfg.pid);ready=Boolean(selectedInstance())}).then(()=>{if(ready)$('connect').click()})}
 </script></main></body></html>

@@ -32,9 +32,9 @@ Không cần Node cho panel/connector nội lực. Cửa sổ launcher phải ti
 
 ## Thao tác hằng ngày bằng panel
 
-1. **SAP2000:** mở và lưu file `.sdb`, chạy **Analyze → Run Analysis** cho các cases cần dùng. Sau khi hoàn tất, giữ model khóa. Bản đầu nên chỉ mở một phiên SAP2000 để tránh mơ hồ instance COM.
+1. **SAP2000:** mở và lưu file `.sdb`, chạy **Analyze → Run Analysis** cho các cases cần dùng. Sau khi hoàn tất, giữ model khóa. Có thể mở nhiều phiên SAP2000; mỗi PID được quét kèm file model đang hoạt động để chọn trên panel.
 2. **Panel:** launcher tự mở trang **Xuất nội lực cấu kiện**. Nếu đang ở website GeekCalculus, dùng nút **SAP2000 · Nội lực (local)** để mở panel; tab mới chưa ghép nối sẽ yêu cầu token. Thuận tiện nhất là quay lại tab đã được launcher mở. Tải lại cùng tab sẽ giữ token. Nếu đã restart connector hoặc đóng tab và mất token, dùng tab mới do launcher mở để nhận mã mới.
-3. Không cần nhập PID. API tự tìm tiến trình `SAP2000.exe` duy nhất đang chạy, rồi kết nối bằng PID đó. Kiểm tra **PID đã kết nối**, **File đang hoạt động**, đường dẫn, phiên bản và trạng thái model. Nếu chưa mở hoặc mở nhiều phiên SAP2000, panel báo lỗi và không chọn thay bạn. Ô PID/DLL thủ công nằm trong **Cấu hình kết nối nâng cao** để chẩn đoán khi cần. Nếu file sai, dừng xuất và kiểm tra SAP2000.
+3. Bấm **Quét SAP2000 đang mở**. Trong danh sách **File SAP2000 / PID**, chọn đúng tên file và đường dẫn (hai file trùng tên vẫn phân biệt bằng PID/đường dẫn), rồi bấm **Kết nối / Làm mới model**. Một phiên duy nhất có thể được chọn tự động; nhiều phiên thì phải chọn rõ ràng. Không cần nhập PID thủ công. Phiên không đọc được có thông báo riêng và không thể chọn, nhưng không chặn quét các phiên khác. Kiểm tra PID, tên file và trạng thái khóa trước khi xuất.
 4. Ở **Output Cases**, tìm theo tên và đánh dấu cases/combinations muốn xuất. Có thể chọn các mục đang hiển thị hoặc bỏ chọn tất cả. Case chưa có kết quả sẽ bị vô hiệu hóa; combinations được kiểm tra khi trích xuất.
 5. Quay sang **SAP2000**, chọn một hoặc nhiều **frame objects**. Joint/area objects không thuộc phạm vi API này.
 6. Quay lại panel. Có thể bấm **Đọc lựa chọn hiện tại** để kiểm tra danh sách; sau đó bấm **Lấy nội lực cấu kiện đang chọn**. Lệnh xuất luôn đọc lại selection tại thời điểm bấm, không dùng danh sách preview cũ. Giữ nguyên model trong lúc đang đọc.
@@ -49,7 +49,7 @@ Cb nằm ở module riêng, không nằm trong panel/API nội lực. Panel hi�
 Nếu trang đã mở nhưng `/model` trả 503, chạy `diagnose-sap2000.cmd` trong cùng thư mục. Script chỉ đọc: phiên bản/bitness Python, khả năng attach .NET theo PID, kết quả GetVersion, tên file và trạng thái khóa. Không chạy analysis, sửa model hoặc in token. Gửi lại các dòng kết quả chẩn đoán, đặc biệt tên bước lỗi và HRESULT. Console connector cũng in lỗi cụ thể sau mỗi 503. Không kết luận lỗi phiên bản hay lỗi phân tích chỉ từ HTTP 503.
 
 - **Không mở được trang/không kết nối connector:** kiểm tra cửa sổ launcher còn chạy và cổng 8010 không bị một connector cũ chiếm. Chỉ chạy một connector cho một SAP2000.
-- **Không tìm thấy SAP2000:** mở SAP2000 trước, cùng tài khoản Windows và cùng mức quyền với connector. Chỉ mở một phiên SAP2000; kiểm tra DLL cài đặt. Bấm kết nối lại để tìm PID mới. Bản này nạp Helper trực tiếp qua pythonnet, không yêu cầu ProgID Helper có sẵn trong Registry và không cần Repair.
+- **Không tìm thấy SAP2000:** mở SAP2000 trước, cùng tài khoản Windows và cùng mức quyền với connector. Bấm Quét SAP2000 đang mở và chọn lại file/PID. Kiểm tra DLL cài đặt và quyền truy cập của phiên không đọc được. Bản này nạp Helper trực tiếp qua pythonnet, không yêu cầu ProgID Helper có sẵn trong Registry và không cần Repair.
 - **Sai phiên bản:** API chỉ chấp nhận 26.2.0, không tự coi bản 26 khác là tương thích.
 - **Chưa có kết quả/không có lựa chọn:** chạy analysis cho cases cần lấy; chọn frame objects rồi thử lại.
 - **File đã đổi:** kết nối lại và kiểm tra tên model trước khi xuất.
@@ -63,6 +63,7 @@ Các endpoint cần `Authorization: Bearer <SAP2000_CONNECTOR_TOKEN>`. Launcher 
 
 | Method | Connector Windows | Dữ liệu |
 |---|---|---|
+| GET | `/API_IF_SAP26.2.0_V1/instances` | Danh sách `{pid, filename, model, locked, available, error}` cho từng phiên SAP2000 local; yêu cầu bearer token |
 | GET/PUT | `/API_IF_SAP26.2.0_V1/connection` | Xem/cấu hình `pid`, `dll_path`; yêu cầu bearer token; lưu trong bộ nhớ connector |
 | GET | `/API_IF_SAP26.2.0_V1/model` | File/đường dẫn model đang hoạt động, phiên bản và trạng thái khóa |
 | GET | `/API_IF_SAP26.2.0_V1/output-cases` | Danh sách Load Cases và Response Combinations, `name`, `kind`, trạng thái analysis |
@@ -194,3 +195,15 @@ Nếu cập nhật từ build .1: dừng connector, thay file bằng ZIP mới, 
 - Chạy `diagnose-sap2000.cmd` không tham số để chẩn đoán theo cùng chế độ Auto PID. Không cần lưu PID cố định vào file.
 
 Cơ chế tasklist được kiểm thử ở biên subprocess với đầu ra Windows mô phỏng (không có/một/nhiều tiến trình, PID đổi sau restart, lỗi và timeout). Cần chạy bản mới trên Windows để xác nhận việc dò process thực tế.
+
+## Chọn nhiều model local — build 2026.10.17-instance-picker.1
+
+Bản này thay quy ước chỉ mở một phiên SAP2000: có thể mở nhiều phiên và chọn file qua danh sách PID + tên model. Thư mục API vẫn cố định `C:\SAP2000-Forces`. Không yêu cầu đổi tên thư mục, cài thêm dependency hoặc tìm PID trong Task Manager.
+
+`GET /API_IF_SAP26.2.0_V1/instances` quét tasklist rồi gắn từng PID bằng DLL để đọc version, tên file, đường dẫn và trạng thái khóa. Không mở file, chạy analysis, đổi units/selection hoặc tự đổi PID đã cấu hình khi quét. Nếu một PID không đọc được, kết quả vẫn có dòng PID đó với `available:false` và lỗi tương ứng; model chưa lưu cũng chưa thể chọn để xuất.
+
+Panel hiển thị mọi phiên tìm được, yêu cầu chọn khi có nhiều phiên, rồi gửi `PUT /connection` với `{pid, expected_model, dll_path}`. `expected_model` là đường dẫn đầy đủ đã quét. Các thao tác đọc từ đó được ghim vào đúng PID/file; nếu file trong PID đổi, API yêu cầu quét và chọn lại. Thay lựa chọn hoặc quét lại sẽ xóa kết quả/cases/extreme cũ trên panel, tránh trộn dữ liệu. File JSON/CSV đã tải về không bị xóa.
+
+Sau khi đóng/mở lại SAP2000, bấm Quét để lấy PID mới. Chỉ model đã chọn mới được dùng cho Output Cases, selection và FrameForce. Việc quét tên file cần connector cùng tài khoản/mức quyền với các SAP2000 đang mở. Các tên và đường dẫn chỉ đọc trên local, không gửi cloud.
+
+Bộ kiểm thử mô phỏng nhiều model có thêm phiên không truy cập được, chọn PID thứ hai, chuyển model, giữ lựa chọn khi reload, xuất Case/Combo, reset kết quả và chặn file đã đổi. Chưa nghiệm thu quét nhiều phiên SAP2000 thật trên Windows.

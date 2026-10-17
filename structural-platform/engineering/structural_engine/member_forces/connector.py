@@ -12,16 +12,18 @@ from .api import router
 from .contract import API_NAME, API_PREFIX, BUILD_ID
 from .sap2000 import ExtractionRequest, SapError
 from .dotnet import ConnectionSettings, connect_dotnet
-from .models import Model
+from .models import Model, Name
+from .instances import scan_instances
 from pydantic import Field
 
 
 class ConnectionRequest(Model):
     pid: int | None = Field(default=None, strict=True, gt=0, le=2147483647)
+    expected_model: Name | None = None
     dll_path: str = Field(default=ConnectionSettings().dll_path, min_length=1, max_length=1000)
 
 
-def create_app(token=None, gateway=None):
+def create_app(token=None, gateway=None, instance_scanner=None):
     token = token if token is not None else os.environ.get('SAP2000_CONNECTOR_TOKEN', '')
     if len(token) < 32:
         raise RuntimeError('Set SAP2000_CONNECTOR_TOKEN to a random token of at least 32 characters')
@@ -43,6 +45,8 @@ def create_app(token=None, gateway=None):
             try:
                 with (gateway() if gateway is not None else connect_dotnet(settings)) as sap:
                     sap.verify_version()
+                    if settings.expected_model is not None and sap.model.GetModelFilename() != settings.expected_model:
+                        raise SapError('SAP2000_MODEL_CHANGED: File trong PID đã đổi. Quét lại danh sách và chọn đúng model trước khi tiếp tục.')
                     return operation(sap)
             except SapError as error:
                 logging.getLogger('uvicorn.error').warning('SAP2000 connection/read failed: %s', error)
@@ -59,14 +63,23 @@ def create_app(token=None, gateway=None):
     @app.get(API_PREFIX + '/connection', dependencies=[Depends(authenticate)])
     def connection_info():
         with lock:
-            return {'build_id': BUILD_ID, 'transport': 'dotnet', 'pid': settings.pid, 'dll_path': settings.dll_path}
+            return {'build_id': BUILD_ID, 'transport': 'dotnet', 'pid': settings.pid, 'dll_path': settings.dll_path, 'expected_model': settings.expected_model}
 
     @app.put(API_PREFIX + '/connection', dependencies=[Depends(authenticate)])
     def configure_connection(payload: ConnectionRequest):
         nonlocal settings
         with lock:
-            settings = ConnectionSettings(pid=payload.pid, dll_path=payload.dll_path)
-            return {'build_id': BUILD_ID, 'transport': 'dotnet', 'pid': settings.pid, 'dll_path': settings.dll_path}
+            settings = ConnectionSettings(pid=payload.pid, dll_path=payload.dll_path, expected_model=payload.expected_model)
+            return {'build_id': BUILD_ID, 'transport': 'dotnet', 'pid': settings.pid, 'dll_path': settings.dll_path, 'expected_model': settings.expected_model}
+
+    @app.get(API_PREFIX + '/instances', dependencies=[Depends(authenticate)])
+    def available_instances():
+        with lock:
+            try:
+                entries = (instance_scanner or scan_instances)(settings)
+                return {'data': entries, 'count': len(entries)}
+            except SapError as error:
+                raise HTTPException(503, str(error)) from error
 
     @app.get(API_PREFIX + '/model', dependencies=[Depends(authenticate)])
     def active_model():

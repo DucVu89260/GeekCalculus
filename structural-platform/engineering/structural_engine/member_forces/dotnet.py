@@ -17,6 +17,7 @@ DEFAULT_DLL = r'C:\Program Files\Computers and Structures\SAP2000 26\SAP2000v1.d
 class ConnectionSettings:
     pid: int | None = None
     dll_path: str = DEFAULT_DLL
+    expected_model: str | None = None
 
     @classmethod
     def from_environment(cls):
@@ -125,7 +126,7 @@ def attach_application(helper, pid):
     application = com_operation('SAP2000_ATTACH_PID', lambda: helper.GetObjectProcess('CSI.SAP2000.API.SapObject', pid))
     # An explicit PID must never silently attach to a different instance.
     if application is None:
-        raise SapError('SAP2000_ATTACH: Cannot find this SAP2000 instance. Enter its current PID from Task Manager > Details. Match Windows user and elevation levels.')
+        raise SapError('SAP2000_ATTACH: PID đã chọn không còn truy cập được. Quét lại các phiên SAP2000 và chọn model. Kiểm tra cùng tài khoản và mức quyền Windows.')
     return application
 
 
@@ -155,7 +156,10 @@ def connect_dotnet(settings: ConnectionSettings):
         helper = com_operation('SAP2000_DOTNET_HELPER', lambda: cHelper(Helper()))
         application = attach_application(helper, pid)
         model = com_operation('SAP2000_MODEL', lambda: cSapModel(application.SapModel))
-        yield Sap2000(DotNetProxy(model, clr.GetClrType(cSapModel), System), connection_pid=pid)
+        sap = Sap2000(DotNetProxy(model, clr.GetClrType(cSapModel), System), connection_pid=pid)
+        if settings.expected_model is not None and sap.model.GetModelFilename() != settings.expected_model:
+            raise SapError('SAP2000_MODEL_CHANGED: File trong PID đã đổi. Quét lại danh sách và chọn đúng model trước khi tiếp tục.')
+        yield sap
     except SapError:
         raise
     except Exception as error:

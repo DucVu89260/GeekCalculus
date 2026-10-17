@@ -78,10 +78,9 @@ function buildBrowser() {
   })
 
   // The report adapter is copied as native ESM for the standalone viewer.
-  copyFileSync(
-    path.join(root, 'standards/aisc360-10-verified-hi.mjs'),
-    path.join(publicDir, 'aisc360-10-verified-hi.mjs'),
-  )
+  for (const module of ['aisc360-10-verified-hi.mjs', 'aisc360-10-ih-flexure.mjs', 'aisc360-10-ih-tension.mjs', 'aisc360-10-ih-shear.mjs', 'aisc360-10-ih-compliance.mjs', 'aisc360-10-ih-source.mjs']) {
+    copyFileSync(path.join(root, 'standards', module), path.join(publicDir, module))
+  }
 }
 
 function buildLibrary() {

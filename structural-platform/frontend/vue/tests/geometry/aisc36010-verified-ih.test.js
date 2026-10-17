@@ -18,11 +18,12 @@ const props=Object.freeze({
  torsion_constant_j_mm4:5e5,warping_constant_cw_mm6:2.9e12
 });
 const baseInput={
- method:'LRFD',section:{h_mm:800,bf_mm:250,tf_mm:16,tw_mm:24,fabrication:'BUILT_UP'},
+ method:'LRFD',section:{h_mm:800,bf_mm:250,tf_mm:16,tw_mm:24,fabrication:'BUILT_UP',web_attachment:'WELDED'},
  material:{fy_mpa:345,e_mpa:200000},
  member:{kx:1,ky:1,kz:1,lx_mm:5000,ly_mm:4000,lz_mm:4000,lb_mm:3000,g_mpa:77000},
  moment_diagram:{mode:'CONSERVATIVE'},
- forces:{axial_kN:-120,moment_x_kNm:140,moment_y_kNm:20}
+ forces:{axial_kN:-120,moment_x_kNm:140,moment_y_kNm:20,shear_x_kN:0,shear_y_kN:0,torsion_kNm:0},
+ holes:{pattern:'STRAIGHT',top_flange_count:0,bottom_flange_count:0,web_count:0,critical_path_confirmed:true}
 };
 const copy=()=>structuredClone(baseInput);
 const near=(a,b,tol=1e-8)=>assert.ok(Math.abs(a-b)<=tol*Math.max(1,Math.abs(a),Math.abs(b)),`Expected ${a} near ${b}`);
@@ -143,15 +144,16 @@ test('quarter points alone cannot confirm the segment extreme used by F1-1',()=>
  assert.match(cbF11(diagram).reason,/entire unbraced segment/);
  near(cbF11({...diagram,segment_maximum_confirmed:true}).value,2500/1580);
 });
-test('Chapter G gaps and stiffeners cannot inherit workbook capacities or a PASS',()=>{
+test('Chapter G now supplies source-specific shear without inheriting workbook capacities',()=>{
  const input=copy();input.forces.shear_y_kN=-120;input.forces.shear_x_kN=0;
  input.stiffeners={spacing_mm:1500};
  const result=calculateIH36010(input,props,lib);
- assert.equal(result.limit_states.shear_web.status,'REVIEW_REQUIRED');
+ assert.equal(result.limit_states.shear_web.status,'CALCULATED');
  assert.equal(result.limit_states.shear_web.demand,120);
- assert.equal(result.limit_states.shear_web.available,undefined);
+ near(result.limit_states.shear_web.nominal,3974.4); // G2: 0.6×345×(800×24)/1000, Cv=1.
+ near(result.limit_states.shear_web.available,3576.96);
  assert.equal(result.limit_states.shear_flange.status,'NOT_APPLICABLE');
- assert.equal(result.limit_states.stiffeners.status,'REVIEW_REQUIRED');
+ assert.equal(result.limit_states.stiffeners.status,'NOT_REQUIRED'); // kv=5 alone carries the demand.
  assert.equal(result.overall_status,'REVIEW_REQUIRED');
  delete input.forces.shear_x_kN;
  assert.equal(calculateIH36010(input,props,lib).limit_states.shear_flange.status,'INPUT_REQUIRED');

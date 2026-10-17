@@ -17,6 +17,11 @@ structural-platform/engineering/structural_engine/sectional_properties/data/sect
 structural-platform/frontend/vue/public/hi-section-properties-core.mjs
 structural-platform/frontend/vue/public/aisc360-10-resistance.js
 structural-platform/frontend/vue/public/aisc360-10-verified-hi.mjs
+structural-platform/frontend/vue/public/aisc360-10-ih-flexure.mjs
+structural-platform/frontend/vue/public/aisc360-10-ih-tension.mjs
+structural-platform/frontend/vue/public/aisc360-10-ih-shear.mjs
+structural-platform/frontend/vue/public/aisc360-10-ih-compliance.mjs
+structural-platform/frontend/vue/public/aisc360-10-ih-source.mjs
 
 # Local test app data; never commit databases, sessions or private sources.
 structural-platform/local/test-data/

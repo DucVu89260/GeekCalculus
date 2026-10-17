@@ -27,7 +27,8 @@ const baseInput={
  material:{fy_mpa:345,e_mpa:200000},
  member:{kx:1,ky:1,kz:1,lx_mm:5000,ly_mm:4000,lz_mm:4000,lb_mm:3000,g_mpa:77000},
  moment_diagram:{mode:'CONSERVATIVE'},
- forces:{axial_kN:-120,moment_x_kNm:140,moment_y_kNm:20}
+ forces:{axial_kN:-120,moment_x_kNm:140,moment_y_kNm:20,shear_x_kN:0,shear_y_kN:0,torsion_kNm:0},
+ holes:{pattern:'STRAIGHT',top_flange_count:0,bottom_flange_count:0,web_count:0,critical_path_confirmed:true}
 };
 const calculate=(lb,method='LRFD')=>{
  const input=structuredClone(baseInput);
@@ -36,13 +37,13 @@ const calculate=(lb,method='LRFD')=>{
  return calculateIH36010(input,sectionProperties,factorLib);
 };
 
-test('Noncompact web applicability reports F4 and keeps the unsupported branch blocked',()=>{
+test('Noncompact web applicability now evaluates the source-compared F4 branch',()=>{
  const input=structuredClone(baseInput);
  input.section.tw_mm=7; // h/tw=109.714: between 3.76 and 5.70 sqrt(E/Fy).
  const result=calculateIH36010(input,sectionProperties,factorLib);
  assert.equal(result.classification.flexureWeb,'NONCOMPACT');
  assert.equal(result.classification.flexureChapter,'F4');
- assert.equal(result.limit_states.major_flexure.status,'REVIEW_REQUIRED');
+ assert.equal(result.limit_states.major_flexure.status,'CALCULATED');
  assert.equal(result.limit_states.major_flexure.clause,'F4');
  assert.equal(result.overall_status,'REVIEW_REQUIRED');
 });

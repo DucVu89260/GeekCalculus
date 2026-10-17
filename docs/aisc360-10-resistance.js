@@ -59,7 +59,7 @@ var Aisc36010Resistance = (() => {
         phi: 0.75,
         omega: 2,
         clause: "D2(b)",
-        description: "Effective net section fracture (D2-2), not yet calculated"
+        description: "Effective net section fracture (D2-2 / D3-1)"
       },
       SHEAR_GENERAL: {
         phi: 0.9,

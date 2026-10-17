@@ -12,7 +12,28 @@ const requirements=Object.freeze({
   all_loads_confirmed:'C2.1: all destabilizing gravity/applied loads included',
   bracing_confirmed:'C3 / Appendix 6: brace strengths/stiffness and actual brace points verified',
 });
+/** Component's explicit gross-member scope accepts externally analysed forces.
+ * ASSUMED records the calculation basis; it never asserts the SAP model was checked.
+ * C3 (physical81 / printed16.1-25) sets K=1 for Direct Analysis under C2.
+ */
+export function reviewGrossIHAnalysis(input) {
+  const missing=[], m=input.member||{},a=input.analysis||{};
+  if(a.method && a.method!=='DIRECT')missing.push('This gross-member workflow uses external Direct Analysis with C3 K=1.');
+  if(['kx','ky','kz'].some(key=>m[key]!==1))missing.push('AISC 360-10 C3: use Kx=Ky=Kz=1 for the external Direct Analysis basis.');
+  if(input.material?.e_mpa!==200000||m.g_mpa!==77200)missing.push('Use nominal AISC E=200,000 MPa and G=77,200 MPa in member resistance checks.');
+  const manual=input.assessment?.force_source==='MANUAL';
+  const load_basis={id:'LOAD_BASIS',status:manual?'CONFIRMED':'INPUT_REQUIRED',clause:'B3.3/B3.4',source:STABILITY_SOURCE,
+    reason:manual?'Manual forces use the selected ASD/LRFD method; values are not converted.':'SAP2000 integration is pending; supply manual forces using the selected ASD/LRFD method.',
+    trace:{force_source:input.assessment?.force_source??null,resistance_method:input.method,automatic_conversion:false}};
+  return {load_basis,analysis:{id:'ANALYSIS',status:missing.length?'INPUT_REQUIRED':'ASSUMED',clause:'C2/C3',source:STABILITY_SOURCE,
+    reason:missing.length?missing.join('; '):'External Chapter C2 Direct Analysis is the supplied-force basis; C3 uses K=1. The software model is not verified by this component.',
+    trace:{method:'EXTERNAL_DIRECT_ANALYSIS',model_verified:false,k_unity_basis:'C3',missing,
+      lengths:'Lx, Ly, Lz and Lb are independent physical restraint lengths; K=1 does not replace these lengths.',
+      nominal_moduli:'Chapter E/F resistances use nominal E/G; C2 stiffness reductions belong to the external analysis.',
+      asd_basis:'External ASD Direct Analysis follows C2.1(4): analyse at 1.6 times ASD loads and divide resulting required strengths by 1.6; no conversion here.'}}};
+}
 export function reviewIHAnalysis(input,canonical) {
+  if(input.assessment?.scope==='GROSS_MEMBER')return reviewGrossIHAnalysis(input);
   const a=input.analysis||{},missing=[];
   const loadMatches=['LRFD','ASD'].includes(a.forces_method)&&a.forces_method===input.method;
   const load_basis={id:'LOAD_BASIS',status:loadMatches?'CONFIRMED':'INPUT_REQUIRED',clause:'B3.3/B3.4/C2.1(4)',
@@ -38,21 +59,22 @@ export function reviewIHAnalysis(input,canonical) {
 }
 
 export function assessIHMemberCompliance(input,result) {
+  const gross=input.assessment?.scope==='GROSS_MEMBER';
   const n=input.forces.axial_kN,mx=input.forces.moment_x_kNm,my=input.forces.moment_y_kNm;
   const states=result.limit_states,c=input.compliance||{},checks=[],blockers=[];
   const addBlock=(key,reason)=>blockers.push({key,reason});
-  for(const key of ['analysis','load_basis'])if(states[key]?.status!=='CONFIRMED')addBlock(key,states[key]?.reason||'Required analysis/load-basis declaration is missing.');
+  for(const key of ['analysis','load_basis'])if(!(states[key]?.status==='CONFIRMED'||(gross&&key==='analysis'&&states[key]?.status==='ASSUMED')))addBlock(key,states[key]?.reason||'Required analysis/load-basis declaration is missing.');
   if(input.section.fabrication!=='BUILT_UP')addBlock('geometry','Rolled fillets and actual catalogue properties are not represented by the sharp-corner geometric model; use an independently verified catalogue geometry before member approval.');
   if(!['WELDED','CONTINUOUS_WELDED_PLATES'].includes(input.section.web_attachment))addBlock('web_attachment','Member Compliance requires explicit continuous welded rectangular plates. Bolted built-up member attachment/E6 is outside this supported scope.');
-  if(c.scope_confirmed!==true)addBlock('scope','Confirm static, prismatic, doubly symmetric welded I/H with rectangular plates; no hybrid steel, cover plates, web openings or moment redistribution.');
-  if(c.envelope_confirmed!==true)addBlock('envelope','Confirm all critical locations/combinations were evaluated and these simultaneous section forces represent the governing member check.');
-  if(c.other_limit_states_confirmed!==true)addBlock('other_limit_states','Connections, brace design, local concentrated-force effects (J10), fatigue and serviceability must be verified separately or explicitly inapplicable.');
+  if(!gross&&c.scope_confirmed!==true)addBlock('scope','Confirm static, prismatic, doubly symmetric welded I/H with rectangular plates; no hybrid steel, cover plates, web openings or moment redistribution.');
+  if(!gross&&c.envelope_confirmed!==true)addBlock('envelope','Confirm all critical locations/combinations were evaluated and these simultaneous section forces represent the governing member check.');
+  if(!gross&&c.other_limit_states_confirmed!==true)addBlock('other_limit_states','Connections, brace design, local concentrated-force effects (J10), fatigue and serviceability must be verified separately or explicitly inapplicable.');
   if(input.forces.torsion_kNm!==0)addBlock('torsion','Explicit zero torsion is required in the supported H1/G7 scope; nonzero torsion needs Chapter H3 checks.');
   const demanded=[['compression',n<0,-n],['tension',n>0,n],['major_flexure',mx!==0,Math.abs(mx)],['minor_flexure',my!==0,Math.abs(my)],
     ['interaction',true,states.interaction?.nominal],['shear_web',input.forces.shear_y_kN!==0,Math.abs(input.forces.shear_y_kN)],
     ['shear_flange',input.forces.shear_x_kN!==0,Math.abs(input.forces.shear_x_kN)]];
-  // The declared hole path is necessary to establish whether F13/H4 apply at all.
-  if(states.net_section?.status!=='CALCULATED')addBlock('net_section',states.net_section?.reason||'Declare the critical hole path.');
+  // Connection-aware scope needs a declared hole path; gross-member scope excludes local-hole checks.
+  if(!gross&&states.net_section?.status!=='CALCULATED')addBlock('net_section',states.net_section?.reason||'Declare the critical hole path.');
   for(const key of ['flange_hole_interaction','stiffeners','tension_field_action','proportion_limits']){
     const entry=states[key];
     if(!entry)continue;
@@ -69,8 +91,8 @@ export function assessIHMemberCompliance(input,result) {
   }
   const failed=checks.some(c=>c.status==='FAIL');
   const utilization=Math.max(0,...checks.map(c=>c.utilization).filter(Number.isFinite));
-  return {status:blockers.length?'REVIEW_REQUIRED':failed?'FAIL':'PASS',scope:'MEMBER_STRENGTH_WITHIN_DECLARED_SCOPE',
-    summary:'AISC 360-10 supported member-strength checks at the declared governing section/load combination; external frame analysis and out-of-scope checks remain the engineer’s responsibility.',
+  return {status:blockers.length?'REVIEW_REQUIRED':failed?'FAIL':'PASS',scope:gross?'GROSS_SECTION_MEMBER_STRENGTH':'MEMBER_STRENGTH_WITHIN_DECLARED_SCOPE',
+    summary:gross?'Gross-section built-up I/H member strength at the entered forces, with external Direct Analysis assumed.':'AISC 360-10 supported member-strength checks at the declared governing section/load combination; external frame analysis and out-of-scope checks remain the engineer’s responsibility.',
     source:STABILITY_SOURCE,checks,blockers,utilization,
-    approval_basis:'Numerical capacities and explicit user declarations; not an automatic certification of the structural model or complete project.'};
+    approval_basis:gross?'Gross member calculations with an external Direct Analysis assumption; no SAP model or connection approval.':'Numerical capacities and explicit user declarations; not an automatic certification of the structural model or complete project.'};
 }

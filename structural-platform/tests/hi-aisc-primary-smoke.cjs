@@ -18,6 +18,28 @@ const close = (actual, expected) => assert.ok(Math.abs(actual - expected) < 2e-5
     assert.match(await page.locator('#calc-info').innerText(), /AISC 360-10/)
     assert.doesNotMatch(await page.locator('#warnings').innerText(), /LEGACY_EDITION|LEGACY_CB|LEGACY_WEAK_AXIS_FE|STIFFENER_PARITY_ONLY/)
     assert.equal(await page.locator('#calculation-notebook').isVisible(), false)
+    const contents = await page.locator('.outline-tree a').allTextContents()
+    assert.deepEqual(contents.map(text => text.replace(/\s+/g, ' ').trim()), [
+      '01 Input Parameters', '02 Calculation Results', '03 Design Calculation',
+      '04 AISC 360-10 Verified Branches', '05 Shared Section Properties',
+    ])
+    const sections = ['input-card', 'calculation-results', 'design-calculation', 'aisc-review', 'shared-section', 'engineering-warnings']
+    for (let index = 1; index < sections.length; index++) {
+      const previous = await page.locator(`#${sections[index - 1]}`).boundingBox()
+      const current = await page.locator(`#${sections[index]}`).boundingBox()
+      assert.ok(current.y >= previous.y + previous.height - 1, `${sections[index]} must follow the previous section in one column`)
+      close(current.x, previous.x)
+      close(current.width, previous.width)
+    }
+    assert.ok(await page.locator('#design-calculation #aisc-review-formulas tbody tr').count() > 0)
+    assert.equal(await page.locator('#calculation-results #member-compliance').count(), 1)
+    assert.equal(await page.locator('#calculation-results #warnings').count(), 0)
+    assert.equal(await page.locator('.page > section:last-of-type').getAttribute('id'), 'engineering-warnings')
+    assert.equal(await page.locator('#sidebar-step-slot').isVisible(), false)
+    assert.ok(await page.locator('.field input').first().evaluate(node => parseFloat(getComputedStyle(node).fontSize)) >= 17)
+    assert.ok(await page.locator('#checkrows').evaluate(node => parseFloat(getComputedStyle(node).fontSize)) >= 14)
+    await page.locator('.outline-tree [href="#design-calculation"]').click()
+    await page.waitForFunction(() => document.querySelector('[href="#design-calculation"]').getAttribute('aria-current') === 'location')
     assert.equal(await page.locator('#sap-import').isDisabled(), true)
     assert.equal(await page.evaluate(() => verifiedResult.overall_status), 'REVIEW_REQUIRED')
 

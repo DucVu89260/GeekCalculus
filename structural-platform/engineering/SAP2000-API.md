@@ -223,3 +223,7 @@ Sau khi cập nhật ZIP vào `C:\SAP2000-Forces`, dừng connector cũ khi khô
 ### Lỗi kiểm tra dữ liệu khi xuất nhiều Case/Combo — build 2026.10.17.4
 
 Cho phép tối đa 2.000 Output Cases/Combos và 100.000 dòng cho mỗi lần xuất. Khi SAP trả về dữ liệu không đáp ứng schema, panel báo `SAP2000_RESULT_INVALID` cùng tên Case/Combo, frame, chỉ số dòng, tên trường và giá trị gây lỗi. Không tự bỏ qua Case/Combo hoặc thay dữ liệu lỗi bằng số 0. Đơn vị và lựa chọn Output được khôi phục cả khi kiểm tra dữ liệu thất bại. Nếu nhận thông báo này, gửi nguyên văn để xác định trường hợp thực tế; lệnh diagnose chỉ kiểm tra kết nối, không tái tạo dữ liệu xuất.
+
+### StepType null từ SAP2000 — build 2026.10.17.5
+
+Ở ranh giới nhận dữ liệu SAP2000, `StepType = null` được chuyển thành chuỗi rỗng (không có nhãn bước). Các nhãn Max/Min/Mode/Step, StepNum và cả sáu thành phần nội lực được giữ nguyên. Thay đổi này không chuyển kết quả envelope/modal thành bộ lực đồng thời; quy tắc xuất CSV vẫn áp dụng. Schema JSON vẫn dùng chuỗi cho step_type.

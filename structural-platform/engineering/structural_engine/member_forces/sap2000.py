@@ -170,7 +170,8 @@ class Sap2000:
                         try:
                             rows.append(ForceRow(record_id=str(len(rows)+1), frame=obj, element=elm,
                                 station=objsta, element_station=elmsta, output_case=loadcase, case_kind=case.kind,
-                                step_type=steptype, step_num=stepnum, concurrency=concurrency,
+                                # CSI may return a null string for results without a step label.
+                                step_type='' if steptype is None else steptype, step_num=stepnum, concurrency=concurrency,
                                 P=p, V2=v2, V3=v3, T=t, M2=m2, M3=m3))
                         except ValidationError as error:
                             raise SapError(

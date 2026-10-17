@@ -274,7 +274,7 @@ def test_combo_type_api_failure_and_cyclic_combo_restore_settings():
     assert model.units == 9 and model.combo_selected['ENV']
 
 
-@pytest.mark.parametrize(('column', 'bad_value', 'field'), [(2, -0.01, 'station'), (6, None, 'step_type'), (13, float('nan'), 'M3')])
+@pytest.mark.parametrize(('column', 'bad_value', 'field'), [(2, -0.01, 'station'), (6, 123, 'step_type'), (13, float('nan'), 'M3')])
 def test_invalid_force_reports_case_frame_field_and_restores_state(column, bad_value, field):
     model = FakeModel()
     original = model.force
@@ -305,3 +305,27 @@ def test_extract_all_183_outputs_without_count_validation_failure():
     assert len(result.rows) == 183*2*2
     assert len({(r.output_case,r.case_kind) for r in result.rows}) == 183
     assert model.units == 9 and not any(model.combo_selected.values())
+
+
+@pytest.mark.parametrize('label', [None, '', 'Max', 'Min', 'Mode', 'Step'])
+def test_nullable_sap_step_label_preserves_force_vector_and_concurrency(label):
+    model = FakeModel()
+    original = model.force
+    def force(frame, item_type):
+        result = list(original(frame, item_type))
+        result[6] = [label, label]
+        return tuple(result)
+    model.Results.FrameForce = force
+    result = Sap2000(model).extract(ExtractionRequest(output_cases=[
+        {'name':'DEAD','kind':'case'}, {'name':'ULS','kind':'combination'},
+        {'name':'ENV','kind':'combination'}]))
+    assert len(result.rows) == 12
+    assert all(row.step_type == ('' if label is None else label) for row in result.rows)
+    for row in result.rows:
+        first = row.station == 0
+        assert [row.P,row.V2,row.V3,row.T,row.M2,row.M3] == ([-10.,1.,3.,5.,7.,9.] if first else [-20.,2.,4.,6.,8.,10.])
+        assert row.step_num == 0
+        assert row.concurrency == ('nonconcurrent' if row.output_case == 'ENV' else 'concurrent')
+    assert model.units == 9 and model.case_selected == {'DEAD':True}
+    assert model.combo_selected == {'ULS':False,'ENV':True}
+    assert all(row['step_type'] == ('' if label is None else label) for row in result.model_dump(mode='json')['rows'])

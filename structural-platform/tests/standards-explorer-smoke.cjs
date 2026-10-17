@@ -352,6 +352,16 @@ async function enforcePageLimit(route, url) {
       await page.setViewportSize({ width: 390, height: 844 })
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1), false, 'upload controls must fit on mobile')
     }
+    await page.goto(`${base}?standard=AISC360-10&source_sha256=${'a'.repeat(64)}&pdf_page=4#/modules/steel/library/standards`)
+    await page.waitForFunction(() => document.querySelector('.std-pdf-canvas')?.width > 0)
+    assert.equal(await page.locator('.std-document-picker select').inputValue(), '9')
+    assert.equal(await page.locator('.std-pdf-controls input').inputValue(), '4', 'member-report link must open the exact source page')
+    await page.goto(`${base}?standard=AISC360-10&source_sha256=${'c'.repeat(64)}&pdf_page=4#/modules/steel/library/standards`)
+    await page.getByRole('alert').filter({ hasText: 'No substitute document or page was opened.' }).waitFor()
+    assert.equal(await page.locator('.std-pdf-canvas').count(), 0, 'unknown source hash must not substitute another PDF')
+    await page.goto(`${base}?standard=AISC360-10&source_sha256=${'a'.repeat(64)}&pdf_page=999#/modules/steel/library/standards`)
+    await page.getByRole('alert').filter({ hasText: 'No substitute document or page was opened.' }).waitFor()
+    assert.equal(await page.locator('.std-pdf-canvas').count(), 0, 'out-of-range page must not open an approximate page')
     assert.deepEqual(errors, [], `Browser errors: ${errors.join('; ')}`)
   } finally {
     await browser.close()

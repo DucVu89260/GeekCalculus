@@ -39,6 +39,7 @@ const noteSaving = ref(false)
 const noteError = ref('')
 const sourcePanel = ref(null)
 const reviewEquation = ref(null)
+const sourceLinkWarning = ref('')
 function beginReview(equation) { reviewEquation.value = equation; sourceForEquation(equation) }
 function equationSaved(record) {
   const normalized = { ...reviewEquation.value, ...record }
@@ -53,6 +54,7 @@ function equationSaved(record) {
 function selectSourceDocument(id) {
   const document = (detail.value?.documents || []).find(item => String(item.id) === String(id))
   if (!document) return
+  sourceLinkWarning.value = ''
   activeDocumentId.value = document.id
   activePage.value = 1
   selectedClauseId.value = null
@@ -286,6 +288,7 @@ async function loadEdition(code = selectedCode.value) {
   noteDraft.value = ''
   noteError.value = ''
   error.value = ''
+  sourceLinkWarning.value = ''
   detail.value = null
   reviewEquation.value = null
   clauses.value = []
@@ -333,6 +336,25 @@ async function loadEdition(code = selectedCode.value) {
       selectedClauseId.value = initial.id
       sectionFilter.value = initial.kind === 'commentary' ? 'commentary' : 'normative'
       loadNotes(initial)
+    }
+    // Member reports link to an exact private artifact and physical page. Never
+    // resolve a missing/wrong artifact by silently opening the first PDF.
+    const locator = new URLSearchParams(window.location.search)
+    if (locator.get('standard') === code && locator.has('source_sha256')) {
+      const hash = locator.get('source_sha256'), pageText = locator.get('pdf_page') || ''
+      const page = /^\d+$/.test(pageText) ? Number(pageText) : NaN
+      const document = /^[a-f0-9]{64}$/.test(hash || '') ? (detail.value?.documents || []).find(item => item.sha256 === hash) : null
+      if (document && Number.isSafeInteger(page) && page >= 1 && page <= Number(document.page_count)) {
+        selectSourceDocument(document.id)
+        activePage.value = page
+      } else {
+        activeDocumentId.value = null; selectedClauseId.value = null; activePage.value = null
+        notesController?.abort(); notesSequence++; notes.value = []; notesLoading.value = false
+        sourceLinkWarning.value = props.locale === 'vi'
+          ? 'Chưa tìm thấy đúng PDF/SHA-256 và trang đã được lập chỉ mục theo liên kết này. Không mở tài liệu hoặc trang thay thế.'
+          : 'The exact PDF/SHA-256 and indexed page in this link are unavailable. No substitute document or page was opened.'
+        viewTab.value = 'source'
+      }
     }
   } catch (loadError) {
     if (loadError?.name !== 'AbortError' && sequence === editionSequence) error.value = loadError?.message || 'Could not load edition.'
@@ -544,6 +566,7 @@ onMounted(loadCatalog)
           <StandardEquationReview v-if="canEdit && !demoMode && reviewEquation" :key="`${selectedCode}-${reviewEquation.id}`" :code="selectedCode" :equation="reviewEquation" :documents="detail.documents" :locale="locale" @saved="equationSaved" @close="reviewEquation = null" />
           <section ref="sourcePanel" class="std-source-section" :class="{ 'std-source-selected': viewTab === 'source' }">
             <header><h3>{{ text.sourceTitle }}</h3><span v-if="selectedClause">{{ selectedClause.code }} · {{ selectedClause.title }}</span></header>
+            <p v-if="sourceLinkWarning" class="std-source-warning" role="alert">{{ sourceLinkWarning }}</p>
             <StandardSourceUpload v-if="canEdit && !demoMode" :key="selectedCode" :code="selectedCode" :limits="detail.upload" :locale="locale" @uploaded="sourceUploaded" />
             <label v-if="detail.documents?.length" class="std-document-picker">
               {{ locale === 'vi' ? 'Tài liệu nguồn' : 'Source document' }}

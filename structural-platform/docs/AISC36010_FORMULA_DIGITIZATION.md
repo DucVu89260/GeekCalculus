@@ -8,23 +8,23 @@ configuration. It extends that registry rather than introducing another equation
 library or numerical engine. SQLite remains the default. The optional PostgreSQL
 configuration inherited from #18 is not enabled by this work.
 
-**No new actual-source engineering approval is claimed in this session.** The
-current cloud backend has no `standard_documents` table and no private AISC PDF.
-The supplied Windows `storage/app/private/AISC-360-10.pdf` path is on another
-machine. No Windows disk/SSH connection or downloadable copy was available.
-`standards:formula-report` returned:
-
-```json
-{"schema_ready":false,"source_available":false,"approved_equations":0}
-```
-
-PR #18's inherited artifact-specific transcription file contains 26 **needs_review**
-equations (E: 5, F: 14, G: 5, H: 2), 9 parameter drafts and partial tables. Its
-historical source audit identifies a 612-page artifact, SHA-256
+**Source blocker resolved on 2026-10-17:** the user supplied the actual 612-page
+AISC 360-10 PDF, SHA-256
 `f9b15004cf51dbaec6c06588d81aa5256be268af87906e5ba863c289795f4e99`.
-Those transcriptions and historical visual-check notes are not new approvals or
-proof that another PDF has identical pagination. The current E3-2 test validates
-rendering of that draft, not equivalence to an available authoritative PDF.
+It was read and critical equations were visually compared. Source CLI indexing
+produced 508 equation occurrences; conservative E/F extraction produced 133
+candidates. Neither operation approves equations. No application DB migration,
+source import or formula approval was performed in this slice. The earlier
+schema/source-unavailable report is historical evidence, superseded for
+source availability by the attachment.
+
+The primary Symmetric I/H calculator now includes D2/D3 net rupture, F13/H4 flange
+holes, F4 noncompact webs, G2/G7 shear, G2.2/G3 stiffeners/TFA, Direct Analysis
+inputs and scoped Member Compliance. Four Luna max tasks provided independent
+source/formula/UI assistance. See the current
+[member review, exact source pages, hand fixtures, warning resolution and limits](../standards/AISC36010_IH_MEMBER_REVIEW_2026.md).
+The inherited 26 needs_review equation drafts still require explicit content-bound
+admin approval; source-compared typed rules do not create DB review events.
 
 Keep originals, native/OCR evidence, page images, application databases and account
 fixtures outside Git/Pages. The pre-existing public ASCE artifact is preserved;
@@ -126,30 +126,23 @@ a smaller limit, in which case HTTP 413 is reported explicitly. Large PDFs requi
 appropriate PHP/proxy configuration; this change does not restart or reconfigure
 the user's containers. Original files and application databases remain private.
 
-### Next Codex engineering batches
+### Source-backed implementation batches — updated 2026-10-17
 
-These are implementation/review targets, **not completed formulas**. Keep Cb=1;
-moment-diagram/API integration is deferred by the user.
+The original source-baseline, D2/D3, F4, G2/G7, G2.2/G3 and integration batches
+have now been implemented and checked within the declared welded symmetric I/H
+scope. The [current member review](../standards/AISC36010_IH_MEMBER_REVIEW_2026.md)
+records changed equations, independent fixtures and remaining exclusions. Cb=1
+remains fixed; SAP/moment-diagram integration is deferred.
 
-| Batch | Contract to implement after the actual source is available | Required acceptance |
-| --- | --- | --- |
-| Source baseline | Inspect the actual edition, SHA and physical/printed pages; import and compare a small E3/F2 set with the PDF. | Exact artifact/page evidence, symbol/unit/condition definitions and explicit approval; no promotion from an equation identifier alone. |
-| D2/D3 | Canonical gross area plus explicit Fu, net area, shear-lag/connection information and supported connection applicability. Keep missing connection branches blocked. | Independent gross-yield/fracture governing examples for ASD/LRFD; missing/invalid net area and connection rejection; H1 cannot consume gross yield as complete tensile strength. |
-| F4 | Complete the noncompact-web doubly symmetric I/H branch, including each applicable flange/yielding/LTB limit state and its source conditions. | Independent consistent-geometry examples, compact/noncompact/slender boundary cases and unbraced-length transitions; no F2/F5 fallback for unsupported F4 conditions. |
-| G2/G7 | Implement web and weak-axis shear separately, using source-confirmed section dimensions, shear-buckling cases and method-specific factors. | Rolled/built-up applicability and factor exceptions, positive/negative shear symmetry, slenderness transitions and omitted-force rejection. No tension-field credit in this batch. |
-| G2.2/G3 | Check stiffener geometry, strength/rigidity and panel/tension-field eligibility explicitly. | Independent eligible/ineligible panel examples and ASD/LRFD checks; failed or incomplete stiffeners cannot increase shear resistance. |
-| Integration | Re-run the changed families and their dependent H1/UI/export cases; preserve source-linked traces and input invalidation. | No global PASS for a member with any unverified or unimplemented applicable check. Keep legacy workbook comparison separate. |
+Actual source comparison and candidate extraction were executed in the Codex
+workspace. Import/approval in the user's Laravel registry remains a separate
+operation: register the same private hash, inspect/index it, then review saved
+expressions against exact pages before promoting a small E/F set. No typed
+member result is populated by an unapproved LaTeX record.
 
-For each batch, record source equations/pages, assumptions, independent expected
-values, tolerances and exclusions **before** enabling the numerical branch. Update
-Draft PR #21 in reviewable commits; do not merge while source verification remains
-unresolved. Reuse prior passing unrelated checks; run the focused regression and
-consumer checks needed by the changed contract.
-
-Use the feature branch and back up the existing database/private storage before a
-normal incremental migration. Do not use `migrate:fresh`, delete volumes or reseed
-over user data. A path on Windows cannot be opened by Codex cloud without transferring
-the file or providing an actual connection. No public source URL is created here.
+Use the feature branch and back up the existing database/private storage before
+a normal incremental migration. Do not use `migrate:fresh`, delete volumes or
+reseed over user data. No public source URL is created here.
 
 The stock Composer backend has no PyMuPDF in the inspected cloud container. For
 PDF extraction while preserving the existing SQLite deployment, an optional image
@@ -207,68 +200,32 @@ matches that JSON**. The command re-inspects the source and imports needs_review
 records. Review E3-2 and a small F2 set beside the linked PDF before expanding.
 Do not approve records just to populate engine lookup results.
 
-## Symmetric I/H: warning resolution and formula inventory
+## Symmetric I/H: current warning resolution and verification
 
-The screenshot's warning list came from the standalone workbook parity engine,
-even though a separate 360-10 kernel already existed below it. The primary results
-now consume `standards/aisc360-10-verified-hi.mjs` and canonical Section Properties.
-Legacy mode remains selectable for workbook comparisons; its output, notebook and
-export are explicitly named 360-05 comparison data. No primary result is replaced
-by legacy values when a branch is missing or canonical calculation fails.
+The source-backed warning matrix, rule inventory, independent hand derivations,
+Direct Analysis length contract and remaining blocked cases are maintained in
+[the current member review](../standards/AISC36010_IH_MEMBER_REVIEW_2026.md), with
+separate [F4](../standards/AISC36010_IH_FLEXURE_REVIEW.md) and
+[Chapter G](../standards/AISC36010_IH_SHEAR_REVIEW.md) reports.
 
-| Screenshot / code issue | Current primary behavior | Remaining source/engineering gate |
-| --- | --- | --- |
-| LEGACY_EDITION | Uses the existing edition-specific 360-10 reference kernel | Full fresh PDF comparison is pending source transfer |
-| LEGACY_CB | Conservative Cb=1; no signed workbook Cb. Quarter-point API now requires explicit confirmation of the maximum absolute moment over the entire segment, in addition to braced ends/same case | A sampled diagram alone cannot prove its extreme |
-| LEGACY_WEAK_AXIS_FE | Independent Kx/Lx/rx and Ky/Ly/ry, plus E4 torsion using shared J/Cw and supplied Kz/Lz/G | Missing restraint inputs block compression and H1 |
-| INCOMPLETE_TENSION | No tensile demand → not applicable. Tensile demand → INPUT_REQUIRED; gross yielding does not masquerade as full tensile resistance | Fu, An, U, connection geometry and source-reviewed D2/D3 branches |
-| STIFFENER_PARITY_ONLY | No workbook LRFD area/sign result in primary ASD/LRFD capacity | G2.2/G3 strength/rigidity, spacing and tension-field eligibility remain unimplemented |
-| NO_GLOBAL_PASS | Overall REVIEW_REQUIRED is retained. The primary table shows CALCULATED / missing-check status, never a whole-member PASS | All applicable checks and source approval must be completed |
-| LOAD_COMBINATION_METHOD | Existing ASD/LRFD selector applies only the versioned resistance factors; UI/export state the chosen method | Input demand combinations must correspond to that method; no implicit conversion |
-| STIFFENER_REVIEW | Separate explicit Chapter G/stiffener blockers, with no tension-field capacity credit | Source comparison and independent Chapter G benchmarks |
+Primary results/export use the canonical Section Properties package and typed
+AISC 360-10 modules. The workbook engine runs only in explicit legacy comparison
+mode. Dirty or invalid input clears results; imported confirmations are reset.
+A scoped Member Compliance PASS requires all applicable checks and explicit
+external-analysis/envelope/separate-limit-state declarations. It is not a
+certificate of the structural model or project.
 
-Other audited path differences: missing/null/nonfinite Cw or J cannot be coerced into an E4/F2 torsional input; primary F6 uses the existing Sy-based noncompact
-flange interpolation and 1.6 Fy Sy cap; primary H1 takes absolute required moments
-and retains full precision rather than rounding the minor-axis ratio; F4 noncompact
-webs are explicitly blocked. The inherited PR #18 F4-11 `h²` correction and its
-independent F5 regression fixtures are retained, not newly certified here.
+Current checks: **145 Node tests passed**, Vue typecheck, native/demo builds,
+primary I/H hand fixtures in both ASD/LRFD, member-compliance UI, bilingual legacy
+and ordinary/admin Standards Explorer source-page browser smokes all passed.
+Source navigation rejects unknown hashes and invalid pages rather than opening a
+substitute PDF. The PDF remains private. The large reader bundle warning remains.
 
-| Formula family | Active reference implementation | Evidence available this session |
-| --- | --- | --- |
-| Gross A, Ix/Iy, Sx/Sy, Zx/Zy, rx/ry, J/Cw | Shared Section Properties adapter; no PHP/browser duplication | Existing core and integration regressions |
-| B4.1a cases 1, 2, 5; B4.1b cases 10, 11, 13, 15 | Rolled/built-up axial versus major/minor flexure distinctions | Existing boundary/branch tests; historical PR #18 audit; fresh source comparison pending |
-| E3-1–4 / E4-4 | Independent x/y/torsional Euler states and nominal compression | Existing regressions and UI trace; actual PDF approval pending |
-| E7-1–9, 16–17 | Qs/Qa and effective web width with declared sharp-corner model | Existing branch tests; source/geometry approval pending |
-| F1-1 | Absolute segment magnitudes or conservative Cb=1 | Added rejection of unconfirmed segment maxima |
-| F2-1–7 / F3-1–2 | Yielding, LTB and local flange buckling for compact webs | Existing ASD/LRFD, boundary and branch regressions |
-| F4 | Noncompact-web resistance remains blocked | No capacity invented from the legacy workbook |
-| F4-7, 11, 12 / F5-1–9 | Existing built-up slender-web reference branch, including inherited h² correction | PR #18 independent nominal/ASD/LRFD fixtures; current regression pass |
-| F6-1–4 | Minor-axis yielding/local buckling | Existing branch and method regressions |
-| H1-1a/b | Full-precision ratios, complete axial and both bending resistances required | Existing signed-demand and missing-input tests |
-| D2/D3, G2/G7, stiffeners/G3 | Explicit missing/partial states | No actual-source approval or capacity claim |
+Prior branch checks retained: full Laravel SQLite-memory suite 90 tests / 847
+assertions; private-upload slice 11 tests / 88 assertions; 12 synthetic Python
+source/index tests. Those unrelated backend/extractor suites were not repeated for
+the current numerical/UI-only slice. PostgreSQL runtime, a new optional Docker
+image build, live app DB import/approval and deployment were not executed here.
 
-Dirty geometry/restraint data immediately invalidates primary results; an invalid
-input cannot restore a previous result. Primary export waits for canonical/kernel
-completion and names its active result `AISC36010_REFERENCE`; any workbook data is
-separately named `legacy_comparison`.
-
-## Executed acceptance evidence
-
-| Check | Result / limit |
-| --- | --- |
-| Laravel full suite, explicit SQLite `:memory:` | 90 passed / 847 assertions after integration of the shared multi-standard importer; no application DB reset |
-| Vue typecheck and complete Node suite | Passed; 108 Node tests passed |
-| Python source/index/candidate suite | 12 passed; synthetic PDFs only. Also reproduced with isolated PyMuPDF 1.26.6; missing Tesseract reproduces an OCR-only error. CI explicitly installs English OCR and uses the main requirements pin. |
-| Native and demo Vue production builds | Passed; existing large reader chunk warning remains |
-| Standards reader/admin smoke | Synthetic API/PDF: hierarchy, typed math, exact pages, draft save/version, explicit comparison, review transition, reset confirmation; passed |
-| AISC edition/source isolation smoke | Passed with synthetic fixtures; explicit document/page, stored expression precedence, unknown source and 2010/2016 separation |
-| ASCE preservation smoke | PDF/outline only, 875 clauses, exact source-page link, no equation/corpus fetches and mobile; passed with API fixtures |
-| Symmetric I/H primary smoke | Actual browser/shared numerical core: active kernel, independent Fe, conservative Cb, missing Chapter G/stiffeners, ASD conversion, stale/invalid input, export and mobile; passed |
-| Bilingual legacy comparison and demo Pages smoke | Passed EN/VI round-trip, numeric fixture, import/export, mobile and published-copy parity; demo ASCE reader checked exact existing PDF bytes |
-| Optional SQLite Compose override | Default and local-domain configurations validated; no image build or DB engine conversion |
-| Actual private AISC PDF comparison/import and a newly verified E/F set | **Not executed; source unavailable in this cloud workspace** |
-| PostgreSQL runtime and optional new Docker image build | Not rerun; inherited #18 evidence is historical |
-
-Merge remains gated on source availability, a small explicitly reviewed E/F set
-and review of the declared engineering gaps. A green rendering or workflow test
-does not satisfy the actual-source engineering verification gate.
+Keep Draft PR #21 for review. Numerical tests, PDF source comparison, admin
+registry approval, merge and deployment remain distinct operations.

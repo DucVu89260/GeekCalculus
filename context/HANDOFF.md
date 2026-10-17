@@ -1,5 +1,11 @@
 # Repository handoff
 
+## Latest CFS layout adjustment — 2026-10-17
+
+- Branch `main`, follow-up to `bdedb3c`. Moved Import JSON Draft and Export JSON out of the main import/action toolbar into the final sidebar card, **06 — Sao lưu và khôi phục JSON**, below Section Resolver and protection notes. Added a brief explanation of backup/transfer/restore and the need for original CFSA/SECTIONS when exporting CFSA.
+- Only standalone CFS HTML placement/copy changed. All JavaScript and Python processing are unchanged (script block compared byte-for-byte). Production demo build and existing complete CFS browser smoke passed, including real Python import/export, saved draft, source gates and mobile layout. No unchanged numerical/backend suites rerun for this presentation-only request.
+- JSON exports contain editable draft data and references, not original CFSA/CFSS binary bytes. They complement browser Save/Load Draft for backup and transferring work. Source files must be re-imported before CFSA export. Publish through the existing Pages workflow; no dependency update, migration or engine rebuild for this adjustment.
+
 ## Latest CFS package integration — 2026-10-17
 
 - Branch `main`; feature commit `1bbcbd3`, based on `f2bae2d`; integrated concurrent main `dd6a22a` (PR #23 H/I layout) without changing that work. User ZIP v0.5D.1 SHA-256 `9f7e542ef1703d7320b90de6bd7cf795d83c5336cff70bd4355dca2fdff56456` is now integrated at `#/modules/steel/cfs/lapping-node`, replacing the pending page. The shared conversation is still inaccessible (403); implementation uses the supplied source, not inferred chat contents.

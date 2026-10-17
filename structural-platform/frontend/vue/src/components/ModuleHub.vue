@@ -75,7 +75,8 @@ const tools = { concrete: ['beam', 'column', 'slab', 'foundation'], future: ['re
       <label class="pending-selector"><span>{{ t('tool') }}</span><select v-model="selectedTools.future"><option value="">{{ t('choose') }}</option><option v-for="tool in tools.future" :key="tool" :value="tool">{{ t(tool) }}</option></select></label>
       <p class="pending-note" role="status">{{ t('pending') }}</p>
     </section>
-    <p v-if="demoMode" class="demo-notice" role="note">{{ t('demoNotice') }}</p>
+    <p v-if="currentGroup.code === 'steel' && currentTool.code === 'cfs'" class="demo-notice" role="note">GeekCalculus Z purlin - Lapping and Node - v1</p>
+    <p v-else-if="demoMode" class="demo-notice" role="note">{{ t('demoNotice') }}</p>
   </main>
 </template>
 

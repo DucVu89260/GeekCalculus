@@ -1,5 +1,10 @@
 # Repository handoff
 
+## CFS standalone version footer — 2026-10-17
+
+- Branch `main`, base `1ccb851`. In `ModuleHub.vue`, CFS overview and add-in now display exactly `GeekCalculus Z purlin - Lapping and Node - v1` in both languages and both native/demo modes. Other modules retain their existing demo notices. CFS v1 remains standalone; no Laravel connection, draft/storage behavior or engineering logic changed.
+- Executed: production demo build and `git diff --check` passed. Targeted Playwright checks passed against native Vite and demo production for both CFS routes, VI/EN and preserved non-CFS footer behavior. The iframe was stubbed for this host-copy check; no Python execution or full engineering-suite rerun was needed. Source is committed/pushed with this entry; Pages publication is checked separately after CI.
+
 ## Latest CFS presentation — VI/EN and JSON help, 2026-10-17
 
 - Branch `main`, base `0178b77`; feature commit `d8ba9b8`. Added a studio VI/EN switch, synchronized in both directions with the host through origin/source-checked messages. A separate presentation module translates static/dynamic labels, help, status, SVG accessibility labels and confirmation copy in place; it never rerenders the editor or changes input/model/option values. The iframe URL is stable during language changes.

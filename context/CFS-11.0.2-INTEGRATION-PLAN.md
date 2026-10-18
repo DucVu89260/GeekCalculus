@@ -2,6 +2,8 @@
 
 Ngày: 2026-10-18. Baseline CFS rà soát ban đầu: `8c07d65`; đã đồng bộ `main` tới `a658a65` và xác nhận các file CFS liên quan không đổi. **Đây là kế hoạch triển khai, chưa phải tính năng đã hoàn thành hoặc bằng chứng đã kết nối CFS thật.**
 
+**Cập nhật bộ mẫu:** đã nhận và đối chiếu CFSA, ba CFSS và PDF chín trang tại baseline `bfeb4be`; xem [kết quả P0-A](CFS-P0-REVIEW.md). PDF có text layer, input/tổ hợp và một Member Check, nhưng không có biểu đồ/bao moment hay bảng moment theo station. P0-A artifact review đã làm; khảo sát khả năng xuất result/điều khiển CFS và nghiệm thu Windows còn mở. P1 có thể bắt đầu với subset input/combination/localized-check; không được dựng bao moment từ check đơn lẻ. Bảng hiện trạng dưới đây mô tả baseline phần mềm trước khi nhận bộ mẫu, chưa phải tính năng mới đã triển khai.
+
 ## 1. Mục tiêu và phân chia trách nhiệm
 
 **CFS 11.0.2 tính toán; GeekCalculus chỉnh phương án, trình bày kết quả và xuất thuyết minh VI/EN.**
@@ -25,7 +27,7 @@ Ngày: 2026-10-18. Baseline CFS rà soát ban đầu: `8c07d65`; đã đồng b�
 
 [Hướng dẫn module hiện tại](../structural-platform/frontend/vue/CFS-LAPPING-NODE.md) và [manifest nguồn](../structural-platform/frontend/vue/public/cfs-lapping-node/upstream-manifest.json) là bằng chứng baseline. ZIP portable đã dùng có SHA-256 `9f7e542ef1703d7320b90de6bd7cf795d83c5336cff70bd4355dca2fdff56456`; bộ test trước dùng fixture tổng hợp, chưa thay cho nghiệm thu với CFS thật. Chữ `Đơn vị: m- kN` đang có trên UI không xác nhận đơn vị native.
 
-**Đầu ra người dùng xác nhận ngày 2026-10-18: có báo cáo PDF hoặc in báo cáo từ CFS.** Vì vậy P0/P1 bắt đầu bằng PDF/report thực tế; chưa xác nhận PDF có bảng moment theo station, nội dung text selectable hay chỉ hình. Khả năng xuất các bảng số riêng và điều khiển tự động vẫn cần khảo sát.
+**Đầu ra người dùng xác nhận ngày 2026-10-18: có báo cáo PDF hoặc in báo cáo từ CFS.** PDF thực tế đã nhận có text selectable và bảng input/combination/localized-check; không chứa bảng moment theo station hoặc đồ thị moment. Vì vậy P0/P1 bắt đầu bằng PDF/report thực tế, còn khả năng xuất các bảng result riêng và điều khiển tự động vẫn cần khảo sát. Chuẩn nguồn của mẫu là AISI S100-16/S1-18, US, LRFD.
 
 Chưa có bằng chứng CFS 11.0.2 cung cấp COM, API, CLI, CSV/Excel hay result database. Các phương thức này là đối tượng khảo sát, không phải giả định triển khai. CFS không phải CSI/SAP2000; không tái sử dụng scaffold CSI như thể đã có API CFS.
 
@@ -164,6 +166,6 @@ MVP không dịch tự do bằng AI các điều kiện/công thức design. Glo
 - Fixture/parser/browser tests mở rộng từ `structural-platform/tests/cfs/` và `tests/cfs-portable-smoke.cjs`; golden samples chỉ dùng dữ liệu tổng hợp/được phép công khai. File công trình/report thực giữ ngoài Git/Pages.
 - Không thêm migration/Laravel service/database trong MVP này. Không thay các module Steel/RC/Loading hiện có hoặc build Section Engine để chạy CFS.
 
-**Đầu vào đầu tiên cần cho P0:** mô hình `.cfsa` cùng các `.cfss` được tham chiếu; báo cáo đầy đủ sau khi chạy CFS 11.0.2; mọi bảng/file kết quả số mà menu Export/Copy/Print thực sự hỗ trợ; ảnh màn hình cấu hình units/analysis/design và menu export. Cần quyền chạy/quan sát CFS trên máy Windows để xác nhận vòng lặp thật. Chưa có các artifact/result samples và môi trường CFS trong checkout đã rà soát; lập kế hoạch không bị chặn, nhưng không thể coi P0 hoặc các nghiệm thu kết nối thật là đã đạt.
+**Đầu vào P0 đã nhận:** mô hình `.cfsa`, đủ ba `.cfss` được tham chiếu và PDF báo cáo chín trang. Đã đối chiếu offline geometry/supports/displayed loads và đọc tổ hợp/check của nguồn; chưa có kết quả moment dọc dầm, complete design summary, ảnh menu/cấu hình hoặc môi trường Windows CFS để xác nhận vòng lặp thật. Các artifact thực và dữ liệu trích xuất giữ ngoài Git/Pages. Không thể coi toàn bộ P0 hoặc nghiệm thu kết nối thật là đã đạt.
 
-Hành động đầu tiên khi có bộ mẫu: lập capability matrix và bản đồ trường **CFSA + report/result → run package**, chọn một moment component và một nhóm tổ hợp để hoàn tất P1/P2 trước khi mở rộng các nội lực/design check khác.
+Hành động tiếp theo: triển khai P1-A cho **CFSA + PDF input/combination/localized-check → run package** với provenance và coverage rõ ràng; đồng thời lấy bằng chứng menu/report result từ CFS để xác định nguồn moment. Chỉ bắt đầu nghiệm thu P1-B/P2 một moment component và một nhóm tổ hợp khi thực sự có số liệu moment theo station/cực trị thích hợp.

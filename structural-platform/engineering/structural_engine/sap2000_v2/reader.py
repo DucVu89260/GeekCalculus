@@ -142,6 +142,17 @@ class SteelReader:
                         child_data=self.section(child,trail=(*trail,name));item['components'].append({'name':child,**(child_data if 'status' in child_data else {})})
         item['dimensions_mm']={key+'_mm':value*1000. for key,value in (geometry.get('data') or {}).items()
                                if key.lower() in ('t3','t2','tf','tw','t2b','tfb','dis') and isinstance(value,(int,float))}
+        if shape_key=='shape_i' and geometry['status'] in OK:
+            item['i_dimensions_mm']={label:item['dimensions_mm'].get(key+'_mm') for key,label in
+                [('t3','h'),('t2','bf_top'),('tf','tf_top'),('tw','tw'),('t2b','bf_bottom'),('tfb','tf_bottom')]}
+        item['segments']=[]
+        if normalized=='VARIABLE' or 'NONPRISMATIC' in normalized:
+            raw=item['geometry']; arrays=[field(raw,k) for k in ('StartSec','EndSec','MyLength','MyType','EI33','EI22')]
+            if raw['status'] in OK and all(isinstance(a,list) for a in arrays) and len({len(a) for a in arrays})==1:
+                for i,(start,end,length,kind,ei33,ei22) in enumerate(zip(*arrays),1):
+                    item['segments'].append({'segment':i,'start_section':start,'end_section':end,
+                        'length':length,'length_type':kind,'length_unit':{1:'relative',2:'m'}.get(kind,'unknown'),
+                        'EI33_variation':ei33,'EI22_variation':ei22})
         return item
 
     def material(self,name):

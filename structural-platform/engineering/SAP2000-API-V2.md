@@ -1,6 +1,6 @@
 # SAP2000-API V2 — Local preview
 
-Build: `2026.10.18-v2-local.2` · Compatible with SAP2000 v26.2.0 · Windows 64-bit.
+Build: `2026.10.18-v2-local.3` · Compatible with SAP2000 v26.2.0 · Windows 64-bit.
 
 ## Chạy thử / Quick start
 
@@ -53,3 +53,7 @@ This is a **local development preview**, not a hosted V2 release. No website nav
 Verified in cloud: synthetic-SAP API/unit/restore/error tests, real CLR reflection fixtures (without SAP DLL), and Chromium panel workflow with synthetic SAP. **Actual Windows + SAP2000 26.2.0 verification is not performed here.** Validate first on a copy of a small model; compare section, material, geometry, overwrites and force results with SAP before production use.
 
 Reference metadata: Ephraim-Bryski/SAP-Tooltips commit `608415951abf7c601c3939ed0296cd1daa45eda5`. This reference contains mixed/older signatures; actual installed interface metadata controls calls. The kit does not redistribute SAP DLLs, CHM or third-party documentation binaries.
+
+## Bảng Section / Material (local.3)
+
+Sau khi đọc snapshot với nhóm Sections và Materials, chọn Frame hoặc thư viện Section. Bảng tóm tắt tự hiện các section đầu I/J của từng đoạn Nonprismatic, h/bf-top/tf-top/tw/bf-bottom/tf-bottom (mm) và tên vật liệu/Fy/Fu (MPa). Kích thước lấy từ GetISection, không phân tích tên section. I/J là đầu đoạn property; GetSectionNonPrismatic gốc giữ thông tin nếu frame chỉ dùng một phần property. Material overwrite của member được ưu tiên khi đọc được. eFy/eFu (expected strengths) vẫn giữ riêng trong JSON/cây vật liệu. Muốn kiểm tra design Fy overwrite, chọn thêm nhóm Design overwrites AISC360-10: hiện raw Value và ProgDet; không suy giá trị program-determined từ0. Thiếu getter/vật liệu sẽ hiện dấu gạch/trạng thái, không tự điền0.

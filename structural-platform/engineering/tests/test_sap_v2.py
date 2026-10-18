@@ -126,3 +126,32 @@ def test_worker_dispatch_and_model_pin():
     assert data['pid']==20948 and model.units==9
     with pytest.raises(SapError,match='MODEL_CHANGED'):
         execute('snapshot',ConnectionSettings(pid=20948,expected_model='different.sdb'),{'expected_model':'different.sdb'},opener=opener,runtime_factory=FixtureRuntime)
+
+
+def test_sc1_tapered_end_geometry_and_material_strengths_are_api_values_not_name_parsing():
+    from structural_engine.sap2000_v2.reflection import block
+    from structural_engine.sap2000_v2.registry import GETTERS
+    model=SteelModel()
+    class TaperedRuntime(FixtureRuntime):
+        def read(self,key,**inputs):
+            name=inputs.get('Name')
+            if key=='section_assignment':
+                return block('ok',GETTERS[key].path,data={'PropName':'SC1','SAuto':''})
+            if key=='section_type' and name=='SC1':
+                return block('ok',GETTERS[key].path,data={'PropType':99})
+            if key=='nonprismatic' and name=='SC1':
+                return block('ok',GETTERS[key].path,data={'NumberItems':1,'StartSec':['H300x200x6x8'],'EndSec':['H700x200x6x8'],'MyLength':[1.],'MyType':[1],'EI33':[2],'EI22':[1]})
+            if key=='shape_i':
+                # Actual SAP geometry intentionally differs from the name: never parse names.
+                return block('ok',GETTERS[key].path,data={'MatProp':'SteelA','t3':.310 if name.startswith('H300') else .700,'t2':.200,'tf':.008,'tw':.006,'t2b':.200,'tfb':.008})
+            return super().read(key,**inputs)
+    with gateway(model) as sap:
+        data=SteelReader(sap,TaperedRuntime(model)).snapshot(SnapshotRequest(expected_model='model.sdb',groups=['sections','materials'],frames=['F1']))
+    seg=data['sections']['SC1']['segments'][0]
+    assert seg=={'segment':1,'start_section':'H300x200x6x8','end_section':'H700x200x6x8','length':1.,'length_type':1,'length_unit':'relative','EI33_variation':2,'EI22_variation':1}
+    assert data['sections'][seg['start_section']]['i_dimensions_mm']=={'h':310.,'bf_top':200.,'tf_top':8.,'tw':6.,'bf_bottom':200.,'tf_bottom':8.}
+    assert data['sections'][seg['end_section']]['i_dimensions_mm']['h']==700.
+    assert data['members'][0]['data']['materials']['effective_material']=='SteelA'
+    assert data['materials']['SteelA']['normalized']['Fy_MPa']==345.
+    assert data['materials']['SteelA']['normalized']['Fu_MPa']==510.
+    assert model.units==9

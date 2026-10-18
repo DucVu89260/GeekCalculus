@@ -1,5 +1,11 @@
 # Repository handoff
 
+## V2 tapered I endpoints and material strength summary — 2026-10-18
+
+- Local preview2026.10.18-v2-local.3 adds explicit ordered Nonprismatic segments (start/end section, length/type/unit, EI33/EI22 variation), and I geometry aliases h/bf_top/tf_top/tw/bf_bottom/tf_bottom in mm from actual getter outputs, not section names. Existing raw data retained.
+- Member or Section-library selection now shows an engineering summary table above the source tree: each property segment I/J, section name, six I dimensions, material and Fy/Fu in MPa. Member material overwrite takes precedence when confirmed; section-only view uses library material. Missing strengths remain dashes/status, no zeros guessed. Material library Fy/Fu at Temp0 explicitly distinct from eFy/eFu and AISC360-10 design Fy overwrite; read overwrite35 Value/ProgDet displayed separately, program-determined effective value not inferred. Segment endpoints do not imply actual physical frame endpoints when partial nonprismatic assignment is used; UI points to original assignment.
+- Verification:12 targeted snapshot/API/kit tests passed, including new independently specified SC1 H300/H700 endpoints and API height intentionally differing from section name. Updated Chromium local smoke passed member I dimensions/Fy/Fu, multi-segment I/J resolution, member SteelB material override, raw design Fy400MPa/ProgDet=false, inherited flows, VI/EN/model reset/mobile. Inspected updated screenshot. Rebuilt source ZIP and verified CRC/manifest hashes. Existing Starlette deprecation warning; Windows SAP live verification pending user trial, not claimed passed. V1 and web navigation unchanged.
+
 ## SAP V2 launcher missing web dependencies — 2026-10-18
 
 - User Windows traceback showed missing uvicorn. Confirmed package bug: V2 launcher installed requirements-windows.txt (pythonnet only), omitting requirements-test.lock (FastAPI/Uvicorn pins). Fixed V2 launcher to explicitly install both files, then preflight import uvicorn/fastapi/pydantic/clr. No V1 changes. Rebuilt source kit as2026.10.18-v2-local.2 with refreshed SHA256 manifest/checksum.

@@ -388,3 +388,21 @@ listing exported Frame / Section pairs with search and multi-selection. Done or
 Escape closes the picker and retains choices. Choose members reopens it. Per member
 and Entire exported group retain their existing behavior. Filtering and math
 contracts are unchanged from .20.
+
+### Staged filters and Section summary — build 2026.10.18.22
+
+Choose scope/members first, then local-axis position and detailed force component.
+In Selected members mode these controls remain disabled until a member is chosen.
+Build Section summary evaluates all six components at the selected position using
+exported data only, independently of the detailed component selector and section4
+filters. It groups per-member signed Min/Max by assigned Section. Missing section
+metadata stays separated by Frame. Default conditions are M3/V2/P, with P/V2/M3
+columns; Show more adds M2/V3/T conditions and V3/M2/T companion columns. Each row
+retains the actual governing vector, Frame, Case/Combo, Step and local position.
+View forces includes tied rows and concurrency/provenance; no independent maxima
+are composed into a design vector. The existing20-row tie preview cap and all IDs
+remain in JSON. Summary JSON retains full precision and source metadata.
+Compatible all-component per-member results are reused, repeated summary clicks
+are cached and expansion/language changes do not recalculate or reread SAP2000.
+Changing scope/members/position/component or extracting a new dataset invalidates
+summary state. Existing local connector APIs remain sufficient.

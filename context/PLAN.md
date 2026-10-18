@@ -121,3 +121,7 @@ Replace inline governing/tie paragraphs with a centered, scrollable table dialog
 ## SAP selected-member extremes — 2026-10-18
 
 Add Selected members beside Per member and existing entire-group scope. Searchable multi-checkbox choices display Frame and assigned Section from exported metadata. Map selection to existing per_frame + frames API filter (no new connector contract), reject empty selection, clear stale extrema on changes and reset on extraction/model changes. Keep section4 filters independent; verify subset/multiple/language request payload and results in browser.
+
+## Section extreme summary and staged filtering — 2026-10-18
+
+Scope/member selection precedes position/component filters; Selected members gates them until a member is chosen. Add section summary from existing per_frame extreme results, grouped by assigned section, min/max for all six components. Default visible conditions M3/V2/P and columns P/V2/M3; expansion adds M2/V3/T and secondary columns. Preserve governing full vectors, all tie IDs and bounded provenance previews; never compose unrelated component maxima. Retain raw precision, signed values, nonconcurrent flags and selected/position scope. No new backend contract or SAP reread. Validate independent multi-frame section fixtures, ties/truncation/missing metadata, then browser cache/expansion/state/mobility and export.

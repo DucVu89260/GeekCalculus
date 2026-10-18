@@ -64,6 +64,8 @@ jobs:
         run: npm test
       - name: Verify CFS portable adapter and binary copy invariants
         run: python3 -m unittest discover -s ../../tests/cfs -v
+      - name: Verify SAP2000 section summary and governing vectors
+        run: node --test ../../tests/sap2000-section-summary.test.cjs
       - name: Build GitHub Pages demo
         run: npm run build -- --outDir ../../../docs --emptyOutDir
         env:

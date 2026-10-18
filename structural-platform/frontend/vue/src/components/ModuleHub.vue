@@ -1,5 +1,5 @@
 <script setup>
-import { computed, defineAsyncComponent, reactive } from 'vue'
+import { computed, defineAsyncComponent, reactive, ref } from 'vue'
 import { copy } from '../i18n'
 import { moduleGroups, groupTools, moduleHref, resolveModuleRoute, sap2000ApiHref } from '../modules'
 import { demoMode } from '../api'
@@ -13,6 +13,9 @@ import WindLoadView from './WindLoadView.vue'
 
 // Keep the PDF reader and math fonts out of the ordinary design workspace load.
 const StandardsExplorer = defineAsyncComponent(() => import('./StandardsExplorer.vue'))
+
+const sapLaunchDialog = ref(null)
+function showSapLaunchGuide(event) { event.preventDefault(); sapLaunchDialog.value?.showModal() }
 
 const homeHref = import.meta.env.BASE_URL
 const props = defineProps({ moduleCode: { type: String, required: true }, user: { type: Object, required: true }, isAdmin: Boolean })
@@ -46,12 +49,31 @@ const tools = { concrete: ['beam', 'column', 'slab', 'foundation'], future: ['re
       <a v-for="group in moduleGroups" :key="group.code" :href="moduleHref(group.code)" :class="{ active: currentGroup.code === group.code }">{{ t(group.title) }}</a>
     </nav>
     <nav class="module-navigation" :class="{ 'loading-navigation': currentGroup.code === 'loads', 'steel-navigation': currentGroup.code === 'steel' }" :aria-label="t('navigation')">
-      <a v-for="tool in navigationTools" :key="tool.code" :href="tool.external ? sap2000ApiHref(locale) : moduleHref(tool.route)"  :rel="tool.external ? 'noopener noreferrer' : undefined" :aria-current="currentTool.code === tool.code ? 'page' : undefined">{{ t(tool.title) }}</a>
+      <a v-for="tool in navigationTools" :key="tool.code" :href="tool.external ? sap2000ApiHref(locale) : moduleHref(tool.route)" @click="tool.external && showSapLaunchGuide($event)"  :rel="tool.external ? 'noopener noreferrer' : undefined" :aria-current="currentTool.code === tool.code ? 'page' : undefined">{{ t(tool.title) }}</a>
     </nav>
+    <dialog ref="sapLaunchDialog" class="sap-launch-guide" aria-labelledby="sap-launch-title">
+      <h2 id="sap-launch-title">{{ locale === 'vi' ? 'Hướng dẫn sử dụng SAP2000-API' : 'Using SAP2000-API' }}</h2>
+      <ol v-if="locale === 'vi'">
+        <li><strong>SAP2000 v26.2.0</strong>.</li>
+        <li>Bộ kết nối tại <strong><code>C:\geek_calculus\SAP2000-API</code></strong>.</li>
+        <li>Đăng ký launcher một lần bằng <strong><code>install-web-launcher.cmd</code></strong>.</li>
+        <li>Giữ connector chạy trong lúc thao tác từ web.</li>
+      </ol>
+      <ol v-else>
+        <li><strong>SAP2000 v26.2.0</strong>.</li>
+        <li>Keep the connector at <strong><code>C:\geek_calculus\SAP2000-API</code></strong>.</li>
+        <li>Register the launcher once using <strong><code>install-web-launcher.cmd</code></strong>.</li>
+        <li>Keep the connector running while using the web panel.</li>
+      </ol>
+      <div class="sap-launch-actions">
+        <button type="button" class="quiet-button" autofocus @click="sapLaunchDialog.close()">{{ t('cancel') }}</button>
+        <a :href="sap2000ApiHref(locale)" rel="noopener noreferrer" @click="sapLaunchDialog.close()">{{ locale === 'vi' ? 'Tiếp tục' : 'Continue' }}</a>
+      </div>
+    </dialog>
     <header class="module-heading"><span class="workspace-group-label">{{ t(currentGroup.title) }}</span><h1>{{ t(currentTool.title) }}</h1><p>{{ t(currentTool.description) }}</p></header>
     <SteelDesignView v-if="currentGroup.code === 'steel' && currentTool.code === 'design'" :locale="locale" />
     <CfsDesignView v-else-if="currentGroup.code === 'steel' && currentTool.code === 'cfs'" :locale="locale" :user="user" :show-add-in="moduleCode === 'steel/cfs/lapping-node'" @update-locale="locale = $event" />
-    <section v-else-if="currentTool.code === 'sap2000-api'" class="module-panel"><a :href="sap2000ApiHref(locale)" rel="noopener noreferrer">SAP2000-API ↗</a><p>Compatible with SAP2000v26.2.0</p></section>
+    <section v-else-if="currentTool.code === 'sap2000-api'" class="module-panel"><a :href="sap2000ApiHref(locale)" @click="showSapLaunchGuide" rel="noopener noreferrer">SAP2000-API ↗</a><p>Compatible with SAP2000v26.2.0</p></section>
     <SectionPropertiesPanel v-else-if="currentTool.code === 'section-properties'" :key="currentGroup.code" :locale="locale" />
     <section v-else-if="currentTool.code === 'standards'" class="module-panel"><p class="standards-breadcrumb"><a :href="moduleHref('steel')">Steel Design</a> / <a :href="moduleHref('steel/library')">Library</a> / <strong>Standards</strong></p><StandardsExplorer :locale="locale" :can-edit="isAdmin" /></section>
     <section v-else-if="currentTool.code === 'library'" class="module-panel"><LibraryBrowser :key="currentGroup.code" :locale="locale" :can-edit="false" /></section>
@@ -82,6 +104,12 @@ const tools = { concrete: ['beam', 'column', 'slab', 'foundation'], future: ['re
 </template>
 
 <style scoped>
+.sap-launch-guide { width: min(560px, calc(100% - 32px)); max-height: calc(100dvh - 32px); overflow: auto; box-sizing: border-box; padding: 24px; border: 1px solid #a6bac5; border-radius: 12px; background: var(--surface-bg, white); color: var(--ink, #23395d); }
+.sap-launch-guide::backdrop { background: rgb(15 34 51 / 55%); }
+.sap-launch-guide h2 { margin: 0 0 16px; font-size: 22px; }
+.sap-launch-guide ol { padding-left: 24px; line-height: 1.8; }.sap-launch-guide li { margin: 8px 0; }.sap-launch-guide code { overflow-wrap: anywhere; }
+.sap-launch-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px; }.sap-launch-actions a { padding: 10px 16px; border-radius: 6px; background: #23395d; color: white; text-decoration: none; }
+
 .module-page { width: calc(100% - 32px); max-width: 1280px; min-height: calc(100vh - 40px); padding: 0 28px 40px; margin: 16px auto 24px; border: 1px solid var(--surface-border); border-radius: 16px; background: var(--workspace-bg); box-shadow: 0 8px 24px #243b570a; }
 .module-topbar { min-height: 84px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
 .module-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }

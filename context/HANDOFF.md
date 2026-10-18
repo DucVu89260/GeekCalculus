@@ -1,5 +1,10 @@
 # Repository handoff
 
+## SAP launcher usage prompt — 2026-10-18
+
+- ModuleHub now shows an accessible native modal with the four requested usage instructions before invoking the Windows launcher. VI/EN, fixed kit path, Cancel/Escape and Continue protocol link; existing SAP panel unchanged.
+- Vue typecheck and production demo build passed (existing chunk-size warning). Targeted production-browser check passed both languages, four list items, fixed path, protocol destination, Cancel/Escape and390px mobile. Updated matching web smoke assertions; full cross-origin SAP smoke was not rerun for this UI-only change. No kit update needed.
+
 ## SAP2000 website → Windows launcher — 2026-10-18
 
 - Build 2026.10.18-web-panel.16; fixed root `C:\geek_calculus\SAP2000-API`. SAP tool now invokes a strict VI/EN/version custom URI rather than opening an unauthenticated panel. New per-user protocol installer and handler request UAC, use a fixed Pages URL, protect a reusable token with current-user DPAPI and reuse an authenticated running connector. No scheduled task, UAC bypass, arbitrary shell URL or termination of unknown listeners. Installer/handler process-only execution-policy flags do not change global policy. Preserve the section-column change from the preceding turn.

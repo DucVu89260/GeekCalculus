@@ -18,6 +18,15 @@ const base=process.env.SAP_WEB_BASE||'http://127.0.0.1/GeekCalculus/'
   for(const lang of ['vi','en']){
    await page.getByRole('button',{name:lang.toUpperCase(),exact:true}).click()
    assert.equal(await links.nth(2).getAttribute('href'),'geekcalculus-sap2000://launch/26.2.0/?lang='+lang)
+   await links.nth(2).click()
+   const guide=page.getByRole('dialog')
+   await guide.waitFor({state:'visible'})
+   assert.equal(await guide.locator('li').count(),4)
+   assert.match(await guide.textContent(),/C:\\geek_calculus\\SAP2000-API/)
+   assert.equal(await guide.locator('a').getAttribute('href'),'geekcalculus-sap2000://launch/26.2.0/?lang='+lang)
+   await guide.getByRole('button',{name:lang==='vi'?'Hủy':'Cancel',exact:true}).click()
+   await guide.waitFor({state:'hidden'})
+
    const panel=await context.newPage();await panel.goto(new URL('sap2000-api/26.2.0/?lang='+lang,base).href)
    await panel.waitForLoadState('domcontentloaded')
    assert.equal(new URL(panel.url()).pathname,new URL('sap2000-api/26.2.0/',base).pathname)

@@ -25,7 +25,7 @@ class FixtureRuntime:
         elif key=='section_properties':
             if name=='NP1':return block('unavailable',GETTERS[key].path,code=1,reason='No single nonprismatic property')
             data={'Area':.01,'As2':.004,'As3':.006,'Torsion':8e-7,'I22':1.2e-5,'I33':.00015,'S22':.00024,'S33':.001,'Z22':.0003,'Z33':.00115,'R22':.0346,'R33':.1225}
-        elif key=='shape_i':data={'FileName':'','MatProp':'SteelA','t3':.3 if name=='I300' else .5,'t2':.15,'tf':.012,'tw':.008,'t2b':.15,'tfb':.012,'Color':0,'Notes':'fixture','GUID':'section-'+name}
+        elif key=='shape_i':data={'FileName':'','MatProp':'SteelA','T3':.3 if name=='I300' else .5,'T2':.15,'Tf':.012,'Tw':.008,'T2b':.15,'Tfb':.012,'Color':0,'Notes':'fixture','GUID':'section-'+name}
         elif key=='section_material_file':data={'NameInFile':name,'FileName':'','MatProp':'' if name=='NP1' else 'SteelA','PropType':99 if name=='NP1' else 1}
         elif key=='nonprismatic':data={'NumberItems':2,'StartSec':['I300','I500'],'EndSec':['I500','I300'],'MyLength':[1.,1.],'MyType':[1,1],'EI33':[2,2],'EI22':[1,1],'Color':0,'Notes':'','GUID':'np'}
         elif key=='nonprismatic_assignment':data={'PropName':'NP1' if name=='F2' else '','sVarTotalLength':0.,'sVarRelStartLoc':0.}

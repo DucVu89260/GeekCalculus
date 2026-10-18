@@ -137,3 +137,7 @@ Expose explicit ordered Nonprismatic segment endpoints and I-section geometry la
 ## V2 live component-read compatibility — 2026-10-18
 
 Handle CSI literal None material overwrite as unassigned; accept reflected section-type output MyType and PropType; use successful typed I getter as verification if enum mapping unresolved. Keep failed geometry diagnostic available in summary. Verify source names/None sentinel in synthetic snapshot and browser, then package local.4; real user DLL snapshot needed if failure persists.
+
+## V2 uploaded live snapshot: geometry casing — 2026-10-18
+
+Live local.3 JSON confirms successful GetISection with T3/T2/Tf/Tw/T2b/Tfb and successful steel Fy/Fu; section enum PropType is correct. Root dimension bug is case-sensitive normalized alias lookup, not failed SAP getter. Normalize convenience dimension keys case-insensitively, preserve raw DLL field spelling and prior None overwrite fix. Synthetic fixture must use installed field casing. Validate uploaded raw records privately without committing model paths/GUIDs/notes, rerun targeted tests/browser and rebuild local.5.

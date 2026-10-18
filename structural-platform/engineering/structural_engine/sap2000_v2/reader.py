@@ -154,8 +154,8 @@ class SteelReader:
                         item['components'].append({'name':child,**block('invalid_data','PropFrame.GetNonPrismatic',reason='Cyclic section definition')})
                     else:
                         child_data=self.section(child,trail=(*trail,name));item['components'].append({'name':child,**(child_data if 'status' in child_data else {})})
-        item['dimensions_mm']={key+'_mm':value*1000. for key,value in (geometry.get('data') or {}).items()
-                               if key.lower() in ('t3','t2','tf','tw','t2b','tfb','dis') and isinstance(value,(int,float))}
+        item['dimensions_mm']={key.casefold()+'_mm':value*1000. for key,value in (geometry.get('data') or {}).items()
+                               if key.casefold() in ('t3','t2','tf','tw','t2b','tfb','dis') and isinstance(value,(int,float)) and not isinstance(value,bool)}
         if shape_key=='shape_i' and geometry['status'] in OK:
             item['i_dimensions_mm']={label:item['dimensions_mm'].get(key+'_mm') for key,label in
                 [('t3','h'),('t2','bf_top'),('tf','tf_top'),('tw','tw'),('t2b','bf_bottom'),('tfb','tf_bottom')]}

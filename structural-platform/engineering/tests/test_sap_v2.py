@@ -193,3 +193,14 @@ def test_unresolved_enum_requires_successful_i_getter_not_section_name_guess():
     assert good['i_dimensions_mm']['h']==500.
     assert good['geometry']['source']=='PropFrame.GetISection'
     assert 'i_dimensions_mm' not in bad and bad['geometry']['status']=='unsupported'
+
+
+def test_installed_dll_uppercase_i_dimensions_match_normalized_lowercase_contract():
+    _,result=read(groups=['sections','materials'])
+    section=result['sections']['I300']
+    assert section['geometry']['data']['T3']==.3
+    assert 't3' not in section['geometry']['data']  # untouched installed-DLL field spelling
+    assert section['dimensions_mm']=={'t3_mm':300.,'t2_mm':150.,'tf_mm':12.,'tw_mm':8.,'t2b_mm':150.,'tfb_mm':12.}
+    assert section['i_dimensions_mm']=={'h':300.,'bf_top':150.,'tf_top':12.,'tw':8.,'bf_bottom':150.,'tf_bottom':12.}
+    assert result['members'][0]['data']['materials']['effective_material']=='SteelA'
+    assert 'None' not in result['materials']

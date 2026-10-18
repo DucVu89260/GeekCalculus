@@ -1,5 +1,10 @@
 # Repository handoff
 
+## V2 live snapshot confirms dimension field casing bug — 2026-10-18
+
+- User supplied live local.3 JSON. Actual GetTypeOAPI PropType and GetISection succeeded; data fields are T3/T2/Tf/Tw/T2b/Tfb, while normalized I aliases looked up lowercase keys. Prior type-signature hypothesis was not the root cause in this snapshot. Fixed convenience dimension keys to casefold before alias mapping; raw output spelling/values remain intact. Retains local.4 literal None material-overwrite fix. Live GetOSteel_1 already succeeds; confirmed Fy/Fu345/450MPa rather than deriving strength from grade name.
+- Preview2026.10.18-v2-local.5 source kit rebuilt. Fifteen targeted tests passed; default synthetic shape fixture now uses exact installed-DLL capitalization and test asserts original T3 remains raw while aliases resolve. Private replay of uploaded raw getter records passed all5 I-section dimensions, component material resolution and Fy/Fu; original JSON/model paths/GUIDs/notes not committed or packaged. Chromium V2 workflow rerun against capitalized-output fixture. ZIP CRC/per-file manifest passed. No new live SAP call performed in cloud; user Windows rerun remains acceptance step. No V1 changes.
+
 ## V2 component geometry and None material overwrite — 2026-10-18
 
 - User live screenshot confirms Nonprismatic child names but blank geometry/Fy/Fu and literal material None. Fixed literal CSI `None` overwrite handling in backend and summary: no overwrite, resolve component library material; do not request a material named None. Added GetTypeOAPI output alias MyType alongside PropType. Unresolved enum now permits read-only GetISection probe; only success supplies I geometry, failures remain explicit with probe diagnostics. UI includes geometry status/type to make failed getters visible. Actual root cause of blank geometry on user's DLL not fully established without snapshot; do not claim confirmed live fix.

@@ -1,6 +1,6 @@
 # SAP2000-API V2 — Local preview
 
-Build: `2026.10.18-v2-local.9` · Compatible with SAP2000 v26.2.0 · Windows 64-bit.
+Build: `2026.10.18-v2-local.10` · Compatible with SAP2000 v26.2.0 · Windows 64-bit.
 
 ## Chạy thử / Quick start
 
@@ -79,3 +79,9 @@ Design Preferences thuộc model và active design code, không thuộc riêng m
 ## Bố cục hồ sơ (local.9)
 
 Toàn bộ khối thông số cấu kiện V2 đặt sau mục3 Cấu kiện đã chọn và ngay trước mục4 Kết quả nội lực. Desktop giữ Output Cases bên trái; mobile đọc theo thứ tự2 →3 → hồ sơ V2 →4 →5. DatabaseTables vẫn nằm trong khối hồ sơ phát triển. Không thay đổi dữ liệu hoặc cách tính.
+
+## Bố cục3/4 (local.10)
+
+Mục3 Cấu kiện đã chọn chứa3.1 Vật liệu/kích thước/điều kiện biên (6 nhóm) và3.2 Thông số thiết kế (3 nhóm). Chọn nhóm checkbox và các điều khiển Nhóm cơ bản/Chọn đủ/Bỏ chọn/Đọc hồ sơ/JSON/kiểm tra DLL/Đối tượng dữ liệu/Nhóm thuộc tính vẫn dùng chung, giữ cơ chế cũ. DatabaseTables tiếp tục ở khối hồ sơ.
+
+Mục4 Kết quả nội lực chứa2 nút Đọc lựa chọn hiện tại và Lấy nội lực cấu kiện đang chọn; sau đó4.1 Lọc nội lực,4.2 Cực trị nội lực,4.3 Tổng hợp cực trị theo Tiết diện. Không đổi thuật toán hay API. Bộ lọc bảng4.1 không tự giới hạn tính cực trị4.2/4.3.

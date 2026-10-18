@@ -157,3 +157,7 @@ Render separate I/J release tables: index0–5, force P/V2/V3/T/M2/M3, DOF U1/U2
 ## V2 member information immediately before force results — 2026-10-18
 
 Move complete profile/data/DatabaseTables panel after selected members and immediately before section4, both DOM and desktop/mobile grid order. Preserve all data/controls. Validate browser bounding boxes/sibling order and existing workflow; package local.9.
+
+## V2 reorganized member/design and force sections — 2026-10-18
+
+Nest shared profile controls/data in section3; group checkboxes3.1(member definitions/6) and3.2(design/3) without changing selection/API requests. Move existing selection/extraction buttons to4; nest force filters4.1/extremes4.2/section summary4.3 under4. Update DOM, grid, headings, VI/EN, cross-references and smoke assertions for placement/mobile/unchanged flows. Package local.10.

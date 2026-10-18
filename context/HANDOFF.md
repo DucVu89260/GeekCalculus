@@ -1,5 +1,10 @@
 # Repository handoff
 
+## V2 member/design/force hierarchy — 2026-10-18
+
+- Preview2026.10.18-v2-local.10 nests profile content in3 Selected members. Checkbox sections3.1 Materials/section dimensions/boundaries(6groups) and3.2 Design parameters(3groups); shared selection/read/export/capability controls and object/category selectors unchanged. DatabaseTables retained. Moved existing selection/extraction controls with same IDs/handlers into4 Force results. Nested4.1 Force filters,4.2 Force extremes and sibling4.3 Section extreme summary. Updated DOM/grid/mobile and VI/EN headings/cross-references; no data/API/math changes.
+- Updated full Chromium smoke passed correct6+3 grouping, shared selections/defaults/all/clear, control ownership and nested sections, desktop/mobile profile containment/order, bilingual headings and snapshot immutability, releases/preferences/design-status/type/export/force/extremes/summary/table flows. Inspected profile screenshot. Source-only ZIP rebuilt; manifest/CRC passed. No new Windows live SAP run required for changed layout, actual user UI check pending; V1/hosted files unchanged.
+
 ## V2 profile panel before force results — 2026-10-18
 
 - Preview2026.10.18-v2-local.9 moves complete member profile panel (including global preferences and development DatabaseTables) after section3 Selected members and immediately before section4 Force results. Updated both DOM and CSS grid areas: desktop Output Cases remains left; mobile order2/3/profile/4/5. No data/algorithm change; V1 untouched.

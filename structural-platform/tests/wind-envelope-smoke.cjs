@@ -24,6 +24,7 @@ const base=process.env.WIND_BASE_URL || 'http://127.0.0.1:5176/GeekCalculus/'
     await page.locator('#torsion').waitFor()
     assert.ok(page.url().endsWith('/loads/wind/envelope-low-rise'))
     assert.equal(await page.locator('.envelope-report>section').count(),5)
+    assert.equal(await page.locator('.overview h1').evaluate(el=>getComputedStyle(el).color),'rgb(255, 255, 255)')
     assert.equal(await page.locator('[data-result=theta]').textContent(),'4.57°')
     assert.equal(await page.locator('[data-result=qh]').textContent(),'1.110 kN/m²')
     assert.equal(await page.locator('[data-result=a]').textContent(),'4.00 m')

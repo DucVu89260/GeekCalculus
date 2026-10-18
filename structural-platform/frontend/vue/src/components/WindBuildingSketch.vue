@@ -56,4 +56,4 @@ const marker = 'wind-arrow-' + useId().replace(/[^a-z0-9-]/gi,'')
     </g>
   </svg>
 </template>
-<style scoped>.wind-sketch{width:100%;height:auto;display:block;max-height:310px;font-family:Calibri,'Segoe UI',sans-serif;color:#23395d}text{fill:#284961;font-size:15px}</style>
+<style scoped>.wind-sketch{width:100%;height:auto;display:block;max-height:310px;font-family:Calibri,'Segoe UI',sans-serif;color:#23395d}text{fill:#284961;font-size:20px}</style>

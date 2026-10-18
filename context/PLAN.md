@@ -117,3 +117,7 @@ Fixed root C:\geek_calculus\SAP2000-API. Replace direct web link with strict cus
 ## SAP extreme detail modal and display — 2026-10-18
 
 Replace inline governing/tie paragraphs with a centered, scrollable table dialog retaining full row vectors and source metadata. Add live VI/EN controls without reload/data loss; SAP2000-API top heading. Normalize tiny negative zero only in two-decimal force display, never modify extraction/interpolation/extreme or export data. Verify existing browser flows, formatter examples, dialog close/Escape/mobile and language round-trip with identical dataset.
+
+## SAP selected-member extremes — 2026-10-18
+
+Add Selected members beside Per member and existing entire-group scope. Searchable multi-checkbox choices display Frame and assigned Section from exported metadata. Map selection to existing per_frame + frames API filter (no new connector contract), reject empty selection, clear stale extrema on changes and reset on extraction/model changes. Keep section4 filters independent; verify subset/multiple/language request payload and results in browser.

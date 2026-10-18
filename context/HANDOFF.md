@@ -1,5 +1,10 @@
 # Repository handoff
 
+## SAP selected-member extremes — 2026-10-18
+
+- Build2026.10.18-web-panel.20 adds Selected members alongside Per member and the retained entire-group option. Searchable multi-checkbox choices display Frame + assigned Section, select visible/clear all, count and preserved keyboard focus. Selection uses existing API scope=per_frame and frames=[...] so each chosen member has its own extrema. Empty selection disables compute; changes clear stale output; extraction/model resets selection. Language toggle preserves selection. Section4 filters are independent. Exported extreme JSON includes selected_frames; no backend/connector contract changes.
+- Executed updated SAP panel browser smoke after starting the fake-SAP service (initial attempt before startup refused connection; rerun passed), then again after focus preservation: all passed. New checks verify Frame/Section labels, section search, empty disabled state, posted frames/scope, F2-only results even with section4 filtered to F1, VI/EN preservation, two-member results and deselection clears. Existing raw-data/force-format/dialog/mobile/export/model checks retained and passed. No actual Windows SAP run available. Source-only kit and hosted panel rebuilt; existing connector compatible.
+
 ## SAP centered extreme vectors / live language — 2026-10-18
 
 - Build2026.10.18-web-panel.19: SAP2000-API is the bold top heading, compatibility line retained and stale static build badge corrected. Added VI/EN buttons with in-tab URL/state-preserving translation, including dialog and principal static instructions. No extraction rerun on language change. Extreme tables now have compact View forces buttons instead of inline paragraphs; native centered dialog provides section/case/step/local station and ratio/all six forces/source/concurrency for each previewed governing/tied row, Close/Escape and overflow for mobile. Existing 20-row tie preview/complete record IDs in JSON preserved.

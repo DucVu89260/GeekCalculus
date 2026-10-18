@@ -370,3 +370,13 @@ retain the existing 20-row preview cap and complete record IDs in JSON.
 All force displays use exactly two decimal places without scientific notation;
 rounded negative zero is shown as 0.00. Large positive values are not clamped.
 This formatting does not mutate extraction, interpolation, extremes or exports.
+
+### Selected-member extreme scope — build 2026.10.18.20
+
+Per member evaluates every exported member separately. Selected members opens a
+searchable checkbox list labelled Frame and assigned Section; one or several
+members can be selected. The existing API per_frame scope with a frames filter
+evaluates each chosen member separately. Empty selection disables calculation.
+Changing selection clears old extrema; a new extraction/model resets selection.
+Section4 filters remain independent. The entire exported group option is retained.
+Selected frames are recorded in the downloaded extreme JSON as selected_frames.

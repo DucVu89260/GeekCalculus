@@ -66,6 +66,8 @@ Steel MVP is a source-traceable **limited reference calculation**, not whole-mem
 
 ### Wind Load / ASCE 7-10
 
+`WIND-UI-28` (implemented / locally verified, base `a05e1e2`): illustrated ASCE building/procedure catalog and a dedicated Chapter 28 Part 1 low-rise workspace following user PICTURE 1–5. Inputs: km/h or m/s, exposure, ridge/eave height, across-ridge B, along-ridge L, roof/enclosure/topography/hurricane classification. Acceptance: dimension sketches, derived eligibility/Kh/qh, source-backed Fig.28.4-1 Case A/B tables with both GCpi signs, torsional designated-zone preview, bilingual/mobile/deep-link checks. Reuse Chapter 26 exposure/velocity primitives; retain Chapter 27 separately. Monoslope geometry may be previewed but pressures remain blocked pending its source applicability verification. No C&C, complete eight-pattern structural analysis, minimum-load certification or SAP export claim. Evidence: 157 Node tests, Vue typecheck and demo build passed; browser smoke passed on 1480px/390px/320px for illustrated selection, five report sections, numerical reference, partial enclosure, invalid/scope gates, bilingual state, JSON export, reload and existing Chapter 27 entry.
+
 | ID | Narrow outcome | Existing surface | Acceptance / dependencies |
 | --- | --- | --- | --- |
 | WIND-01 | Add independent worked-case verification of the existing Ch27 Phase A result | `asce7-10-wind.mjs`, `asce710-wind.test.js`, WindLoadView | Source-backed case with units/signs, both GCpi signs, exposure/Kz/q/Cp; independently computed intermediate/result values, not just formula duplication |

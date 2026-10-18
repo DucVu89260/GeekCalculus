@@ -1,0 +1,105 @@
+<script setup>
+import { computed, reactive, ref, watch } from 'vue'
+import { calculateEnvelope710 } from '../../../../standards/asce7-10-envelope.mjs'
+import { moduleHref } from '../modules'
+import WindBuildingSketch from './WindBuildingSketch.vue'
+import WindPressureTable from './WindPressureTable.vue'
+const props = defineProps({locale:{type:String,default:'vi'}})
+const en = computed(()=>props.locale === 'en')
+const t = (vi,english)=>en.value ? english : vi
+const input = reactive({project:'',windSpeed:196,speedUnit:'km/h',exposure:'B',ridgeHeight:12,eaveHeight:10,width:50,length:95,roofType:'GABLE',kzt:1,kd:.85,enclosure:'ENCLOSED',hurricane:false,conditionsConfirmed:false})
+const result = computed(()=>{try{return {value:calculateEnvelope710({...input}),error:''}}catch(e){return {value:null,error:e.message}}})
+const r = computed(()=>result.value.value)
+const d = computed(()=>r.value?.derived)
+const f = (value,digits=3)=>typeof value === 'number' && Number.isFinite(value) ? value.toFixed(digits) : '—'
+const notice = ref('')
+const links = computed(()=>[
+  ['overview',t('Tổng quan','Overview')],['inputs',t('Thông số đầu vào','Input data')],['parameters',t('Hệ số & điều kiện','Parameters & eligibility')],['pressures',t('Áp lực hai phương','Directional pressures')],['torsion',t('Trường hợp xoắn','Torsional cases')],
+])
+watch(()=>input.speedUnit,(unit,old)=>{if(typeof input.windSpeed==='number') input.windSpeed=Number((unit===old?input.windSpeed:unit==='m/s'?input.windSpeed/3.6:input.windSpeed*3.6).toFixed(6))})
+const scopeMessage = key => ({
+  LOW_RISE_HEIGHT:t('Chiều cao tính toán h vượt 18 m.','Reference height h exceeds 18 m.'),
+  LOW_RISE_PLAN:t('h phải không lớn hơn min(L, B).','h must not exceed min(L, B).'),
+  ROOF_SLOPE:t('Độ dốc mái vượt 45°.','Roof slope exceeds 45°.'),
+  MONOSLOPE_REVIEW:t('Hình học mái một dốc được hiển thị; phạm vi áp dụng Chương 28 cho trường hợp này còn cần kiểm chứng. Chưa cấp hệ số/áp lực.','Monoslope geometry preview: Chapter 28 applicability requires verification. Coefficients/pressures are withheld.'),
+  OPENING_PROTECTION_REVIEW:t('Vùng bão: kiểm tra bảo vệ lỗ mở theo §26.10.3 và phân loại độ kín. Không tự chuyển GCpi.','Hurricane region: verify opening protection under §26.10.3 and enclosure classification. GCpi is not automatically changed.'),
+}[key] || key)
+function printReport(){ window.print() }
+function exportReport(){
+  if(!r.value){notice.value=t('Kiểm tra thông số đầu vào.','Check input data.');return}
+  const blob=new Blob([JSON.stringify(r.value,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a')
+  a.href=url;a.download='ASCE7-10-Envelope-review.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)
+}
+const pdf = page=>`${import.meta.env.BASE_URL}standards/asce7-10.pdf#page=${page}`
+</script>
+
+<template>
+  <div class="envelope-workspace">
+    <header class="envelope-toolbar"><a :href="moduleHref('loads/wind')">← {{ t('Loại công trình','Building types') }}</a><div><button type="button" @click="exportReport">{{ t('Xuất báo cáo JSON','Export report JSON') }}</button><button type="button" @click="printReport">{{ t('In / PDF','Print / PDF') }}</button></div></header>
+    <div class="envelope-layout">
+      <aside class="envelope-nav"><span>ASCE 7-10</span><strong>{{ t('Nhà thấp tầng','Low-rise buildings') }}</strong><nav aria-label="Envelope report sections"><a v-for="[id,label] in links" :key="id" :href="'#'+id" @click.prevent="($el.querySelector('#'+id)).scrollIntoView({behavior:'smooth'})">{{ label }}</a></nav><p>MWFRS · Chapter 28<br />Part 1 · Fig. 28.4-1</p><a :href="pdf(344)" target="_blank" rel="noopener">{{ t('Mở tiêu chuẩn nguồn','Open source standard') }} ↗</a></aside>
+      <main class="envelope-report">
+        <section id="overview" class="report-block overview">
+          <p class="report-eyebrow">01 / OVERVIEW · ASCE/SEI 7-10</p><h1>{{ t('PHÂN TÍCH TẢI TRỌNG GIÓ','WIND LOADING ANALYSIS') }}</h1><h2>{{ t('Hệ khung chịu lực chính · MWFRS','Main Wind-Force Resisting System · MWFRS') }}</h2><p>Envelope Procedure · Chapter 28 · Part 1</p><p>{{ t('Nhà thấp tầng kín và nửa kín · Tường & mái','Enclosed and partially enclosed low-rise buildings · Walls & roofs') }}</p>
+          <div class="overview-tags"><span>{{ t('Mái hai dốc ≤45°','Gable roof ≤45°') }}</span><span>h ≤18 m · h ≤min(L, B)</span><span>kN/m² · m · {{ input.speedUnit }}</span></div>
+          <p class="review-banner">REVIEW_REQUIRED · {{ t('Báo cáo tham khảo. Thông số ban đầu là ví dụ theo ảnh mẫu; phải xác minh cho dự án.','Reference report. Initial inputs follow the supplied example and require project verification.') }}</p>
+        </section>
+
+        <section id="inputs" class="report-block">
+          <div class="section-heading"><span>02</span><div><h2>{{ t('Thông số đầu vào','Input data') }}</h2><p>{{ t('Hình học, vận tốc gió và phân loại công trình','Geometry, basic wind speed and building classification') }}</p></div></div>
+          <label class="project-field">{{ t('Dự án','Project') }}<input v-model="input.project" maxlength="160" :placeholder="t('Tên dự án (tùy chọn)','Project name (optional)')" /></label>
+          <div class="input-and-sketch">
+            <div class="envelope-fields">
+              <label>{{ t('Vận tốc gió cơ bản','Basic wind speed') }} · V<div class="speed-control"><input v-model.number="input.windSpeed" name="windSpeed" type="number" min="0.01" step="0.1" /><select v-model="input.speedUnit" aria-label="Wind speed unit"><option>km/h</option><option>m/s</option></select></div><small>Fig. 26.5-1 · {{ t('Theo cấp rủi ro','Risk-category specific') }}</small></label>
+              <label>{{ t('Dạng địa hình đón gió','Exposure category') }}<select v-model="input.exposure" name="exposure"><option>B</option><option>C</option><option>D</option></select><small>§26.7</small></label>
+              <label>{{ t('Cao độ đỉnh mái','Ridge height') }} · hr (m)<input v-model.number="input.ridgeHeight" name="ridgeHeight" type="number" min="0.01" step="0.1" /><small>hr ≥ he</small></label>
+              <label>{{ t('Cao độ diềm mái','Eave height') }} · he (m)<input v-model.number="input.eaveHeight" name="eaveHeight" type="number" min="0.01" step="0.1" /><small>he ≤ hr</small></label>
+              <label>{{ t('Bề rộng ngang nhà','Building width') }} · B (m)<input v-model.number="input.width" name="width" type="number" min="0.01" step="0.1" /><small>{{ t('Vuông góc đường đỉnh mái','Normal to building ridge') }}</small></label>
+              <label>{{ t('Chiều dài dọc nhà','Building length') }} · L (m)<input v-model.number="input.length" name="length" type="number" min="0.01" step="0.1" /><small>{{ t('Song song đường đỉnh mái','Parallel to building ridge') }}</small></label>
+              <label>{{ t('Loại mái','Roof type') }}<select v-model="input.roofType" name="roofType"><option value="GABLE">{{ t('Mái hai dốc','Gable') }}</option><option value="MONOSLOPE">{{ t('Mái một dốc · Xem hình học','Monoslope · Geometry preview') }}</option></select></label>
+              <label>{{ t('Hệ số địa hình','Topographic factor') }} · Kzt<input v-model.number="input.kzt" name="kzt" type="number" min="1" step="0.01" /><small>§26.8 · Fig. 26.8-1</small></label>
+              <label>{{ t('Hệ số hướng gió','Directionality factor') }} · Kd<input :value="input.kd" readonly aria-label="Kd" /><small>Table 26.6-1 · {{ t('Tổ hợp Chương 2','Chapter 2 combinations') }}</small></label>
+              <label>{{ t('Phân loại độ kín','Enclosure classification') }}<select v-model="input.enclosure" name="enclosure"><option value="ENCLOSED">{{ t('Nhà kín','Enclosed') }}</option><option value="PARTIALLY_ENCLOSED">{{ t('Nhà nửa kín','Partially enclosed') }}</option></select><small>§26.2 / §26.10</small></label>
+              <label>{{ t('Thuộc vùng bão','Hurricane region') }}<select v-model="input.hurricane" name="hurricane"><option :value="false">{{ t('Không','No') }}</option><option :value="true">{{ t('Có','Yes') }}</option></select><small>§26.10.3</small></label>
+            </div>
+            <div class="dimension-sketches"><figure><WindBuildingSketch mode="plan" /><figcaption>{{ t('Mặt bằng · Hai phương gió','Plan · Two wind directions') }}</figcaption></figure><figure><WindBuildingSketch :roof="input.roofType" /><figcaption>{{ t('Mặt đứng ngang nhà · Ký hiệu và kích thước','Transverse elevation · Symbols & dimensions') }}</figcaption></figure></div>
+          </div>
+          <label class="conditions-check"><input v-model="input.conditionsConfirmed" type="checkbox" name="conditionsConfirmed" />{{ t('Đã kiểm tra dạng công trình đều, đặc tính đáp ứng và điều kiện §28.1.2, cấp rủi ro và phân loại độ kín.','Regular shape, response characteristics and §28.1.2 conditions, risk category and enclosure classification have been checked.') }}</label>
+          <p v-if="!input.conditionsConfirmed" class="report-note">{{ t('Chưa xác nhận điều kiện áp dụng; bảng dưới là bản xem trước để rà soát.','Applicability is not yet confirmed; the following tables are a review preview.') }}</p>
+          <p v-if="result.error" role="alert" class="input-error">{{ t('Dữ liệu chưa hợp lệ','Invalid input') }}: {{ result.error }}</p>
+          <p v-for="message in r?.messages || []" :key="message" class="report-note" role="status">{{ scopeMessage(message) }}</p>
+        </section>
+
+        <section id="parameters" class="report-block">
+          <div class="section-heading"><span>03</span><div><h2>{{ t('Thông số & hệ số tải trọng gió','Resulting parameters & coefficients') }}</h2><p>Tables 26.9-1, 26.11-1, 28.3-1 · Fig. 28.4-1</p></div></div>
+          <div class="parameter-grid"><dl><div><dt>θ · {{ t('Độ dốc mái','Roof angle') }}</dt><dd data-result="theta">{{ f(d?.theta,2) }}°</dd></div><div><dt>h · {{ t('Cao độ tính toán','Reference roof height') }}</dt><dd data-result="h">{{ f(d?.h,2) }} m</dd></div><div><dt>α / zg</dt><dd>{{ f(d?.alpha,2) }} / {{ f(d?.zg_m,2) }} m</dd></div><div><dt>Kh</dt><dd data-result="kh">{{ f(d?.kh) }}</dd></div><div><dt>GCpi</dt><dd data-result="gcpi">±{{ f(d?.gcpi,2) }}</dd></div></dl><dl><div><dt>V · m/s</dt><dd>{{ f(d?.v_mps) }}</dd></div><div><dt>qh · {{ t('Áp lực vận tốc','Velocity pressure') }}</dt><dd data-result="qh">{{ f(d?.qh) }} kN/m²</dd></div><div><dt>a · {{ t('Vùng biên','End zone') }}</dt><dd data-result="a">{{ f(d?.a,2) }} m</dd></div><div><dt>2a · {{ t('Khung vùng đầu hồi','End-zone main frame') }}</dt><dd>{{ f(d?.two_a,2) }} m</dd></div><div><dt>h ≤18 m / h ≤min(L,B)</dt><dd :class="{ invalid:r && (!r.checks.height || !r.checks.plan) }">{{ r ? (r.checks.height ? '✓' : '✕')+' / '+(r.checks.plan ? '✓' : '✕') : '—' }}</dd></div></dl></div>
+          <div class="formula-strip"><p>h = he {{ t('khi','when') }} θ ≤10°; {{ t('còn lại','otherwise') }} h = (hr + he) / 2</p><p>Kh = 2.01(z / zg)<sup>2/α</sup>; z = max(h, {{ input.exposure === 'B' ? '9.144' : '4.572' }} m)</p><p>qh = 0.000613 · Kh · Kzt · Kd · V² [kN/m²], V [m/s] · Eq. 28.3-1</p><p>p = qh [GCpf − (±GCpi)] · Eq. 28.4-1</p><p>a = max[min(0.1 min(B,L), 0.4h), 0.04 min(B,L), 0.9 m]</p></div>
+          <p class="report-note">{{ t('GCpf đã gồm hiệu ứng giật; không nhân thêm G. Không nhân hệ số tầm quan trọng gió của ấn bản cũ.','GCpf already includes gust effects; do not apply G again. No legacy wind importance factor is inserted.') }}</p>
+        </section>
+
+        <section id="pressures" class="report-block">
+          <div class="section-heading"><span>04</span><div><h2>{{ t('Áp lực gió lên hệ khung chính','MWFRS wind pressures') }}</h2><p>{{ t('Case A · Gió ngang nhà / Case B · Gió dọc nhà','Case A · Transverse / Case B · Longitudinal') }}</p></div></div>
+          <div class="pressure-grid"><WindPressureTable :rows="r?.transverse || []" :zones="['1','2','3','4','1E','2E','3E','4E']" :title="t('Phương ngang · Case A','Transverse direction · Case A')" /><WindPressureTable :rows="r?.longitudinal || []" :zones="['1','2','3','4','5','6','1E','2E','3E','4E','5E','6E']" :title="t('Phương dọc · Case B','Longitudinal direction · Case B')" /></div>
+          <div class="zone-explanations"><p>{{ t('Khi GCpf âm ở vùng 2/2E:','When GCpf is negative in zones 2/2E:') }}<br />{{ t('Chiều dài áp dụng ngang nhà','Transverse extent') }} = {{ f(r?.zone2.transverse,2) }} m<br />{{ t('Chiều dài áp dụng dọc nhà','Longitudinal extent') }} = {{ f(r?.zone2.longitudinal,2) }} m</p><p>min(0.5D, 2.5he) · Fig. 28.4-1 note 8<br />{{ t('Phần mái còn lại tới đỉnh mái dùng hệ số vùng 3/3E. Các hệ số Case B theo hàng 0–90° của bảng, không dùng độ dốc mái để đổi hệ số này.','Remaining roof extent to the ridge uses zones 3/3E. Case B uses the table’s 0–90° row, independently of the roof angle.') }}</p></div>
+          <div class="pressure-grid"><figure><WindBuildingSketch mode="zones" direction="A" /><figcaption>Case A · {{ t('Sơ đồ vùng tham khảo','Indicative surface-zone schematic') }}</figcaption></figure><figure><WindBuildingSketch mode="zones" direction="B" /><figcaption>Case B · {{ t('Sơ đồ vùng tham khảo','Indicative surface-zone schematic') }}</figcaption></figure></div>
+        </section>
+
+        <section id="torsion" class="report-block">
+          <div class="section-heading"><span>05</span><div><h2>{{ t('Trường hợp tải gió xoắn','Torsional load cases') }}</h2><p>Fig. 28.4-1 · Note 5</p></div></div>
+          <div class="pressure-grid"><WindPressureTable :rows="r?.torsionA || []" :zones="['1T','2T','3T','4T']" :title="t('Gió xoắn · Phương ngang','Transverse torsional case')" torsion /><WindPressureTable :rows="r?.torsionB || []" :zones="['5T','6T']" :title="t('Gió xoắn · Phương dọc','Longitudinal torsional case')" torsion /></div>
+          <div class="pressure-grid"><figure><WindBuildingSketch mode="zones" direction="A" torsion /><figcaption>Case A torsion · Transverse</figcaption></figure><figure><WindBuildingSketch mode="zones" direction="B" torsion /><figcaption>Case B torsion · Longitudinal</figcaption></figure></div>
+          <p class="report-note">{{ t('Vùng ký hiệu T chịu 25% áp lực thiết kế thuần tương ứng, gồm cả GCpi. Các mặt còn lại giữ trường hợp cơ bản. Phải xét cả 8 mẫu tải với từng góc đón gió; hình trên không thay thế sơ đồ gán tải đầy đủ trong tiêu chuẩn.','T-designated zones take 25% of the corresponding full net pressure, including GCpi. Other surfaces retain the basic load case. All 8 corner loading patterns must be considered; these sketches do not replace the complete code load diagrams.') }}</p>
+          <p>{{ t('Ngoại lệ xoắn theo note 5 cần kiểm tra riêng (nhà một tầng thấp, khung nhẹ hoặc diaphragm mềm); không tự miễn trừ theo chiều cao.','Note 5 torsion exemptions require separate verification (low one-story, light-frame or flexible-diaphragm construction); height alone does not automatically exempt a building.') }}</p>
+          <p class="review-banner">REVIEW_REQUIRED · {{ t('Chưa đánh giá tổng lực/cắt ngang tối thiểu (§28.4.4: 0,77 kN/m² tường và 0,38 kN/m² mái chiếu đứng), tải từng góc, parapet/overhang và tác động lên mô hình. Không phải kết quả C&C hoặc bộ tải SAP2000 hoàn chỉnh.','Minimum wall/roof-projection load effects (§28.4.4: 0.77/0.38 kN/m²), all corner patterns, parapets/overhangs and structural response remain to be checked. This is not C&C or a complete SAP2000 load set.') }}</p>
+          <a :href="pdf(348)" target="_blank" rel="noopener">{{ t('Đối chiếu bảng và các ghi chú gốc','Compare source coefficient table and notes') }} · PDF p.348 ↗</a><p v-if="notice" role="status">{{ notice }}</p>
+        </section>
+      </main>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.envelope-workspace{color:#23395d}.envelope-toolbar{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:18px}.envelope-toolbar a,.envelope-nav a{color:#315f82;text-decoration:none}.envelope-toolbar div{display:flex;gap:8px}.envelope-toolbar button{border:1px solid #b7c9d9;background:white;color:#23395d;padding:9px 13px;border-radius:7px;cursor:pointer}.envelope-layout{display:grid;grid-template-columns:205px minmax(0,1fr);gap:20px;align-items:start}.envelope-nav{position:sticky;top:16px;background:#f1f5f9;border:1px solid #d6e0e9;padding:18px;border-radius:10px;font-size:14px}.envelope-nav>span{font-size:12px;letter-spacing:.1em}.envelope-nav strong{display:block;font-size:19px;margin:8px 0 18px}.envelope-nav nav{display:grid;gap:4px}.envelope-nav nav a{padding:10px 5px;border-bottom:1px solid #d7e0e8}.envelope-nav p{line-height:1.7;font-size:12px;color:#60768b}.envelope-report{min-width:0;display:grid;gap:20px}.report-block{scroll-margin-top:16px;background:#fffdf8;border:1px solid #d3dee8;border-radius:12px;padding:24px;min-width:0}.overview{background:#193857;color:white}.overview h1{font-size:27px;margin:10px 0}.overview h2{font-size:19px;font-weight:500;color:#dceaf4}.overview>p{line-height:1.6}.report-eyebrow{font-size:12px;letter-spacing:.13em}.overview-tags{display:flex;gap:8px;flex-wrap:wrap}.overview-tags span{padding:6px 9px;border:1px solid #70889e;border-radius:5px;font-size:12px}.review-banner{background:#fff5df;color:#76571d;border:1px solid #e6d4af;padding:13px;border-radius:7px;font-size:13px;line-height:1.7}.section-heading{display:flex;gap:12px;align-items:flex-start;margin-bottom:20px}.section-heading>span{background:#e6eef5;padding:10px;font-size:18px;border-radius:7px}.section-heading h2{font-size:21px;margin:3px 0 7px}.section-heading p{margin:0;font-size:13px;color:#60768b}.input-and-sketch{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(230px,.85fr);gap:24px}.envelope-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}.envelope-fields label,.project-field{display:flex;flex-direction:column;gap:7px;font-size:13px;font-weight:650}.envelope-fields input,.envelope-fields select,.project-field input{width:100%;min-width:0;box-sizing:border-box;padding:10px;border:1px solid #b7cbd5;border-radius:5px;background:#f1f8ed;color:#254c7d;font:inherit;font-size:16px}.envelope-fields input[readonly]{background:#eef1f4;color:#52677e}.envelope-fields small{font-size:11px;color:#62768b;font-weight:400}.speed-control{display:flex;gap:6px}.speed-control select{max-width:85px}.project-field{margin-bottom:20px}.project-field input{background:white;max-width:500px}.dimension-sketches{display:grid;gap:16px;align-content:start}.envelope-workspace figure{margin:0;border:1px solid #dae3e9;border-radius:8px;padding:12px;background:#fbfdfe;min-width:0}.envelope-workspace figcaption{text-align:center;font-size:12px;color:#62768b;line-height:1.6}.conditions-check{display:flex;gap:9px;font-size:13px;line-height:1.7;margin-top:20px;align-items:start}.conditions-check input{margin-top:5px;width:16px;height:16px;flex:0 0 16px}.report-note{background:#edf3f7;padding:12px;border-left:3px solid #7b9bb2;font-size:13px;line-height:1.7}.input-error,.invalid{color:#a23232!important}.parameter-grid,.pressure-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.parameter-grid dl{margin:0}.parameter-grid dl>div{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid #dce5ec;padding:13px 0;font-size:13px}.parameter-grid dd{margin:0;color:#245780;font-weight:700;white-space:nowrap}.formula-strip{background:#f2f6f9;padding:10px 16px;margin-top:18px;border-radius:7px;font-family:Cambria,serif;overflow-wrap:anywhere}.formula-strip p{line-height:1.65;font-size:15px}.pressure-grid{margin-bottom:18px}.zone-explanations{display:grid;grid-template-columns:1fr 1fr;gap:18px;font-size:13px;line-height:1.8}.envelope-report a{color:#2f638c}button:hover,.envelope-nav nav a:hover{background:#23395d;color:white}input:focus,select:focus,button:focus-visible,a:focus-visible{outline:2px solid #4e91bc;outline-offset:2px}
+@media(max-width:1150px){.envelope-layout{grid-template-columns:170px minmax(0,1fr)}.input-and-sketch{grid-template-columns:1fr}.dimension-sketches{grid-template-columns:1fr 1fr}.report-block{padding:18px}}@media(max-width:800px){.envelope-layout{grid-template-columns:1fr}.envelope-nav{position:static}.envelope-nav nav{display:flex;flex-wrap:wrap}.envelope-nav nav a{padding:7px;font-size:12px}.envelope-nav p,.envelope-nav>span{display:none}.pressure-grid,.parameter-grid,.zone-explanations{grid-template-columns:1fr}.overview h1{font-size:23px}.envelope-toolbar{font-size:13px}}@media(max-width:500px){.envelope-fields,.dimension-sketches{grid-template-columns:1fr}.report-block{padding:13px}.overview h1{font-size:21px}.parameter-grid dl>div{font-size:12px}.envelope-toolbar button{font-size:12px;padding:8px}.section-heading h2{font-size:18px}}
+@media print{.envelope-toolbar,.envelope-nav,.conditions-check{display:none!important}.envelope-layout{display:block}.report-block{border:0;padding:10px;break-inside:avoid}.overview{color:#23395d;background:white}.overview h2{color:#23395d}.pressure-grid{grid-template-columns:1fr 1fr}.envelope-report{gap:5px}.envelope-workspace{print-color-adjust:exact}}
+</style>

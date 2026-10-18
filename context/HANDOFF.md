@@ -1,5 +1,38 @@
 # Repository handoff
 
+## Wind Envelope low-rise workspace — 2026-10-18
+
+- Base `a05e1e2`, existing `work` checkout. User requests illustrated building
+  choices after ASCE 7-10 and a five-part Envelope / Enclosed & Partially
+  Enclosed / Low-rise HTML workspace following PICTURE 1–5.
+- Added bilingual wind catalog (Ch28 envelope, Ch27 directional, Ch29 other,
+  Ch30 C&C), deep route `#/modules/loads/wind/envelope-low-rise`, five report
+  sections, dimension and region SVGs, Case A/B signed pressure tables, designated
+  torsional zones, JSON/print report and responsive left contents navigation.
+  Existing Chapter 27 view is retained at `loads/wind/directional-walls`.
+- New engineering module `standards/asce7-10-envelope.mjs` reuses existing
+  Chapter 26 velocity/exposure primitives. Source table and notes were visually
+  checked against the exact PDF pp.344–348. Preserves global REVIEW_REQUIRED;
+  monoslope is a geometry preview with pressure rows blocked. Eligibility,
+  hurricane/opening checks, full eight corner patterns, minimum load effects,
+  parapets/overhangs and SAP export remain project-level gates. No backend,
+  authentication, data migrations or other member-rule contracts changed.
+- Executed: 157 Node tests passed, zero failures/skips (six new envelope tests
+  with independent default-case values, interpolation, unit/scope/torsion
+  checks); Vue typecheck and production demo build passed. Existing Vite chunk
+  size warnings remain. `tests/wind-envelope-smoke.cjs` passed against the
+  isolated production build: illustrated catalog, deep link, all five sections,
+  default values, reactive velocity, partially enclosed GCpi, invalid input,
+  monoslope gate, language switch, JSON, reload, 320/390px and Chapter27 entry.
+  Fixed a real checkbox-width overflow discovered by the mobile smoke.
+- Source audit: `standards/ASCE7-10-ENVELOPE-AUDIT.md`. Default worked case
+  qh=1.1100821278 kN/m²; screenshot's rounded/legacy qh≈1.114 is not forced into
+  code. Figure28.4-1 net-pressure torsion factor applies to internal and external
+  terms together. SVGs are schematic, not a structural load assignment/export.
+- Delivery: push the tested source to main and use the existing Pages CI build;
+  no hand edits to generated docs. Local browser evidence is distinct from
+  observing the public deployment.
+
 ## CFS actual source sample — 2026-10-18
 
 - Branch `main`, base `bfeb4be`; documentation/private-artifact review only. Added [P0-A evidence](CFS-P0-REVIEW.md), updated integration Plan/status and retained all concurrent SAP/IH functionality. Five uploaded originals and full extracted project data remain outside Git/Pages; source hashes and capability metadata only are recorded in the repository.

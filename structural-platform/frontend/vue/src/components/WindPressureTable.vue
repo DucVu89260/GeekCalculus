@@ -1,0 +1,6 @@
+<script setup>
+defineProps({ rows:{type:Array,default:()=>[]}, zones:{type:Array,default:()=>[]}, title:String, torsion:Boolean })
+const fmt = n => typeof n === 'number' && Number.isFinite(n) ? n.toFixed(3) : '—'
+</script>
+<template><div class="pressure-table"><h3>{{ title }}</h3><div class="table-scroll"><table><thead><tr><th rowspan="2">Zone</th><th rowspan="2">GCpf</th><th colspan="2">p · kN/m²</th></tr><tr><th>+GCpi</th><th>−GCpi</th></tr></thead><tbody><tr v-for="zone in (rows.length ? rows : zones.map(zone=>({zone})))" :key="zone.zone" :class="{ edge:zone.zone.includes('E') }"><th scope="row">{{ zone.zone }}</th><td>{{ fmt(zone.gcpf) }}</td><td>{{ fmt(zone.positive) }}</td><td>{{ fmt(zone.negative) }}</td></tr></tbody></table></div></div></template>
+<style scoped>.pressure-table{min-width:0}.pressure-table h3{margin:0;padding:14px;background:#23395d;color:white;font-size:16px}.table-scroll{overflow:auto}table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;background:white}th,td{border:1px solid #ccd9e2;padding:10px 8px;text-align:right;white-space:nowrap}thead th{background:#dfedf1;color:#25485f;text-align:center}tbody th{text-align:left;font-weight:600;background:#f3f7fa}.edge th{background:#e8f2ee}td{color:#204e77}tbody tr:hover td{background:#f1f6fb}</style>

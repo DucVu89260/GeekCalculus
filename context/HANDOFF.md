@@ -1,5 +1,12 @@
 # Repository handoff
 
+## SAP centered extreme vectors / live language — 2026-10-18
+
+- Build2026.10.18-web-panel.19: SAP2000-API is the bold top heading, compatibility line retained and stale static build badge corrected. Added VI/EN buttons with in-tab URL/state-preserving translation, including dialog and principal static instructions. No extraction rerun on language change. Extreme tables now have compact View forces buttons instead of inline paragraphs; native centered dialog provides section/case/step/local station and ratio/all six forces/source/concurrency for each previewed governing/tied row, Close/Escape and overflow for mobile. Existing 20-row tie preview/complete record IDs in JSON preserved.
+- One shared Intl two-decimal force formatter covers main rows/extreme values/dialog; tiny signed numbers round to 0.00, no negative zero or scientific force notation, large values not clamped. Raw datasets and exported JSON/CSV unchanged. Coordinates retain existing precision. No numerical-engine/Windows-launcher changes.
+- Executed updated SAP panel browser smoke twice as UI evolved: passed dialogs and values, VI/EN roundtrip retaining dataset byte serialization and selected filters, four tiny/zero/large formatter examples, mobile dialog, existing multi-PID/extraction/interpolation/extremes/exports. Inspected desktop screenshot /tmp/sap-extreme-dialog-desktop.png. Existing hosted SAP web smoke passed against production shell plus freshly generated panel, including VI/EN headings, source CSS equality, mobile and real browser cross-origin loopback extraction/interpolation with fake SAP. JavaScript syntax and git diff checks passed. No real Windows SAP test available.
+- Updated kit/hosted source assets, not root docs; main publication remains CI-owned. Existing .17+ local connector compatible; hosted users need a hard refresh after Pages updates, not connector reinstallation.
+
 ## SAP force display precision and units — 2026-10-18
 
 - Build2026.10.18-web-panel.18: P/V2/V3/T/M2/M3 render with two fixed decimal places in force rows, extremes and expanded governing vectors; coordinate precision remains unchanged. Force table headers show m, kN and kN·m on a second line, with mixed force/moment units noted in extreme value headers. Raw data, JSON/CSV, interpolation and extreme math retain full precision.

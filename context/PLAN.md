@@ -113,3 +113,7 @@ Add SAP2000-API immediately after CFS Design, opening the versioned standalone p
 ## SAP desktop launch — 2026-10-18
 
 Fixed root C:\geek_calculus\SAP2000-API. Replace direct web link with strict custom protocol, per-user registration and explicit UAC elevation; fixed GitHub Pages target and VI/EN allowlist. Reuse authenticated local connector using per-user DPAPI token; never stop unknown listeners. Validate protocol routing/build and token auth rejection; Windows registration/UAC requires user device verification.
+
+## SAP extreme detail modal and display — 2026-10-18
+
+Replace inline governing/tie paragraphs with a centered, scrollable table dialog retaining full row vectors and source metadata. Add live VI/EN controls without reload/data loss; SAP2000-API top heading. Normalize tiny negative zero only in two-decimal force display, never modify extraction/interpolation/extreme or export data. Verify existing browser flows, formatter examples, dialog close/Escape/mobile and language round-trip with identical dataset.

@@ -36,10 +36,13 @@ main{max-width:none;width:100%;padding:0 14px}.layout{grid-template-columns:minm
 
 .extreme-filters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.extreme-filters label{min-width:0}.extreme-filters select{max-width:none}.extreme table{font-size:13px}.extreme th,.extreme td{padding:8px 6px}.extreme td:nth-child(8){white-space:normal;max-width:190px;overflow-wrap:anywhere}.extreme td:last-child{white-space:normal;min-width:180px;max-width:330px}.extreme td details p{overflow-wrap:anywhere;line-height:1.45;font-size:13px}.extreme .interpolated{background:#fff4df}.extreme summary{cursor:pointer}
 @media(max-width:850px){.extreme-filters{grid-template-columns:minmax(0,1fr)}}
+.panel-topbar{display:flex;align-items:center;justify-content:space-between;gap:16px}.panel-topbar h1{font-size:34px;font-weight:800;margin:0 0 12px}.panel-language{display:flex;gap:4px}.panel-language button[aria-pressed=true]{background:var(--accent);color:white}.panel-subtitle{font-size:23px;font-weight:600}
+#extreme-dialog{width:min(1500px,calc(100% - 32px));max-height:calc(100dvh - 32px);padding:22px;border:1px solid var(--edge);border-radius:14px;color:inherit;background:#fff;margin:auto;overflow:auto}#extreme-dialog::backdrop{background:#102b3cb3}#extreme-dialog .dialog-header{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:12px}#extreme-dialog h2{margin:0}#extreme-dialog .table-wrap{max-height:60dvh}#extreme-dialog td:nth-child(3){white-space:normal;min-width:200px;max-width:340px;overflow-wrap:anywhere}#extreme-dialog th{z-index:1}#extreme-dialog .dialog-meta{white-space:pre-wrap;line-height:1.6}#extreme-dialog button:focus-visible{outline:3px solid #55a8d4;outline-offset:3px}.extreme td:last-child{min-width:130px}.extreme td:last-child button{white-space:nowrap}
+@media(max-width:600px){.panel-topbar h1{font-size:29px}#extreme-dialog{padding:14px;width:calc(100% - 20px)}#extreme-dialog h2{font-size:20px}}
 </style>
 </head>
 <body><main>
-<header><p id="sap-compatibility" style="font-weight:700;margin:0 0 8px">Compatible with SAP2000v26.2.0</p><div class="badge">API_IF_SAP26.2.0_V1 · SAP2000 26.2.0 · .NET / PID · build 2026.10.17.14 · Panel 5 bước</div><h1>Xuất nội lực cấu kiện</h1><p class="muted">Chọn cấu kiện trong SAP2000, sau đó quay lại đây để lấy nội lực. Đơn vị: kN · m · kN.m; giữ nguyên trục local SAP2000.</p></header>
+<header><div class="panel-topbar"><h1 id="sap-title">SAP2000-API</h1><div class="panel-language" role="group" aria-label="VI / EN"><button id="lang-vi" type="button">VI</button><button id="lang-en" type="button">EN</button></div></div><p id="sap-compatibility" style="font-weight:700;margin:0 0 8px">Compatible with SAP2000v26.2.0</p><div class="badge">API_IF_SAP26.2.0_V1 · SAP2000 26.2.0 · .NET / PID · build 2026.10.18.19 · Panel 5 bước</div><p class="panel-subtitle">Xuất nội lực cấu kiện</p><p class="muted">Chọn cấu kiện trong SAP2000, sau đó quay lại đây để lấy nội lực. Đơn vị: kN · m · kN.m; giữ nguyên trục local SAP2000.</p></header>
 <div id="status" class="status" role="status" aria-live="polite">Đang chờ kết nối SAP2000 trên máy này.</div>
 <fieldset id="controls" aria-label="Bảng xuất nội lực SAP2000"><div class="layout">
 <section class="card connection" id="connection-panel"><h2>1. Kết nối model</h2>
@@ -79,21 +82,50 @@ main{max-width:none;width:100%;padding:0 14px}.layout{grid-template-columns:minm
 <div class="table-wrap"><table><thead><tr><th>Nhóm</th><th>Thành phần</th><th>Cực trị</th><th>Giá trị có dấu<br><small>(kN / kN·m)</small></th><th>|Giá trị|<br><small>(kN / kN·m)</small></th><th>Frame</th><th>Tiết diện</th><th>Case / Combo</th><th>Step</th><th>Element</th><th>x local 1<br><small>(m)</small></th><th>x/L</th><th>Vị trí</th><th>Nguồn</th><th>Bộ lực / Đồng hạng</th></tr></thead><tbody id="extreme-results"></tbody></table></div>
 <div class="actions"><button id="extreme-prev">Trước</button><span id="extreme-page">0 dòng</span><button id="extreme-next">Sau</button></div></section>
 </div><section class="card help" id="help-panel"><details><summary>Hướng dẫn thao tác</summary><ol><li>Mở và lưu model SAP2000 26.2.0; chạy phân tích.</li><li>Kết nối model, kiểm tra tên file, chọn Output Cases.</li><li>Chọn frame objects trong SAP2000.</li><li>Quay lại panel và bấm “Lấy nội lực cấu kiện đang chọn”.</li><li>Tải JSON/CSV hoặc tìm extreme case.</li></ol><p class="muted">Panel này chạy trên máy của bạn. Chưa gửi dữ liệu lên cloud, chưa tính Cb và chưa gán/chỉnh sửa model.</p></details></section></fieldset>
+<dialog id="extreme-dialog" aria-labelledby="extreme-dialog-title"><div class="dialog-header"><h2 id="extreme-dialog-title">Bộ lực tại dòng chi phối</h2><button id="extreme-dialog-close" type="button" autofocus>Đóng</button></div><p id="extreme-dialog-meta" class="dialog-meta"></p><div class="table-wrap"><table><thead><tr><th>Frame</th><th>Tiết diện</th><th>Case / Combo</th><th>Step</th><th>Element</th><th>x local 1<br><small>(m)</small></th><th>x/L</th><th>Vị trí</th><th>P<br><small>(kN)</small></th><th>V2<br><small>(kN)</small></th><th>V3<br><small>(kN)</small></th><th>T<br><small>(kN·m)</small></th><th>M2<br><small>(kN·m)</small></th><th>M3<br><small>(kN·m)</small></th><th>Nguồn</th><th>Đồng thời</th></tr></thead><tbody id="extreme-dialog-results"></tbody></table></div><p id="extreme-dialog-note" class="result-note muted"></p></dialog>
 <script>
 'use strict';
 const connectorBase=document.querySelector('meta[name=sap2000-connector]')?.content||'';
 const prefix=connectorBase+'/API_IF_SAP26.2.0_V1';
 
-function applyPanelLanguage(){
- const lang=new URLSearchParams(location.search).get('lang')==='en'?'en':'vi';document.documentElement.lang=lang;
+let panelLanguage=new URLSearchParams(location.search).get('lang')==='en'?'en':'vi';
+const staticTranslations=[];
+const staticAttributes=[];
+const ui=(vi,en)=>panelLanguage==='en'?en:vi;
+function applyPanelLanguage(lang=panelLanguage){
+ panelLanguage=lang;document.documentElement.lang=lang;
  document.title=lang==='en'?'SAP2000 · Internal forces':'SAP2000 · Xuất nội lực';
  const words={"Xuất nội lực cấu kiện": "Export member forces", "1. Kết nối model": "1. Connect model", "2. Output Cases & Combos": "2. Output Cases & Combos", "3. Cấu kiện đã chọn": "3. Selected members", "4. Kết quả nội lực": "4. Internal forces", "5. Extreme Cases & Combos": "5. Extreme Cases & Combos", "Mã kết nối local": "Local connector token", "Quét SAP2000 đang mở": "Scan running SAP2000", "File SAP2000 / PID": "SAP2000 file / PID", "Cấu hình DLL nâng cao": "Advanced DLL settings", "Đường dẫn SAP2000v1.dll": "SAP2000v1.dll path", "Kết nối / Làm mới model": "Connect / Refresh model", "PID đã kết nối": "Connected PID", "File đang hoạt động": "Active model file", "Trạng thái": "Status", "Tìm case / combination": "Find case / combination", "Loại output": "Output type", "Chọn các mục đang hiển thị": "Select visible items", "Bỏ chọn tất cả": "Clear all selections", "Chỉ Load Cases": "Load Cases only", "Chỉ Load Combinations": "Load Combinations only", "Đọc lựa chọn hiện tại": "Read current selection", "Lấy nội lực cấu kiện đang chọn": "Extract selected member forces", "Tải dữ liệu JSON": "Download raw JSON", "Xuất liên kết CSV": "Export connection CSV", "Tải vị trí / nội suy JSON": "Download positions / interpolation JSON", "Cấu kiện": "Member", "Tiết diện": "Section", "Vị trí dọc cấu kiện": "Member position", "Tất cả station": "All stations", "Cả 5 vị trí": "All five positions", "Loại section": "Section type", "Xóa bộ lọc": "Reset filters", "Tất cả": "All", "Section và thành phần Nonprismatic": "Sections and Nonprismatic segments", "Nhóm": "Group", "Thành phần": "Component", "Cực trị": "Extreme", "Giá trị có dấu": "Signed value", "|Giá trị|": "|Value|", "Vị trí": "Position", "Nguồn": "Source", "Bộ lực / Đồng hạng": "Force vector / Ties", "Tìm cực trị cho cấu kiện": "Member scope", "Theo từng cấu kiện": "Per member", "Theo toàn bộ nhóm đã xuất": "Entire exported group", "Vị trí khảo sát cực trị": "Extreme evaluation position", "Tất cả station gốc": "All original stations", "Thành phần nội lực": "Force component", "Tất cả: P, V2, V3, T, M2, M3": "All: P, V2, V3, T, M2, M3", "Xác định Min / Max / Absolute": "Find Min / Max / Absolute", "Tải extreme JSON": "Download extremes JSON", "Trước": "Previous", "Sau": "Next", "Hướng dẫn thao tác": "Quick instructions"};
  const labels=lang==='en'?words:{'2. Output Cases & Combos':'2. Load Cases & Tổ hợp tải','5. Extreme Cases & Combos':'5. Cực trị Case & Combo','Frame':'Cấu kiện','Element':'Phần tử'};
- {
-  const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT),nodes=[];let node;
-  while(node=walker.nextNode())if(!['SCRIPT','STYLE'].includes(node.parentElement?.tagName))nodes.push(node);
-  for(const text of nodes){const key=text.textContent.trim();if(labels[key])text.textContent=text.textContent.replace(key,labels[key])}
+ Object.assign(words,{'Frame':'Member','Element':'Element','Đóng':'Close','Bộ lực tại dòng chi phối':'Governing force vectors','Đồng thời':'Concurrency',
+ 'Chọn cấu kiện trong SAP2000, sau đó quay lại đây để lấy nội lực. Đơn vị: kN · m · kN.m; giữ nguyên trục local SAP2000.':'Select members in SAP2000, then return here to extract forces. Units: kN · m · kN·m; SAP2000 local axes are preserved.',
+ 'Quét các phiên SAP2000 đang mở và chọn đúng file model muốn xuất nội lực.':'Scan running SAP2000 instances and select the model to export.',
+ 'Không cần tìm hoặc nhập PID thủ công.':'No manual PID lookup is needed.',
+ 'Quay sang SAP2000 và chọn một hoặc nhiều frame objects.':'Select one or more frame objects in SAP2000.',
+ 'Lệnh xuất đọc lại lựa chọn SAP2000 tại thời điểm bấm. Không thao tác model khi đang xuất.':'Extraction reads the current SAP2000 selection. Do not modify the model while exporting.',
+ 'Bộ lọc chỉ áp dụng cho bảng này. JSON, CSV liên kết và mục 5 dùng toàn bộ dữ liệu đã xuất.':'These filters apply only to this table. JSON, connection CSV and section 5 use the entire exported dataset.',
+ 'Envelope vẫn hiển thị trong bảng và tải được bằng JSON. CSV liên kết chỉ nhận bộ lực đồng thời; các dòng envelope/modal hoặc Max/Min không dùng làm bộ lực thiết kế liên kết.':'Envelope results remain visible and downloadable as JSON. Connection CSV accepts concurrent force vectors only; envelope/modal or Max/Min rows are not connection design vectors.',
+ 'Mỗi cực trị có bộ 6 lực tại dòng chi phối riêng. Không ghép các cực trị P/M2/M3/V2/V3 từ các dòng khác nhau thành một bộ lực liên kết. Bộ lọc mục 4 không tác động mục 5.':'Each extreme retains all six forces from its own governing row. Do not combine component extremes from different rows into one connection vector. Section 4 filters do not affect section 5.',
+ 'x theo trục local 1, từ End I (x = 0) đến End J (x = L). Giữ dấu nội lực SAP2000. Mốc chia tư có thể nội suy tuyến tính; mốc theo toàn frame, chưa phải đoạn Lb.':'x follows local axis 1 from End I (x = 0) to End J (x = L). SAP2000 force signs are preserved. Quarter points may use linear interpolation over the full member, not an Lb segment.',
+ 'Mốc vị trí theo toàn chiều dài I–J, chưa phải đoạn không giằng Lb. Thiếu mốc chia tư sẽ nội suy tuyến tính có giữ dấu, từ hai station kẹp mốc trong cùng element/case/step; không ngoại suy. Bảng rút gọn số hiển thị; JSON giữ đầy đủ độ chính xác.':'Positions use the full I–J length, not the unbraced length Lb. Missing quarter points use signed linear interpolation between bracketing stations in the same element/case/step, without extrapolation. Display rounding does not change JSON precision.',
+ 'Với panel web, dùng launcher --web-url để mở trang có mã kết nối. Mã chỉ giữ trong phiên tab này; được khôi phục khi tải lại trang.':'For the web panel, open it through the launcher to receive a token. The token is retained only in this tab session.',
+ 'Chọn DLL ở thư mục cài đặt chính. Các phiên SAP2000 được đọc theo từng PID, không cần đăng ký COM Helper.':'Choose the DLL in the main installation directory. Instances are read by PID; COM Helper registration is not required.',
+ 'Mở và lưu model SAP2000 26.2.0; chạy phân tích.':'Open and save a SAP2000 26.2.0 model, then run analysis.',
+ 'Kết nối model, kiểm tra tên file, chọn Output Cases.':'Connect the model, check the filename and select Output Cases.',
+ 'Chọn frame objects trong SAP2000.':'Select frame objects in SAP2000.',
+ 'Quay lại panel và bấm “Lấy nội lực cấu kiện đang chọn”.':'Return to the panel and click “Extract selected member forces”.',
+ 'Tải JSON/CSV hoặc tìm extreme case.':'Download JSON/CSV or find extreme cases.',
+ 'Panel này chạy trên máy của bạn. Chưa gửi dữ liệu lên cloud, chưa tính Cb và chưa gán/chỉnh sửa model.':'This panel communicates with your local connector. No model data is uploaded to the cloud; Cb is not calculated and the model is not modified.',
+ 'Đang chờ kết nối SAP2000 trên máy này.':'Waiting for SAP2000 on this computer.',
+ 'Chưa có dữ liệu xuất.':'No exported data yet.','Chưa đọc lựa chọn.':'Selection not read yet.','Chưa kết nối':'Not connected','Chưa xác định':'Unknown','Chưa đọc section.':'Sections not read yet.',
+ 'Chọn mục đầu, giữ Shift rồi bấm mục cuối để chọn cả dải đang hiển thị. Giữ Shift và bỏ chọn để bỏ cả dải.':'Select the first item, hold Shift and click the last item to select the visible range. Shift-uncheck clears a range.'});
+ if(!staticTranslations.length){for(const element of document.querySelectorAll('[placeholder]'))staticAttributes.push([element,element.getAttribute('placeholder')]);const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);let node;
+  while(node=walker.nextNode())if(!['SCRIPT','STYLE'].includes(node.parentElement?.tagName))staticTranslations.push([node,node.textContent]);
  }
+ for(const [node,original] of staticTranslations){if(!node.isConnected)continue;const key=original.trim(),label=(lang==='en'?words:labels)[key];node.textContent=label?original.replace(key,label):original}
+ for(const [element,original] of staticAttributes)element.setAttribute('placeholder',lang==='en'?({'Nhập tên…':'Enter name…','Token của connector':'Connector token'}[original]||original):original);
+ for(const language of ['vi','en'])document.getElementById('lang-'+language).setAttribute('aria-pressed',String(language===lang));
+
 }
 
 const $=id=>document.getElementById(id);
@@ -130,7 +162,7 @@ function visibleCases(){const q=$('search').value.toLowerCase();return cases.fil
 function renderCases(){const box=$('cases');box.replaceChildren();$('case-preview').textContent='';for(const c of visibleCases()){
  const key=caseKey(c),label=document.createElement('label');const missing=c.results_available===false||dataset?.missing_results?.some(r=>r.output_case===c.name&&r.case_kind===c.kind);label.className='case'+(missing?' unavailable':'');label.title=c.name;label.dataset.caseKey=key;label.classList.toggle('checked',chosen.has(key));
  const input=document.createElement('input');input.type='checkbox';input.checked=chosen.has(key);input.setAttribute('aria-label',(c.kind==='case'?'Case: ':'Combo: ')+c.name);
- const span=document.createElement('span');span.textContent=c.name+' · '+(c.kind==='case'?'Case':'Combination')+(missing?' · Không có kết quả (none)':'');
+ const span=document.createElement('span');span.textContent=c.name+' · '+(c.kind==='case'?'Case':'Combination')+(missing?ui(' · Không có kết quả (none)',' · No results (none)'):'');
  input.addEventListener('click',event=>{const visible=visibleCases(),index=visible.findIndex(item=>caseKey(item)===key),anchor=visible.findIndex(item=>caseKey(item)===caseAnchor),checked=input.checked;
  const range=event.shiftKey&&anchor>=0?visible.slice(Math.min(anchor,index),Math.max(anchor,index)+1):[c];
  for(const item of range)checked?chosen.add(caseKey(item)):chosen.delete(caseKey(item));
@@ -141,7 +173,7 @@ function renderCases(){const box=$('cases');box.replaceChildren();$('case-previe
  label.addEventListener('mouseleave',()=>{if(!label.contains(document.activeElement))$('case-preview').textContent=''});
  label.addEventListener('focusout',event=>{if(!label.contains(event.relatedTarget))$('case-preview').textContent=''});
  label.append(input,span);box.append(label)}updateCaseCount();}
-function updateCaseCount(){$('case-count').textContent=chosen.size+' / '+cases.length+' mục được chọn · '+visibleCases().length+' mục hiển thị';syncButtons()}
+function updateCaseCount(){$('case-count').textContent=chosen.size+' / '+cases.length+ui(' mục được chọn · ',' selected · ')+visibleCases().length+ui(' mục hiển thị',' visible');syncButtons()}
 function tableRow(body,values){const tr=document.createElement('tr');for(const value of values){const td=document.createElement('td');td.textContent=String(value);tr.append(td)}body.append(tr)}
 const resultFilterIds=['filter-frame','filter-section','filter-position','filter-case','filter-kind','filter-step'];
 function memberLookup(){return new Map((dataset?.members||[]).map(m=>[m.frame,m]))}
@@ -162,8 +194,8 @@ function populateFilters(){resetFilters();const rows=dataset?.rows||[],members=m
  'filter-frame':rows.map(r=>[r.frame,r.frame]),
  'filter-section':rows.filter(r=>members.has(r.frame)).map(r=>[members.get(r.frame).section,members.get(r.frame).section]),
  'filter-case':rows.map(r=>[JSON.stringify([r.case_kind,r.output_case]),r.output_case+' · '+(r.case_kind==='case'?'Case':'Combo')]),
- 'filter-step':rows.map(r=>[JSON.stringify(r.step_type),r.step_type||'(Không có Step)'])};
- for(const [id,pairs] of Object.entries(values)){const select=$(id);select.replaceChildren();const all=document.createElement('option');all.value='';all.textContent='Tất cả';select.append(all);
+ 'filter-step':rows.map(r=>[JSON.stringify(r.step_type),r.step_type||ui('(Không có Step)','(No Step)')])};
+ for(const [id,pairs] of Object.entries(values)){const select=$(id);select.replaceChildren();const all=document.createElement('option');all.value='';all.textContent=ui('Tất cả','All');select.append(all);
  for(const [value,label] of [...new Map(pairs)].sort((a,b)=>a[1].localeCompare(b[1],undefined,{numeric:true}))){const option=document.createElement('option');option.value=value;option.textContent=label;select.append(option)}}
 }
 function sampleGroup(row){return JSON.stringify([row.frame,row.case_kind,row.output_case,row.step_type,row.step_num])}
@@ -172,25 +204,26 @@ function renderPositionNotice(){const box=$('position-notice');box.textContent='
  const groups=new Set(filteredRows(true).map(sampleGroup));
  const samples=positionData.data.filter(s=>groups.has(sampleGroup(s))&&(selected==='five'||s.fraction===Number(selected)));
  const missing=samples.filter(s=>s.method==='unavailable'),linear=samples.filter(s=>s.method==='linear').length;
- box.textContent='Mốc có dữ liệu: '+(samples.length-missing.length)+' / '+samples.length+'; nội suy tuyến tính: '+linear+'. Giữ nguyên dấu âm/dương; chưa tính Cb.';
- if(missing.length){box.textContent+=' Thiếu '+missing.length+' mốc: '+missing.slice(0,6).map(s=>'Frame '+s.frame+' · '+s.output_case+' · '+(s.step_type||'Step')+' '+s.step_num+' · '+positionMarks.find(m=>m[1]===s.fraction)[2]+': '+s.reason).join('; ')+(missing.length>6?'; …':'');box.classList.add('position-warning')}
+ box.textContent=ui('Mốc có dữ liệu: ','Available positions: ')+(samples.length-missing.length)+' / '+samples.length+ui('; nội suy tuyến tính: ','; linearly interpolated: ')+linear+ui('. Giữ nguyên dấu âm/dương; chưa tính Cb.','. Signs are preserved; Cb is not calculated.');
+ if(missing.length){box.textContent+=ui(' Thiếu ',' Missing ')+missing.length+ui(' mốc: ',' positions: ')+missing.slice(0,6).map(s=>'Frame '+s.frame+' · '+s.output_case+' · '+(s.step_type||'Step')+' '+s.step_num+' · '+positionMarks.find(m=>m[1]===s.fraction)[2]+': '+s.reason).join('; ')+(missing.length>6?'; …':'');box.classList.add('position-warning')}
 }
-function displayForce(value){return Number.isFinite(value)?value.toFixed(2):String(value)}
+const forceFormatter=new Intl.NumberFormat('en-US',{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:false});
+function displayForce(value){if(!Number.isFinite(value))return String(value);const text=forceFormatter.format(value);return text==='-0.00'?'0.00':text}
 function displayNumber(value){return Number.isFinite(value)?Number(value.toPrecision(7)).toString():String(value)}
 function variationLabel(code){return ({1:'Linear',2:'Parabolic',3:'Cubic'})[code]||('Mã '+code)}
 function renderMemberInfo(members){const box=$('member-info');box.replaceChildren();if(!members?.length){box.textContent='Chưa đọc section.';return}
  const list=document.createElement('ul');for(const m of members){const item=document.createElement('li');item.textContent=m.frame+' · '+m.section+' · '+m.section_type+(m.length!=null?' · L='+m.length+' '+(m.units_code===6?'m':'(eUnits '+m.units_code+')'):'')+(m.auto_select_list?' · Auto-select: '+m.auto_select_list:'');
- if(m.components?.length){const parts=document.createElement('ul');for(const part of m.components){const li=document.createElement('li');li.textContent='Đoạn '+part.index+': '+part.start_section+' ('+part.start_type+') → '+part.end_section+' ('+part.end_type+'); '+(part.length_type===1?'Tỷ lệ: ':'Chiều dài: ')+part.length+(part.length_type===1?'':' '+({1:'in',2:'ft',3:'in',4:'ft',5:'mm',6:'m',7:'mm',8:'m',9:'mm',10:'m',11:'mm',12:'m',13:'cm',14:'cm',15:'cm',16:'cm'}[m.units_code]||'(eUnits '+m.units_code+')'))+'; EI33='+variationLabel(part.ei33_variation)+'; EI22='+variationLabel(part.ei22_variation);parts.append(li)}item.append(parts)}list.append(item)}box.append(list)
+ if(m.components?.length){const parts=document.createElement('ul');for(const part of m.components){const li=document.createElement('li');li.textContent=ui('Đoạn ','Segment ')+part.index+': '+part.start_section+' ('+part.start_type+') → '+part.end_section+' ('+part.end_type+'); '+(part.length_type===1?ui('Tỷ lệ: ','Relative length: '):ui('Chiều dài: ','Length: '))+part.length+(part.length_type===1?'':' '+({1:'in',2:'ft',3:'in',4:'ft',5:'mm',6:'m',7:'mm',8:'m',9:'mm',10:'m',11:'mm',12:'m',13:'cm',14:'cm',15:'cm',16:'cm'}[m.units_code]||'(eUnits '+m.units_code+')'))+'; EI33='+variationLabel(part.ei33_variation)+'; EI22='+variationLabel(part.ei22_variation);parts.append(li)}item.append(parts)}list.append(item)}box.append(list)
 }
 for(const id of resultFilterIds)$(id).onchange=()=>{page=0;renderResults()};
 $('reset-filters').onclick=()=>{resetFilters();renderResults()};
-function renderResults(){renderPositionNotice();$('results').replaceChildren();$('missing-results').textContent=dataset?.missing_results?.length?'Không có kết quả (none): '+dataset.missing_results.map(r=>r.output_case+(r.frame?' / Frame '+r.frame:'')+' — '+r.reason).join('; '):'';if(!dataset){$('snapshot').textContent='Chưa có dữ liệu xuất.';$('page').textContent='0 dòng';return}
+function renderResults(){renderPositionNotice();$('results').replaceChildren();$('missing-results').textContent=dataset?.missing_results?.length?ui('Không có kết quả (none): ','No results (none): ')+dataset.missing_results.map(r=>r.output_case+(r.frame?' / Frame '+r.frame:'')+' — '+r.reason).join('; '):'';if(!dataset){$('snapshot').textContent=ui('Chưa có dữ liệu xuất.','No exported data yet.');$('page').textContent='0 dòng';return}
  const rows=filteredRows(),members=memberLookup(),start=page*pageSize;
  const samples=new Map((positionData?.data||[]).flatMap(s=>s.rows.map(r=>[r.record_id,s])));
- for(const r of rows.slice(start,start+pageSize)){const sample=$('filter-position').value?samples.get(r.record_id):null;tableRow($('results'),[r.frame,members.get(r.frame)?.section||'—',members.get(r.frame)?.section_type||'—',r.element,displayNumber(r.station),rowPositions(r,members.get(r.frame)).map(m=>m[2]).join(', ')||'—',r.output_case,r.step_type+' '+r.step_num,...['P','V2','V3','T','M2','M3'].map(c=>displayForce(r[c])),sample?.method==='linear'?'Nội suy':'SAP2000']);
+ for(const r of rows.slice(start,start+pageSize)){const sample=$('filter-position').value?samples.get(r.record_id):null;tableRow($('results'),[r.frame,members.get(r.frame)?.section||'—',members.get(r.frame)?.section_type||'—',r.element,displayNumber(r.station),rowPositions(r,members.get(r.frame)).map(m=>m[2]).join(', ')||'—',r.output_case,r.step_type+' '+r.step_num,...['P','V2','V3','T','M2','M3'].map(c=>displayForce(r[c])),sample?.method==='linear'?ui('Nội suy','Interpolated'):'SAP2000']);
  const tr=$('results').lastElementChild;tr.classList.toggle('interpolated',sample?.method==='linear');if(sample?.method==='linear')tr.title='Nội suy tuyến tính từ record '+sample.source_record_ids.join(' → ')+'; trọng số '+sample.weight;}
 
- $('snapshot').textContent=dataset.model+' · '+rows.length+' dòng · '+new Date(dataset.extracted_at).toLocaleString('vi-VN')+' · kN / m / kN.m';$('page').textContent=rows.length?(start+1)+'–'+Math.min(start+pageSize,rows.length)+' / '+rows.length+' dòng (gốc SAP '+dataset.rows.length+')':'0 dòng phù hợp / tổng '+dataset.rows.length;syncButtons();}
+ $('snapshot').textContent=dataset.model+' · '+rows.length+ui(' dòng · ',' rows · ')+new Date(dataset.extracted_at).toLocaleString(panelLanguage==='en'?'en-GB':'vi-VN')+' · kN / m / kN.m';$('page').textContent=rows.length?(start+1)+'–'+Math.min(start+pageSize,rows.length)+' / '+rows.length+ui(' dòng (gốc SAP ',' rows (original SAP ')+dataset.rows.length+')':ui('0 dòng phù hợp / tổng ','0 matching rows / total ')+dataset.rows.length;syncButtons();}
 function clearResults(){dataset=null;positionData=null;page=0;clearExtremes();populateFilters();renderMemberInfo([]);renderResults();renderCases()}
 function download(content,name,type='application/json'){const blob=content instanceof Blob?content:new Blob([JSON.stringify(content,null,2)],{type});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
 function selectedInstance(){return instances.find(item=>String(item.pid)===$('instance').value&&item.available)}
@@ -199,60 +232,76 @@ function readToken(){token=$('token').value.trim()||token;if(!token)throw new Er
 async function scanInstances(preferredPid=null){
  readToken();const previous=preferredPid||$('instance').value;resetModel();instances=[];$('instance-summary').textContent='Chưa nhận được danh sách model mới.';$('instance').replaceChildren();$('instance-errors').replaceChildren();syncButtons();
  await api('/connection',{pid:null,dll_path:$('dll').value.trim()},false,'PUT');
- message('Đang quét PID và đọc tên các model SAP2000…');const result=await api('/instances');instances=result.data;
+ message(ui('Đang quét PID và đọc tên các model SAP2000…','Scanning PIDs and SAP2000 model names…'));const result=await api('/instances');instances=result.data;
  const empty=document.createElement('option');empty.value='';empty.textContent=instances.length?'Chọn file SAP2000 muốn kết nối…':'Không tìm thấy SAP2000 đang mở';$('instance').append(empty);
  for(const item of instances){const option=document.createElement('option');option.value=String(item.pid);option.disabled=!item.available;option.textContent=(item.filename||'Không đọc được model')+' — PID '+item.pid+(item.available?' — '+item.model:' — Không thể kết nối');option.title=item.model||item.error||'';$('instance').append(option);if(!item.available){const li=document.createElement('li');li.textContent='PID '+item.pid+': '+(item.error||'Không đọc được model');$('instance-errors').append(li)}}
  const previousItem=instances.find(item=>String(item.pid)===String(previous)&&item.available);
  if(previousItem)$('instance').value=String(previousItem.pid);else if(!previous&&instances.length===1&&instances[0].available)$('instance').value=String(instances[0].pid);
  $('instance-summary').textContent=instances.length+' phiên SAP2000; '+instances.filter(item=>item.available).length+' model có thể chọn.';
- message(instances.length?'Đã quét xong. Chọn đúng file rồi bấm Kết nối / Làm mới model.':'Chưa có SAP2000 đang mở. Mở SAP2000 rồi bấm Quét SAP2000 đang mở.');syncButtons();
+ message(instances.length?ui('Đã quét xong. Chọn đúng file rồi bấm Kết nối / Làm mới model.','Scan complete. Select the file, then click Connect / Refresh model.'):ui('Chưa có SAP2000 đang mở. Mở SAP2000 rồi bấm Quét SAP2000 đang mở.','No running SAP2000 found. Open SAP2000, then scan again.'));syncButtons();
 }
 $('scan').onclick=()=>run(()=>scanInstances());
-$('instance').onchange=()=>{resetModel();message(selectedInstance()?'Đã chọn file. Bấm Kết nối / Làm mới model để đọc Output Cases.':'Chọn một model có thể kết nối trong danh sách.');syncButtons()};
+$('instance').onchange=()=>{resetModel();message(selectedInstance()?ui('Đã chọn file. Bấm Kết nối / Làm mới model để đọc Output Cases.','File selected. Click Connect / Refresh model to read Output Cases.'):ui('Chọn một model có thể kết nối trong danh sách.','Select an available model from the list.'));syncButtons()};
 $('connect').onclick=()=>run(async()=>{
  readToken();const selected=selectedInstance();if(!selected)throw new Error('Quét SAP2000 và chọn một file model trước.');resetModel();
  await api('/connection',{pid:selected.pid,expected_model:selected.model,dll_path:$('dll').value.trim()},false,'PUT');
  message('Đang kết nối '+selected.filename+' — PID '+selected.pid+'…');const info=await api('/model');if(info.model!==selected.model||info.pid!==selected.pid)throw new Error('Phiên hoặc file SAP2000 đã đổi. Quét lại danh sách rồi chọn đúng model.');
  const output=await api('/output-cases');model=info;cases=output.data;
- $('detected-pid').textContent=info.pid;$('filename').textContent=info.filename||'Model chưa lưu';$('modelpath').textContent=info.model;$('modelstate').textContent='SAP2000 '+info.sap2000_version+' · '+(info.locked?'Model đang khóa':'Model chưa khóa — cần chạy analysis');renderCases();message('Đã kết nối đúng file và PID đã chọn. Chọn Output Cases để tiếp tục.');
+ $('detected-pid').textContent=info.pid;$('filename').textContent=info.filename||'Model chưa lưu';$('modelpath').textContent=info.model;$('modelstate').textContent='SAP2000 '+info.sap2000_version+' · '+(info.locked?'Model đang khóa':'Model chưa khóa — cần chạy analysis');renderCases();message(ui('Đã kết nối đúng file và PID đã chọn. Chọn Output Cases để tiếp tục.','Connected to the selected file and PID. Select Output Cases to continue.'));
 });
 function caseFilterChanged(){caseAnchor=null;$('cases').scrollLeft=0;renderCases()}
 $('search').oninput=caseFilterChanged;
 $('case-kind').onchange=caseFilterChanged;
 $('select-all').onclick=()=>{caseAnchor=null;for(const c of visibleCases())chosen.add(caseKey(c));renderCases()};
 $('select-none').onclick=()=>{caseAnchor=null;chosen.clear();renderCases()};
-$('selection').onclick=()=>run(async()=>{const result=await api('/selection');if(result.model!==model.model)throw new Error('Model đang hoạt động đã đổi. Bấm Kết nối / Làm mới model trước khi tiếp tục.');$('detected-pid').textContent=result.pid||'Không xác định';$('frames').textContent=result.frames.length+' frame: '+result.frames.join(', ');const metadata=await api('/members');if(metadata.model!==model.model||metadata.pid!==result.pid)throw new Error('Model đã đổi khi đọc section. Hãy kết nối lại.');renderMemberInfo(metadata.data);message(result.frames.length?'Đã đọc lựa chọn và section.':'Chưa chọn frame trong SAP2000.');});
+$('selection').onclick=()=>run(async()=>{const result=await api('/selection');if(result.model!==model.model)throw new Error('Model đang hoạt động đã đổi. Bấm Kết nối / Làm mới model trước khi tiếp tục.');$('detected-pid').textContent=result.pid||'Không xác định';$('frames').textContent=result.frames.length+' frame: '+result.frames.join(', ');const metadata=await api('/members');if(metadata.model!==model.model||metadata.pid!==result.pid)throw new Error('Model đã đổi khi đọc section. Hãy kết nối lại.');renderMemberInfo(metadata.data);message(result.frames.length?ui('Đã đọc lựa chọn và section.','Selection and sections read.'):ui('Chưa chọn frame trong SAP2000.','No frame selected in SAP2000.'));});
 $('extract').onclick=()=>run(async()=>{
- clearResults();message('Đang trích xuất nội lực… Giữ nguyên model cho đến khi hoàn tất.');
+ clearResults();message(ui('Đang trích xuất nội lực… Giữ nguyên model cho đến khi hoàn tất.','Extracting forces… Keep the model unchanged until completion.'));
  const output_cases=cases.filter(c=>chosen.has(caseKey(c))).map(c=>({name:c.name,kind:c.kind}));
- dataset=await api('/frame-forces',{output_cases,expected_model:model.model});page=0;populateFilters();renderMemberInfo(dataset.members);renderResults();renderCases();positionData=await api('/position-samples',{dataset});renderResults();const frames=[...new Set(dataset.rows.map(r=>r.frame))];$('frames').textContent=frames.length+' frame đã xuất: '+frames.join(', ');message('Đã xuất '+dataset.rows.length+' dòng nội lực từ '+frames.length+' cấu kiện; '+(dataset.missing_results?.length||0)+' mục không có kết quả (none).');
+ dataset=await api('/frame-forces',{output_cases,expected_model:model.model});page=0;populateFilters();renderMemberInfo(dataset.members);renderResults();renderCases();positionData=await api('/position-samples',{dataset});renderResults();const frames=[...new Set(dataset.rows.map(r=>r.frame))];$('frames').textContent=frames.length+ui(' frame đã xuất: ',' exported frames: ')+frames.join(', ');message('Đã xuất '+dataset.rows.length+' dòng nội lực từ '+frames.length+' cấu kiện; '+(dataset.missing_results?.length||0)+' mục không có kết quả (none).');
 });
 $('position-json').onclick=()=>download(positionData,'sap2000-position-samples.json');
 $('json').onclick=()=>download(dataset,'sap2000-forces.json');
-$('csv').onclick=()=>run(async()=>{const csv=await api('/connection-export',{dataset,format:'csv'},true);download(csv,'sap2000-connection-forces.csv','text/csv');message('Đã xuất CSV liên kết. Kiểm tra trục, dấu và vị trí mặt cắt trước khi nhập phần mềm đích.');});
+$('csv').onclick=()=>run(async()=>{const csv=await api('/connection-export',{dataset,format:'csv'},true);download(csv,'sap2000-connection-forces.csv','text/csv');message(ui('Đã xuất CSV liên kết. Kiểm tra trục, dấu và vị trí mặt cắt trước khi nhập phần mềm đích.','Connection CSV exported. Verify axes, signs and section position before using the target software.'));});
 $('prev').onclick=()=>{page--;renderResults()};$('next').onclick=()=>{page++;renderResults()};
-function clearExtremes(){extremeData=null;extremePage=0;$('extreme-results').replaceChildren();$('extreme-summary').textContent='';$('extreme-missing').textContent='';$('extreme-page').textContent='0 dòng';syncButtons()}
+let activeExtreme=null;
+function openExtremeDialog(item,type,governing){activeExtreme={item,type,governing};renderExtremeDialog();if(!$('extreme-dialog').open)$('extreme-dialog').showModal()}
+function renderExtremeDialog(){if(!activeExtreme)return;const {item,type,governing:g}=activeExtreme,members=memberLookup();
+ $('extreme-dialog-meta').textContent=item.component+' · '+({min:'Min',max:'Max',absolute:'|Max|'}[type])+' · '+g.tie_count+' '+ui('dòng đồng hạng','tied rows')+' · '+ui('Mỗi dòng giữ nguyên bộ 6 lực tại cùng vị trí/case/step.','Each row preserves all six forces at the same position/case/step.');
+ const body=$('extreme-dialog-results');body.replaceChildren();
+ for(let i=0;i<g.rows.length;i++){const r=g.rows[i],loc=g.locations[i];tableRow(body,[r.frame,members.get(r.frame)?.section||'—',r.output_case,r.step_type+' '+r.step_num,r.element,displayNumber(loc.station),loc.relative_station==null?'—':displayNumber(loc.relative_station),loc.position,...['P','V2','V3','T','M2','M3'].map(c=>displayForce(r[c])),loc.method==='linear'?ui('Nội suy','Interpolated'):'SAP2000',r.concurrency]);
+  if(loc.method==='linear')body.lastElementChild.title=ui('Nguồn: ','Sources: ')+loc.source_record_ids.join(' → ');
+ }
+ $('extreme-dialog-note').textContent=ui('Chỉ làm tròn khi hiển thị; JSON giữ nguyên giá trị gốc.','Display rounding only; JSON retains original values.')+(g.rows_truncated?' '+ui('Hiển thị 20 dòng đồng hạng đầu; JSON giữ đủ record_ids để đối chiếu.','Showing the first 20 tied rows; JSON retains all record_ids for verification.'):'');
+}
+$('extreme-dialog-close').onclick=()=>$('extreme-dialog').close();
+$('extreme-dialog').addEventListener('close',()=>{activeExtreme=null});
+function clearExtremes(){if($('extreme-dialog').open)$('extreme-dialog').close();activeExtreme=null;extremeData=null;extremePage=0;$('extreme-results').replaceChildren();$('extreme-summary').textContent='';$('extreme-missing').textContent='';$('extreme-page').textContent='0 dòng';syncButtons()}
 function renderExtremes(){const body=$('extreme-results');body.replaceChildren();if(!extremeData)return;
  const members=new Map((dataset?.members||[]).map(m=>[m.frame,m]));
  const entries=extremeData.data.flatMap(item=>['min','max','absolute'].map(type=>({item,type,governing:item[type]})));
  for(const {item,type,governing:g} of entries.slice(extremePage*pageSize,(extremePage+1)*pageSize)){
   const row=g.rows[0],loc=g.locations[0];
-  tableRow(body,[extremeData.scope==='global'?'Toàn nhóm':item.group,item.component,{min:'Min',max:'Max',absolute:'|Max|'}[type],displayForce(row[item.component]),displayForce(Math.abs(row[item.component])),row.frame,members.get(row.frame)?.section||'—',row.output_case,row.step_type+' '+row.step_num,row.element,displayNumber(loc.station),loc.relative_station==null?'—':displayNumber(loc.relative_station),loc.position,loc.method==='linear'?'Nội suy':'SAP2000','']);
-  const tr=body.lastElementChild;tr.classList.toggle('interpolated',loc.method==='linear');const cell=tr.lastElementChild,details=document.createElement('details'),summary=document.createElement('summary');summary.textContent=g.tie_count+' dòng · xem bộ lực';details.append(summary);
-  for(let i=0;i<g.rows.length;i++){const r=g.rows[i],l=g.locations[i],p=document.createElement('p');p.textContent='Frame '+r.frame+' · Section '+(members.get(r.frame)?.section||'—')+' · '+r.output_case+' ('+r.case_kind+') · '+r.step_type+' '+r.step_num+' · Element '+r.element+' · x='+displayNumber(l.station)+' m · '+l.position+' · '+(l.method==='linear'?'Nội suy':'SAP2000')+' · '+r.concurrency+'; '+['P','V2','V3','T','M2','M3'].map(c=>c+'='+displayForce(r[c])+' '+(['P','V2','V3'].includes(c)?'kN':'kN·m')).join('; ')+(l.method==='linear'?'; nguồn '+l.source_record_ids.join(' → '):'');details.append(p)}
-  if(g.rows_truncated){const p=document.createElement('p');p.textContent='Hiển thị 20 dòng đồng hạng đầu. JSON giữ đủ record_ids để đối chiếu dữ liệu gốc.';details.append(p)}cell.append(details);
+  tableRow(body,[extremeData.scope==='global'?ui('Toàn nhóm','Entire group'):item.group,item.component,{min:'Min',max:'Max',absolute:'|Max|'}[type],displayForce(row[item.component]),displayForce(Math.abs(row[item.component])),row.frame,members.get(row.frame)?.section||'—',row.output_case,row.step_type+' '+row.step_num,row.element,displayNumber(loc.station),loc.relative_station==null?'—':displayNumber(loc.relative_station),loc.position,loc.method==='linear'?ui('Nội suy','Interpolated'):'SAP2000','']);
+  const tr=body.lastElementChild;tr.classList.toggle('interpolated',loc.method==='linear');const button=document.createElement('button');button.type='button';button.textContent=ui('Xem bộ lực','View forces')+' ('+g.tie_count+')';button.onclick=()=>openExtremeDialog(item,type,g);tr.lastElementChild.append(button);
+
  }
- const total=entries.length,start=extremePage*pageSize;$('extreme-page').textContent=total?(start+1)+'–'+Math.min(start+pageSize,total)+' / '+total+' dòng':'0 dòng';
- $('extreme-summary').textContent=extremeData.data.length+' nhóm/thành phần · '+$('scope').selectedOptions[0].textContent+' · '+$('extreme-position').selectedOptions[0].textContent;
+ const total=entries.length,start=extremePage*pageSize;$('extreme-page').textContent=total?(start+1)+'–'+Math.min(start+pageSize,total)+' / '+total+ui(' dòng',' rows'):ui('0 dòng','0 rows');
+ $('extreme-summary').textContent=extremeData.data.length+ui(' nhóm/thành phần · ',' groups/components · ')+$('scope').selectedOptions[0].textContent+' · '+$('extreme-position').selectedOptions[0].textContent;
  const missing=extremeData.unavailable_positions||[];$('extreme-missing').textContent=missing.length?missing.length+' mốc không đủ dữ liệu: '+missing.slice(0,6).map(s=>'Frame '+s.frame+' · '+s.output_case+' · '+s.step_type+' '+s.step_num+' · x/L='+s.fraction+': '+s.reason).join('; ')+(missing.length>6?'; …':''):'';
  syncButtons();
 }
 for(const id of ['scope','extreme-position','extreme-component'])$(id).onchange=clearExtremes;
 $('extreme-prev').onclick=()=>{extremePage--;renderExtremes()};$('extreme-next').onclick=()=>{extremePage++;renderExtremes()};
-$('extremes').onclick=()=>run(async()=>{clearExtremes();message('Đang xác định extreme case…');const component=$('extreme-component').value;
+$('extremes').onclick=()=>run(async()=>{clearExtremes();message(ui('Đang xác định extreme case…','Finding extreme cases…'));const component=$('extreme-component').value;
  extremeData=await api('/extremes',{dataset,scope:$('scope').value,position:$('extreme-position').value,...(component?{components:[component]}:{})});renderExtremes();
- message(extremeData.data.length?'Đã xác định cực trị và vị trí local tại từng dòng chi phối. Mở bộ lực để xem Case/Combo và các dòng đồng hạng.':'Không có dữ liệu tại vị trí khảo sát. Xem lý do và tải JSON để kiểm tra.');});
+ message(extremeData.data.length?ui('Đã xác định cực trị và vị trí local tại từng dòng chi phối. Mở bộ lực để xem Case/Combo và các dòng đồng hạng.','Extremes and local positions found. Open View forces for governing Case/Combo and tied rows.'):ui('Không có dữ liệu tại vị trí khảo sát. Xem lý do và tải JSON để kiểm tra.','No data at the evaluation position. Review the reasons and download JSON to verify.'));});
 $('extreme-json').onclick=()=>download(extremeData,'sap2000-extremes.json');
+for(const language of ['vi','en'])$('lang-'+language).onclick=()=>{
+ const url=new URL(location.href);url.searchParams.set('lang',language);history.replaceState(null,'',url.pathname+url.search);applyPanelLanguage(language);
+ for(const id of ['filter-frame','filter-section','filter-case','filter-step']){const select=$(id);if(select.options[0]?.value==='')select.options[0].textContent=ui('Tất cả','All')}
+ if(cases.length)renderCases();if(dataset){renderMemberInfo(dataset.members);renderResults();}if(extremeData)renderExtremes();if(activeExtreme)renderExtremeDialog();
+};
 applyPanelLanguage();
 syncButtons();if(token){let ready=false;run(async()=>{const cfg=await api('/connection');$('dll').value=cfg.dll_path;await scanInstances(cfg.pid);ready=Boolean(selectedInstance())}).then(()=>{if(ready)$('connect').click()})}
 </script></main></body></html>

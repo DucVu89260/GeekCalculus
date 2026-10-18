@@ -358,3 +358,15 @@ while the connector is stopped. Keep `.venv` and the saved DPAPI file; no protoc
 reinstallation is necessary. Regression: run
 `pwsh -NoProfile -File tests/test_sap_launcher_token.ps1`. Cross-platform token
 serialization is checked; Windows-specific DPAPI/UAC remains a device check.
+
+### Panel interaction — build 2026.10.18.19
+
+The top heading is SAP2000-API with live VI/EN controls. Switching language updates
+the tab URL without reloading and retains extraction data, selection and filters.
+Extreme rows use a View forces button opening a centered native dialog. Its table
+shows each governing/tied row with section, case, step, location, all six forces
+and concurrency. Close or Escape returns to the unchanged results. Large tie sets
+retain the existing 20-row preview cap and complete record IDs in JSON.
+All force displays use exactly two decimal places without scientific notation;
+rounded negative zero is shown as 0.00. Large positive values are not clamped.
+This formatting does not mutate extraction, interpolation, extremes or exports.

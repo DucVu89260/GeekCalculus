@@ -1,0 +1,605 @@
+{
+  "repository": "https://github.com/Ephraim-Bryski/SAP-Tooltips",
+  "commit": "608415951abf7c601c3939ed0296cd1daa45eda5",
+  "usage": "Documentation reference only; not imported. Runtime SAP2000 DLL signatures take precedence. No proprietary CHM/HTML copied.",
+  "methods": {
+    "load_point": {
+      "path": "CSI_OAPI_Documentation/GetLoadPointWithGUID_{Frame_Object}.htm",
+      "sha256": "366a26213615023013a91b8182ccbc705f8d2729fe6081937055c7758e5af5c6"
+    },
+    "case_type": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Obsolete_Functions/GetType_{Load_Case}.htm",
+      "sha256": "7d6a5b0f5270b006e5b3122271cba78f960d05efe1cf97b1d034d509f45b2adb"
+    },
+    "design_code": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Breaking_Changes_Between_v17_and_v18/Breaking_Changes_v18.htm",
+      "sha256": "5f08a0004f97dca1d709bf058ee7cc3c6b9b7774b38a91af6e602a5346d11812"
+    },
+    "point_matrix": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Object_Model/Point_Object/GetTransformationMatrix_{Point_Object}.htm",
+      "sha256": "6fe8860bda2af21b0b345aeddca59947a14443f28dbf9facc9d5c70f68c6ea0f"
+    },
+    "point_axes": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Object_Model/Point_Object/GetLocalAxes_{Point_Object}.htm",
+      "sha256": "ad3d4c2a35c2352a36173b602d00e995e588d63f7245d43a62dfb3c34a0df49c"
+    },
+    "coordinates": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Object_Model/Point_Object/GetCoordCartesian_{Point_Object}.htm",
+      "sha256": "646872577c959b3869473c13c93e1acc906529b614bbb582c392f4b4989e82b7"
+    },
+    "guid": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Object_Model/Frame_Object/SetGUID_{Frame_Object}.htm",
+      "sha256": "22b0c98de9e548a041314a57cd78ceb59022a66ed8df7f913df1215015cc566a"
+    },
+    "springs": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Object_Model/Frame_Object/GetSpring_{Frame_Object}.htm",
+      "sha256": "0fa086d3323ed720c889846dcc31a4532ccde28992b1253657c997b3ed37762f"
+    },
+    "section_assignment": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Object_Model/Frame_Object/GetSection_{Frame_Object}.htm",
+      "sha256": "e944e9adb0a5bd843eb08fd4ed31e472d05d86198d58ab3201e8ca1df9b18bcc"
+    },
+    "nonprismatic_assignment": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Object_Model/Frame_Object/GetSectionNonPrismatic.htm",
+      "sha256": "266ac0edc7ed85a902540f0ce9a06b0d29dc97541a9a91365f276bdacc337078"
+    },
+    "releases": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Object_Model/Frame_Object/GetReleases_{Frame_Object}.htm",
+      "sha256": "c23a2c30748a3d0aa0e9214bacda649c1ff68e9ff90db8204a62f1bd46b9f4db"
+    },
+    "points": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Object_Model/Frame_Object/GetPoints_{Frame_Object}.htm",
+      "sha256": "32ff8d7d2c962b201cdb763fdbe24f798e172f518df1a2fdb080db26c8d9de90"
+    },
+    "member_modifiers": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Object_Model/Frame_Object/GetModifiers_{Frame_Object}.htm",
+      "sha256": "cb110b18c9b52638ee9e6e202f1c093b1224c27ebf40f868e9bbfb0e1034ce34"
+    },
+    "material_overwrite": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Object_Model/Frame_Object/GetMaterialOverwrite_{Frame_Object}.htm",
+      "sha256": "e341fafe1f00ec23f7f56bbdf1548454b3025ef637b3d681c3961acb9164285b"
+    },
+    "material_temperature": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Object_Model/Frame_Object/GetMatTemp_{Frame_Object}.htm",
+      "sha256": "f71535bf7dbb3c085cdf038afefdec1badee51f0c6061a1cc63685094c47b75f"
+    },
+    "local_axes": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Object_Model/Frame_Object/GetLocalAxes_{Frame_Object}.htm",
+      "sha256": "2869929d3763a3217866574af8155c85b7ec02ec0e7eaed82378c8e9a45f9004"
+    },
+    "advanced_local_axes": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Object_Model/Frame_Object/GetLocalAxesAdvanced_Frame_Object.htm",
+      "sha256": "4de16c4bc7dbd28367b818a3f5576527b7a7e5adeed9daf5d7d49eac42e9b42f"
+    },
+    "load_temperature": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Object_Model/Frame_Object/GetLoadTemperature_{Frame_Object}.htm",
+      "sha256": "eb926469c423945a81431c9634baf3c9450c80f5a96d804ec9f5393d8e6cde00"
+    },
+    "load_gravity": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Object_Model/Frame_Object/GetLoadGravity_{Frame_Object}.htm",
+      "sha256": "0b7b9d238155f1fe7fbf57498eaec99e1910a13eac25bdf8df2a3b3ede7616bf"
+    },
+    "load_distributed": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Object_Model/Frame_Object/GetLoadDistributed_{Frame_Object}.htm",
+      "sha256": "9675a33db4a81e1f335c195fd704e755a5d19c99e40435c6ee59dc617aeb181b"
+    },
+    "insertion": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Object_Model/Frame_Object/GetInsertionPoint_{Frame_Object}.htm",
+      "sha256": "fc97f556c6a74eabbc3f0db481fa47ed0f032e65893a42ae2dfdf2e02986209b"
+    },
+    "hinges": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Object_Model/Frame_Object/GetHingeAssigns_1.htm",
+      "sha256": "398a8180f2a2076ed8039116b2e4431e43f173e3487cfd20317e8c81714d4c77"
+    },
+    "groups": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Object_Model/Frame_Object/GetGroupAssign_{Frame_Object}.htm",
+      "sha256": "fd8b838b2e8d5d7f5d2c61f07375aff231aeec1cd220974e0cb2a4a56c71f429"
+    },
+    "end_offsets": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Object_Model/Frame_Object/GetEndLengthOffset_{Frame_Object}.htm",
+      "sha256": "0400975d5a45fadc0b3af0d62aeef60a372d755e0ec0fbe13dfd492499155fd2"
+    },
+    "design_procedure": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Object_Model/Frame_Object/GetDesignProcedure.htm",
+      "sha256": "4f19d718e1a2d10f4f08d7ee9d017a036f713978637d674e08e7838979533283"
+    },
+    "design_summary": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Design/Steel/GetSummaryResults_{Steel}.htm",
+      "sha256": "5bb21a483d82557658d751e0208195ce5d06210985d7b2c0975c4db263aae15f"
+    },
+    "design_available": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Design/Steel/GetResultsAvailable_{Steel}.htm",
+      "sha256": "b97a05ead4a48b9c8f4434e3953a9470b332e595df831c17261a6d1c2d38582a"
+    },
+    "design_section": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Design/Steel/GetDesignSection_{Steel}.htm",
+      "sha256": "c8dc362a29e99820ed0c3cc6c907f7cbf015623e1c7ea3d05ec8fb86e919687e"
+    },
+    "strength_combos": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Design/Steel/GetComboStrength_{Steel}.htm",
+      "sha256": "fb15ae993102d8ef8b9e9409fb7108679afefa38f6161922cc1a2a2e64c24777"
+    },
+    "deflection_combos": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Design/Steel/GetComboDeflection_{Steel}.htm",
+      "sha256": "54037c9190c0e1c08f45ebef3058f3bdcf318191f9a95bf28b6d6f18606feebe"
+    },
+    "preference": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Design/Steel/AISC_360_10/GetPreference_{Steel_AISC_360-10}.htm",
+      "sha256": "b9fef52f0b0235fb5235d58ffcdeb371451f2547be475da2f01d999907eb9d58"
+    },
+    "overwrite": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Design/Steel/AISC_360_10/GetOverwrite_{Steel_AISC360_10}.htm",
+      "sha256": "f2524c342ed7feb701007ec69d83b50af522c05c716cce08ce4578e92d3de283"
+    },
+    "load_patterns": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Definitions/Load_Pattern/GetNameList_{Load_Pattern}.htm",
+      "sha256": "fa481068df503abc538a2874baf7d430e41246040bb976255bb8e637c635ac68"
+    },
+    "pattern_type": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Definitions/Load_Pattern/GetLoadType_{Load_Pattern}.htm",
+      "sha256": "5f80592cea27714ecce89f6b568de21a46f11ab0450fcf8fba6e56370bff01fd"
+    },
+    "combo_type": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Definitions/Combinations/GetType_{Combinations}.htm",
+      "sha256": "a320de62d600fde5a5fbc4a478b6d09f97b9dd46243269c75bc089b8c5bc9c51"
+    },
+    "combo_components": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Definitions/Combinations/GetCaseList.htm",
+      "sha256": "fb02585745196ae9aaf83b726f18dc0e9bb243ec713a690ea74cad4c945d059d"
+    },
+    "material_density": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Definitions/Properties/Material/GetWeightAndMass_{Material}.htm",
+      "sha256": "92d5e4e18289085dc0206f93cd714ea08f427eb320fe3574a1cd817f764b8348"
+    },
+    "steel_strength": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Definitions/Properties/Material/GetOSteel_1.htm",
+      "sha256": "5fcb5f8cb7991601e222f685a748aa4eba493a479cb5ede13a3ae9cff7d363e4"
+    },
+    "material_type": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Definitions/Properties/Material/GetMaterial.htm",
+      "sha256": "4d008b0afb9abf79e051cf3fedc26956f7ba5196651546188752c266a9ecbf39"
+    },
+    "material_isotropic": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Definitions/Properties/Material/GetMPIsotropic.htm",
+      "sha256": "7d7c80273c718dabdd96c8c68ce49a187efc35037dfd5cfebab4e2b3a314431d"
+    },
+    "section_type": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Definitions/Properties/Frame/GetType_{Frame}.htm",
+      "sha256": "2c44e1d8aa01826853df4b591584b12579c2ee78acccc775cadd2e0466d38f46"
+    },
+    "shape_tube": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Definitions/Properties/Frame/GetTube_{Frame}.htm",
+      "sha256": "e881a8345f827e54d7c4c7878f0706b812ead56ec53c0c8090630335f02344ee"
+    },
+    "shape_tee": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Definitions/Properties/Frame/GetTee_{Frame}.htm",
+      "sha256": "a0f500d5077db27f5b24312f00621a19b5a9c04035c02ccbac2fe77309ceee04"
+    },
+    "section_properties": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Definitions/Properties/Frame/GetSectProps.htm",
+      "sha256": "3bcf5f9f089ce00c98ccde26a78b2282e2d7e7332c6afe3e9713cef39d6ff075"
+    },
+    "shape_sd": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Definitions/Properties/Frame/GetSDSection.htm",
+      "sha256": "22a7cd4f0116eb26c1e55d7c50ef454291d8cdc20c434cae67da6361fb69a4e6"
+    },
+    "shape_rectangle": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Definitions/Properties/Frame/GetRectangle.htm",
+      "sha256": "35d9dcd42b3763fcab0a265892fded1c694a69317e5ad1e27731bf3d2326bd4c"
+    },
+    "shape_pipe": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Definitions/Properties/Frame/GetPipe_{Frame}.htm",
+      "sha256": "d38fbd76f492de52fa1f2f013baaf0dc57f85897fc64cfe34136de062abdf01b"
+    },
+    "nonprismatic": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Definitions/Properties/Frame/GetNonPrismatic.htm",
+      "sha256": "8b8ab5898991c95de9f470662b5d074acaf7f31ad6163d9a8667cdb99443800b"
+    },
+    "section_material_file": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Definitions/Properties/Frame/GetNameInPropFile.htm",
+      "sha256": "f7f2a29de9ccc60e301a18302ead6f8c92360c519061d7df2274025affffbb24"
+    },
+    "section_modifiers": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Definitions/Properties/Frame/GetModifiers_{Frame}.htm",
+      "sha256": "45e958870f7ec0d1f2d71a13213b7129b10b25ca134b36ffd62ba59158aa98a5"
+    },
+    "shape_i": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Definitions/Properties/Frame/GetISection_{Frame}.htm",
+      "sha256": "bb0f0054a6f56ad9aef8af3c6bb695bd196f9c77f479d1df4de43621ddbf2ba7"
+    },
+    "shape_hybrid_i": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Definitions/Properties/Frame/GetHybridISection.htm",
+      "sha256": "63357fbf594b2bf9d4446af06d5f8544814c3b4fe23a30715ba9d038584c814c"
+    },
+    "shape_general": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Definitions/Properties/Frame/GetGeneral.htm",
+      "sha256": "91c3d33c022c5d0614b98e5f6548ef623cbe8d9c7d0f63a13f3a9934a289fc47"
+    },
+    "shape_double_channel": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Definitions/Properties/Frame/GetDblChannel.htm",
+      "sha256": "6b8061a80246c91c42b4f0202a6fde8ff9e354dd589acff545f3699e94b0a3da"
+    },
+    "shape_double_angle": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Definitions/Properties/Frame/GetDblAngle.htm",
+      "sha256": "8949f21e49ad07a18cf819d3e50289c63732064d4facabb8de5a531c835b75eb"
+    },
+    "shape_cold_z": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Definitions/Properties/Frame/GetColdZ.htm",
+      "sha256": "30194bc1ca24f7bc74ac54fa034afd4a4dd89d4e2f83b97e676fbebb95b23b91"
+    },
+    "shape_cold_hat": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Definitions/Properties/Frame/GetColdHat.htm",
+      "sha256": "9db29d7c05d6b752983753977d1504a8dd18c7f820fe1ef3838ca5ab68c0ac24"
+    },
+    "shape_cold_c": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Definitions/Properties/Frame/GetColdC.htm",
+      "sha256": "113615ffd211aca26a2be1ace8082a63f11354fd97490f39fd924d2fc1c91928"
+    },
+    "shape_circle": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Definitions/Properties/Frame/GetCircle.htm",
+      "sha256": "33772004f03e7fa93ea63a8cc2fc51102af228537c576aa42fc6bacfb506c817"
+    },
+    "shape_channel": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Definitions/Properties/Frame/GetChannel_{Frame}.htm",
+      "sha256": "d1cf2f648847d2d702d555e5e6bb73ebe4a1aa366b16444d59f6f81511e35d2a"
+    },
+    "auto_select": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Definitions/Properties/Frame/GetAutoSelectSteel.htm",
+      "sha256": "0815301ec258840fd8dd70658d9c4a474e9a01b0a847df837c80ce7dec40320f"
+    },
+    "shape_angle": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Definitions/Properties/Frame/GetAngle_{Frame}.htm",
+      "sha256": "616f93730016eab8d259eee4b38c31e99065e40950e2722fff744bf417ffd36c"
+    },
+    "nonlinear_loads": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Definitions/Load_Case/Static_Nonlinear/GetLoads_{Static_Nonlinear}.htm",
+      "sha256": "9f528b76335c62d828683b7a868086489dbd85bf410f0a41073f6ac07ee20183"
+    },
+    "nonlinear_geometry": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Definitions/Load_Case/Static_Nonlinear/GetGeometricNonlinearity_{Static_Nonlinear}.htm",
+      "sha256": "50aa3ed3d797e5eb4e3d19a7f72bd09f4c26d8e46d9b295dde386c8a572093a7"
+    },
+    "linear_loads": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Definitions/Load_Case/Static_Linear/GetLoads_{Static_Linear}.htm",
+      "sha256": "9266b99a31f3cb996e9ee547579ef1291cb019757de860b0e43485d3bc33802f"
+    },
+    "joint_displacements": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Analysis_Results/Results/StepLabel.htm",
+      "sha256": "60b7de3fe47b15fe668691c0ac1a60426f16a8b858302880fe72e51e8d56ea55"
+    },
+    "joint_reactions": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Analysis_Results/Results/JointReact.htm",
+      "sha256": "51e065680e89fed38efae5b5c25c223481a8d6bf327e58647705b1ade4feffaf"
+    },
+    "frame_joint_forces": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Analysis_Results/Results/FrameJointForce.htm",
+      "sha256": "0255c0ec3746d10b9935aecbe960a4f71d983ba51bd2c1d331b811fe87608b4c"
+    }
+  },
+  "aisc360_10": {
+    "overwrites": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Design/Steel/AISC_360_10/GetOverwrite_{Steel_AISC360_10}.htm",
+      "sha256": "f2524c342ed7feb701007ec69d83b50af522c05c716cce08ce4578e92d3de283",
+      "items": [
+        {
+          "item": 1,
+          "label": "Framing type"
+        },
+        {
+          "item": 2,
+          "label": "Omega0"
+        },
+        {
+          "item": 3,
+          "label": "Consider deflection"
+        },
+        {
+          "item": 4,
+          "label": "Deflection check type"
+        },
+        {
+          "item": 5,
+          "label": "DL deflection limit, L/Value"
+        },
+        {
+          "item": 6,
+          "label": "SDL + LL deflection limit, L/Value"
+        },
+        {
+          "item": 7,
+          "label": "LL deflection limit, L/Value"
+        },
+        {
+          "item": 8,
+          "label": "Total load deflection limit, L/Value"
+        },
+        {
+          "item": 9,
+          "label": "Total camber limit, L/Value"
+        },
+        {
+          "item": 10,
+          "label": "DL deflection limit, absolute"
+        },
+        {
+          "item": 11,
+          "label": "SDL + LL deflection limit, absolute"
+        },
+        {
+          "item": 12,
+          "label": "LL deflection limit, absolute"
+        },
+        {
+          "item": 13,
+          "label": "Total load deflection limit, absolute"
+        },
+        {
+          "item": 14,
+          "label": "Total camber limit, absolute"
+        },
+        {
+          "item": 15,
+          "label": "Specified camber"
+        },
+        {
+          "item": 16,
+          "label": "Net area to total area ratio"
+        },
+        {
+          "item": 17,
+          "label": "Live load reduction factor"
+        },
+        {
+          "item": 18,
+          "label": "Unbraced length ratio, Major"
+        },
+        {
+          "item": 19,
+          "label": "Unbraced length ratio, Minor"
+        },
+        {
+          "item": 20,
+          "label": "Unbraced length ratio, Lateral Torsional Buckling"
+        },
+        {
+          "item": 21,
+          "label": "Effective length factor, K1 Major"
+        },
+        {
+          "item": 22,
+          "label": "Effective length factor, K1 Minor"
+        },
+        {
+          "item": 23,
+          "label": "Effective length factor, K2 Major"
+        },
+        {
+          "item": 24,
+          "label": "Effective length factor, K2 Minor"
+        },
+        {
+          "item": 25,
+          "label": "Effective length factor, K Lateral Torsional Buckling"
+        },
+        {
+          "item": 26,
+          "label": "Moment coefficient, Cm Major"
+        },
+        {
+          "item": 27,
+          "label": "Moment coefficient, Cm Minor"
+        },
+        {
+          "item": 28,
+          "label": "Bending coefficient, Cb"
+        },
+        {
+          "item": 29,
+          "label": "Nonsway moment factor, B1 Major"
+        },
+        {
+          "item": 30,
+          "label": "Nonsway moment factor, B1 Minor"
+        },
+        {
+          "item": 31,
+          "label": "Sway moment factor, B2 Major"
+        },
+        {
+          "item": 32,
+          "label": "Sway moment factor, B2 Minor"
+        },
+        {
+          "item": 33,
+          "label": "Reduce HSS thickness"
+        },
+        {
+          "item": 34,
+          "label": "HSS welding type"
+        },
+        {
+          "item": 35,
+          "label": "Yield stress, Fy"
+        },
+        {
+          "item": 36,
+          "label": "Expected to specified Fy ratio, Ry"
+        },
+        {
+          "item": 37,
+          "label": "Compressive capacity, Pnc"
+        },
+        {
+          "item": 38,
+          "label": "Tensile capacity, Pnt"
+        },
+        {
+          "item": 39,
+          "label": "Major bending capacity, Mn3"
+        },
+        {
+          "item": 40,
+          "label": "Minor bending capacity, Mn2"
+        },
+        {
+          "item": 41,
+          "label": "Major shear capacity, Vn2"
+        },
+        {
+          "item": 42,
+          "label": "Minor shear capacity, Vn3"
+        },
+        {
+          "item": 43,
+          "label": "Demand/capacity ratio limit"
+        }
+      ]
+    },
+    "preferences": {
+      "path": "CSI_OAPI_Documentation/SAP2000_API_Fuctions/Design/Steel/AISC_360_10/GetPreference_{Steel_AISC_360-10}.htm",
+      "sha256": "b9fef52f0b0235fb5235d58ffcdeb371451f2547be475da2f01d999907eb9d58",
+      "items": [
+        {
+          "item": 1,
+          "label": "Framing type"
+        },
+        {
+          "item": 2,
+          "label": "Seismic design category"
+        },
+        {
+          "item": 3,
+          "label": "Design provision"
+        },
+        {
+          "item": 4,
+          "label": "Analysis method (Obsolete, replaced by 27, 28, and 29)"
+        },
+        {
+          "item": 5,
+          "label": "Notional load coefficient"
+        },
+        {
+          "item": 6,
+          "label": "Phi or Omega for bending"
+        },
+        {
+          "item": 7,
+          "label": "Phi or Omega for compression"
+        },
+        {
+          "item": 8,
+          "label": "Phi or Omega for tension yielding"
+        },
+        {
+          "item": 9,
+          "label": "Phi or Omega for tension fracture"
+        },
+        {
+          "item": 10,
+          "label": "Phi or Omega for shear"
+        },
+        {
+          "item": 11,
+          "label": "Phi or Omega for shear short webbed rolled I"
+        },
+        {
+          "item": 12,
+          "label": "Phi or Omega for torsion"
+        },
+        {
+          "item": 13,
+          "label": "Ignore seismic code"
+        },
+        {
+          "item": 14,
+          "label": "Ignore special seismic load"
+        },
+        {
+          "item": 15,
+          "label": "Doubler plate is plug welded"
+        },
+        {
+          "item": 16,
+          "label": "HSS welding type"
+        },
+        {
+          "item": 17,
+          "label": "Reduce HSS thickness"
+        },
+        {
+          "item": 18,
+          "label": "Consider deflection"
+        },
+        {
+          "item": 19,
+          "label": "DL deflection limit, L/Value"
+        },
+        {
+          "item": 20,
+          "label": "SDL + LL deflection limit, L/Value"
+        },
+        {
+          "item": 21,
+          "label": "LL deflection limit, L/Value"
+        },
+        {
+          "item": 22,
+          "label": "Total load deflection limit, L/Value"
+        },
+        {
+          "item": 23,
+          "label": "Total camber limit, L/Value"
+        },
+        {
+          "item": 24,
+          "label": "Pattern live load factor"
+        },
+        {
+          "item": 25,
+          "label": "Demand/capacity ratio limit"
+        },
+        {
+          "item": 26,
+          "label": "Multi-response case design"
+        },
+        {
+          "item": 27,
+          "label": "Analysis Method"
+        },
+        {
+          "item": 28,
+          "label": "Second Order Method"
+        },
+        {
+          "item": 29,
+          "label": "Stiffness Reduction Method"
+        },
+        {
+          "item": 30,
+          "label": "Importance Factor"
+        },
+        {
+          "item": 31,
+          "label": "Design Systems Rho"
+        },
+        {
+          "item": 32,
+          "label": "Design Systems Sds"
+        },
+        {
+          "item": 33,
+          "label": "Design Systems R"
+        },
+        {
+          "item": 34,
+          "label": "Design Systems Omega0"
+        },
+        {
+          "item": 35,
+          "label": "Design Systems Cd"
+        }
+      ]
+    }
+  }
+}

@@ -98,7 +98,7 @@ async function verifySharedCalculator(page, route) {
     assert.equal(await modulePage.evaluate(() => window.opener), null)
     assert.deepEqual(await navHashes(modulePage.locator('.workspace-group-navigation')), expectedHash(groupRoutes))
     assert.equal(await modulePage.locator('.module-navigation a').nth(2).textContent(),'SAP2000-API')
-    assert.equal(await modulePage.locator('.module-navigation a').nth(2).getAttribute('target'),'_blank')
+    assert.equal(await modulePage.locator('.module-navigation a').nth(2).getAttribute('href'),'geekcalculus-sap2000://launch/26.2.0/?lang=en')
     assert.deepEqual((await navHashes(modulePage.locator('.module-navigation'))).filter(Boolean), expectedHash([
       'steel', 'steel/cfs', 'steel/section-properties', 'steel/library', 'steel/future',
     ]))

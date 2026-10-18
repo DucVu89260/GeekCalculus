@@ -109,3 +109,7 @@ Use the smallest relevant row above. A new nontrivial slice records: objective; 
 ## SAP-WEB-26.2 — implemented / locally verified 2026-10-17
 
 Add SAP2000-API immediately after CFS Design, opening the versioned standalone panel in a new tab. Input: uploaded SAP2000_26.2.0-API.zip; source panel/connector/processing exactly match existing force API, bundled .venv excluded. Pin compatibility to SAP2000 26.2.0. Reuse panel with VI/EN heading/label controls; web serves static UI + clean Windows kit, live reads go only to token-protected loopback connector with explicit trusted web origins. No Laravel/model persistence, force/axis/math changes. Acceptance: Vue typecheck/build; navigation/new-tab/subpath/language browser checks; connector auth/CORS tests, source ZIP hygiene, existing SAP browser regressions. Windows SAP connection and actual hosted deployment remain separate acceptance.
+
+## SAP desktop launch — 2026-10-18
+
+Fixed root C:\geek_calculus\SAP2000-API. Replace direct web link with strict custom protocol, per-user registration and explicit UAC elevation; fixed GitHub Pages target and VI/EN allowlist. Reuse authenticated local connector using per-user DPAPI token; never stop unknown listeners. Validate protocol routing/build and token auth rejection; Windows registration/UAC requires user device verification.

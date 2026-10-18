@@ -1,8 +1,8 @@
 @echo off
 setlocal
-set "API_ROOT=C:\SAP2000-Forces"
+set "API_ROOT=C:\geek_calculus\SAP2000-API"
 if /I not "%~dp0"=="%API_ROOT%\" (
-    echo Extract the complete API kit to C:\SAP2000-Forces and run this file there.
+    echo Extract the complete API kit to C:\geek_calculus\SAP2000-API and run this file there.
     pause
     exit /b 1
 )

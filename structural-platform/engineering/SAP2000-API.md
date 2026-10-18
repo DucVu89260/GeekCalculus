@@ -15,14 +15,14 @@ Website cloud không thể trực tiếp gọi SAP2000 COM của máy người d
 ## Cài đặt một lần trên Windows
 
 1. Cần SAP2000 **26.2.0**, Python **64-bit >= 3.11** và Internet để tải dependencies. Khi cài Python, bật Python Launcher (`py`). Chạy connector cùng tài khoản/phiên desktop với SAP2000; không cần chạy administrator nếu SAP2000 không chạy elevated.
-2. Đặt bản mã có các thay đổi API này trên máy Windows, thư mục cố định `C:\SAP2000-Forces`. Không sao chép `.venv`, dependencies hoặc build cache từ Linux sang Windows.
-3. Trong Explorer, mở `C:\SAP2000-Forces`, nhấp đúp **`start-sap2000-panel.cmd`**. Script tạo venv, cài dependencies theo lock và chạy connector. Lần đầu có thể mất vài phút. Giữ cửa sổ console đang chạy.
+2. Đặt bản mã có các thay đổi API này trên máy Windows, thư mục cố định `C:\geek_calculus\SAP2000-API`. Không sao chép `.venv`, dependencies hoặc build cache từ Linux sang Windows.
+3. Trong Explorer, mở `C:\geek_calculus\SAP2000-API`, nhấp đúp **`start-sap2000-panel.cmd`**. Script tạo venv, cài dependencies theo lock và chạy connector. Lần đầu có thể mất vài phút. Giữ cửa sổ console đang chạy.
 4. Launcher tự mở trình duyệt và ghép nối panel bằng mã giữ trong phiên tab. Không cần tự nhập token. Mã không đưa vào query/HTTP access log và được xóa khỏi fragment địa chỉ sau khi trang đọc. Token giữ trong sessionStorage của tab để tải lại trang vẫn kết nối được; restart connector sinh token mới nếu không cấu hình token môi trường cố định.
 
 Nếu muốn chạy bằng PowerShell thay vì nhấp đúp:
 
 ```powershell
-cd C:\SAP2000-Forces
+cd C:\geek_calculus\SAP2000-API
 py -3 -m venv .venv
 .\.venv\Scripts\python -m pip install -r requirements-test.lock -r requirements-windows.txt
 .\.venv\Scripts\python -m structural_engine.member_forces.run_connector
@@ -165,7 +165,7 @@ Từ `engineering`: `PYTHONPATH=. .venv/bin/python tests/sap_panel_server.py`. �
 Khởi động với PID từ CMD (thay bằng PID đang dùng):
 
 ```cmd
-cd /d C:\SAP2000-Forces
+cd /d C:\geek_calculus\SAP2000-API
 start-sap2000-panel.cmd --pid 20948
 ```
 
@@ -187,7 +187,7 @@ Nếu cập nhật từ build .1: dừng connector, thay file bằng ZIP mới, 
 
 ## Quy ước local — build 2026.10.16-dotnet-pid.3 (Auto PID)
 
-- Giải nén toàn bộ bộ API vào **`C:\SAP2000-Forces`**. Launcher và công cụ chẩn đoán kiểm tra vị trí này; nếu sai thư mục sẽ hướng dẫn chuyển bộ API trước khi chạy. Giữ `.venv` khi cập nhật.
+- Giải nén toàn bộ bộ API vào **`C:\geek_calculus\SAP2000-API`**. Launcher và công cụ chẩn đoán kiểm tra vị trí này; nếu sai thư mục sẽ hướng dẫn chuyển bộ API trước khi chạy. Giữ `.venv` khi cập nhật.
 - Chỉ mở **một tiến trình `SAP2000.exe`** trong lúc dùng API. Launcher mặc định bỏ PID môi trường cũ; `--pid` vẫn là lựa chọn nâng cao rõ ràng.
 - Nhấp đúp `start-sap2000-panel.cmd`, không cần tra hoặc nhập PID. Connector dùng Windows `tasklist` có filter chính xác `SAP2000.exe`, không cần thêm thư viện dò process.
 - Mỗi lần kết nối/đọc sẽ quét lại PID nếu đang ở chế độ tự động. Không có SAP thì yêu cầu mở, nhiều SAP thì yêu cầu đóng bớt; không chọn ngẫu nhiên tiến trình đầu tiên.
@@ -198,7 +198,7 @@ Cơ chế tasklist được kiểm thử ở biên subprocess với đầu ra Wi
 
 ## Chọn nhiều model local — build 2026.10.17-instance-picker.1
 
-Bản này thay quy ước chỉ mở một phiên SAP2000: có thể mở nhiều phiên và chọn file qua danh sách PID + tên model. Thư mục API vẫn cố định `C:\SAP2000-Forces`. Không yêu cầu đổi tên thư mục, cài thêm dependency hoặc tìm PID trong Task Manager.
+Bản này thay quy ước chỉ mở một phiên SAP2000: có thể mở nhiều phiên và chọn file qua danh sách PID + tên model. Thư mục API vẫn cố định `C:\geek_calculus\SAP2000-API`. Không yêu cầu đổi tên thư mục, cài thêm dependency hoặc tìm PID trong Task Manager.
 
 `GET /API_IF_SAP26.2.0_V1/instances` quét tasklist rồi gắn từng PID bằng DLL để đọc version, tên file, đường dẫn và trạng thái khóa. Không mở file, chạy analysis, đổi units/selection hoặc tự đổi PID đã cấu hình khi quét. Nếu một PID không đọc được, kết quả vẫn có dòng PID đó với `available:false` và lỗi tương ứng; model chưa lưu cũng chưa thể chọn để xuất.
 
@@ -218,7 +218,7 @@ Build 2026.10.17.2 đọc từng PID qua một Python worker riêng, cùng cách
 
 Kết nối model nằm ngang phía trên. Output Cases & Combos ở cột trái; cột phải lần lượt là cấu kiện đã chọn, bảng nội lực và Extreme Cases & Combos. Màn hình hẹp tự chuyển thành một cột theo thứ tự 1–5. Hướng dẫn thao tác có thể mở ở cuối panel.
 
-Sau khi cập nhật ZIP vào `C:\SAP2000-Forces`, dừng connector cũ khi không xuất dữ liệu rồi chạy lại launcher; tải lại trình duyệt và kiểm tra build 2026.10.17.3. Không cần cài lại `.venv`.
+Sau khi cập nhật ZIP vào `C:\geek_calculus\SAP2000-API`, dừng connector cũ khi không xuất dữ liệu rồi chạy lại launcher; tải lại trình duyệt và kiểm tra build 2026.10.17.3. Không cần cài lại `.venv`.
 
 ### Lỗi kiểm tra dữ liệu khi xuất nhiều Case/Combo — build 2026.10.17.4
 
@@ -301,7 +301,7 @@ Trong Steel Structure, SAP2000-API nằm ngay sau CFS Design và mở tab mới 
 
 Website chỉ phục vụ HTML và ZIP Windows source-only (không .venv). Chạy SAP2000/connector trên Windows cùng mức quyền như trước. Panel web gọi trực tiếp `http://127.0.0.1:8010`, không gửi model qua Laravel hoặc server web. Cần token connector; CORS chỉ chấp nhận các origin GeekCalculus được khai báo trong connector.py, không dùng wildcard, vẫn yêu cầu Bearer token cho mọi dữ liệu. Nếu trình duyệt hỏi quyền truy cập mạng local, cho phép đối với GeekCalculus. Native panel localhost vẫn chạy như trước.
 
-Để mở web panel kèm token mà không sao chép token thủ công, dùng launcher trong CMD tại C:\SAP2000-Forces:
+Để mở web panel kèm token mà không sao chép token thủ công, dùng launcher trong CMD tại C:\geek_calculus\SAP2000-API:
 
 ```cmd
 start-sap2000-panel.cmd --web-url "http://geekcalculus.com/sap2000-api/26.2.0/?lang=vi"
@@ -316,3 +316,33 @@ start-sap2000-panel.cmd --web-url "https://ducvu89260.github.io/GeekCalculus/sap
 --web-url chỉ chấp nhận trang versioned trên các origin đã duyệt, không nhận URL tùy ý. Token đi qua fragment, được xóa khỏi thanh địa chỉ ngay khi panel tải, không đưa vào HTTP request/URL log; chỉ giữ trong sessionStorage của tab đó. Nếu mở một tab web mới chưa có token, dùng launcher với --web-url để mở phiên được xác thực. Không đưa token vào chat, Git hoặc query string. Native launcher không tham số vẫn mở localhost.
 
 Tài liệu đầu vào: SAP2000_26.2.0-API.zip; panel, connector và processing khớp nguồn force API trước tích hợp. Manifest versioned ghi SHA256 đầu vào và bản source-only phân phối. Cần kiểm chứng trên Windows/SAP2000 thực; kiểm thử cloud dùng fake SAP và browser CORS thực.
+
+### Extreme table section — build 2026.10.18.15
+
+The extreme table includes the governing member's assigned Section next to Frame;
+missing metadata displays an em dash. Each expanded tie also identifies its own
+member's section. Nonprismatic sections retain their assigned name (e.g. RF1);
+this column does not infer a local interpolated section.
+
+When moving the website to a new domain, change `--web-url` to the actual deployed
+HTTPS panel URL and add its exact origin to `WEB_ORIGINS` in the connector, then
+distribute the updated kit. The local connector remains necessary on the SAP2000
+Windows machine. Buying a domain alone does not deploy the website.
+
+### Website launcher — build 2026.10.18.16
+
+Fixed directory: `C:\geek_calculus\SAP2000-API`. Stop the old connector before
+updating. Recreate `.venv` when moving from another path; virtual environments
+are not portable across directory moves. Run `install-web-launcher.cmd` once
+per Windows user. It registers `geekcalculus-sap2000` under HKCU. The website
+button invokes the handler with only version 26.2.0 and language vi/en. UAC consent
+is requested, then the connector opens the fixed GitHub Pages panel with a token
+fragment. Browser and UAC prompts cannot be silently bypassed. PowerShell execution
+policy override applies only to the launcher process, not the system policy.
+
+The reusable token is current-user DPAPI-encrypted at
+`%LOCALAPPDATA%\GeekCalculus\SAP2000-API\connector-token.dpapi`. Repeat clicks
+reuse a matching authenticated connector. Unknown listeners are never stopped;
+stop the old connector safely with Ctrl+C first. Keep the connector window open.
+To unregister remove only `HKCU\Software\Classes\geekcalculus-sap2000`.
+Windows registration/UAC/DPAPI need verification on a Windows machine.

@@ -13,11 +13,12 @@ const base=process.env.SAP_WEB_BASE||'http://127.0.0.1/GeekCalculus/'
   await links.nth(2).waitFor()
   assert.equal(await links.nth(1).textContent(),'CFS Design')
   assert.equal(await links.nth(2).textContent(),'SAP2000-API')
-  assert.equal(await links.nth(2).getAttribute('target'),'_blank')
+  assert.equal(await links.nth(2).getAttribute('target'),null)
   const originalUrl=page.url()
   for(const lang of ['vi','en']){
    await page.getByRole('button',{name:lang.toUpperCase(),exact:true}).click()
-   const pending=context.waitForEvent('page');await links.nth(2).click();const panel=await pending
+   assert.equal(await links.nth(2).getAttribute('href'),'geekcalculus-sap2000://launch/26.2.0/?lang='+lang)
+   const panel=await context.newPage();await panel.goto(new URL('sap2000-api/26.2.0/?lang='+lang,base).href)
    await panel.waitForLoadState('domcontentloaded')
    assert.equal(new URL(panel.url()).pathname,new URL('sap2000-api/26.2.0/',base).pathname)
    assert.equal(await panel.locator('html').getAttribute('lang'),lang)
@@ -48,6 +49,6 @@ const base=process.env.SAP_WEB_BASE||'http://127.0.0.1/GeekCalculus/'
   assert.equal(await live.locator('#results tr.interpolated').count(),2)
   await live.screenshot({path:'/tmp/sap2000-web-en.png',fullPage:true})
   assert.deepEqual(errors,[])
-  console.log('SAP web passed: CFS-adjacent button, new tab, VI/EN headings, exact package CSS, compatibility text, source-only kit, Pages subpath, mobile, authenticated real cross-origin loopback extraction/interpolation.')
+  console.log('SAP web passed: CFS-adjacent protocol button (VI/EN), hosted panel, VI/EN headings, exact package CSS, compatibility text, source-only kit, Pages subpath, mobile, authenticated real cross-origin loopback extraction/interpolation.')
  }finally{await browser.close()}
 })().catch(e=>{console.error(e);process.exitCode=1})

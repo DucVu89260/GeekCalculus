@@ -52,4 +52,4 @@ export function moduleFromHash() {
   return match && resolveModuleRoute(match[1]) ? match[1] : null
 }
 
-export const sap2000ApiHref = locale => `${import.meta.env.BASE_URL}sap2000-api/26.2.0/?lang=${locale === 'en' ? 'en' : 'vi'}`
+export const sap2000ApiHref = locale => `geekcalculus-sap2000://launch/26.2.0/?lang=${locale === 'en' ? 'en' : 'vi'}`

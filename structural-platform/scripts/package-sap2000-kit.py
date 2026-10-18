@@ -11,7 +11,7 @@ def main():
     output = repo / 'downloads' / 'API_IF_SAP26.2.0_V1.zip'
     output.parent.mkdir(exist_ok=True)
     files = [source / name for name in ['requirements-test.lock', 'requirements-windows.txt',
-        'start-sap2000-panel.cmd', 'stop-sap2000-panel.cmd', 'diagnose-sap2000.cmd', 'SAP2000-API.md', 'CB-AISC360-10.md',
+        'install-web-launcher.cmd', 'install-web-launcher.ps1', 'open-sap2000-web.ps1', 'start-sap2000-panel.cmd', 'stop-sap2000-panel.cmd', 'diagnose-sap2000.cmd', 'SAP2000-API.md', 'CB-AISC360-10.md',
         'structural_engine/__init__.py']]
     for folder in ['member_forces', 'design']:
         files.extend(p for p in (source / 'structural_engine' / folder).rglob('*')
@@ -22,9 +22,11 @@ def main():
             if path.suffix == '.cmd':
                 data = path.read_text().replace('\r\n', '\n').replace('\n', '\r\n').encode()
             archive.writestr(str(path.relative_to(source)).replace('\\', '/'), data)
-        archive.writestr('BAT-DAU.txt', '''API_IF_SAP26.2.0_V1 — .NET/PID build 2026.10.17.14 — Panel 5 bước
-1. Giải nén toàn bộ ZIP vào C:\\SAP2000-Forces; dừng connector cũ bằng Ctrl+C trước khi cập nhật.
-2. Giữ .venv đang có; launcher tự cài/cập nhật dependencies, gồm pythonnet 3.2.1.
+        archive.writestr('BAT-DAU.txt', '''API_IF_SAP26.2.0_V1 — .NET/PID build 2026.10.18.16 — Panel 5 bước
+1. Giải nén toàn bộ ZIP vào C:\\geek_calculus\\SAP2000-API; dừng connector cũ bằng Ctrl+C trước khi cập nhật.
+2. Chạy install-web-launcher.cmd một lần cho mỗi tài khoản Windows; sau đó bấm SAP2000-API trên web.
+   Xác nhận mở ứng dụng và quyền Administrator; launcher tự mở trang có token.
+   Giữ .venv đang có; launcher tự cài/cập nhật dependencies, gồm pythonnet 3.2.1.
 3. Mở SAP2000 26.2.0 và model đã phân tích. Dùng cùng tài khoản/mức quyền với connector.
 4. Có thể mở nhiều phiên SAP2000. Không cần tìm hoặc nhập PID thủ công.
 5. Nếu cổng 8010 bị chiếm: đóng các tác vụ xuất, chạy stop-sap2000-panel.cmd bằng Administrator.

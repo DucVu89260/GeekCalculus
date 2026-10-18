@@ -1,5 +1,17 @@
 # Repository handoff
 
+## SAP2000 website → Windows launcher — 2026-10-18
+
+- Build 2026.10.18-web-panel.16; fixed root `C:\geek_calculus\SAP2000-API`. SAP tool now invokes a strict VI/EN/version custom URI rather than opening an unauthenticated panel. New per-user protocol installer and handler request UAC, use a fixed Pages URL, protect a reusable token with current-user DPAPI and reuse an authenticated running connector. No scheduled task, UAC bypass, arbitrary shell URL or termination of unknown listeners. Installer/handler process-only execution-policy flags do not change global policy. Preserve the section-column change from the preceding turn.
+- Executed Vue typecheck and production demo build (existing chunk warning); updated SAP web browser smoke passed protocol href/locale plus hosted panel, source CSS, mobile and real cross-origin authenticated fake-SAP extraction/interpolation; SAP panel smoke and structure-group navigation smoke passed. Connector tests: 41 passed; launcher busy-port test initially skipped while fixture held port, then rerun with port free: 1 passed. One existing Starlette deprecation warning.
+- Source-only kit rebuilt, including all three installer/handler files. Windows registry activation, elevation, DPAPI and actual SAP2000 are UNRUN here (Linux). Install once per Windows user and verify with browser/UAC consent; recreate .venv if relocated rather than copying its absolute-path launchers. Stop old connector first. Public docs remain CI-owned. Git push is separate from Pages/live verification.
+
+## SAP2000 extreme section column — 2026-10-18
+
+- Existing feature branch: added assigned section beside governing frame in the extreme table and each tie detail; VI/EN heading, missing metadata shown as em dash. No force math or SAP reads changed. Shifted case wrapping and browser assertions for the inserted column.
+- Executed `PYTHONPATH=.:tests .venv/bin/python -m tests.sap_panel_server` (engineering) and Playwright `sap2000-panel-smoke.cjs`: passed, including distinct I300/NP1 sections, end-J/global quarter extremes, exports and mobile. Fake SAP only; Windows SAP not available here. Test server stopped afterward.
+- Rebuilt source-only Windows ZIP and hosted panel using existing packaging scripts, build 2026.10.18-web-panel.15. Public docs are CI-owned; no live deployment claim. New domain requires deployed URL plus exact connector WEB_ORIGINS entry.
+
 ## Gross-member Symmetric I/H workflow — 2026-10-17
 
 - Branch `feature/ih-gross-member-capacities`, base main `1ccb851`; implementation commit `440de8a`, pushed in [PR #24](https://github.com/DucVu89260/GeekCalculus/pull/24). Preserves merged PR #23 layout and newer CFS work. This user explicitly moved local connection/hole checks out of Component and requested gross flexural capacities, fewer confirmation inputs, C3 review, future SAP API and visible H1 interaction.

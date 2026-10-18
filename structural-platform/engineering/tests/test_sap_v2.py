@@ -49,7 +49,7 @@ def test_all_groups_restore_state_and_keep_design_overwrites_and_point_axes_sepa
     model=SteelModel();old=(model.units,model.case_selected.copy(),model.combo_selected.copy())
     _,data=read(model,groups=list(GROUPS),output_cases=[{'name':'DEAD','kind':'case'}])
     assert (model.units,model.case_selected,model.combo_selected)==old
-    setup=data['model_data']['steel_design'];assert len(setup['preferences'])==35 and setup['design_method']=='ASD'
+    setup=data['model_data']['steel_design'];assert setup['scope']=='model_design_code';assert len(setup['preferences'])==35 and setup['design_method']=='ASD'
     overwrite=data['members'][0]['data']['design_overwrites'];assert len(overwrite)==43
     cb=next(r for r in overwrite if r['item']==28)
     assert cb['label']=='Bending coefficient, Cb' and field(cb,'Value')==0 and field(cb,'ProgDet') is True
@@ -244,3 +244,16 @@ def test_no_model_design_gives_exact_message_without_attempting_summary():
         assert len(member['data']['design_overwrites'])==43
     assert len(result['model_data']['steel_design']['preferences'])==35
     assert not any(key=='design_summary' for key,_,_ in model.v2_calls)
+
+
+def test_preferences_only_reads_model_once_without_any_frame_selection():
+    model=SteelModel()
+    with gateway(model) as sap:
+        def unexpected_selection():raise AssertionError('Model preferences must not query selected members')
+        sap.selection=unexpected_selection
+        result=SteelReader(sap,FixtureRuntime(model)).snapshot(SnapshotRequest(expected_model='model.sdb',groups=['design_setup']))
+    assert result['members']==[] and result['sections']=={} and result['materials']=={}
+    assert result['model_data']['steel_design']['scope']=='model_design_code'
+    assert len([key for key,_,_ in model.v2_calls if key=='preference'])==35
+    assert not any(key in ('section_assignment','overwrite') for key,_,_ in model.v2_calls)
+    assert model.units==9

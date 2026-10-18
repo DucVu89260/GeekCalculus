@@ -46,7 +46,7 @@ main{max-width:none;width:100%;padding:0 14px}.layout{grid-template-columns:minm
 </style>
 </head>
 <body><main>
-<header><div class="panel-topbar"><h1 id="sap-title">SAP2000-API V2 · Local</h1><div class="panel-language" role="group" aria-label="VI / EN"><button id="lang-vi" type="button">VI</button><button id="lang-en" type="button">EN</button></div></div><p id="sap-compatibility" style="font-weight:700;margin:0 0 8px">Compatible with SAP2000v26.2.0</p><div class="badge">API_IF_SAP26.2.0_V2 · SAP2000 26.2.0 · .NET / PID · build 2026.10.18-v2-local.7 · Panel 5 bước</div><p class="panel-subtitle">Xuất nội lực cấu kiện</p><p class="muted">Chọn cấu kiện trong SAP2000, sau đó quay lại đây để lấy nội lực. Đơn vị: kN · m · kN.m; giữ nguyên trục local SAP2000.</p></header>
+<header><div class="panel-topbar"><h1 id="sap-title">SAP2000-API V2 · Local</h1><div class="panel-language" role="group" aria-label="VI / EN"><button id="lang-vi" type="button">VI</button><button id="lang-en" type="button">EN</button></div></div><p id="sap-compatibility" style="font-weight:700;margin:0 0 8px">Compatible with SAP2000v26.2.0</p><div class="badge">API_IF_SAP26.2.0_V2 · SAP2000 26.2.0 · .NET / PID · build 2026.10.18-v2-local.8 · Panel 5 bước</div><p class="panel-subtitle">Xuất nội lực cấu kiện</p><p class="muted">Chọn cấu kiện trong SAP2000, sau đó quay lại đây để lấy nội lực. Đơn vị: kN · m · kN.m; giữ nguyên trục local SAP2000.</p></header>
 <div id="status" class="status" role="status" aria-live="polite">Đang chờ kết nối SAP2000 trên máy này.</div>
 <fieldset id="controls" aria-label="Bảng xuất nội lực SAP2000"><div class="layout">
 <section class="card connection" id="connection-panel"><h2>1. Kết nối model</h2>
@@ -396,7 +396,7 @@ $('extremes').onclick=()=>run(async()=>{clearExtremes(false);message(ui('Đang x
  extremeData=await api('/extremes',{dataset,scope:selected?'per_frame':$('scope').value,...(selected?{frames}:{}),position:$('extreme-position').value,...(component?{components:[component]}:{})});if(selected)extremeData.selected_frames=frames;renderExtremes();
  message(extremeData.data.length?ui('Đã xác định cực trị và vị trí local tại từng dòng chi phối. Mở bộ lực để xem Case/Combo và các dòng đồng hạng.','Extremes and local positions found. Open View forces for governing Case/Combo and tied rows.'):ui('Không có dữ liệu tại vị trí khảo sát. Xem lý do và tải JSON để kiểm tra.','No data at the evaluation position. Review the reasons and download JSON to verify.'));});
 $('extreme-json').onclick=()=>download(extremeData,'sap2000-extremes.json');
-const v2Groups={identity:['Định danh / GUID / Groups','Identity / GUID / Groups'],sections:['Tiết diện / Kích thước / Properties','Sections / Dimensions / Properties'],materials:['Vật liệu / Material overwrite','Materials / Material overwrite'],geometry:['Hình học / Trục local','Geometry / Local axes'],assignments:['Releases / Offsets / Springs / Hinges','Releases / Offsets / Springs / Hinges'],modifiers:['Modifiers section và member','Section and member modifiers'],design_setup:['Thiết lập thiết kế / Preferences','Design setup / Preferences'],design_overwrites:['Design overwrites AISC 360-10','AISC 360-10 design overwrites'],design_results:['Kết quả SAP Steel Design','SAP Steel Design results']};
+const v2Groups={identity:['Định danh / GUID / Groups','Identity / GUID / Groups'],sections:['Tiết diện / Kích thước / Properties','Sections / Dimensions / Properties'],materials:['Vật liệu / Material overwrite','Materials / Material overwrite'],geometry:['Hình học / Trục local','Geometry / Local axes'],assignments:['Releases / Offsets / Springs / Hinges','Releases / Offsets / Springs / Hinges'],modifiers:['Modifiers section và member','Section and member modifiers'],design_setup:['Preferences — Toàn model','Preferences — Model-wide'],design_overwrites:['Design overwrites AISC 360-10','AISC 360-10 design overwrites'],design_results:['Kết quả SAP Steel Design','SAP Steel Design results']};
 const v2SelectedGroups=new Set(['identity','sections','materials','geometry','modifiers']);
 let v2Snapshot=null,v2Capabilities=null,v2Table=null;
 function syncV2Buttons(){
@@ -417,7 +417,7 @@ function v2Tree(label,value){
 function renderV2Targets(){const target=$('profile-target'),previous=target.value;target.replaceChildren();const add=(value,label)=>{const option=document.createElement('option');option.value=value;option.textContent=label;target.append(option)};
  if(v2Snapshot){for(const member of v2Snapshot.members)add('frame:'+member.frame,'Frame '+member.frame+' · '+(member.analysis_section||'—'));add('@sections',ui('Thư viện Section đã đọc','Read Section library'));add('@materials',ui('Thư viện vật liệu đã đọc','Read material library'));add('@model',ui('Dữ liệu model / Thiết kế','Model / Design data'));add('@snapshot',ui('Thông tin nguồn / Đơn vị / Coverage','Provenance / Units / Coverage'))}
  if(v2Capabilities)add('@capabilities',ui('Khả năng getter trong DLL','Installed DLL getter capabilities'));
- if([...target.options].some(o=>o.value===previous))target.value=previous;renderV2Categories();
+ if([...target.options].some(o=>o.value===previous))target.value=previous;if(v2Snapshot&&!v2Snapshot.members.length)target.value='@model';renderV2Categories();
 }
 function renderV2Categories(){const selector=$('profile-category'),previous=selector.value;selector.replaceChildren();let values={};const key=$('profile-target').value;
  if(key.startsWith('frame:')){const member=v2Snapshot?.members.find(m=>m.frame===key.slice(6));values={identity_reference:{frame:member.frame,analysis_section:member.analysis_section,auto_select_list:member.auto_select_list},...member.data}}
@@ -426,7 +426,7 @@ function renderV2Categories(){const selector=$('profile-category'),previous=sele
  else if(key==='@model')values=v2Snapshot.model_data;
  else if(key==='@snapshot')values=Object.fromEntries(Object.entries(v2Snapshot).filter(([k])=>!['members','sections','materials','model_data','force_dataset'].includes(k)));
  else if(key==='@capabilities')values={getters:v2Capabilities.data};
- for(const name of Object.keys(values)){const option=document.createElement('option');option.value=name;option.textContent=v2Groups[name]?ui(...v2Groups[name]):name;selector.append(option)}
+ for(const name of Object.keys(values)){const option=document.createElement('option');option.value=name;option.textContent=name==='steel_design'?ui('Thiết lập thiết kế / Preferences — Toàn model','Design setup / Preferences — Model-wide'):(v2Groups[name]?ui(...v2Groups[name]):name);selector.append(option)}
  if([...selector.options].some(o=>o.value===previous))selector.value=previous;selector.onchange=()=>renderV2View(values[selector.value]);renderV2View(values[selector.value]);
 }
 function v2MaterialName(value){return typeof value==='string'&&value.trim()&&value.trim().toLowerCase()!=='none'?value:null}
@@ -461,7 +461,30 @@ function renderV2EngineeringSummary(){
  box.append(p);
 }
 
-function renderV2View(value){renderV2EngineeringSummary();const box=$('profile-detail');box.replaceChildren();if(value===undefined)return;if($('profile-category').value==='design_results'&&value.message){const message=document.createElement('p');message.id='profile-design-message';message.textContent=value.message;message.className=value.status==='ok'?'v2-status-ok':'v2-status-warning';box.append(message);}const root=v2Tree($('profile-category').selectedOptions[0]?.textContent||'data',value);box.append(root);if(root.tagName==='DETAILS')root.open=true}
+function renderV2ReleaseTables(container,assignments){
+ const result=assignments?.releases;if(!result)return;
+ const title=document.createElement('h3');title.textContent=ui('Giải phóng đầu cấu kiện / Releases','Member end releases');container.append(title);
+ const dofs=['U1','U2','U3','R1','R2','R3'],forces=['P','V2','V3','T','M2','M3'];
+ for(const [key,end] of [['ii','I'],['jj','J']]){
+  const heading=document.createElement('h4');heading.textContent=ui('Đầu ','End ')+end;container.append(heading);
+  const values=v2Field(result,key),valid=['ok','empty'].includes(result.status)&&Array.isArray(values)&&values.length===6;
+  const wrap=document.createElement('div');wrap.className='table-wrap';const table=document.createElement('table'),head=document.createElement('thead'),body=document.createElement('tbody'),tr=document.createElement('tr');table.id='profile-release-'+end.toLowerCase();
+  for(const text of [ui('Chỉ số','Index'),ui('Thành phần nội lực','Force component'),ui('Bậc tự do tương ứng','Corresponding DOF'),ui('Kết quả thuật toán','Returned value'),ui('Ý nghĩa kết quả','Meaning')]){const th=document.createElement('th');th.textContent=text;tr.append(th)}head.append(tr);
+  for(let i=0;i<6;i++){const flag=valid&&typeof values[i]==='boolean'?values[i]:null;tableRow(body,[i,forces[i],dofs[i],flag===null?'—':String(flag),flag===true?ui('Có giải phóng (true)','Released (true)'):flag===false?ui('Không giải phóng (false)','Not released (false)'):ui('Chưa xác định — kiểm tra getter','Unknown — check getter')])}
+  table.append(head,body);wrap.append(table);container.append(wrap);
+ }
+ const note=document.createElement('p');note.className='result-note muted';note.textContent=ui('Theo trục local SAP2000. true = có giải phóng; false = không giải phóng. Partial fixity là dữ liệu riêng; không suy điều kiện giằng hoặc Cb chỉ từ Releases.','SAP2000 local axes. true = released; false = not released. Partial fixity is separate; releases alone do not establish bracing or Cb.');container.append(note);
+ const start=v2Field(result,'StartValue'),end=v2Field(result,'EndValue');
+ if(['ok','empty'].includes(result.status)&&Array.isArray(start)&&start.length===6&&Array.isArray(end)&&end.length===6){
+  const h=document.createElement('h4');h.textContent=ui('Giá trị partial fixity gốc','Raw partial-fixity values');container.append(h);
+  const wrap=document.createElement('div');wrap.className='table-wrap';const table=document.createElement('table'),head=document.createElement('thead'),body=document.createElement('tbody'),tr=document.createElement('tr');table.id='profile-partial-fixity';
+  for(const label of [ui('Thành phần / DOF','Component / DOF'),'I','J',ui('Đơn vị','Units')]){const th=document.createElement('th');th.textContent=label;tr.append(th)}head.append(tr);
+  for(let i=0;i<6;i++)tableRow(body,[forces[i]+' / '+dofs[i],start[i],end[i],i<3?'kN/m':'kN·m/rad']);table.append(head,body);wrap.append(table);container.append(wrap);
+  const note=document.createElement('p');note.className='result-note muted';note.textContent=ui('Giữ giá trị SAP trả về; phải đọc cùng release flag tương ứng. Giá trị 0 không tự chứng minh có lò xo được gán.','Values are retained as returned by SAP and must be read with the matching release flags. Zero alone does not establish an assigned spring.');container.append(note);
+ }
+}
+
+function renderV2View(value){renderV2EngineeringSummary();const box=$('profile-detail');box.replaceChildren();if(value===undefined)return;if($('profile-category').value==='assignments')renderV2ReleaseTables(box,value);if($('profile-target').value==='@model'&&$('profile-category').value==='steel_design'){const note=document.createElement('p');note.id='profile-preferences-scope';note.className='result-note muted';note.textContent=ui('Design Preferences là thiết lập chung theo tiêu chuẩn thiết kế đang chọn của model, được đọc một lần cho hồ sơ. Không thuộc riêng member. Design overwrites được đọc riêng cho từng member.','Design Preferences are model-wide settings for the active design code, read once per snapshot. They do not belong to an individual member. Design overwrites are read per member.');box.append(note);}if($('profile-category').value==='design_results'&&value.message){const message=document.createElement('p');message.id='profile-design-message';message.textContent=value.message;message.className=value.status==='ok'?'v2-status-ok':'v2-status-warning';box.append(message);}const root=v2Tree($('profile-category').selectedOptions[0]?.textContent||'data',value);box.append(root);if(root.tagName==='DETAILS')root.open=true}
 $('profile-target').onchange=renderV2Categories;
 $('profile-defaults').onclick=()=>{v2SelectedGroups.clear();for(const g of ['identity','sections','materials','geometry','modifiers'])v2SelectedGroups.add(g);renderV2Groups();syncButtons()};
 $('profile-all').onclick=()=>{for(const g of Object.keys(v2Groups))v2SelectedGroups.add(g);renderV2Groups();syncButtons()};

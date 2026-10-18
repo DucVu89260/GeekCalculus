@@ -1,6 +1,6 @@
 # SAP2000-API V2 — Local preview
 
-Build: `2026.10.18-v2-local.7` · Compatible with SAP2000 v26.2.0 · Windows 64-bit.
+Build: `2026.10.18-v2-local.8` · Compatible with SAP2000 v26.2.0 · Windows 64-bit.
 
 ## Chạy thử / Quick start
 
@@ -69,3 +69,9 @@ UI hồ sơ còn9 nhóm: identity, sections, materials, geometry, assignments, m
 Chọn Releases/Offsets/Springs/Hinges để đọc assignments và nguồn/trạng thái từng getter. Releases có thứ tự U1/U2/U3/R1/R2/R3, true=released; giá trị partial fixity giữ riêng. End offsets có đơn vị m, rigid-zone factor không thứ nguyên. Không có spring/hinge trả empty nếu SAP getter xác nhận; getter không hỗ trợ/lỗi không suy thành không gán. Preferences35 và overwrites43 chỉ ánh xạ AISC360-10, giữ Value/ProgDet và nguồn. Không chạy StartDesign.
 
 Kết quả Steel Design đọc theo từng frame. Khi SAP xác nhận chưa có kết quả toàn model hoặc getter member thành công nhưng trả0 records, hiển thị chính xác **Members have not been designed** (`status=not_designed`). Nếu getter lỗi/không xác nhận được availability, hiển thị unavailable cùng lý do thay vì kết luận chưa design. Thông báo không tự chạy thiết kế; cần thao tác trong SAP rồi đọc lại hồ sơ.
+
+## Releases và phạm vi Preferences (local.8)
+
+Chọn nhóm Releases/Offsets/Springs/Hinges rồi xem assignments: có bảng riêng đầu I/J với5 cột Chỉ số, Thành phần nội lực, Bậc tự do tương ứng, Kết quả thuật toán và Ý nghĩa kết quả. Thứ tự P/V2/V3/T/M2/M3 ↔ U1/U2/U3/R1/R2/R3; true=có giải phóng, false=không giải phóng. Getter thiếu/lỗi hiện chưa xác định, không điền false. Partial fixity giữ bảng riêng và dữ liệu gốc. Chỉ đọc cùng release flag; không suy Cb/giằng từ các flag.
+
+Design Preferences thuộc model và active design code, không thuộc riêng member. Dữ liệu lưu một lần ở model_data.steel_design (scope=model_design_code); xem đối tượng Dữ liệu model/Thiết kế. Chỉ chọn Preferences rồi đọc hồ sơ thì không cần chọn frame; snapshot có0 members là bình thường. Nếu chọn thêm nhóm thuộc member thì vẫn phải chọn frame trong SAP. Design overwrites giữ riêng theo từng member, không nhập chung với Preferences.

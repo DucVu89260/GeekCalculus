@@ -149,3 +149,7 @@ Add SAP display type plus stable shape key to section catalog/component referenc
 ## V2 focused profile groups and per-member design status — 2026-10-18
 
 Remove loads/forces/displacements only from profile UI/request, retaining lower force workflow and backward-compatible API groups. Retain assignment/release/offset/spring/hinge and AISC360-10 preference/overwrite extraction. Clarify release DOF and offset units. Per-member design result status distinguishes global false and successful empty member summary (Members have not been designed) from unknown/failed getters. No automatic SAP design. Verify9 UI groups/requests, assignments/prefs/overwrites/member result cases, lower extraction and clean kit.
+
+## V2 readable Releases and model-wide Preferences — 2026-10-18
+
+Render separate I/J release tables: index0–5, force P/V2/V3/T/M2/M3, DOF U1/U2/U3/R1/R2/R3, raw true/false, localized meaning. Unknown/failed flags remain unknown; partial-fixity values separate with units and raw source tree retained. Label Preferences model-wide, store scope=model_design_code once per snapshot; overwrites per member. Validate browser mapping/VI-EN/data immutability and scope unit test; package local.8.

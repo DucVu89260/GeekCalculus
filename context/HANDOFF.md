@@ -1,5 +1,11 @@
 # Repository handoff
 
+## V2 readable releases and model-wide Preferences — 2026-10-18
+
+- Preview2026.10.18-v2-local.8 adds separate I/J release tables with exact5 requested columns: index, force component, corresponding DOF, raw boolean, VI/EN meaning (true released / false not released). Fixed mapping0..5=P/V2/V3/T/M2/M3 ↔ U1/U2/U3/R1/R2/R3. Missing/nonboolean/failed outputs remain unknown, not false. Partial-fixity values shown separately in6-row unit-labelled table; raw tree retained. No force or strength math changes.
+- Design setup is explicitly scope=model_design_code, shared once per snapshot, with UI model-wide label/note; member overwrites remain separate. Preferences-only reads do not query or require selected members and return0 members; UI selects model data automatically. Other member groups still require selection. Only active AISC360-10 preferences are indexed.
+-40 targeted tests passed, including global scope and preferences-only no-selection read35 values once, no member getter calls, unit restoration. Chromium smoke passed both release tables/5columns/12flag rows, M3true/M2false interpretation, partial values, VI/EN roundtrip preserving snapshot, model-wide notice and preferences-only JSON/target, plus inherited workflows. Existing Starlette warning; no new live Windows SAP execution. Source kit rebuilt and CRC/per-file hashes verified. V1/hosted assets unchanged.
+
 ## V2 focused profile picker and per-member Steel Design availability — 2026-10-18
 
 - Preview2026.10.18-v2-local.7 profile picker now9 groups: removed loads/forces/displacements UI checkboxes and corresponding profile request groups. Lower Case/Combo/force extraction/extremes/summary preserved independently; API retains optional older groups for backward compatibility. Default5 definition groups unchanged. Assignments include existing release/partial fixity/insertion/offset/spring/hinge/material-temperature getters with explicit source/status. Added release DOF labels/boolean meaning and end-offset units; missing/unsupported assignment getter not inferred as empty. Existing AISC360-10 preference35/overwrite43 read tables retained.

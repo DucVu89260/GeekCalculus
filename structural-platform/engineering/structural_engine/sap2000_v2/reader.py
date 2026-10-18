@@ -215,7 +215,8 @@ class SteelReader:
         code=self.read('design_code')
         name=field(code,'CodeName') or ''
         active=re.sub('[^A-Z0-9]','',name.upper())=='AISC36010'
-        result={'code':code,'available':self.read('design_available'),
+        result={'scope':'model_design_code','basis':'Model-wide preferences for the active design code; member overwrites remain separate',
+                'code':code,'available':self.read('design_available'),
                 'strength_combos':self.read('strength_combos'),'deflection_combos':self.read('deflection_combos'),
                 'aisc360_10_active':active}
         if include_preferences:
@@ -287,10 +288,12 @@ class SteelReader:
         sap=self.sap
         before=sap.model_info()
         if request.expected_model!=before['model']:raise SapError('SAP2000_MODEL_CHANGED: Reconnect before reading V2 data')
-        frames=list(dict.fromkeys(sap.selection() if request.frames is None else request.frames))
-        if not frames or len(frames)>200 or set(frames)-set(sap.names(sap.model.FrameObj)):
+        groups=set(request.groups)
+        model_only=groups=={'design_setup'}
+        frames=[] if model_only else list(dict.fromkeys(sap.selection() if request.frames is None else request.frames))
+        if not model_only and (not frames or len(frames)>200 or set(frames)-set(sap.names(sap.model.FrameObj))):
             raise SapError('SAP2000_V2_SELECTION: Select 1–200 existing frame objects')
-        groups=set(request.groups);members=[];model_data={};force_data=None
+        members=[];model_data={};force_data=None
         with units_session(sap) as original_units:
             setup=self.design_setup('design_setup' in groups) if groups & {'design_setup','design_overwrites','design_results'} else None
             if setup:model_data['steel_design']=setup

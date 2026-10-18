@@ -1,6 +1,6 @@
 API_NAME = 'API_IF_SAP26.2.0_V2'
 API_PREFIX = '/' + API_NAME
-BUILD_ID = '2026.10.18-v2-local.7'
+BUILD_ID = '2026.10.18-v2-local.8'
 SAP_VERSION = '26.2.0'
 PORT = 8010
 REFERENCE_URL = 'https://github.com/Ephraim-Bryski/SAP-Tooltips'

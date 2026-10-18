@@ -83,7 +83,7 @@ const tools = { concrete: ['beam', 'column', 'slab', 'foundation'], future: ['re
         <p class="pending-note" role="status">{{ t('pending') }}</p>
       </div>
     </section>
-    <WindLoadView v-else-if="currentGroup.code === 'loads' && currentTool.code === 'wind'" :locale="locale" />
+    <WindLoadView v-else-if="currentGroup.code === 'loads' && currentTool.code === 'wind'" :locale="locale" :workspace="moduleCode.endsWith('/envelope-low-rise') ? 'envelope' : moduleCode.endsWith('/directional-walls') ? 'directional' : ''" />
     <ComboGeneratorView v-else-if="currentGroup.code === 'loads' && currentTool.code === 'combo'" :locale="locale" :demo-mode="demoMode" :user="user" />
     <section v-else-if="currentGroup.code === 'loads'" class="module-panel loading-pending-panel" :data-loading-tool="currentTool.code">
       <StructureIllustration group="loads" :label="t(currentTool.title)" />

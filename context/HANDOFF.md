@@ -56,6 +56,61 @@
 - Validation executed: 10 V2 API/snapshot/units/restoration/error/bounds tests passed; 4 real CLR reflection tests passed (synthetic emitted types, no SAP DLL); Chromium local smoke passed all snapshot/data/design-overwrite/force/extreme/summary/table/JSON/VI-EN/mobile/model-reset cases. Corrected smoke to await lazy disclosure rendering. Inspected desktop data-explorer screenshot. ZIP CRC/per-file hashes/whitelist passed (41 files); extracted-kit import/authenticated panel check passed from /tmp outside checkout.
 - Full engineering suite with CLR enabled: **388 passed, 1 failed**, no skipped tests. Failure is existing `test_i_advanced_matches_independent_high_precision_energy_integral`, effective shear area0.2083333333356841 versus0.20833333333333334 at rel1e-11 for depth4562.25mm/width1mm synthetic I. Section-property source/test files unchanged by V2; no tolerance changes made. Existing Starlette/httpx deprecation warning. Do not claim full suite passes.
 - Actual Windows + SAP2000 26.2.0 acceptance is **unrun**. Next action: user runs kit on a small saved model, default groups first, then optional groups and reports failed getter statuses/capabilities without token. Preview, not a verified complete live steel-design adapter or hosted V2 release.
+## Wind Envelope low-rise workspace — 2026-10-18
+
+- Base `a05e1e2`, existing `work` checkout. User requests illustrated building
+  choices after ASCE 7-10 and a five-part Envelope / Enclosed & Partially
+  Enclosed / Low-rise HTML workspace following PICTURE 1–5.
+- Added bilingual wind catalog (Ch28 envelope, Ch27 directional, Ch29 other,
+  Ch30 C&C), deep route `#/modules/loads/wind/envelope-low-rise`, five report
+  sections, dimension and region SVGs, Case A/B signed pressure tables, designated
+  torsional zones, JSON/print report and responsive left contents navigation.
+  Existing Chapter 27 view is retained at `loads/wind/directional-walls`.
+- New engineering module `standards/asce7-10-envelope.mjs` reuses existing
+  Chapter 26 velocity/exposure primitives. Source table and notes were visually
+  checked against the exact PDF pp.344–348. Preserves global REVIEW_REQUIRED;
+  monoslope is a geometry preview with pressure rows blocked. Eligibility,
+  hurricane/opening checks, full eight corner patterns, minimum load effects,
+  parapets/overhangs and SAP export remain project-level gates. No backend,
+  authentication, data migrations or other member-rule contracts changed.
+- Executed: 157 Node tests passed, zero failures/skips (six new envelope tests
+  with independent default-case values, interpolation, unit/scope/torsion
+  checks); Vue typecheck and production demo build passed. Existing Vite chunk
+  size warnings remain. `tests/wind-envelope-smoke.cjs` passed against the
+  isolated production build: illustrated catalog, deep link, all five sections,
+  default values, reactive velocity, partially enclosed GCpi, invalid input,
+  monoslope gate, language switch, JSON, reload, 320/390px and Chapter27 entry.
+  Fixed a real checkbox-width overflow discovered by the mobile smoke.
+- Source audit: `standards/ASCE7-10-ENVELOPE-AUDIT.md`. Default worked case
+  qh=1.1100821278 kN/m²; screenshot's rounded/legacy qh≈1.114 is not forced into
+  code. Figure28.4-1 net-pressure torsion factor applies to internal and external
+  terms together. SVGs are schematic, not a structural load assignment/export.
+- Delivery: source `6bc3ec1`, contrast/sketch-legibility follow-up `cfd8178`,
+  CI-generated Pages artifact `45b60a2`. Frontend/backend/source-index jobs
+  succeeded; HTTPS retrieval of the live index and its hashed CSS/JS verified
+  the envelope route and white title-contrast rule. Pages deployment run
+  `39118639176` belongs to `45b60a2`. Generated docs were built by CI, not
+  hand-edited. Local smoke also asserts title contrast.
+- Live Chromium smoke could not start because the cloud browser rejects the
+  public proxy certificate (`ERR_CERT_AUTHORITY_INVALID`); TLS verification
+  was not disabled. Live HTTPS artifact evidence and full local production
+  browser interaction evidence are separate. No native persistence/security
+  or complete-building design claim is made by this UI release.
+
+## CFS actual source sample — 2026-10-18
+
+- Branch `main`, base `bfeb4be`; documentation/private-artifact review only. Added [P0-A evidence](CFS-P0-REVIEW.md), updated integration Plan/status and retained all concurrent SAP/IH functionality. Five uploaded originals and full extracted project data remain outside Git/Pages; source hashes and capability metadata only are recorded in the repository.
+- PDF: nine native-text pages, physical/printed numbering differs. It contains three section inputs, analysis inputs/supports/loadings, 12 combinations and one localized Member Check under AISI S100-16/S1-18, US, LRFD. No moment curve/envelope/station table or full-system design result. Do not infer an envelope or whole-design PASS from one station/check.
+- Executed read-only CFSA parser/reference checks and independent PDF table comparisons: 8 member references/16 endpoint coordinates, 27 support positions/bearing/K/observed labels and 6 distributed-load rows match within PDF display precision. Sample supports inch-length/bearing and kip/in distributed-load mappings, not universal native semantics. CFSS properties remain undecoded; PDF has no input hashes, so full run identity remains unverified. Naming/input differences (thickness/flange geometry/material grade), override-zero semantics and effective-vs-gross properties are documented without changing source files or engineering logic.
+- Private review outputs are under `/workspace/cfs-review-2026-10-18/`: `Khao-sat-CFS.md`, `review.json`, native PDF text and read-only CFSA JSON. No model or report bytes were added to public assets. Verification: source hashes, native text/visual page inspection, comparison/count assertions, documentation links and `git diff --check`; no application suites/CFS Windows execution were run for this slice.
+- Next: P1-A source-bound PDF input/combination/localized-check reader with synthetic/anonymized committed fixtures. Obtain CFS report/export-selection evidence or additional actual moment/station/full-design outputs for P1-B/P2; candidate rerun/API/CLI remains an open product acceptance gate. Do not prematurely mark all P0 complete or connect Linux/browser Pyodide as if it were CFS.
+
+## CFS 11.0.2 integration plan — 2026-10-18
+
+- Branch `main`, initial CFS audit `8c07d65`, synchronized to `a658a65` before delivery; related CFS sources/guide unchanged. Preserved concurrent SAP/IH updates and read current SAP connector transport (not just the older CSI scaffold); it is a reference pattern, not evidence of CFS API capability. Added [the CFS-specific implementation plan](CFS-11.0.2-INTEGRATION-PLAN.md) and indexed it in PLAN. Documentation only: CFS owns analysis/design; GeekCalculus owns portable lap/XT iteration, moment envelopes and source-traceable VI/EN reports, without requiring Laravel/database.
+- Read actual CFSA reader/normalizer/browser I/O, package manifest and current guide. Confirmed combinations opaque, native units/support mappings provisional, CFSS only resolved, no results/design reader or proven CFS desktop connection. Plan separates file import and real manual round-trip from later Windows automation; requires exact input/result identity, stale states, sign/station/combination fidelity and report source/translation parity. CFS is distinct from the CSI scaffold.
+- User confirmed PDF/printed reports are available; plan now prioritizes PDF text/table extraction with page/record provenance, while numeric station availability and automation capability remain unknown. Image-only graphs or extrema-only tables do not establish full numeric envelopes; a limited bilingual report can precede them.
+- Verification for this documentation slice: check relative links/referenced paths and `git diff --check`; no runtime/formula/data/schema/dependency or generated Pages changes, so no application suites rerun. P0 discovery and all real-CFS acceptance remain unrun. Next: obtain one matching CFSA/CFSS/PDF report set and export/settings evidence from CFS 11.0.2, establish capability/units/axes matrix, then implement one moment-component reader/viewer slice if the output supports it.
 
 ## SAP staged filters and Section extreme summary — 2026-10-18
 

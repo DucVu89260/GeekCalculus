@@ -1,5 +1,10 @@
 # Repository handoff
 
+## SAP force display precision and units — 2026-10-18
+
+- Build2026.10.18-web-panel.18: P/V2/V3/T/M2/M3 render with two fixed decimal places in force rows, extremes and expanded governing vectors; coordinate precision remains unchanged. Force table headers show m, kN and kN·m on a second line, with mixed force/moment units noted in extreme value headers. Raw data, JSON/CSV, interpolation and extreme math retain full precision.
+- Rebuilt kit and hosted panel. Updated and executed existing Playwright SAP panel smoke: passed fixed-two-decimal cells, column units, extraction, signed interpolation, extremes, exports and mobile using fake SAP. No native SAP change; existing .17 connector remains compatible with hosted UI. Public docs are CI-owned.
+
 ## SAP launcher restart-token fix — 2026-10-18
 
 - User reported Input string was not in a correct format after shutting down the connector. Legacy Set-Content appends CR/LF; Get-Content -Raw passed this directly to ConvertTo-SecureString. Reproduced decoding failure with a disposable synthetic token on PowerShell7.4.13/Linux; trimming recovered the original token. Fix trims legacy saved text, writes without newline and preserves token; stage/line diagnostics redact token-reader errors. No deleting token, automatic rotation or protocol re-registration. Build2026.10.18-web-panel.17.

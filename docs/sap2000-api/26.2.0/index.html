@@ -42,10 +42,11 @@ main{max-width:none;width:100%;padding:0 14px}.layout{grid-template-columns:minm
 @media(max-width:600px){.panel-topbar h1{font-size:29px}#extreme-dialog{padding:14px;width:calc(100% - 20px)}#extreme-dialog h2{font-size:20px}}
 .extreme-member-picker{padding:14px;margin:12px 0;background:#f2f7fa;border:1px solid var(--line);border-radius:8px}.extreme-member-picker input[type=search]{max-width:520px}.extreme-member-options{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:6px;max-height:240px;overflow:auto}.extreme-member-options label{display:flex;align-items:center;gap:10px;padding:8px;background:white;border:1px solid var(--line);border-radius:6px;overflow-wrap:anywhere}.extreme-member-options input{flex-shrink:0;accent-color:var(--accent)}
 #extreme-member-picker{width:min(850px,calc(100% - 24px));max-height:calc(100dvh - 32px);margin:auto;padding:22px;overflow:auto;background:white;color:inherit;border:1px solid var(--edge);border-radius:14px}#extreme-member-picker::backdrop{background:#102b3cb3}.member-dialog-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}.member-dialog-header h2{margin:0}#extreme-member-selection{align-items:center}#extreme-member-picker .extreme-member-options{max-height:50dvh}
+#extreme-scope-stage{max-width:520px}#extreme-evaluation-stage{grid-template-columns:repeat(2,minmax(0,1fr));margin-top:16px}#section-summary-panel{margin-top:24px;padding-top:18px;border-top:2px solid var(--line)}#section-summary-panel h3{margin:0 0 10px}#section-summary-results td:nth-child(3){white-space:normal;min-width:170px;max-width:270px;overflow-wrap:anywhere}#section-summary-panel th{z-index:1}#section-summary-results td{font-variant-numeric:tabular-nums}#section-summary-results td:nth-child(8){white-space:nowrap;max-width:none}#section-summary-panel .interpolated{background:#fff4df}@media(max-width:850px){#extreme-evaluation-stage{grid-template-columns:minmax(0,1fr)}}
 </style>
 </head>
 <body><main>
-<header><div class="panel-topbar"><h1 id="sap-title">SAP2000-API</h1><div class="panel-language" role="group" aria-label="VI / EN"><button id="lang-vi" type="button">VI</button><button id="lang-en" type="button">EN</button></div></div><p id="sap-compatibility" style="font-weight:700;margin:0 0 8px">Compatible with SAP2000v26.2.0</p><div class="badge">API_IF_SAP26.2.0_V1 · SAP2000 26.2.0 · .NET / PID · build 2026.10.18.21 · Panel 5 bước</div><p class="panel-subtitle">Xuất nội lực cấu kiện</p><p class="muted">Chọn cấu kiện trong SAP2000, sau đó quay lại đây để lấy nội lực. Đơn vị: kN · m · kN.m; giữ nguyên trục local SAP2000.</p></header>
+<header><div class="panel-topbar"><h1 id="sap-title">SAP2000-API</h1><div class="panel-language" role="group" aria-label="VI / EN"><button id="lang-vi" type="button">VI</button><button id="lang-en" type="button">EN</button></div></div><p id="sap-compatibility" style="font-weight:700;margin:0 0 8px">Compatible with SAP2000v26.2.0</p><div class="badge">API_IF_SAP26.2.0_V1 · SAP2000 26.2.0 · .NET / PID · build 2026.10.18.22 · Panel 5 bước</div><p class="panel-subtitle">Xuất nội lực cấu kiện</p><p class="muted">Chọn cấu kiện trong SAP2000, sau đó quay lại đây để lấy nội lực. Đơn vị: kN · m · kN.m; giữ nguyên trục local SAP2000.</p></header>
 <div id="status" class="status" role="status" aria-live="polite">Đang chờ kết nối SAP2000 trên máy này.</div>
 <fieldset id="controls" aria-label="Bảng xuất nội lực SAP2000"><div class="layout">
 <section class="card connection" id="connection-panel"><h2>1. Kết nối model</h2>
@@ -73,18 +74,19 @@ main{max-width:none;width:100%;padding:0 14px}.layout{grid-template-columns:minm
 <details class="member-details"><summary>Section và thành phần Nonprismatic</summary><div id="member-info">Chưa đọc section.</div></details>
 <p id="missing-results" class="result-note"></p><div class="table-wrap"><table><thead><tr><th>Frame</th><th>Section</th><th>Loại section</th><th>Element</th><th>Station<br><small>(m)</small></th><th>Vị trí I–J</th><th>Case</th><th>Step</th><th>P<br><small>(kN)</small></th><th>V2<br><small>(kN)</small></th><th>V3<br><small>(kN)</small></th><th>T<br><small>(kN·m)</small></th><th>M2<br><small>(kN·m)</small></th><th>M3<br><small>(kN·m)</small></th><th>Nguồn</th></tr></thead><tbody id="results"></tbody></table></div><div class="actions"><button id="prev">Trước</button><span id="page" aria-live="polite">0 dòng</span><button id="next">Sau</button></div></section>
 <section class="card extreme" id="extreme-panel"><h2>5. Extreme Cases &amp; Combos</h2>
-<div class="extreme-filters">
-<label for="scope">Tìm cực trị cho cấu kiện<select id="scope"><option value="per_frame">Theo từng cấu kiện</option><option value="selected">Cấu kiện được chọn</option><option value="global">Theo toàn bộ nhóm đã xuất</option></select></label>
+<div id="extreme-scope-stage"><label for="scope">Tìm cực trị cho cấu kiện<select id="scope"><option value="per_frame">Theo từng cấu kiện</option><option value="selected">Cấu kiện được chọn</option><option value="global">Theo toàn bộ nhóm đã xuất</option></select></label></div>
+<div id="extreme-member-selection" class="actions" hidden><button id="extreme-member-open" type="button">Chọn cấu kiện</button><span id="extreme-member-selection-count" class="result-note" role="status"></span></div>
+<div class="extreme-filters" id="extreme-evaluation-stage">
 <label for="extreme-position">Vị trí khảo sát cực trị<select id="extreme-position"><option value="all">Tất cả station gốc</option><option value="end_i">End I</option><option value="quarter">1/4 L</option><option value="mid">1/2 L</option><option value="three_quarter">3/4 L</option><option value="end_j">End J</option><option value="five">Cả 5 vị trí</option></select></label>
 <label for="extreme-component">Thành phần nội lực<select id="extreme-component"><option value="">Tất cả: P, V2, V3, T, M2, M3</option><option>P</option><option>V2</option><option>V3</option><option>T</option><option>M2</option><option>M3</option></select></label>
 </div>
-<div id="extreme-member-selection" class="actions" hidden><button id="extreme-member-open" type="button">Chọn cấu kiện</button><span id="extreme-member-selection-count" class="result-note" role="status"></span></div>
 <div class="actions"><button id="extremes">Xác định Min / Max / Absolute</button><button id="extreme-json">Tải extreme JSON</button></div>
 <p class="result-note muted">x theo trục local 1, từ End I (x = 0) đến End J (x = L). Giữ dấu nội lực SAP2000. Mốc chia tư có thể nội suy tuyến tính; mốc theo toàn frame, chưa phải đoạn Lb.</p>
 <p class="result-note muted">Mỗi cực trị có bộ 6 lực tại dòng chi phối riêng. Không ghép các cực trị P/M2/M3/V2/V3 từ các dòng khác nhau thành một bộ lực liên kết. Bộ lọc mục 4 không tác động mục 5.</p>
 <p id="extreme-summary" class="result-note" role="status"></p><p id="extreme-missing" class="result-note position-warning"></p>
 <div class="table-wrap"><table><thead><tr><th>Nhóm</th><th>Thành phần</th><th>Cực trị</th><th>Giá trị có dấu<br><small>(kN / kN·m)</small></th><th>|Giá trị|<br><small>(kN / kN·m)</small></th><th>Frame</th><th>Tiết diện</th><th>Case / Combo</th><th>Step</th><th>Element</th><th>x local 1<br><small>(m)</small></th><th>x/L</th><th>Vị trí</th><th>Nguồn</th><th>Bộ lực / Đồng hạng</th></tr></thead><tbody id="extreme-results"></tbody></table></div>
-<div class="actions"><button id="extreme-prev">Trước</button><span id="extreme-page">0 dòng</span><button id="extreme-next">Sau</button></div></section>
+<div class="actions"><button id="extreme-prev">Trước</button><span id="extreme-page">0 dòng</span><button id="extreme-next">Sau</button></div><section id="section-summary-panel" aria-labelledby="section-summary-title"><h3 id="section-summary-title">Summary cực trị theo Section</h3><p class="result-note muted">Summary xét cả 6 thành phần tại vị trí đã chọn, độc lập với bộ lọc thành phần ở bảng chi tiết. Mỗi hàng giữ bộ lực tại đúng dòng chi phối; envelope/modal không phải bộ lực đồng thời để thiết kế liên kết.</p><div class="actions"><button id="section-summary" type="button" class="primary">Tạo Summary theo Section</button><button id="section-summary-more" type="button" aria-expanded="false">Xem thêm M2 / V3 / T ▾</button><button id="section-summary-json" type="button">Tải Summary JSON</button></div><p id="section-summary-status" class="result-note" role="status"></p><p id="section-summary-missing" class="result-note position-warning"></p><div class="table-wrap"><table><thead id="section-summary-head"></thead><tbody id="section-summary-results"></tbody></table></div><div class="actions"><button id="section-summary-prev" type="button">Trước</button><span id="section-summary-page">0 dòng</span><button id="section-summary-next" type="button">Sau</button></div></section>
+</section>
 </div><section class="card help" id="help-panel"><details><summary>Hướng dẫn thao tác</summary><ol><li>Mở và lưu model SAP2000 26.2.0; chạy phân tích.</li><li>Kết nối model, kiểm tra tên file, chọn Output Cases.</li><li>Chọn frame objects trong SAP2000.</li><li>Quay lại panel và bấm “Lấy nội lực cấu kiện đang chọn”.</li><li>Tải JSON/CSV hoặc tìm extreme case.</li></ol><p class="muted">Panel này chạy trên máy của bạn. Chưa gửi dữ liệu lên cloud, chưa tính Cb và chưa gán/chỉnh sửa model.</p><p>Windows connector: <a href="API_IF_SAP26.2.0_V1.zip" download>Download SAP2000 26.2.0 API kit</a>. Extract to C:\geek_calculus\SAP2000-API and run install-web-launcher.cmd once on each Windows device. Then click SAP2000-API on GeekCalculus and approve the browser / Administrator prompts. The launcher opens this panel with a local token. Browser local-network permission may be required.</p></details></section></fieldset>
 <dialog id="extreme-member-picker" class="extreme-member-picker" aria-labelledby="extreme-member-title"><div class="member-dialog-header"><h2 id="extreme-member-title">Cấu kiện được chọn</h2><button id="extreme-member-done" type="button">Xong</button></div><label for="extreme-member-search">Tìm Frame / Section</label><input id="extreme-member-search" type="search" placeholder="Frame / Section"><div class="actions"><button id="extreme-members-all" type="button">Chọn các mục đang hiển thị</button><button id="extreme-members-none" type="button">Bỏ chọn tất cả</button></div><p id="extreme-member-count" class="result-note" role="status"></p><div id="extreme-member-options" class="extreme-member-options"></div><p class="result-note muted">Tìm cực trị riêng cho từng cấu kiện được chọn trong dữ liệu đã xuất.</p></dialog>
 <dialog id="extreme-dialog" aria-labelledby="extreme-dialog-title"><div class="dialog-header"><h2 id="extreme-dialog-title">Bộ lực tại dòng chi phối</h2><button id="extreme-dialog-close" type="button" autofocus>Đóng</button></div><p id="extreme-dialog-meta" class="dialog-meta"></p><div class="table-wrap"><table><thead><tr><th>Frame</th><th>Tiết diện</th><th>Case / Combo</th><th>Step</th><th>Element</th><th>x local 1<br><small>(m)</small></th><th>x/L</th><th>Vị trí</th><th>P<br><small>(kN)</small></th><th>V2<br><small>(kN)</small></th><th>V3<br><small>(kN)</small></th><th>T<br><small>(kN·m)</small></th><th>M2<br><small>(kN·m)</small></th><th>M3<br><small>(kN·m)</small></th><th>Nguồn</th><th>Đồng thời</th></tr></thead><tbody id="extreme-dialog-results"></tbody></table></div><p id="extreme-dialog-note" class="result-note muted"></p></dialog>
@@ -102,7 +104,7 @@ function applyPanelLanguage(lang=panelLanguage){
  document.title=lang==='en'?'SAP2000 · Internal forces':'SAP2000 · Xuất nội lực';
  const words={"Xuất nội lực cấu kiện": "Export member forces", "1. Kết nối model": "1. Connect model", "2. Output Cases & Combos": "2. Output Cases & Combos", "3. Cấu kiện đã chọn": "3. Selected members", "4. Kết quả nội lực": "4. Internal forces", "5. Extreme Cases & Combos": "5. Extreme Cases & Combos", "Mã kết nối local": "Local connector token", "Quét SAP2000 đang mở": "Scan running SAP2000", "File SAP2000 / PID": "SAP2000 file / PID", "Cấu hình DLL nâng cao": "Advanced DLL settings", "Đường dẫn SAP2000v1.dll": "SAP2000v1.dll path", "Kết nối / Làm mới model": "Connect / Refresh model", "PID đã kết nối": "Connected PID", "File đang hoạt động": "Active model file", "Trạng thái": "Status", "Tìm case / combination": "Find case / combination", "Loại output": "Output type", "Chọn các mục đang hiển thị": "Select visible items", "Bỏ chọn tất cả": "Clear all selections", "Chỉ Load Cases": "Load Cases only", "Chỉ Load Combinations": "Load Combinations only", "Đọc lựa chọn hiện tại": "Read current selection", "Lấy nội lực cấu kiện đang chọn": "Extract selected member forces", "Tải dữ liệu JSON": "Download raw JSON", "Xuất liên kết CSV": "Export connection CSV", "Tải vị trí / nội suy JSON": "Download positions / interpolation JSON", "Cấu kiện": "Member", "Tiết diện": "Section", "Vị trí dọc cấu kiện": "Member position", "Tất cả station": "All stations", "Cả 5 vị trí": "All five positions", "Loại section": "Section type", "Xóa bộ lọc": "Reset filters", "Tất cả": "All", "Section và thành phần Nonprismatic": "Sections and Nonprismatic segments", "Nhóm": "Group", "Thành phần": "Component", "Cực trị": "Extreme", "Giá trị có dấu": "Signed value", "|Giá trị|": "|Value|", "Vị trí": "Position", "Nguồn": "Source", "Bộ lực / Đồng hạng": "Force vector / Ties", "Tìm cực trị cho cấu kiện": "Member scope", "Theo từng cấu kiện": "Per member", "Theo toàn bộ nhóm đã xuất": "Entire exported group", "Vị trí khảo sát cực trị": "Extreme evaluation position", "Tất cả station gốc": "All original stations", "Thành phần nội lực": "Force component", "Tất cả: P, V2, V3, T, M2, M3": "All: P, V2, V3, T, M2, M3", "Xác định Min / Max / Absolute": "Find Min / Max / Absolute", "Tải extreme JSON": "Download extremes JSON", "Trước": "Previous", "Sau": "Next", "Hướng dẫn thao tác": "Quick instructions"};
  const labels=lang==='en'?words:{'2. Output Cases & Combos':'2. Load Cases & Tổ hợp tải','5. Extreme Cases & Combos':'5. Cực trị Case & Combo','Frame':'Cấu kiện','Element':'Phần tử'};
- Object.assign(words,{'Frame':'Member','Element':'Element','Chọn cấu kiện':'Choose members','Xong':'Done','Cấu kiện được chọn':'Selected members','Tìm Frame / Section':'Find Frame / Section','Tìm cực trị riêng cho từng cấu kiện được chọn trong dữ liệu đã xuất.':'Find extremes separately for each selected member in the exported dataset.','Đóng':'Close','Bộ lực tại dòng chi phối':'Governing force vectors','Đồng thời':'Concurrency',
+ Object.assign(words,{'Frame':'Member','Element':'Element','Summary cực trị theo Section':'Extreme summary by Section','Tạo Summary theo Section':'Build Section summary','Tải Summary JSON':'Download Summary JSON','Summary xét cả 6 thành phần tại vị trí đã chọn, độc lập với bộ lọc thành phần ở bảng chi tiết. Mỗi hàng giữ bộ lực tại đúng dòng chi phối; envelope/modal không phải bộ lực đồng thời để thiết kế liên kết.':'Summary evaluates all six components at the selected position, independently of the detailed component filter. Each row retains its governing force vector; envelope/modal rows are not concurrent connection design vectors.','Chọn cấu kiện':'Choose members','Xong':'Done','Cấu kiện được chọn':'Selected members','Tìm Frame / Section':'Find Frame / Section','Tìm cực trị riêng cho từng cấu kiện được chọn trong dữ liệu đã xuất.':'Find extremes separately for each selected member in the exported dataset.','Đóng':'Close','Bộ lực tại dòng chi phối':'Governing force vectors','Đồng thời':'Concurrency',
  'Chọn cấu kiện trong SAP2000, sau đó quay lại đây để lấy nội lực. Đơn vị: kN · m · kN.m; giữ nguyên trục local SAP2000.':'Select members in SAP2000, then return here to extract forces. Units: kN · m · kN·m; SAP2000 local axes are preserved.',
  'Quét các phiên SAP2000 đang mở và chọn đúng file model muốn xuất nội lực.':'Scan running SAP2000 instances and select the model to export.',
  'Không cần tìm hoặc nhập PID thủ công.':'No manual PID lookup is needed.',
@@ -142,6 +144,7 @@ const pageSize=100;
 let caseAnchor=null;
 let extremePage=0;
 const extremeFrames=new Set();
+let sectionSummaryData=null,sectionSummaryPage=0,sectionSummaryExpanded=false;
 if(token)$('token-entry').hidden=true;
 function message(text,error=false){$('status').textContent=text;$('status').classList.toggle('error',error)}
 function syncButtons(){
@@ -149,7 +152,13 @@ function syncButtons(){
  $('position-json').disabled=!positionData;
  $('json').disabled=!dataset;for(const id of ['csv','extremes'])$(id).disabled=!dataset||!dataset.rows.length;
  $('extreme-json').disabled=!extremeData;
- if($('scope').value==='selected'&&!extremeFrames.size)$('extremes').disabled=true;
+ const noMembers=!dataset||!dataset.rows.length||($('scope').value==='selected'&&!extremeFrames.size);
+ $('extreme-position').disabled=noMembers;$('extreme-component').disabled=noMembers;$('section-summary').disabled=noMembers;
+ if(noMembers)$('extremes').disabled=true;
+ $('section-summary-json').disabled=!sectionSummaryData;$('section-summary-more').disabled=!sectionSummaryData;
+ const summaryTotal=sectionSummaryData?sectionSummaryEntries().length:0;
+ $('section-summary-prev').disabled=!sectionSummaryData||sectionSummaryPage===0;
+ $('section-summary-next').disabled=!sectionSummaryData||(sectionSummaryPage+1)*pageSize>=summaryTotal;
  $('extreme-prev').disabled=!extremeData||extremePage===0;
  $('extreme-next').disabled=!extremeData||(extremePage+1)*pageSize>=(extremeData.data.length*3);
  $('prev').disabled=!dataset||page===0;
@@ -297,7 +306,69 @@ function renderExtremeDialog(){if(!activeExtreme)return;const {item,type,governi
 }
 $('extreme-dialog-close').onclick=()=>$('extreme-dialog').close();
 $('extreme-dialog').addEventListener('close',()=>{activeExtreme=null});
-function clearExtremes(){if($('extreme-dialog').open)$('extreme-dialog').close();activeExtreme=null;extremeData=null;extremePage=0;$('extreme-results').replaceChildren();$('extreme-summary').textContent='';$('extreme-missing').textContent='';$('extreme-page').textContent='0 dòng';syncButtons()}
+// BEGIN_SECTION_SUMMARY
+// Reduction of already computed per-member extremes; no force components are combined.
+function buildSectionSummary(result,members){
+ const metadata=new Map(members.map(member=>[member.frame,member]));
+ const grouped=new Map();
+ for(const item of result.data){
+  const section=metadata.get(item.group)?.section||null;
+  // Missing section metadata must not merge unrelated frames into one section.
+  const key=JSON.stringify([section||{frame:item.group},item.component]);
+  if(!grouped.has(key))grouped.set(key,{section,frame:section?null:item.group,component:item.component,items:[]});
+  grouped.get(key).items.push(item);
+ }
+ function reduce(items,type){
+  const values=items.map(item=>item[type].value),value=type==='min'?Math.min(...values):Math.max(...values);
+  const recordIds=new Set(),previews=new Map();
+  for(const item of items){const g=item[type];if(g.value!==value)continue;
+   for(const id of g.record_ids)recordIds.add(id);
+   for(let i=0;i<g.rows.length;i++){const row=g.rows[i];if(!previews.has(row.record_id)&&previews.size<20)previews.set(row.record_id,{row,location:g.locations[i]})}
+  }
+  return {value,record_ids:[...recordIds],tie_count:recordIds.size,rows:[...previews.values()].map(p=>p.row),locations:[...previews.values()].map(p=>p.location),rows_truncated:recordIds.size>previews.size};
+ }
+ const order=['M3','V2','P','M2','V3','T'];
+ const data=[...grouped.values()].map(g=>({group:g.section||('Frame '+g.frame+' — section unavailable'),section:g.section,component:g.component,min:reduce(g.items,'min'),max:reduce(g.items,'max')}));
+ data.sort((a,b)=>a.group.localeCompare(b.group,undefined,{numeric:true})||order.indexOf(a.component)-order.indexOf(b.component));
+ return {...result,scope:'section',source_scope:result.scope,aggregation:'assigned_section',summary_version:1,data};
+}
+// END_SECTION_SUMMARY
+function sectionSummaryEntries(){return (sectionSummaryData?.data||[]).filter(item=>sectionSummaryExpanded||['M3','V2','P'].includes(item.component)).flatMap(item=>['min','max'].map(type=>({item,type,governing:item[type]})))}
+function clearSectionSummary(){sectionSummaryData=null;sectionSummaryPage=0;sectionSummaryExpanded=false;renderSectionSummary()}
+function renderSectionSummary(){
+ const components=sectionSummaryExpanded?['P','V2','M3','V3','M2','T']:['P','V2','M3'];
+ const head=$('section-summary-head');head.replaceChildren();const tr=document.createElement('tr');
+ const headings=[[ui('Tiết diện','Section')],[ui('Điều kiện cực trị','Extreme condition')],['Case / Combo'],['Frame'],['x local 1','m'],[ui('Vị trí','Position')],['Step'],...components.map(c=>[c,['P','V2','V3'].includes(c)?'kN':'kN·m']),[ui('Bộ lực / Đồng hạng','Force vector / Ties')]];
+ for(const [label,unit] of headings){const th=document.createElement('th');th.textContent=label;if(unit){const small=document.createElement('small');small.textContent='('+unit+')';th.append(document.createElement('br'),small)}tr.append(th)}head.append(tr);
+ const body=$('section-summary-results');body.replaceChildren();const entries=sectionSummaryEntries(),start=sectionSummaryPage*pageSize;
+ for(const {item,type,governing:g} of entries.slice(start,start+pageSize)){const row=g.rows[0],loc=g.locations[0];
+  tableRow(body,[item.group,item.component+'-'+type,row.output_case,row.frame,displayNumber(loc.station),loc.position,row.step_type+' '+row.step_num,...components.map(c=>displayForce(row[c])),'']);
+  const resultRow=body.lastElementChild;resultRow.classList.toggle('interpolated',loc.method==='linear');resultRow.title=ui('Đồng thời: ','Concurrency: ')+row.concurrency;
+  const button=document.createElement('button');button.type='button';button.textContent=ui('Xem bộ lực','View forces')+' ('+g.tie_count+')';button.onclick=()=>openExtremeDialog(item,type,g);resultRow.lastElementChild.append(button);
+ }
+ $('section-summary-status').textContent=sectionSummaryData?[...new Set(sectionSummaryData.data.map(item=>item.group))].length+ui(' section · Min/Max theo Section · ',' sections · Min/Max by Section · ')+$('extreme-position').selectedOptions[0].textContent:'';
+ const missing=sectionSummaryData?.unavailable_positions||[];
+ $('section-summary-missing').textContent=missing.length?missing.length+ui(' mốc thiếu dữ liệu; xem JSON để kiểm tra.',' positions unavailable; inspect JSON for details.'):'';
+ $('section-summary-page').textContent=entries.length?(start+1)+'–'+Math.min(start+pageSize,entries.length)+' / '+entries.length+ui(' dòng',' rows'):ui('0 dòng','0 rows');
+ $('section-summary-more').textContent=sectionSummaryExpanded?ui('Thu gọn M2 / V3 / T ▴','Hide M2 / V3 / T ▴'):ui('Xem thêm M2 / V3 / T ▾','Show M2 / V3 / T ▾');$('section-summary-more').setAttribute('aria-expanded',String(sectionSummaryExpanded));
+}
+$('section-summary').onclick=()=>run(async()=>{
+ if(sectionSummaryData){renderSectionSummary();return}
+ const selected=$('scope').value==='selected',frames=[...extremeFrames];
+ if(selected&&!frames.length)throw new Error(ui('Chọn ít nhất một cấu kiện.','Select at least one member.'));
+ message(ui('Đang tổng hợp cực trị theo Section…','Building Section extreme summary…'));
+ const allComponents=['M3','V2','P','M2','V3','T'];
+ // Reuse compatible detailed results; otherwise process exported data once, never reread SAP.
+ const reusable=extremeData?.scope==='per_frame'&&extremeData.position===$('extreme-position').value&&allComponents.every(c=>extremeData.components.includes(c));
+ const result=reusable?extremeData:await api('/extremes',{dataset,scope:'per_frame',position:$('extreme-position').value,components:allComponents,...(selected?{frames}:{})});
+ sectionSummaryData=buildSectionSummary(result,dataset.members||[]);if(selected)sectionSummaryData.selected_frames=frames;
+ sectionSummaryPage=0;renderSectionSummary();message(ui('Đã tổng hợp cực trị theo Section từ dữ liệu đã xuất.','Section extremes summarized from the exported data.'));
+});
+$('section-summary-more').onclick=()=>{sectionSummaryExpanded=!sectionSummaryExpanded;sectionSummaryPage=0;renderSectionSummary();syncButtons()};
+$('section-summary-prev').onclick=()=>{sectionSummaryPage--;renderSectionSummary();syncButtons()};
+$('section-summary-next').onclick=()=>{sectionSummaryPage++;renderSectionSummary();syncButtons()};
+$('section-summary-json').onclick=()=>download(sectionSummaryData,'sap2000-section-summary.json');
+function clearExtremes(clearSummary=true){if(clearSummary)clearSectionSummary();if($('extreme-dialog').open)$('extreme-dialog').close();activeExtreme=null;extremeData=null;extremePage=0;$('extreme-results').replaceChildren();$('extreme-summary').textContent='';$('extreme-missing').textContent='';$('extreme-page').textContent='0 dòng';syncButtons()}
 function renderExtremes(){const body=$('extreme-results');body.replaceChildren();if(!extremeData)return;
  const members=new Map((dataset?.members||[]).map(m=>[m.frame,m]));
  const entries=extremeData.data.flatMap(item=>['min','max','absolute'].map(type=>({item,type,governing:item[type]})));
@@ -315,7 +386,7 @@ function renderExtremes(){const body=$('extreme-results');body.replaceChildren()
 $('scope').onchange=()=>{clearExtremes();renderExtremeMembers();if($('scope').value==='selected')openExtremeMemberPicker()};
 for(const id of ['extreme-position','extreme-component'])$(id).onchange=clearExtremes;
 $('extreme-prev').onclick=()=>{extremePage--;renderExtremes()};$('extreme-next').onclick=()=>{extremePage++;renderExtremes()};
-$('extremes').onclick=()=>run(async()=>{clearExtremes();message(ui('Đang xác định extreme case…','Finding extreme cases…'));const component=$('extreme-component').value,selected=$('scope').value==='selected',frames=[...extremeFrames];
+$('extremes').onclick=()=>run(async()=>{clearExtremes(false);message(ui('Đang xác định extreme case…','Finding extreme cases…'));const component=$('extreme-component').value,selected=$('scope').value==='selected',frames=[...extremeFrames];
  if(selected&&!frames.length)throw new Error(ui('Chọn ít nhất một cấu kiện.','Select at least one member.'));
  extremeData=await api('/extremes',{dataset,scope:selected?'per_frame':$('scope').value,...(selected?{frames}:{}),position:$('extreme-position').value,...(component?{components:[component]}:{})});if(selected)extremeData.selected_frames=frames;renderExtremes();
  message(extremeData.data.length?ui('Đã xác định cực trị và vị trí local tại từng dòng chi phối. Mở bộ lực để xem Case/Combo và các dòng đồng hạng.','Extremes and local positions found. Open View forces for governing Case/Combo and tied rows.'):ui('Không có dữ liệu tại vị trí khảo sát. Xem lý do và tải JSON để kiểm tra.','No data at the evaluation position. Review the reasons and download JSON to verify.'));});
@@ -323,8 +394,8 @@ $('extreme-json').onclick=()=>download(extremeData,'sap2000-extremes.json');
 for(const language of ['vi','en'])$('lang-'+language).onclick=()=>{
  const url=new URL(location.href);url.searchParams.set('lang',language);history.replaceState(null,'',url.pathname+url.search);applyPanelLanguage(language);
  for(const id of ['filter-frame','filter-section','filter-case','filter-step']){const select=$(id);if(select.options[0]?.value==='')select.options[0].textContent=ui('Tất cả','All')}
- renderExtremeMembers();if(cases.length)renderCases();if(dataset){renderMemberInfo(dataset.members);renderResults();}if(extremeData)renderExtremes();if(activeExtreme)renderExtremeDialog();
+ renderExtremeMembers();if(cases.length)renderCases();if(dataset){renderMemberInfo(dataset.members);renderResults();}if(extremeData)renderExtremes();renderSectionSummary();if(activeExtreme)renderExtremeDialog();
 };
 applyPanelLanguage();
-syncButtons();if(token){let ready=false;run(async()=>{const cfg=await api('/connection');$('dll').value=cfg.dll_path;await scanInstances(cfg.pid);ready=Boolean(selectedInstance())}).then(()=>{if(ready)$('connect').click()})}
+renderSectionSummary();syncButtons();if(token){let ready=false;run(async()=>{const cfg=await api('/connection');$('dll').value=cfg.dll_path;await scanInstances(cfg.pid);ready=Boolean(selectedInstance())}).then(()=>{if(ready)$('connect').click()})}
 </script></main></body></html>

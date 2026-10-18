@@ -16,8 +16,13 @@ if errorlevel 1 (
     echo V2 requires Python 3.11 or newer, 64-bit. Recreate this V2 .venv with Python 64-bit.
     goto failed
 )
-".venv\Scripts\python.exe" -m pip install --disable-pip-version-check -r requirements-windows.txt
+".venv\Scripts\python.exe" -m pip install --disable-pip-version-check -r requirements-test.lock -r requirements-windows.txt
 if errorlevel 1 goto failed
+".venv\Scripts\python.exe" -c "import uvicorn,fastapi,pydantic,clr"
+if errorlevel 1 (
+    echo V2 dependencies are incomplete. Read the installation error above and retry this launcher.
+    goto failed
+)
 ".venv\Scripts\python.exe" -m structural_engine.sap2000_v2.run_connector %*
 if errorlevel 1 goto failed
 exit /b 0

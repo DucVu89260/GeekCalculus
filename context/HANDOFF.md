@@ -1,5 +1,10 @@
 # Repository handoff
 
+## SAP V2 launcher missing web dependencies — 2026-10-18
+
+- User Windows traceback showed missing uvicorn. Confirmed package bug: V2 launcher installed requirements-windows.txt (pythonnet only), omitting requirements-test.lock (FastAPI/Uvicorn pins). Fixed V2 launcher to explicitly install both files, then preflight import uvicorn/fastapi/pydantic/clr. No V1 changes. Rebuilt source kit as2026.10.18-v2-local.2 with refreshed SHA256 manifest/checksum.
+- Regression test `tests/test_sap_v2_kit.py` passed (launcher dependency closure and preflight order). Extracted new ZIP, created fresh /tmp Python venv, successfully installed both requirement files and imported/served V2 panel with TestClient from outside checkout. Windows pythonnet marker excluded on Linux; actual Windows/SAP acceptance remains unrun. Existing Starlette/httpx warning persists. User can repair installed kit with `.venv\Scripts\python.exe -m pip install -r requirements-test.lock -r requirements-windows.txt`, or replace kit files with .2 while retaining V2 .venv.
+
 ## SAP2000 API V2 local preview — 2026-10-18
 
 - Separate `structural_engine/sap2000_v2` implementation, build2026.10.18-v2-local.1; V1 source/ZIP and hosted navigation/assets unchanged. Runtime-reflected allowlisted getters, named outputs/signatures/statuses and reference metadata pinned to SAP-Tooltips commit608415951abf7c601c3939ed0296cd1daa45eda5. New schema2 snapshots cover member identification, sections/nonprismatic components/properties, materials/overwrites, geometry/axes, assignments/modifiers, loads/combo definitions, endpoint response, design setup/AISC360-10 preferences35/overwrites43 and available SAP design results. Unsupported/failed/missing values remain explicit. No strength/Cb calculations or automatic analysis/design. Reuses unchanged V1 force DTO and processing, including inherited filters/extremes/section summary.

@@ -1,10 +1,10 @@
 {
   "sap2000_version": "26.2.0",
   "api_name": "API_IF_SAP26.2.0_V1",
-  "build_id": "2026.10.18-web-panel.16",
+  "build_id": "2026.10.18-web-panel.17",
   "input_archive": "SAP2000_26.2.0-API.zip",
   "input_sha256": "9e0e9a2973727c6e8c6156415efa17efdb846791ac149afb551014eae0718905",
-  "distribution_sha256": "a3404578c5114af740985dcbd57a8029b781815a2b1228ec48f4042846a6ea4c",
+  "distribution_sha256": "dafbd2ae88eb0edf43922a4f12ed5a012597811c968406a0273f29dc40a3c13c",
   "panel_layout": "CSS byte-identical to the uploaded package",
   "transport": "authenticated loopback Windows connector"
 }

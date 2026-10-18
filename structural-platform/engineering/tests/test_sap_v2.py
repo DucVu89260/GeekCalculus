@@ -155,3 +155,41 @@ def test_sc1_tapered_end_geometry_and_material_strengths_are_api_values_not_name
     assert data['materials']['SteelA']['normalized']['Fy_MPa']==345.
     assert data['materials']['SteelA']['normalized']['Fu_MPa']==510.
     assert model.units==9
+
+
+def test_mytype_signature_and_literal_none_overwrite_resolve_component_material():
+    from structural_engine.sap2000_v2.reflection import block
+    from structural_engine.sap2000_v2.registry import GETTERS
+    model=SteelModel()
+    class ActualNamesRuntime(FixtureRuntime):
+        def read(self,key,**inputs):
+            if key=='section_type':
+                return block('ok',GETTERS[key].path,data={'MyType':99 if inputs['Name']=='NP1' else 1})
+            if key=='material_overwrite':
+                return block('ok',GETTERS[key].path,data={'PropName':'None'})
+            return super().read(key,**inputs)
+    with gateway(model) as sap:
+        result=SteelReader(sap,ActualNamesRuntime(model)).snapshot(SnapshotRequest(expected_model='model.sdb'))
+    assert result['sections']['NP1']['segments'][0]['start_section']=='I300'
+    assert result['sections']['I300']['i_dimensions_mm']['h']==300.
+    assert result['members'][1]['data']['materials']['effective_material']=='SteelA'
+    assert 'None' not in result['materials']
+    assert result['materials']['SteelA']['normalized']['Fy_MPa']==345.
+    assert result['materials']['SteelA']['normalized']['Fu_MPa']==510.
+
+
+def test_unresolved_enum_requires_successful_i_getter_not_section_name_guess():
+    from structural_engine.sap2000_v2.reflection import block
+    from structural_engine.sap2000_v2.registry import GETTERS
+    model=SteelModel()
+    class UnknownEnumRuntime(FixtureRuntime):
+        def read(self,key,**inputs):
+            if key=='section_type':return block('ok',GETTERS[key].path,data={'UnexpectedType':123})
+            if key=='shape_i' and inputs['Name']=='bad':return block('unavailable',GETTERS[key].path,code=1)
+            return super().read(key,**inputs)
+    with gateway(model) as sap:
+        reader=SteelReader(sap,UnknownEnumRuntime(model))
+        good=reader.section('600212610');bad=reader.section('bad')
+    assert good['i_dimensions_mm']['h']==500.
+    assert good['geometry']['source']=='PropFrame.GetISection'
+    assert 'i_dimensions_mm' not in bad and bad['geometry']['status']=='unsupported'

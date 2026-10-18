@@ -133,3 +133,7 @@ User completed V1 and requests a separate local-first V2 using SAP-Tooltips as r
 ## V2 tapered I-section and steel strength presentation — 2026-10-18
 
 Expose explicit ordered Nonprismatic segment endpoints and I-section geometry labels (h,bf-top,tf-top,tw,bf-bottom,tf-bottom in mm), resolving component sections rather than parsing their names. Show a member/section engineering summary alongside raw data with endpoint section/material/Fy/Fu in MPa. Preserve member material overwrite precedence; display read design Fy override separately, never infer program-determined effective strengths. Add independent SC1 H300/H700 dimensional and material fixtures, browser checks and rebuild local-only preview kit. Windows SAP verification remains pending.
+
+## V2 live component-read compatibility — 2026-10-18
+
+Handle CSI literal None material overwrite as unassigned; accept reflected section-type output MyType and PropType; use successful typed I getter as verification if enum mapping unresolved. Keep failed geometry diagnostic available in summary. Verify source names/None sentinel in synthetic snapshot and browser, then package local.4; real user DLL snapshot needed if failure persists.

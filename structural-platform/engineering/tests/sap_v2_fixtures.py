@@ -21,7 +21,7 @@ class FixtureRuntime:
         elif key=='guid':data={'GUID':'synthetic-guid-'+name}
         elif key=='groups':data={'NumberGroups':2,'Groups':['ROOF','STEEL']}
         elif key=='design_procedure':data={'MyType':1}
-        elif key=='section_type':data={'PropType':99 if name=='NP1' else 1}
+        elif key=='section_type':data={'MyType':99 if name=='NP1' else 1}
         elif key=='section_properties':
             if name=='NP1':return block('unavailable',GETTERS[key].path,code=1,reason='No single nonprismatic property')
             data={'Area':.01,'As2':.004,'As3':.006,'Torsion':8e-7,'I22':1.2e-5,'I33':.00015,'S22':.00024,'S33':.001,'Z22':.0003,'Z33':.00115,'R22':.0346,'R33':.1225}
@@ -31,7 +31,7 @@ class FixtureRuntime:
         elif key=='nonprismatic_assignment':data={'PropName':'NP1' if name=='F2' else '','sVarTotalLength':0.,'sVarRelStartLoc':0.}
         elif key=='auto_select':data={'NumberItems':2,'SectName':['I300','I500'],'AutoStartSection':'I300','Notes':'','GUID':'auto'}
         elif key in ('section_modifiers','member_modifiers'):data={'Value':[1.,.8,.9,1.,.7,.6,1.,1.]}
-        elif key=='material_overwrite':data={'PropName':'SteelB' if name=='F2' else ''}
+        elif key=='material_overwrite':data={'PropName':'SteelB' if name=='F2' else 'None'}
         elif key=='material_type':data={'MatType':1,'Color':0,'Notes':'','GUID':'material-'+name}
         elif key=='material_isotropic':data={'e':200000000.,'u':.3,'a':1.2e-5,'g':76923076.92307693}
         elif key=='material_density':data={'w':77.,'m':7.85}

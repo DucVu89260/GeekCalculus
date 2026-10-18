@@ -1,6 +1,6 @@
 # SAP2000-API V2 — Local preview
 
-Build: `2026.10.18-v2-local.3` · Compatible with SAP2000 v26.2.0 · Windows 64-bit.
+Build: `2026.10.18-v2-local.4` · Compatible with SAP2000 v26.2.0 · Windows 64-bit.
 
 ## Chạy thử / Quick start
 

@@ -16,6 +16,12 @@ REFERENCE = json.loads(Path(__file__).with_name('reference.json').read_text())
 OK = ('ok', 'empty')
 
 
+def material_name(value):
+    # CSI uses the literal 'None' for an unassigned frame material overwrite.
+    return value if isinstance(value,str) and value.strip() and value.strip().casefold()!='none' else None
+
+
+
 @contextmanager
 def units_session(sap):
     previous = sap.model.GetPresentUnits()
@@ -120,11 +126,19 @@ class SteelReader:
             return block('invalid_data','PropFrame.GetNonPrismatic',reason='Cyclic or excessively nested section references')
         if name in self.sections:return self.sections[name]
         kind = self.read('section_type',Name=name)
-        code = field(kind,'PropType')
+        code = field(kind,'PropType',field(kind,'MyType'))
         kind_name = self.sap.section_type_names.get(code,'Unknown')
         normalized = re.sub('[^A-Z0-9]','',kind_name.upper()).removeprefix('SECTION')
         shape_key = SHAPES.get(normalized)
         geometry = self.read(shape_key,Name=name) if shape_key else block('unsupported','PropFrame geometry',reason='No verified shape getter for enum '+kind_name)
+        # Older/different API signatures can leave the enum unresolved. A successful
+        # typed GetISection read verifies geometry; never infer shape from its name.
+        if not shape_key and normalized not in ('VARIABLE','NONPRISMATIC'):
+            probe=self.read('shape_i',Name=name)
+            if probe['status']=='ok':
+                geometry=probe;shape_key='shape_i'
+                if kind_name=='Unknown':kind_name='I (verified GetISection)'
+            else:geometry={**geometry,'i_section_probe':probe}
         props = self.read('section_properties',Name=name)
         item = {'name':name,'type':kind,'type_name':kind_name,'geometry':geometry,
                 'properties':props,'properties_mm':canonical_properties(props),
@@ -181,8 +195,8 @@ class SteelReader:
             data=self.sections.get(name,{})
             for source in (data.get('geometry',{}),data.get('material_file',{})):
                 for key,value in (source.get('data') or {}).items():
-                    if 'matprop' in key.casefold() and isinstance(value,str) and value:names.append(value)
-        assigned=field(overwrite,'PropName')
+                    if 'matprop' in key.casefold() and material_name(value):names.append(material_name(value))
+        assigned=material_name(field(overwrite,'PropName'))
         if assigned:names.append(assigned)
         for name in dict.fromkeys(names):self.material(name)
         return {'library_materials':list(dict.fromkeys(names)), 'member_overwrite':overwrite,

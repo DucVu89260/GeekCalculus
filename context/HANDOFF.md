@@ -1,5 +1,10 @@
 # Repository handoff
 
+## V2 component geometry and None material overwrite — 2026-10-18
+
+- User live screenshot confirms Nonprismatic child names but blank geometry/Fy/Fu and literal material None. Fixed literal CSI `None` overwrite handling in backend and summary: no overwrite, resolve component library material; do not request a material named None. Added GetTypeOAPI output alias MyType alongside PropType. Unresolved enum now permits read-only GetISection probe; only success supplies I geometry, failures remain explicit with probe diagnostics. UI includes geometry status/type to make failed getters visible. Actual root cause of blank geometry on user's DLL not fully established without snapshot; do not claim confirmed live fix.
+- Preview2026.10.18-v2-local.4. Fourteen API/kit tests passed, including MyType+None fixture and unknown-enum/numeric-section-name success versus failed typed getter rejection. Shared synthetic browser fixture now returns MyType and None sentinel; full V2 Chromium smoke passed with those values. No name parsing or fabricated dimension/strength values; V1 unchanged. User must retry live RF1 and provide failed getter status/source if blank persists.
+
 ## V2 tapered I endpoints and material strength summary — 2026-10-18
 
 - Local preview2026.10.18-v2-local.3 adds explicit ordered Nonprismatic segments (start/end section, length/type/unit, EI33/EI22 variation), and I geometry aliases h/bf_top/tf_top/tw/bf_bottom/tf_bottom in mm from actual getter outputs, not section names. Existing raw data retained.

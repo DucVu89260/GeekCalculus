@@ -15,8 +15,15 @@ def opener(settings):
     with gateway(MODELS[settings.pid]) as sap:
         sap.connection_pid=settings.pid;yield sap
 
+class BrowserRuntime(FixtureRuntime):
+    def read(self,key,**inputs):
+        if key=='design_summary' and inputs.get('Name')=='F2':
+            from structural_engine.sap2000_v2.reflection import block
+            return block('empty','DesignSteel.GetSummaryResults',data={'NumberItems':0,'FrameName':[]})
+        return super().read(key,**inputs)
+
 def runner(operation,settings,payload=None):
-    return execute(operation,settings,payload,opener=opener,runtime_factory=FixtureRuntime)
+    return execute(operation,settings,payload,opener=opener,runtime_factory=BrowserRuntime)
 
 def scanner(settings):
     return [{'pid':pid,'model':model.GetModelFilename(),'filename':model.GetModelFilename().split('\\')[-1],

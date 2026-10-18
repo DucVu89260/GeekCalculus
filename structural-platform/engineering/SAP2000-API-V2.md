@@ -1,6 +1,6 @@
 # SAP2000-API V2 — Local preview
 
-Build: `2026.10.18-v2-local.6` · Compatible with SAP2000 v26.2.0 · Windows 64-bit.
+Build: `2026.10.18-v2-local.7` · Compatible with SAP2000 v26.2.0 · Windows 64-bit.
 
 ## Chạy thử / Quick start
 
@@ -61,3 +61,11 @@ Sau khi đọc snapshot với nhóm Sections và Materials, chọn Frame hoặc 
 ## Section type keywords (local.6)
 
 Bảng Section thành phần có cột **Loại tiết diện SAP / Key**. JSON của section và tham chiếu component có `section_type`: `key`, `sap_label`, enum name/code gốc, nguồn nhận diện và trạng thái routing. Các key: `i_wide_flange`, `channel`, `tee`, `angle`, `double_angle`, `double_channel`, `pipe`, `tube`, `rectangular`, `circular`, `auto_select_list`, `steel_joist`. Loại cha Nonprismatic là `nonprismatic` / `component_dependent`; cần xét từng component. Auto-select là `selection_list`; Steel Joist là `specialized_workflow`. General/Section Designer/hybrid/cold-formed hoặc loại chưa ánh xạ giữ `manual_review` để kiểm tra thủ công. Key nhận diện hình học không chứng minh module tính cường độ đã hỗ trợ; `design_check_status` luôn `not_evaluated`. Vật liệu và điều kiện áp dụng tiêu chuẩn phải kiểm tra riêng.
+
+## Hồ sơ tập trung / Focused profile (local.7)
+
+UI hồ sơ còn9 nhóm: identity, sections, materials, geometry, assignments, modifiers, design_setup, design_overwrites, design_results. Bỏ3 checkbox loads/forces/displacements và không gửi các nhóm này khi chọn đủ nhóm. Xuất nội lực, Case/Combo, cực trị và Summary phía dưới vẫn hoạt động riêng. API nhóm cũ giữ tương thích cho client đã dùng; thay đổi này áp dụng cho luồng UI hồ sơ.
+
+Chọn Releases/Offsets/Springs/Hinges để đọc assignments và nguồn/trạng thái từng getter. Releases có thứ tự U1/U2/U3/R1/R2/R3, true=released; giá trị partial fixity giữ riêng. End offsets có đơn vị m, rigid-zone factor không thứ nguyên. Không có spring/hinge trả empty nếu SAP getter xác nhận; getter không hỗ trợ/lỗi không suy thành không gán. Preferences35 và overwrites43 chỉ ánh xạ AISC360-10, giữ Value/ProgDet và nguồn. Không chạy StartDesign.
+
+Kết quả Steel Design đọc theo từng frame. Khi SAP xác nhận chưa có kết quả toàn model hoặc getter member thành công nhưng trả0 records, hiển thị chính xác **Members have not been designed** (`status=not_designed`). Nếu getter lỗi/không xác nhận được availability, hiển thị unavailable cùng lý do thay vì kết luận chưa design. Thông báo không tự chạy thiết kế; cần thao tác trong SAP rồi đọc lại hồ sơ.

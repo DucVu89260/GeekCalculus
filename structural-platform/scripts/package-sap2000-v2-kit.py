@@ -29,7 +29,7 @@ def main():
             manifest[name] = hashlib.sha256(data).hexdigest()
         archive.writestr('manifest.sha256.json', json.dumps(manifest, indent=2))
         archive.writestr('BAT-DAU.txt',
-            'SAP2000-API V2 local preview — 2026.10.18-v2-local.6\n'
+            'SAP2000-API V2 local preview — 2026.10.18-v2-local.7\n'
             'Extract ALL files to C:\\geek_calculus\\SAP2000-API\\V2\n'
             'Stop V1 connector with Ctrl+C; keep SAP2000 26.2.0 open.\n'
             'Run start-sap2000-v2.cmd at the same Windows user/elevation as SAP.\n'

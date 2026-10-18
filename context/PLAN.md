@@ -145,3 +145,7 @@ Live local.3 JSON confirms successful GetISection with T3/T2/Tf/Tw/T2b/Tfb and s
 ## V2 component shape keywords for module routing — 2026-10-18
 
 Add SAP display type plus stable shape key to section catalog/component references and summary table. Classify installed enum names (not hardcoded enum codes or section names) for user's12 families; Nonprismatic remains component-dependent, auto-select a selection list, joist specialized, unrecognized/special types manual_review. Shape identification is not a supported/validated strength check. Verify mapping, unknown/typed-probe boundaries, child references and browser/export; package local.6 without V1/website changes.
+
+## V2 focused profile groups and per-member design status — 2026-10-18
+
+Remove loads/forces/displacements only from profile UI/request, retaining lower force workflow and backward-compatible API groups. Retain assignment/release/offset/spring/hinge and AISC360-10 preference/overwrite extraction. Clarify release DOF and offset units. Per-member design result status distinguishes global false and successful empty member summary (Members have not been designed) from unknown/failed getters. No automatic SAP design. Verify9 UI groups/requests, assignments/prefs/overwrites/member result cases, lower extraction and clean kit.

@@ -66,7 +66,7 @@ def test_code_mismatch_does_not_query_aisc_indices_or_fake_design_results():
     _,data=read(model,groups=['design_setup','design_overwrites','design_results'])
     assert data['model_data']['steel_design']['preferences']['status']=='unsupported'
     assert data['members'][0]['data']['design_overwrites']['status']=='unsupported'
-    assert data['members'][0]['data']['design_results']['summary']['status']=='unavailable'
+    assert data['members'][0]['data']['design_results']['summary']['status']=='not_designed'
     assert not any(key in ('preference','overwrite','design_summary') for key,_,_ in model.v2_calls)
 
 def test_unlocked_definition_reads_work_but_outputs_need_explicit_cases_and_analysis():
@@ -204,3 +204,43 @@ def test_installed_dll_uppercase_i_dimensions_match_normalized_lowercase_contrac
     assert section['i_dimensions_mm']=={'h':300.,'bf_top':150.,'tf_top':12.,'tw':8.,'bf_bottom':150.,'tf_bottom':12.}
     assert result['members'][0]['data']['materials']['effective_material']=='SteelA'
     assert 'None' not in result['materials']
+
+
+def test_design_status_is_per_member_and_failed_getter_is_not_mislabeled_undesigned():
+    from structural_engine.sap2000_v2.reflection import block
+    from structural_engine.sap2000_v2.registry import GETTERS
+    model=SteelModel()
+    class MixedDesignRuntime(FixtureRuntime):
+        def read(self,key,**inputs):
+            if key=='design_summary' and inputs['Name']=='F2':
+                self.model.v2_calls.append((key,inputs,self.model.units))
+                return block('empty',GETTERS[key].path,data={'NumberItems':0,'FrameName':[]})
+            return super().read(key,**inputs)
+    with gateway(model) as sap:
+        result=SteelReader(sap,MixedDesignRuntime(model)).snapshot(SnapshotRequest(expected_model='model.sdb',groups=['design_results']))
+    assert result['members'][0]['data']['design_results']['status']=='ok'
+    empty=result['members'][1]['data']['design_results']
+    assert empty['status']=='not_designed' and empty['message']=='Members have not been designed'
+    assert any(key=='design_summary' and args['Name']=='F2' for key,args,_ in model.v2_calls)
+    class FailedDesignRuntime(FixtureRuntime):
+        def read(self,key,**inputs):
+            if key in ('design_available','design_summary'):return block('unavailable',GETTERS[key].path,code=1)
+            return super().read(key,**inputs)
+    with gateway(model) as sap:
+        result=SteelReader(sap,FailedDesignRuntime(model)).snapshot(SnapshotRequest(expected_model='model.sdb',groups=['design_results']))
+    assert result['members'][0]['data']['design_results']['status']=='unavailable'
+    assert result['members'][0]['data']['design_results']['message']!='Members have not been designed'
+
+
+def test_no_model_design_gives_exact_message_without_attempting_summary():
+    model=SteelModel();model.design_available=False
+    _,result=read(model,groups=['assignments','design_setup','design_overwrites','design_results'])
+    for member in result['members']:
+        assert member['data']['design_results']['message']=='Members have not been designed'
+        assert member['data']['assignments']['releases']['dof_order']==['U1','U2','U3','R1','R2','R3']
+        assert member['data']['assignments']['springs']['status']=='empty'
+        assert member['data']['assignments']['hinges']['status']=='empty'
+        assert member['data']['assignments']['end_offsets']['field_units']['Length1']=='m'
+        assert len(member['data']['design_overwrites'])==43
+    assert len(result['model_data']['steel_design']['preferences'])==35
+    assert not any(key=='design_summary' for key,_,_ in model.v2_calls)

@@ -110,6 +110,10 @@ class SteelReader:
             'design_summary':{'Ratio':'dimensionless, SAP result only','Location':'m from frame I end'},
         }
         if key in units:result['field_units']=units[key]
+        if key=='releases' and result['status'] in OK:
+            result['dof_order']=['U1','U2','U3','R1','R2','R3']
+            result['release_flag_meaning']='true = released; false = not released. Partial-fixity values retained separately.'
+        if key=='end_offsets':result['field_units']={'Length1':'m','Length2':'m','RZ':'dimensionless rigid-zone factor'}
         return result
 
     def modifiers(self, key, name):
@@ -234,6 +238,23 @@ class SteelReader:
                            'basis':'Keep ProgDet and Value separately; no effective program default is inferred'})
         return result
 
+    def design_results(self,frame,setup):
+        available=field(setup['available'],'return_value')
+        source='DesignSteel.GetSummaryResults'
+        if available is False:
+            summary=block('not_designed',source,reason='Members have not been designed')
+        elif available is True:
+            summary=self.read('design_summary',Name=frame,ItemType=0)
+            if summary['status'] in OK and (summary['status']=='empty' or field(summary,'NumberItems')==0):
+                summary={**summary,'status':'not_designed','reason':'Members have not been designed'}
+        else:
+            summary=block('unavailable',source,reason='Cannot confirm SAP steel design availability; check getter status')
+        status=summary['status']
+        return {'status':status,'message':('Members have not been designed' if status=='not_designed' else
+                    ('SAP Steel Design results available' if status in OK else 'SAP Steel Design results could not be read')),
+                'design_section':self.read('design_section',Name=frame),'summary':summary,
+                'basis':'Read existing results only; design availability is model-wide, summary is queried for this frame. No StartDesign.'}
+
     def load_catalog(self,requested):
         cases=requested or [type('Case',(),{'name':c['name'],'kind':c['kind']})() for c in self.sap.cases()]
         catalog={}
@@ -302,11 +323,7 @@ class SteelReader:
                 if 'modifiers' in groups:member['data']['modifiers']={'member':self.modifiers('member_modifiers',frame),'section':self.sections.get(section,{}).get('modifiers')}
                 if 'loads' in groups:member['data']['loads']={key:self.read(key,Name=frame,ItemType=0) for key in ('load_point','load_distributed','load_gravity','load_temperature')}
                 if 'design_overwrites' in groups:member['data']['design_overwrites']=self.overwrites(frame,setup)
-                if 'design_results' in groups:
-                    available=field(setup['available'],'return_value')
-                    member['data']['design_results']={'design_section':self.read('design_section',Name=frame),
-                        'summary':self.read('design_summary',Name=frame,ItemType=0) if available is True else
-                            block('unavailable','DesignSteel.GetSummaryResults',reason='SAP steel design results are not confirmed available; V2 does not run design')}
+                if 'design_results' in groups:member['data']['design_results']=self.design_results(frame,setup)
             if 'loads' in groups:model_data['loads']=self.load_catalog(request.output_cases)
             if 'forces' in groups:
                 if request.output_cases and before['locked']:

@@ -17,7 +17,7 @@ def main():
     files = [source / name for name in names]
     for folder in ('sap2000_v2', 'member_forces', 'design'):
         files += [p for p in (source / 'structural_engine' / folder).rglob('*')
-                  if p.is_file() and p.suffix in ('.py', '.html', '.json')
+                  if p.is_file() and p.suffix in ('.py', '.html', '.json', '.mjs')
                   and '__pycache__' not in p.parts]
     manifest = {}
     with zipfile.ZipFile(output, 'w', zipfile.ZIP_DEFLATED) as archive:
@@ -33,7 +33,7 @@ def main():
         manifest['install-web-launcher.cmd']=hashlib.sha256(alias).hexdigest()
         archive.writestr('manifest.sha256.json', json.dumps(manifest, indent=2))
         archive.writestr('BAT-DAU.txt',
-            'SAP2000-API V2 web/local release — 2026.10.18-v2-web.1\n'
+            'SAP2000-API V2 web/local release — 2026.10.19-v2-design-preview.1\n'
             'Extract ALL files to C:\\geek_calculus\\SAP2000-API\n'
             'Stop V1 connector with Ctrl+C; keep SAP2000 26.2.0 open.\n'
             'Run install-web-launcher.cmd once to upgrade the web protocol to V2.\n'

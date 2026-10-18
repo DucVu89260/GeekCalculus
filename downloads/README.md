@@ -1,3 +1,5 @@
+> Development branch preview: **2026.10.19-v2-design-preview.1** adds Steel Design input review only. It does not run batch capacity checks or transfer inputs into the component calculator yet. This preview has not replaced the stable published V2 web release below. See SAP2000-API-V2.md in the ZIP.
+
 # SAP2000-API V2 — current web/local kit
 
 Download [API_IF_SAP26.2.0_V2.zip](API_IF_SAP26.2.0_V2.zip?raw=true). Build **2026.10.18-v2-web.1**, SAP2000 **26.2.0**.

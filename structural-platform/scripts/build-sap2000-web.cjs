@@ -12,6 +12,7 @@ if(fs.existsSync(source)){
 const kit=path.join(root,'downloads/API_IF_SAP26.2.0_V2.zip'),published=path.join(dest,'API_IF_SAP26.2.0_V2.zip')
 if(fs.existsSync(kit))fs.copyFileSync(kit,published)
 if(!fs.existsSync(published))throw Error('Missing clean SAP2000 V2 Windows kit')
+const handoff=path.join(base,'engineering/structural_engine/sap2000_v2/design_handoff.mjs');if(fs.existsSync(handoff))fs.copyFileSync(handoff,path.join(dest,'design_handoff.mjs'));if(!fs.existsSync(path.join(dest,'design_handoff.mjs')))throw Error('Missing design handoff module')
 const old=path.join(dest,'API_IF_SAP26.2.0_V1.zip');if(fs.existsSync(old))fs.unlinkSync(old)
 const html=fs.readFileSync(path.join(dest,'index.html'),'utf8')
 const manifest={sap2000_version:'26.2.0',api_name:'API_IF_SAP26.2.0_V2',build_id:html.match(/build (2026\.[\w.-]+)/)?.[1],distribution_sha256:crypto.createHash('sha256').update(fs.readFileSync(published)).digest('hex'),panel_layout:'Shared V2 package source and CSS',transport:'authenticated loopback Windows connector',local_root:'C:\\geek_calculus\\SAP2000-API'}

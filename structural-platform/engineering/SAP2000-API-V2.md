@@ -1,6 +1,6 @@
 # SAP2000-API V2 — Web / Local
 
-Build `2026.10.18-v2-web.1` · Compatible with SAP2000 v26.2.0 · Windows64-bit, Python3.11+.
+Build `2026.10.19-v2-design-preview.1` · Compatible with SAP2000 v26.2.0 · Windows64-bit, Python3.11+.
 
 ## Cài mới / Nâng cấp từ V1 hoặc V2 local
 
@@ -71,3 +71,11 @@ Cloud verifies synthetic SAP snapshots/auth/restoration, real CLR reflection fix
 Extract all files to `C:\geek_calculus\SAP2000-API`, stop old connector, run `install-web-launcher.cmd` once to upgrade registration, then click SAP2000-API on GeekCalculus and approve browser/UAC/local-network prompts. Keep SAP2000 26.2.0 and connector running at matching Windows user/elevation. For local-only use run `start-sap2000-v2.cmd`.
 
 Reference: Ephraim-Bryski/SAP-Tooltips@608415951abf7c601c3939ed0296cd1daa45eda5. Actual DLL signatures control reads; reference has older/mixed signatures. No SAP DLL/CHM/model/source-document binaries are redistributed.
+
+## Preview kết nối Steel Design — 2026-10-19
+
+Bản này là preview chuẩn bị đầu vào, **chưa thay bản web ổn định**. Hai nút Kiểm tra Steel Design / Kiểm tra nhanh từ Summary mở dialog giữa màn hình. Có edition AISC360-10, module Symmetric I/H (Asymmetric pending), chế độ full/summary, frame, ASD/LRFD và nguồn unbraced lengths. Chiều dài mỗi frame giữ riêng ngay cả khi cùng tên section. SAP ratios18/19/20 chỉ nhân Length khi Value>0, ProgDet=false và người dùng xác nhận chiều dài tham chiếu; nếu không phải nhập tay. Không coi0 là chiều dài mặc định.
+
+Full chuẩn bị mọi member trong dataset đã xuất, các station gốc và five-point samples có sẵn. Quick chỉ dùng các dòng governing preview của Summary; không tuyên bố đã xét toàn bộ combo/ties. Mỗi dòng giữ sáu lực có dấu, Case/Combo, Step, frame/element/station và concurrency. Xem trước100 dòng, JSON giữ tập đã chuẩn bị. Nonconcurrent, missing geometry/material, unknown scope/axis/DAM/fabrication/Lz, tapered cần phương pháp riêng đều giữ trạng thái review/input_required. Cb chưa tự tính ở pha này, không thay bằng1. **Không có batch capacity/D-C hoặc PASS/FAIL ở pha chuẩn bị.** Không mở legacy Excel hoặc ghép nội lực cực trị độc lập để giả lập kết quả AISC.
+
+Handoff schema `sap-steel-handoff-1`, status `INPUT_REVIEW_ONLY`; tải prepared-job JSON để rà soát. Snapshot/forces/derived samples sai model hoặc derived timestamp cũ bị chặn. Nếu dữ liệu đổi sau khi mở dialog phải đóng/mở lại, tránh tải job cũ. Không ghi nội lực vào URL hoặc localStorage. Kết nối receiver/module tính và batch runner là bước tiếp theo, phải dùng engine chuẩn đã có và kiểm chứng các ánh xạ/nhánh còn thiếu trước khi tuyên bố hoàn thiện kiểm tra.

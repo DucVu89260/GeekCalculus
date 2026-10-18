@@ -22,7 +22,7 @@ def main():
             if path.suffix == '.cmd':
                 data = path.read_text().replace('\r\n', '\n').replace('\n', '\r\n').encode()
             archive.writestr(str(path.relative_to(source)).replace('\\', '/'), data)
-        archive.writestr('BAT-DAU.txt', '''API_IF_SAP26.2.0_V1 — .NET/PID build 2026.10.18.20 — Panel 5 bước
+        archive.writestr('BAT-DAU.txt', '''API_IF_SAP26.2.0_V1 — .NET/PID build 2026.10.18.21 — Panel 5 bước
 1. Giải nén toàn bộ ZIP vào C:\\geek_calculus\\SAP2000-API; dừng connector cũ bằng Ctrl+C trước khi cập nhật.
 2. Chạy install-web-launcher.cmd một lần cho mỗi tài khoản Windows; sau đó bấm SAP2000-API trên web.
    Xác nhận mở ứng dụng và quyền Administrator; launcher tự mở trang có token.

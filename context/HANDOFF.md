@@ -1,5 +1,10 @@
 # Repository handoff
 
+## SAP Selected members opens a dialog — 2026-10-18
+
+- User clarified the .20 inline list must be a popup. Build2026.10.18-web-panel.21 replaces the inline picker with a centered native dialog opening automatically when Selected members is chosen. Frame/Section multi-checkbox list, search, select visible/clear, Done/Escape and Choose members reopen button. Summary count stays in section5. Per member and Entire exported group/math/API filters remain unchanged. No local connector change needed.
+- Updated and ran the existing SAP panel browser smoke twice: passed opening/reopening dialog, VI/EN titles/buttons, Done/Escape,390px bounds, labels/search, selected-subset posted frames and results, multi-member behavior, raw-force precision/export and existing scopes. Inspected /tmp/sap-selected-members-dialog.png. JS syntax and diff checks passed. Rebuilt clean Windows ZIP and hosted assets. No native Windows SAP run available.
+
 ## SAP selected-member extremes — 2026-10-18
 
 - Build2026.10.18-web-panel.20 adds Selected members alongside Per member and the retained entire-group option. Searchable multi-checkbox choices display Frame + assigned Section, select visible/clear all, count and preserved keyboard focus. Selection uses existing API scope=per_frame and frames=[...] so each chosen member has its own extrema. Empty selection disables compute; changes clear stale output; extraction/model resets selection. Language toggle preserves selection. Section4 filters are independent. Exported extreme JSON includes selected_frames; no backend/connector contract changes.

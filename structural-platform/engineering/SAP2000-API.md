@@ -380,3 +380,11 @@ evaluates each chosen member separately. Empty selection disables calculation.
 Changing selection clears old extrema; a new extraction/model resets selection.
 Section4 filters remain independent. The entire exported group option is retained.
 Selected frames are recorded in the downloaded extreme JSON as selected_frames.
+
+### Selected-member picker dialog — build 2026.10.18.21
+
+Choosing Selected members automatically opens a centered member-picker dialog
+listing exported Frame / Section pairs with search and multi-selection. Done or
+Escape closes the picker and retains choices. Choose members reopens it. Per member
+and Entire exported group retain their existing behavior. Filtering and math
+contracts are unchanged from .20.

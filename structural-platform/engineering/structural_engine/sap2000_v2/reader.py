@@ -11,6 +11,7 @@ from .contract import API_NAME, BUILD_ID, SAP_VERSION, UNITS, REFERENCE_URL, REF
 from .models import SnapshotRequest, TableRequest
 from .reflection import RuntimeReader, block, field
 from .registry import GETTERS, SHAPES
+from .section_types import classify_section
 
 REFERENCE = json.loads(Path(__file__).with_name('reference.json').read_text())
 OK = ('ok', 'empty')
@@ -128,6 +129,7 @@ class SteelReader:
         kind = self.read('section_type',Name=name)
         code = field(kind,'PropType',field(kind,'MyType'))
         kind_name = self.sap.section_type_names.get(code,'Unknown')
+        enum_name=kind_name
         normalized = re.sub('[^A-Z0-9]','',kind_name.upper()).removeprefix('SECTION')
         shape_key = SHAPES.get(normalized)
         geometry = self.read(shape_key,Name=name) if shape_key else block('unsupported','PropFrame geometry',reason='No verified shape getter for enum '+kind_name)
@@ -141,6 +143,7 @@ class SteelReader:
             else:geometry={**geometry,'i_section_probe':probe}
         props = self.read('section_properties',Name=name)
         item = {'name':name,'type':kind,'type_name':kind_name,'geometry':geometry,
+                'section_type':classify_section(enum_name,code,verified_i=shape_key=='shape_i' and geometry['status']=='ok'),
                 'properties':props,'properties_mm':canonical_properties(props),
                 'material_file':self.read('section_material_file',Name=name),
                 'modifiers':self.modifiers('section_modifiers',name), 'components':[]}
@@ -153,7 +156,7 @@ class SteelReader:
                     if child in (*trail,name):
                         item['components'].append({'name':child,**block('invalid_data','PropFrame.GetNonPrismatic',reason='Cyclic section definition')})
                     else:
-                        child_data=self.section(child,trail=(*trail,name));item['components'].append({'name':child,**(child_data if 'status' in child_data else {})})
+                        child_data=self.section(child,trail=(*trail,name));item['components'].append({'name':child,'section_type':child_data.get('section_type'),**(child_data if 'status' in child_data else {})})
         item['dimensions_mm']={key.casefold()+'_mm':value*1000. for key,value in (geometry.get('data') or {}).items()
                                if key.casefold() in ('t3','t2','tf','tw','t2b','tfb','dis') and isinstance(value,(int,float)) and not isinstance(value,bool)}
         if shape_key=='shape_i' and geometry['status'] in OK:

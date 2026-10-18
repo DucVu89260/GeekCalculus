@@ -1,6 +1,6 @@
 # SAP2000-API V2 — Local preview
 
-Build: `2026.10.18-v2-local.5` · Compatible with SAP2000 v26.2.0 · Windows 64-bit.
+Build: `2026.10.18-v2-local.6` · Compatible with SAP2000 v26.2.0 · Windows 64-bit.
 
 ## Chạy thử / Quick start
 
@@ -57,3 +57,7 @@ Reference metadata: Ephraim-Bryski/SAP-Tooltips commit `608415951abf7c601c3939ed
 ## Bảng Section / Material (local.3)
 
 Sau khi đọc snapshot với nhóm Sections và Materials, chọn Frame hoặc thư viện Section. Bảng tóm tắt tự hiện các section đầu I/J của từng đoạn Nonprismatic, h/bf-top/tf-top/tw/bf-bottom/tf-bottom (mm) và tên vật liệu/Fy/Fu (MPa). Kích thước lấy từ GetISection, không phân tích tên section. I/J là đầu đoạn property; GetSectionNonPrismatic gốc giữ thông tin nếu frame chỉ dùng một phần property. Material overwrite của member được ưu tiên khi đọc được. eFy/eFu (expected strengths) vẫn giữ riêng trong JSON/cây vật liệu. Muốn kiểm tra design Fy overwrite, chọn thêm nhóm Design overwrites AISC360-10: hiện raw Value và ProgDet; không suy giá trị program-determined từ0. Thiếu getter/vật liệu sẽ hiện dấu gạch/trạng thái, không tự điền0.
+
+## Section type keywords (local.6)
+
+Bảng Section thành phần có cột **Loại tiết diện SAP / Key**. JSON của section và tham chiếu component có `section_type`: `key`, `sap_label`, enum name/code gốc, nguồn nhận diện và trạng thái routing. Các key: `i_wide_flange`, `channel`, `tee`, `angle`, `double_angle`, `double_channel`, `pipe`, `tube`, `rectangular`, `circular`, `auto_select_list`, `steel_joist`. Loại cha Nonprismatic là `nonprismatic` / `component_dependent`; cần xét từng component. Auto-select là `selection_list`; Steel Joist là `specialized_workflow`. General/Section Designer/hybrid/cold-formed hoặc loại chưa ánh xạ giữ `manual_review` để kiểm tra thủ công. Key nhận diện hình học không chứng minh module tính cường độ đã hỗ trợ; `design_check_status` luôn `not_evaluated`. Vật liệu và điều kiện áp dụng tiêu chuẩn phải kiểm tra riêng.

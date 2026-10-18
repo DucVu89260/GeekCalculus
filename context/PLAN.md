@@ -141,3 +141,7 @@ Handle CSI literal None material overwrite as unassigned; accept reflected secti
 ## V2 uploaded live snapshot: geometry casing — 2026-10-18
 
 Live local.3 JSON confirms successful GetISection with T3/T2/Tf/Tw/T2b/Tfb and successful steel Fy/Fu; section enum PropType is correct. Root dimension bug is case-sensitive normalized alias lookup, not failed SAP getter. Normalize convenience dimension keys case-insensitively, preserve raw DLL field spelling and prior None overwrite fix. Synthetic fixture must use installed field casing. Validate uploaded raw records privately without committing model paths/GUIDs/notes, rerun targeted tests/browser and rebuild local.5.
+
+## V2 component shape keywords for module routing — 2026-10-18
+
+Add SAP display type plus stable shape key to section catalog/component references and summary table. Classify installed enum names (not hardcoded enum codes or section names) for user's12 families; Nonprismatic remains component-dependent, auto-select a selection list, joist specialized, unrecognized/special types manual_review. Shape identification is not a supported/validated strength check. Verify mapping, unknown/typed-probe boundaries, child references and browser/export; package local.6 without V1/website changes.

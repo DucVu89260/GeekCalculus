@@ -1,5 +1,10 @@
 # Repository handoff
 
+## V2 SAP section family keywords — 2026-10-18
+
+- Local preview2026.10.18-v2-local.6 adds section_type to section catalog and Nonprismatic child references: stable key, SAP display label, original installed enum name/code, classification basis, routing status and design_check_status=not_evaluated. Summary table adds SAP section type/key beside component name. User families: I/Wide Flange, Channel, Tee, Angle, Double Angle, Double Channel, Pipe, Tube, Rectangular, Circular, Auto Select List, Steel Joist. No section-name parsing or hardcoded numeric enum mapping. Nonprismatic routing is component_dependent; auto-select selection_list; joist specialized_workflow; General/SD/cold/hybrid/unmapped remain manual_review. Recognizing a shape does not claim strength-module support or steel material applicability.
+- Validation:37 targeted API/kit/type tests passed, including enum-name/label mapping, arbitrary numeric code preservation, special/unknown/probe boundaries and Nonprismatic child metadata. Chromium smoke verifies type/key column and JSON child/parent types while retaining prior force/data/extreme/table/VI-EN/mobile flow. Source-only ZIP rebuilt; CRC/per-file manifest and new section_types.py inclusion passed. Existing Starlette warning. No new live Windows run; V1 and hosted assets/navigation unchanged.
+
 ## V2 live snapshot confirms dimension field casing bug — 2026-10-18
 
 - User supplied live local.3 JSON. Actual GetTypeOAPI PropType and GetISection succeeded; data fields are T3/T2/Tf/Tw/T2b/Tfb, while normalized I aliases looked up lowercase keys. Prior type-signature hypothesis was not the root cause in this snapshot. Fixed convenience dimension keys to casefold before alias mapping; raw output spelling/values remain intact. Retains local.4 literal None material-overwrite fix. Live GetOSteel_1 already succeeds; confirmed Fy/Fu345/450MPa rather than deriving strength from grade name.

@@ -1,4 +1,4 @@
-"""Local-only V2 endpoints. V1 force DTOs/processing are reused unchanged."""
+"""Authenticated loopback V2 endpoints. V1 force DTOs/processing are reused unchanged."""
 import os
 from pathlib import Path
 import secrets
@@ -7,7 +7,8 @@ from fastapi import Depends, FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from starlette.middleware.trustedhost import TrustedHostMiddleware
-from ..member_forces.connector import ConnectionRequest
+from starlette.middleware.cors import CORSMiddleware
+from ..member_forces.connector import ConnectionRequest, WEB_ORIGINS
 from ..member_forces.dotnet import ConnectionSettings
 from ..member_forces.instances import scan_instances
 from ..member_forces.sap2000 import SapError, ExtractionRequest
@@ -27,7 +28,9 @@ def create_app(token=None,operation_runner=None,instance_scanner=None):
             raise HTTPException(401,'Invalid V2 connector token',headers={'WWW-Authenticate':'Bearer'})
     app=FastAPI(title=API_NAME,version='2.0',docs_url=None,redoc_url=None,openapi_url=None)
     app.add_middleware(TrustedHostMiddleware,allowed_hosts=['127.0.0.1','localhost','testserver'])
-    # No web origins enabled: local-first release only.
+    app.add_middleware(CORSMiddleware,allow_origins=WEB_ORIGINS,
+                       allow_methods=['GET','POST','PUT'],allow_headers=['Authorization','Content-Type'],
+                       allow_private_network=True,allow_credentials=False)
     lock=threading.Lock();settings=ConnectionSettings.from_environment()
     runner=operation_runner or run_worker
     def call(command,payload=None):
@@ -42,13 +45,13 @@ def create_app(token=None,operation_runner=None,instance_scanner=None):
             'Content-Security-Policy':"default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'"})
     @app.get(API_PREFIX+'/connection',dependencies=auth)
     def connection():
-        with lock:return {'api_name':API_NAME,'build_id':BUILD_ID,'transport':'dotnet','pid':settings.pid,'dll_path':settings.dll_path,'expected_model':settings.expected_model}
+        with lock:return {'api_name':API_NAME,'build_id':BUILD_ID,'transport':'dotnet','web_panel_supported':True,'pid':settings.pid,'dll_path':settings.dll_path,'expected_model':settings.expected_model}
     @app.put(API_PREFIX+'/connection',dependencies=auth)
     def configure(payload:ConnectionRequest):
         nonlocal settings
         with lock:
             settings=ConnectionSettings(pid=payload.pid,dll_path=payload.dll_path,expected_model=payload.expected_model)
-            return {'api_name':API_NAME,'build_id':BUILD_ID,'transport':'dotnet','pid':settings.pid,'dll_path':settings.dll_path,'expected_model':settings.expected_model}
+            return {'api_name':API_NAME,'build_id':BUILD_ID,'transport':'dotnet','web_panel_supported':True,'pid':settings.pid,'dll_path':settings.dll_path,'expected_model':settings.expected_model}
     @app.get(API_PREFIX+'/instances',dependencies=auth)
     def instances():
         with lock:

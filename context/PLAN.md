@@ -173,3 +173,7 @@ Move complete profile/data/DatabaseTables panel after selected members and immed
 ## V2 reorganized member/design and force sections — 2026-10-18
 
 Nest shared profile controls/data in section3; group checkboxes3.1(member definitions/6) and3.2(design/3) without changing selection/API requests. Move existing selection/extraction buttons to4; nest force filters4.1/extremes4.2/section summary4.3 under4. Update DOM, grid, headings, VI/EN, cross-references and smoke assertions for placement/mobile/unchanged flows. Package local.10.
+
+## Publish V2 as default SAP web connector — 2026-10-18
+
+User authorizes replacing hosted V1 with V2 at existing SAP26.2.0 URL/protocol and fixed root C:\geek_calculus\SAP2000-API (no V2 subfolder). Enable exact-origin CORS/private-network preflight with bearer auth retained. V2 --web-url validation, DPAPI V2 token and registered protocol launcher with normal UAC consent; do not stop unknown processes. Package new launcher/upgrade alias and current docs. Build hosted assets/manifest/ZIP from V2 source, preserve source V1 fallback but remove default hosted V1 kit. Verify auth/origin boundaries, launcher contracts, local and actual cross-origin browser V2 snapshot/forces, app navigation/VI-EN and production build. Integrate current main changes, push main for existing Pages CI; report deployment separately from Windows validation.

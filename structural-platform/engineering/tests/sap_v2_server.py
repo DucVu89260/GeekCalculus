@@ -1,5 +1,6 @@
 """Test-only local V2 server with synthetic models; never included in Windows kit."""
 from contextlib import contextmanager
+import os
 import uvicorn
 from sap_v2_fixtures import SteelModel,FixtureRuntime,gateway
 from structural_engine.sap2000_v2.connector import create_app
@@ -30,4 +31,4 @@ def scanner(settings):
              'available':True,'locked':True,'error':None} for pid,model in MODELS.items()]
 
 if __name__=='__main__':
-    uvicorn.run(create_app('v2-browser-test-token-000000000000000000',operation_runner=runner,instance_scanner=scanner),host='127.0.0.1',port=8012)
+    uvicorn.run(create_app('v2-browser-test-token-000000000000000000',operation_runner=runner,instance_scanner=scanner),host='127.0.0.1',port=int(os.environ.get('SAP_V2_TEST_PORT','8012')))

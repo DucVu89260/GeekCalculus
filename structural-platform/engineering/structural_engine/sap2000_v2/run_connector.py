@@ -8,6 +8,7 @@ import webbrowser
 from urllib.parse import quote
 import uvicorn
 from .connector import create_app
+from ..member_forces.run_connector import checked_web_url
 from .contract import PORT
 
 
@@ -16,6 +17,7 @@ def main():
     parser.add_argument('--pid',type=int)
     parser.add_argument('--dll')
     parser.add_argument('--no-browser',action='store_true')
+    parser.add_argument('--web-url',type=checked_web_url,help='Approved GeekCalculus panel URL')
     args=parser.parse_args()
     if args.pid is not None:os.environ['SAP2000_PID']=str(args.pid)
     else:os.environ.pop('SAP2000_PID',None)
@@ -27,7 +29,7 @@ def main():
     token=os.environ.get('SAP2000_V2_TOKEN') or secrets.token_urlsafe(32)
     app=create_app(token)
     if not args.no_browser:
-        timer=threading.Timer(1,lambda:webbrowser.open('http://127.0.0.1:'+str(PORT)+'/?lang=vi#token='+quote(token,safe='')))
+        timer=threading.Timer(1,lambda:webbrowser.open((args.web_url or 'http://127.0.0.1:'+str(PORT)+'/?lang=vi')+'#token='+quote(token,safe='')))
         timer.daemon=True;timer.start()
     uvicorn.run(app,host='127.0.0.1',port=PORT,workers=1)
 

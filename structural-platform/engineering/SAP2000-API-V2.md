@@ -1,87 +1,73 @@
-# SAP2000-API V2 — Local preview
+# SAP2000-API V2 — Web / Local
 
-Build: `2026.10.18-v2-local.10` · Compatible with SAP2000 v26.2.0 · Windows 64-bit.
+Build `2026.10.18-v2-web.1` · Compatible with SAP2000 v26.2.0 · Windows64-bit, Python3.11+.
 
-## Chạy thử / Quick start
+## Cài mới / Nâng cấp từ V1 hoặc V2 local
 
-1. Giải nén **toàn bộ nội dung** ZIP vào `C:\geek_calculus\SAP2000-API\V2` (file `start-sap2000-v2.cmd` phải nằm ngay trong thư mục V2). Không ghi đè bộ V1 ở thư mục cha.
-2. Cài Python 64-bit 3.11 trở lên, có Python Launcher `py`. Lần đầu cần Internet để cài dependencies; `.venv` của V2 được tạo riêng.
-3. Mở SAP2000 **26.2.0**, mở model đã lưu. Chạy phân tích trước nếu cần nội lực/chuyển vị; chạy Steel Design trong SAP trước nếu cần kết quả thiết kế SAP.
-4. Dừng connector V1 đang chạy bằng **Ctrl+C** trong cửa sổ của nó, đợi tác vụ xuất hoàn tất trước khi dừng. Giữ SAP2000 mở. V1/V2 cùng dùng cổng **8010**, không chạy đồng thời.
-5. Chạy `start-sap2000-v2.cmd` bằng cùng tài khoản Windows và mức quyền với SAP2000. Nếu SAP đang chạy Administrator, chạy CMD này Administrator.
-6. Trình duyệt mở panel local với token tự sinh. Giữ cửa sổ connector chạy; không cần nhập token hay đăng ký web launcher.
-7. Bấm **Quét SAP2000 đang mở**, chọn đúng tên file/PID, rồi **Kết nối / Làm mới model**.
-8. Chọn frame objects trong SAP. Ở **V2 · Dữ liệu cấu kiện thép**, chọn nhóm dữ liệu rồi đọc snapshot. Bắt đầu với 5 nhóm mặc định, sau đó mở rộng từng nhóm. Chọn Case/Combo trước khi đọc nội lực hoặc chuyển vị.
-9. Chọn cấu kiện / danh mục / nhóm để xem cây dữ liệu và bảng; tải JSON để giữ toàn bộ dữ liệu gốc. Các mục nội lực, lọc vị trí, cực trị và Summary giữ bố cục V1.
+1. Đợi tác vụ đọc/xuất hoàn tất, dừng connector cũ bằng Ctrl+C. Giữ SAP2000 mở.
+2. Giải nén **toàn bộ** ZIP trực tiếp vào **`C:\geek_calculus\SAP2000-API`**. Không đặt trong thư mục con V2. Ghi đè file cùng tên; giữ `.venv` đang có. Không sao chép `.venv` từ máy khác.
+3. Chạy **`install-web-launcher.cmd`** một lần với tài khoản Windows sử dụng web. Đây là bước cập nhật đăng ký protocol từ V1 sang V2, kể cả trước đây bạn đã cài launcher V1. Alias này gọi installer V2; cũng có thể chạy `install-web-launcher-v2.cmd`.
+4. Mở model đã lưu trong SAP2000 **26.2.0**. Chạy analysis trước khi cần nội lực; chạy Steel Design trong SAP nếu muốn đọc kết quả thiết kế có sẵn.
+5. Trên GeekCalculus bấm **SAP2000-API**, đọc hướng dẫn, bấm Tiếp tục, chấp thuận mở ứng dụng và UAC Administrator. Giữ cùng tài khoản/mức quyền với SAP.
+6. Launcher mở PowerShell/connector và trang web có token tự động. Nếu trình duyệt hỏi quyền truy cập mạng local, cho phép trang GeekCalculus. Giữ cửa sổ connector chạy.
+7. Quét/chọn đúng model/PID, kết nối; chọn frame trong SAP rồi đọc hồ sơ hoặc lấy nội lực trên panel.
 
-**English:** Extract all kit files to `C:\geek_calculus\SAP2000-API\V2`. Install Python 3.11+ 64-bit with `py`. Keep a saved SAP2000 26.2.0 model open, stop the V1 connector, then run `start-sap2000-v2.cmd` at the same Windows user/elevation as SAP. Scan/select the model, connect, select SAP frames, choose data groups and read a snapshot. Select output cases for force/displacement reads. Keep the connector window running.
+**Địa chỉ web:** https://ducvu89260.github.io/GeekCalculus/sap2000-api/26.2.0/?lang=vi
 
-## Dữ liệu / Coverage
+Nếu trang vẫn hiện V1, tải lại bỏ cache (Ctrl+F5). Nếu cổng8010 bị chiếm hoặc launcher báo connector khác, dừng cửa sổ connector cũ khi không có tác vụ xuất rồi mở lại từ web. Không cần đóng SAP hay Repair. Cả V1/V2 sử dụng cổng8010, không chạy đồng thời.
 
-- Identity: frame name, GUID, groups, assigned/analyzed section, auto-select and material overwrite.
-- Sections: installed-DLL shape type, common-shape dimensions, source properties A/As/J/I/S/Z/r and separate modifiers. Nonprismatic segments retain start/end sections, relative/absolute length and EI variation; component sections are read recursively.
-- Materials: source material type, E/G/Poisson/thermal expansion/densities, steel Fy/Fu and expected strengths where supported; member material overwrite stays distinct from library values.
-- Geometry: I/J points and coordinates, length, local-axis assignment, advanced axes/transformation where available.
-- Assignments: releases/partial fixity, insertion/end offsets/rigid zone, spring/hinge assignments and temperature assignments, subject to actual installed API signatures.
-- Loads: frame distributed/point/temperature/gravity loads, selected case/combo definitions and factors; missing API data remains explicit.
-- Forces: inherited V1 extraction/position interpolation/extremes/section summary; no strength or Cb calculation added.
-- Displacements/reactions: selected output joint endpoint results and frame-joint force output. Joint response axes are **point-element local**, not automatically frame-local/global. This is not a full-span deflection check.
-- Steel design: active code, available results, selected design combinations, design section, summary D/C and messages where supported. Indexed preferences (35) and overwrites (43) are currently mapped **only for AISC 360-10**. Other codes return unsupported mapping, never guessed indices. ProgDet/source override values are retained, not applied to library properties.
-- DatabaseTables: inventory and fields from the actual DLL; read a selected available table with bounded records (default5000/max50000, preview200). Table display selection follows SAP's existing database-table display state; it is independent of the panel's output-case picker. Raw table strings are not silently unit-converted.
+## Chạy thủ công
 
-Some getters, shapes or design methods can be unsupported on the installed DLL. `unsupported`, `unavailable`, `empty`, `input_required` and failed-read statuses are shown with source/signature context. Missing data is **not substituted with zero**. General/Section Designer geometry is not a complete design-ready decomposition. Material library properties at temperature0 are not a temperature-adjusted member analysis model.
+Local panel, không cần web:
 
-## Units and source fidelity
+```cmd
+cd /d C:\geek_calculus\SAP2000-API
+start-sap2000-v2.cmd
+```
 
-SAP numeric reads use kN–m–C, force axes/signs unchanged; original units and temporarily changed output selections are restored. Avoid editing/switching the SAP model during reads. Section/material normalized convenience fields use explicit mm/MPa scaling; source values remain separate. No modifiers are silently applied. Force displays use two decimals, while JSON/interpolation/extreme computations preserve raw precision. Existing force datasets retain their V1 DTO; V2 snapshots use schema2 and API prefix `/API_IF_SAP26.2.0_V2`.
+Mở panel web thủ công:
+
+```cmd
+cd /d C:\geek_calculus\SAP2000-API
+start-sap2000-v2.cmd --web-url "https://ducvu89260.github.io/GeekCalculus/sap2000-api/26.2.0/?lang=vi"
+```
+
+Không cần nhập token nếu mở qua launcher. Nếu đang chạy thủ công bằng token ngẫu nhiên, dừng connector đó trước khi dùng launcher web (launcher có token DPAPI riêng). Cài đặt lần đầu cần Internet để tải dependencies; launcher cài cả requirements-test.lock và requirements-windows.txt.
+
+## Bố cục và dữ liệu
+
+- **3. Cấu kiện đã chọn:**3.1 identity/GUID/groups, sections/dimensions/properties, materials/overwrite, geometry/local axes, releases/offsets/springs/hinges, section/member modifiers;3.2 model-wide Preferences, per-member AISC360-10 overwrites, existing SAP Steel Design results.
+- Nhóm cơ bản/Chọn đủ/Bỏ chọn/Đọc hồ sơ/JSON/kiểm tra DLL và2 selector giữ cơ chế chung. Preferences-only không cần chọn member; xem Model/Design data. Các nhóm member cần chọn1–200 frame.
+- **4. Kết quả nội lực:** đọc lựa chọn/lấy nội lực,4.1 lọc,4.2 cực trị,4.3 tổng hợp theo tiết diện. Profile không đọc lặp tải/nội lực/chuyển vị. Bộ lọc4.1 không tự giới hạn4.2/4.3.
+- Nonprismatic giữ các đoạn, section đầu/cuối, relative/absolute length và EI variation. Kích thước I đọc từ GetISection, không suy từ tên; I/J của bảng là đầu đoạn property, không mặc định đầu vật lý của frame nếu frame chỉ dùng một phần property.
+- Section type key phục vụ nhận diện nhóm module, không chứng minh đã đủ điều kiện kiểm tra cường độ. Section đặc biệt/unmapped giữ manual_review; Nonprismatic component_dependent, Auto Select List selection_list, Steel Joist specialized_workflow.
+- Fy/Fu từ SAP material library tại Temp0, ưu tiên material overwrite đã xác nhận; literal None nghĩa không overwrite. eFy/eFu và design Fy overwrite giữ riêng. Không suy effective program-determined values từ Value0/ProgDet.
+- Releases: bảngI/J5 cột,0–5=P/V2/V3/T/M2/M3 ↔ U1/U2/U3/R1/R2/R3. true=có giải phóng, false=không giải phóng. Partial fixity tách riêng; không suy giằng/Cb chỉ từ Releases.
+- Preferences35 và overwrites43 hiện chỉ ánh xạ AISC360-10. Kết quả member chưa có design: **Members have not been designed** khi getter xác nhận. Getter lỗi/không rõ availability báo riêng, không tự chạy Design.
+- DatabaseTables giữ cho phát triển: inventory/getter thực từ DLL, raw table strings, display selection hiện có của SAP độc lập panel cases; default5000/max50000 records, preview200. Kiểm tra units/axes/selection trước khi dùng tính.
+
+## Đơn vị, dữ liệu gốc và giới hạn
+
+Các numeric reads dùng kN–m–C, giữ dấu/trục CSI. Khôi phục units và output selections sau tác vụ. Geometry chuẩn hóa mm, stress MPa bằng hệ số đơn vị rõ ràng; raw DLL fields/signatures vẫn giữ. Modifiers section/member không tự áp vào properties. Force display2 decimals; JSON/interpolation/extremes giữ full precision. Nested force dataset giữ V1 DTO để tương thích xử lý; snapshotV2 schema2/API prefixV2.
+
+Các getter chỉ đọc được allowlist; không chạy Analysis/StartDesign hay gán đối tượng. Units/output selections có thể đổi tạm để đọc và được khôi phục. Không đổi model trong khi xuất. Missing/unsupported/unavailable không tự thay bằng0. Đọc được shape/material không đồng nghĩa module sức chịu tải/Cb đã được xác minh.
+
+## Token / Quyền truy cập
+
+Connector chỉ bind127.0.0.1:8010. Web chỉ được CORS cho exact GeekCalculus origins, bearer token vẫn bắt buộc, không gửi token trong query. Token web launcher được DPAPI bảo vệ riêng theo Windows user tại LocalAppData/GeekCalculus/SAP2000-API/connector-v2-token.dpapi. Fragment bị panel xóa sau khi nhận; không gửi token cho người khác. JSON chứa tên/đường dẫn và dữ liệu model; kiểm tra trước khi chia sẻ. Không mở port8010 ra Internet.
 
 ## Diagnostics
 
-If scanning fails, confirm matching Windows user/elevation and that SAP has no modal dialog open. Optional explicit settings:
-
 ```cmd
-start-sap2000-v2.cmd --pid 20948 --dll "C:\Program Files\Computers and Structures\SAP2000 26\SAP2000v1.dll"
 diagnose-sap2000-v2.cmd --pid 20948 --dll "C:\Program Files\Computers and Structures\SAP2000 26\SAP2000v1.dll"
 ```
 
-Replace the example PID with the current PID. The panel also exports a runtime capabilities report. Share failed status/source/signature and diagnostics, **never the connector token**. Snapshots include model paths and engineering data; review before sharing.
+Thay PID ví dụ bằng PID thực nếu cần. Panel quét PID tự động; export capabilities và failed getter statuses để chẩn đoán, không gửi token. DLL phải từ thư mục cài SAP chính, không dùng NativeAPI DLL.
 
-## Preview limits and validation
+## Validation / English quick start
 
-This is a **local development preview**, not a hosted V2 release. No website navigation, protocol registration or V1 files are changed. Allowlisted getters only: no automatic analysis/design runs or assignments. SAP units/output selections may be temporarily changed for reads and restored afterward.
+Cloud verifies synthetic SAP snapshots/auth/restoration, real CLR reflection fixtures (no SAP DLL), local/hosted browser workflows. User has verified basic/section/material reads on actual SAP. **New Windows protocol/UAC integration needs user acceptance on the target machine.** No live Windows SAP instance is available in cloud.
 
-Verified in cloud: synthetic-SAP API/unit/restore/error tests, real CLR reflection fixtures (without SAP DLL), and Chromium panel workflow with synthetic SAP. **Actual Windows + SAP2000 26.2.0 verification is not performed here.** Validate first on a copy of a small model; compare section, material, geometry, overwrites and force results with SAP before production use.
+Extract all files to `C:\geek_calculus\SAP2000-API`, stop old connector, run `install-web-launcher.cmd` once to upgrade registration, then click SAP2000-API on GeekCalculus and approve browser/UAC/local-network prompts. Keep SAP2000 26.2.0 and connector running at matching Windows user/elevation. For local-only use run `start-sap2000-v2.cmd`.
 
-Reference metadata: Ephraim-Bryski/SAP-Tooltips commit `608415951abf7c601c3939ed0296cd1daa45eda5`. This reference contains mixed/older signatures; actual installed interface metadata controls calls. The kit does not redistribute SAP DLLs, CHM or third-party documentation binaries.
-
-## Bảng Section / Material (local.3)
-
-Sau khi đọc snapshot với nhóm Sections và Materials, chọn Frame hoặc thư viện Section. Bảng tóm tắt tự hiện các section đầu I/J của từng đoạn Nonprismatic, h/bf-top/tf-top/tw/bf-bottom/tf-bottom (mm) và tên vật liệu/Fy/Fu (MPa). Kích thước lấy từ GetISection, không phân tích tên section. I/J là đầu đoạn property; GetSectionNonPrismatic gốc giữ thông tin nếu frame chỉ dùng một phần property. Material overwrite của member được ưu tiên khi đọc được. eFy/eFu (expected strengths) vẫn giữ riêng trong JSON/cây vật liệu. Muốn kiểm tra design Fy overwrite, chọn thêm nhóm Design overwrites AISC360-10: hiện raw Value và ProgDet; không suy giá trị program-determined từ0. Thiếu getter/vật liệu sẽ hiện dấu gạch/trạng thái, không tự điền0.
-
-## Section type keywords (local.6)
-
-Bảng Section thành phần có cột **Loại tiết diện SAP / Key**. JSON của section và tham chiếu component có `section_type`: `key`, `sap_label`, enum name/code gốc, nguồn nhận diện và trạng thái routing. Các key: `i_wide_flange`, `channel`, `tee`, `angle`, `double_angle`, `double_channel`, `pipe`, `tube`, `rectangular`, `circular`, `auto_select_list`, `steel_joist`. Loại cha Nonprismatic là `nonprismatic` / `component_dependent`; cần xét từng component. Auto-select là `selection_list`; Steel Joist là `specialized_workflow`. General/Section Designer/hybrid/cold-formed hoặc loại chưa ánh xạ giữ `manual_review` để kiểm tra thủ công. Key nhận diện hình học không chứng minh module tính cường độ đã hỗ trợ; `design_check_status` luôn `not_evaluated`. Vật liệu và điều kiện áp dụng tiêu chuẩn phải kiểm tra riêng.
-
-## Hồ sơ tập trung / Focused profile (local.7)
-
-UI hồ sơ còn9 nhóm: identity, sections, materials, geometry, assignments, modifiers, design_setup, design_overwrites, design_results. Bỏ3 checkbox loads/forces/displacements và không gửi các nhóm này khi chọn đủ nhóm. Xuất nội lực, Case/Combo, cực trị và Summary phía dưới vẫn hoạt động riêng. API nhóm cũ giữ tương thích cho client đã dùng; thay đổi này áp dụng cho luồng UI hồ sơ.
-
-Chọn Releases/Offsets/Springs/Hinges để đọc assignments và nguồn/trạng thái từng getter. Releases có thứ tự U1/U2/U3/R1/R2/R3, true=released; giá trị partial fixity giữ riêng. End offsets có đơn vị m, rigid-zone factor không thứ nguyên. Không có spring/hinge trả empty nếu SAP getter xác nhận; getter không hỗ trợ/lỗi không suy thành không gán. Preferences35 và overwrites43 chỉ ánh xạ AISC360-10, giữ Value/ProgDet và nguồn. Không chạy StartDesign.
-
-Kết quả Steel Design đọc theo từng frame. Khi SAP xác nhận chưa có kết quả toàn model hoặc getter member thành công nhưng trả0 records, hiển thị chính xác **Members have not been designed** (`status=not_designed`). Nếu getter lỗi/không xác nhận được availability, hiển thị unavailable cùng lý do thay vì kết luận chưa design. Thông báo không tự chạy thiết kế; cần thao tác trong SAP rồi đọc lại hồ sơ.
-
-## Releases và phạm vi Preferences (local.8)
-
-Chọn nhóm Releases/Offsets/Springs/Hinges rồi xem assignments: có bảng riêng đầu I/J với5 cột Chỉ số, Thành phần nội lực, Bậc tự do tương ứng, Kết quả thuật toán và Ý nghĩa kết quả. Thứ tự P/V2/V3/T/M2/M3 ↔ U1/U2/U3/R1/R2/R3; true=có giải phóng, false=không giải phóng. Getter thiếu/lỗi hiện chưa xác định, không điền false. Partial fixity giữ bảng riêng và dữ liệu gốc. Chỉ đọc cùng release flag; không suy Cb/giằng từ các flag.
-
-Design Preferences thuộc model và active design code, không thuộc riêng member. Dữ liệu lưu một lần ở model_data.steel_design (scope=model_design_code); xem đối tượng Dữ liệu model/Thiết kế. Chỉ chọn Preferences rồi đọc hồ sơ thì không cần chọn frame; snapshot có0 members là bình thường. Nếu chọn thêm nhóm thuộc member thì vẫn phải chọn frame trong SAP. Design overwrites giữ riêng theo từng member, không nhập chung với Preferences.
-
-## Bố cục hồ sơ (local.9)
-
-Toàn bộ khối thông số cấu kiện V2 đặt sau mục3 Cấu kiện đã chọn và ngay trước mục4 Kết quả nội lực. Desktop giữ Output Cases bên trái; mobile đọc theo thứ tự2 →3 → hồ sơ V2 →4 →5. DatabaseTables vẫn nằm trong khối hồ sơ phát triển. Không thay đổi dữ liệu hoặc cách tính.
-
-## Bố cục3/4 (local.10)
-
-Mục3 Cấu kiện đã chọn chứa3.1 Vật liệu/kích thước/điều kiện biên (6 nhóm) và3.2 Thông số thiết kế (3 nhóm). Chọn nhóm checkbox và các điều khiển Nhóm cơ bản/Chọn đủ/Bỏ chọn/Đọc hồ sơ/JSON/kiểm tra DLL/Đối tượng dữ liệu/Nhóm thuộc tính vẫn dùng chung, giữ cơ chế cũ. DatabaseTables tiếp tục ở khối hồ sơ.
-
-Mục4 Kết quả nội lực chứa2 nút Đọc lựa chọn hiện tại và Lấy nội lực cấu kiện đang chọn; sau đó4.1 Lọc nội lực,4.2 Cực trị nội lực,4.3 Tổng hợp cực trị theo Tiết diện. Không đổi thuật toán hay API. Bộ lọc bảng4.1 không tự giới hạn tính cực trị4.2/4.3.
+Reference: Ephraim-Bryski/SAP-Tooltips@608415951abf7c601c3939ed0296cd1daa45eda5. Actual DLL signatures control reads; reference has older/mixed signatures. No SAP DLL/CHM/model/source-document binaries are redistributed.

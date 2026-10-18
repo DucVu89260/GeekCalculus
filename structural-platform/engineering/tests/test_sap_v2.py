@@ -100,7 +100,7 @@ def test_table_bounds_strings_units_and_key_validation():
         with pytest.raises(SapError,match='runtime table key'):reader.table(TableRequest(table_key='missing',expected_model='model.sdb'))
     assert model.units==9
 
-def test_http_auth_validation_and_no_web_cors():
+def test_http_auth_validation_and_approved_web_cors():
     calls=[]
     def runner(op,settings,payload):calls.append(op);return {'op':op}
     client=TestClient(create_app(TOKEN,operation_runner=runner,instance_scanner=lambda s:[]))
@@ -114,7 +114,15 @@ def test_http_auth_validation_and_no_web_cors():
     assert client.get(API_PREFIX+'/schema',headers=AUTH).json()['api_name'].endswith('_V2')
     assert client.get('/',headers={'Host':'attacker.example'}).status_code==400
     preflight=client.options(API_PREFIX+'/snapshot',headers={'Origin':'https://ducvu89260.github.io','Access-Control-Request-Method':'POST','Access-Control-Request-Headers':'authorization'})
-    assert 'access-control-allow-origin' not in preflight.headers and client.get('/').status_code==200
+    assert preflight.status_code==200 and preflight.headers['access-control-allow-origin']=='https://ducvu89260.github.io'
+    private=client.options(API_PREFIX+'/snapshot',headers={'Origin':'https://ducvu89260.github.io','Access-Control-Request-Method':'POST','Access-Control-Request-Headers':'authorization,content-type','Access-Control-Request-Private-Network':'true'})
+    assert private.headers['access-control-allow-private-network']=='true'
+    assert 'access-control-allow-credentials' not in private.headers
+    denied=client.options(API_PREFIX+'/snapshot',headers={'Origin':'https://attacker.example','Access-Control-Request-Method':'POST'})
+    assert denied.status_code==400 and 'access-control-allow-origin' not in denied.headers
+    assert client.get(API_PREFIX+'/connection',headers={'Origin':'https://ducvu89260.github.io'}).status_code==401
+    assert client.get(API_PREFIX+'/connection',headers=AUTH).json()['web_panel_supported'] is True
+    assert client.get('/').status_code==200
     assert calls==['model','snapshot']
 
 def test_worker_dispatch_and_model_pin():

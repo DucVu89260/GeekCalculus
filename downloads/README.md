@@ -1,3 +1,20 @@
+# SAP2000-API V2 — current web/local kit
+
+Download [API_IF_SAP26.2.0_V2.zip](API_IF_SAP26.2.0_V2.zip?raw=true). Build **2026.10.18-v2-web.1**, SAP2000 **26.2.0**.
+
+1. Finish active reads and stop the old connector with Ctrl+C; keep SAP2000 open.
+2. Extract all files directly to **`C:\geek_calculus\SAP2000-API`**, keeping an existing compatible `.venv`. No V2 subfolder.
+3. Run **`install-web-launcher.cmd`** once to install/upgrade the protocol registration to V2 (also required for users of the old V1 launcher).
+4. Click SAP2000-API on GeekCalculus and accept browser/UAC prompts; keep connector running. Local-only use: `start-sap2000-v2.cmd`.
+
+The existing web address remains [SAP2000-API](https://ducvu89260.github.io/GeekCalculus/sap2000-api/26.2.0/?lang=vi). Read `SAP2000-API-V2.md` in the kit. [V2 checksum](API_IF_SAP26.2.0_V2.zip.sha256). No tokens, environments, SAP DLLs or model exports are bundled.
+
+Validated with targeted API/auth/private-network tests and local/hosted browser flows using synthetic SAP. Windows protocol/UAC and actual SAP acceptance must be checked on the target device; user has already confirmed basic section/material extraction in prior local previews.
+
+---
+
+## Archived V1 distribution notes
+
 # API_IF_SAP26.2.0_V1 — Windows kit
 
 Download [API_IF_SAP26.2.0_V1.zip](API_IF_SAP26.2.0_V1.zip?raw=true), then extract the entire archive on the Windows machine running SAP2000 26.2.0.

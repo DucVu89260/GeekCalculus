@@ -56,13 +56,13 @@ const tools = { concrete: ['beam', 'column', 'slab', 'foundation'], future: ['re
       <ol v-if="locale === 'vi'">
         <li><strong>SAP2000 v26.2.0</strong>.</li>
         <li>Bộ kết nối tại <strong><code>C:\geek_calculus\SAP2000-API</code></strong>.</li>
-        <li>Đăng ký launcher một lần bằng <strong><code>install-web-launcher.cmd</code></strong>.</li>
+        <li>Cài hoặc cập nhật launcher V2 bằng <strong><code>install-web-launcher.cmd</code></strong>.</li>
         <li>Giữ connector chạy trong lúc thao tác từ web.</li>
       </ol>
       <ol v-else>
         <li><strong>SAP2000 v26.2.0</strong>.</li>
         <li>Keep the connector at <strong><code>C:\geek_calculus\SAP2000-API</code></strong>.</li>
-        <li>Register the launcher once using <strong><code>install-web-launcher.cmd</code></strong>.</li>
+        <li>Install or upgrade the V2 launcher using <strong><code>install-web-launcher.cmd</code></strong>.</li>
         <li>Keep the connector running while using the web panel.</li>
       </ol>
       <div class="sap-launch-actions">

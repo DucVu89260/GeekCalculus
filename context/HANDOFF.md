@@ -1,5 +1,10 @@
 # Repository handoff
 
+## V2 profile panel before force results — 2026-10-18
+
+- Preview2026.10.18-v2-local.9 moves complete member profile panel (including global preferences and development DatabaseTables) after section3 Selected members and immediately before section4 Force results. Updated both DOM and CSS grid areas: desktop Output Cases remains left; mobile order2/3/profile/4/5. No data/algorithm change; V1 untouched.
+- Browser smoke adds DOM immediate-sibling and desktop/mobile bounding-order assertions, retains extraction/profile/releases/preferences/design-status/extremes/summary/type/JSON/VI-EN workflow. Source ZIP rebuilt and manifest/CRC verified. No new SAP live validation needed for layout, actual Windows rendering remains user check.
+
 ## V2 readable releases and model-wide Preferences — 2026-10-18
 
 - Preview2026.10.18-v2-local.8 adds separate I/J release tables with exact5 requested columns: index, force component, corresponding DOF, raw boolean, VI/EN meaning (true released / false not released). Fixed mapping0..5=P/V2/V3/T/M2/M3 ↔ U1/U2/U3/R1/R2/R3. Missing/nonboolean/failed outputs remain unknown, not false. Partial-fixity values shown separately in6-row unit-labelled table; raw tree retained. No force or strength math changes.

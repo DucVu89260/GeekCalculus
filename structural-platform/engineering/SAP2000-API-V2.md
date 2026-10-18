@@ -1,6 +1,6 @@
 # SAP2000-API V2 — Local preview
 
-Build: `2026.10.18-v2-local.8` · Compatible with SAP2000 v26.2.0 · Windows 64-bit.
+Build: `2026.10.18-v2-local.9` · Compatible with SAP2000 v26.2.0 · Windows 64-bit.
 
 ## Chạy thử / Quick start
 
@@ -75,3 +75,7 @@ Kết quả Steel Design đọc theo từng frame. Khi SAP xác nhận chưa có
 Chọn nhóm Releases/Offsets/Springs/Hinges rồi xem assignments: có bảng riêng đầu I/J với5 cột Chỉ số, Thành phần nội lực, Bậc tự do tương ứng, Kết quả thuật toán và Ý nghĩa kết quả. Thứ tự P/V2/V3/T/M2/M3 ↔ U1/U2/U3/R1/R2/R3; true=có giải phóng, false=không giải phóng. Getter thiếu/lỗi hiện chưa xác định, không điền false. Partial fixity giữ bảng riêng và dữ liệu gốc. Chỉ đọc cùng release flag; không suy Cb/giằng từ các flag.
 
 Design Preferences thuộc model và active design code, không thuộc riêng member. Dữ liệu lưu một lần ở model_data.steel_design (scope=model_design_code); xem đối tượng Dữ liệu model/Thiết kế. Chỉ chọn Preferences rồi đọc hồ sơ thì không cần chọn frame; snapshot có0 members là bình thường. Nếu chọn thêm nhóm thuộc member thì vẫn phải chọn frame trong SAP. Design overwrites giữ riêng theo từng member, không nhập chung với Preferences.
+
+## Bố cục hồ sơ (local.9)
+
+Toàn bộ khối thông số cấu kiện V2 đặt sau mục3 Cấu kiện đã chọn và ngay trước mục4 Kết quả nội lực. Desktop giữ Output Cases bên trái; mobile đọc theo thứ tự2 →3 → hồ sơ V2 →4 →5. DatabaseTables vẫn nằm trong khối hồ sơ phát triển. Không thay đổi dữ liệu hoặc cách tính.

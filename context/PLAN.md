@@ -153,3 +153,7 @@ Remove loads/forces/displacements only from profile UI/request, retaining lower 
 ## V2 readable Releases and model-wide Preferences — 2026-10-18
 
 Render separate I/J release tables: index0–5, force P/V2/V3/T/M2/M3, DOF U1/U2/U3/R1/R2/R3, raw true/false, localized meaning. Unknown/failed flags remain unknown; partial-fixity values separate with units and raw source tree retained. Label Preferences model-wide, store scope=model_design_code once per snapshot; overwrites per member. Validate browser mapping/VI-EN/data immutability and scope unit test; package local.8.
+
+## V2 member information immediately before force results — 2026-10-18
+
+Move complete profile/data/DatabaseTables panel after selected members and immediately before section4, both DOM and desktop/mobile grid order. Preserve all data/controls. Validate browser bounding boxes/sibling order and existing workflow; package local.9.

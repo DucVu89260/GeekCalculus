@@ -346,3 +346,15 @@ reuse a matching authenticated connector. Unknown listeners are never stopped;
 stop the old connector safely with Ctrl+C first. Keep the connector window open.
 To unregister remove only `HKCU\Software\Classes\geekcalculus-sap2000`.
 Windows registration/UAC/DPAPI need verification on a Windows machine.
+
+### Restart token correction — build 2026.10.18.17
+
+The .16 launcher wrote serialized DPAPI text with a trailing newline and read it
+without trimming. The next launch could fail while decoding the saved token. .17
+trims legacy file whitespace, writes new values without newline, preserves the
+existing token and reports startup stage/line without dumping token data. Replace
+`open-sap2000-web.ps1` at the same fixed installation path, or overlay the new kit
+while the connector is stopped. Keep `.venv` and the saved DPAPI file; no protocol
+reinstallation is necessary. Regression: run
+`pwsh -NoProfile -File tests/test_sap_launcher_token.ps1`. Cross-platform token
+serialization is checked; Windows-specific DPAPI/UAC remains a device check.

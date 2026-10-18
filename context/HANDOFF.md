@@ -1,5 +1,10 @@
 # Repository handoff
 
+## SAP launcher restart-token fix — 2026-10-18
+
+- User reported Input string was not in a correct format after shutting down the connector. Legacy Set-Content appends CR/LF; Get-Content -Raw passed this directly to ConvertTo-SecureString. Reproduced decoding failure with a disposable synthetic token on PowerShell7.4.13/Linux; trimming recovered the original token. Fix trims legacy saved text, writes without newline and preserves token; stage/line diagnostics redact token-reader errors. No deleting token, automatic rotation or protocol re-registration. Build2026.10.18-web-panel.17.
+- Executed new PowerShell regression: syntax parse, LF/CRLF/blank-line recovery, original writer with three repeat reads, new writer exact roundtrip, corrupt-token rejection all passed. Official Microsoft PowerShell package SHA256 checked against HTTPS package index; runtime under /tmp only. Windows DPAPI/UAC and real SAP remain unrun here. Updated source-only ZIP and hosted distribution.
+
 ## SAP launcher usage prompt — 2026-10-18
 
 - ModuleHub now shows an accessible native modal with the four requested usage instructions before invoking the Windows launcher. VI/EN, fixed kit path, Cancel/Escape and Continue protocol link; existing SAP panel unchanged.

@@ -29,9 +29,17 @@
   qh=1.1100821278 kN/m²; screenshot's rounded/legacy qh≈1.114 is not forced into
   code. Figure28.4-1 net-pressure torsion factor applies to internal and external
   terms together. SVGs are schematic, not a structural load assignment/export.
-- Delivery: push the tested source to main and use the existing Pages CI build;
-  no hand edits to generated docs. Local browser evidence is distinct from
-  observing the public deployment.
+- Delivery: source `6bc3ec1`, contrast/sketch-legibility follow-up `cfd8178`,
+  CI-generated Pages artifact `45b60a2`. Frontend/backend/source-index jobs
+  succeeded; HTTPS retrieval of the live index and its hashed CSS/JS verified
+  the envelope route and white title-contrast rule. Pages deployment run
+  `39118639176` belongs to `45b60a2`. Generated docs were built by CI, not
+  hand-edited. Local smoke also asserts title contrast.
+- Live Chromium smoke could not start because the cloud browser rejects the
+  public proxy certificate (`ERR_CERT_AUTHORITY_INVALID`); TLS verification
+  was not disabled. Live HTTPS artifact evidence and full local production
+  browser interaction evidence are separate. No native persistence/security
+  or complete-building design claim is made by this UI release.
 
 ## CFS actual source sample — 2026-10-18
 

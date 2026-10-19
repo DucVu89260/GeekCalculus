@@ -1,5 +1,11 @@
 # Repository handoff
 
+## Vietnam location reference intake — 2026-10-19
+
+- Branch `main`, synchronized baseline `84b6265`; existing SAP/wind functionality retained. User supplied official government PDF URL for location-based wind/ground/short-/long-period acceleration in Steel Library. Proxy 403 blocked retrieval even after turn network permission and escalated HTTPS attempt. No source bytes/engineering values read, no runtime/data/schema/formula changes.
+- Used onboarding network guidance to read restricted policy and save only the additive network draft: retain `api.github.com`, `ducvu89260.github.io`, `tinhketcau.com`; add `datafiles.chinhphu.vn`. Saved/requires-publish is not applied runtime access. No scripts/startup edits or TLS bypass. User needs to apply environment settings or attach PDF, then resume source inspection.
+- Added [intake/integration contract](VIETNAM-LOCATION-LOOKUP.md) and PLAN row based on actual ModuleHub/LibraryBrowser/modules. Specifies units/source identity, administrative-edition/split-scope handling, VI/EN/native/demo and acceptance checks. No empty UI placeholder or guessed dataset. Documentation paths and diff are checked; application suites unrun for doc/config-only preparation.
+
 ## SAP V2 integrated Steel Design input review — 2026-10-19
 
 - User explicitly requests input-review workflow. Integrated source preview9dd9dff selectively into stable2e0bb6d on current branch `fix/sap2000-portable-bootstrap`; resolved build-ID-only source conflicts while retaining portable bootstrap, release_start/end filters, start/end names and existing protocol. Build2026.10.19-v2-input-review.1. No unverified capacity/Cb engine connected.

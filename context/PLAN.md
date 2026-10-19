@@ -1,5 +1,9 @@
 # Repository implementation plan
 
+## Vietnam administrative-location lookup — 2026-10-19
+
+`VN-LOCATION-01` (source-blocked, baseline `84b6265`): [intake/acceptance contract](VIETNAM-LOCATION-LOOKUP.md). Official PDF requested for wind/reference ground/short-/long-period acceleration lookup in Steel Library. Proxy 403 prevented source retrieval; no source title/edition/tables/units/values inferred. Saved additive network draft preserving current explicit hosts and adding the official host; runtime application or direct PDF upload remains required. Audited ModuleHub/LibraryBrowser/modules; scoped additive VI/EN location lookup with provenance, edition-specific administrative paths and explicit ambiguity, preserving catalog/Standards. No application feature or empty placeholder shipped. Next: obtain/read source, extract/independently verify data, implement/test and publish.
+
 ## SAP V2 Steel Design input review — 2026-10-19
 
 `SAP-STEEL-INPUT-01`: integrate preparation preview9dd9dff into current stable2e0bb6d, preserving portable bootstrap and release-position filters. Modal from member/Summary, full/quick, edition-scoped I/H selector, ASD/LRFD, per-frame material/geometry/length sources/missing inputs, signed concurrent-vector provenance and JSON. No capacity/Cb engine invocation. Nonprismatic child geometry visible, no invented intermediate section. Acceptance: pure data-contract tests, V2 local+hosted HTTP/browser flows, typecheck/build, package-module integrity. Actual Windows SAP acceptance remains separate.

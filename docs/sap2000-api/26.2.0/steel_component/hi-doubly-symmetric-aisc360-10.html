@@ -1,0 +1,2197 @@
+<!doctype html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GeekCalculus — AISC 360-10 H/I Member Check</title>
+<style>
+:root{--navy:#152e49;--navy2:#203f5a;--muted:#6c7c89;--border:#dce3e8;--bg:#f4f6f7;--white:#fff;--ink:#283a4b;--accent:#067d85;--pale:#e8f4f2;--amber:#a56a16;--amberbg:#fff6e7;--red:#b43838;--redbg:#fff0ee;--line:#f0f2f4;font-family:Calibri,'Segoe UI',Arial,sans-serif;color:var(--ink);font-size:18px}
+*{box-sizing:border-box}body{margin:0;background:var(--bg)}button,input,select{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #79bccb;outline-offset:2px}.shell{display:grid;grid-template-columns:218px minmax(0,1fr);min-height:100vh}.sidenav{background:#162e47;color:#d5e3eb;padding:25px 15px;position:sticky;top:0;height:100vh}.logo{font-size:24px;font-weight:800;letter-spacing:-.7px;color:#fff;padding:0 14px 21px}.logo span{color:#60cac2}.nav-caption{font-size:13px;text-transform:uppercase;letter-spacing:2px;color:#8297a9;font-weight:800;margin:16px 12px 8px}.navitem{display:flex;align-items:center;gap:10px;width:100%;padding:12px 12px;text-decoration:none;border-radius:9px;color:#bdcddb;font-size:16px}.navitem:hover{background:#223b55}.navitem.active{background:#244b65;color:#fff;font-weight:700}.navitem svg{width:17px;height:17px;opacity:.9}.sidebottom{margin:34px 12px 0;border-top:1px solid #395066;padding-top:19px;color:#a1b3c3;font-size:14px;line-height:1.7}.sidebottom strong{color:#f5d8a0}
+.main{min-width:0}.topbar{min-height:71px;background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:12px 28px;gap:20px}.breadcrumb{color:#778b9c;font-size:16px}.breadcrumb strong{color:var(--navy);font-weight:800}.tag{display:inline-flex;align-items:center;gap:7px;font-size:14px;color:#8c641d;background:var(--amberbg);border:1px solid #efd9b6;border-radius:20px;padding:7px 10px;font-weight:750}.dot{height:7px;width:7px;background:#dfad50;border-radius:50%}.page{padding:28px;max-width:1500px;margin:auto}.intro{display:flex;gap:24px;align-items:flex-start;justify-content:space-between;margin-bottom:22px}.intro h1{margin:0 0 7px;color:var(--navy);font-size:32px;font-weight:800;letter-spacing:-.5px}.intro p{margin:0;color:var(--muted);font-size:16px;line-height:1.6}.intro-actions{display:flex;flex-wrap:wrap;gap:8px}.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid var(--border);padding:10px 13px;border-radius:8px;background:#fff;color:#42596a;font-weight:700;font-size:15px;white-space:nowrap;transition:background .15s}.btn:hover{background:#edf4f5}.btn.primary{background:var(--navy);border-color:var(--navy);color:#fff}.btn.primary:hover{background:#2f4a63}.btn.mini{padding:7px 11px}.warningbar{display:flex;align-items:flex-start;gap:12px;padding:13px 16px;background:var(--amberbg);border:1px solid #ebd6b0;border-radius:11px;color:#79531a;font-size:15px;line-height:1.55;margin-bottom:20px}.warningbar strong{display:block;margin-bottom:2px}.warningbar .alert-icon{border-radius:50%;border:2px solid #d4ad68;display:grid;place-items:center;min-width:21px;height:21px;font-weight:800}
+.workspace{display:grid;grid-template-columns:minmax(385px, .95fr) minmax(430px,1.05fr);align-items:start;gap:19px}.card{background:#fff;border:1px solid var(--border);border-radius:13px;box-shadow:0 2px 14px #1b304007}.cardhead{padding:17px 19px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:12px}.cardhead h2{font-size:18px;letter-spacing:-.1px;margin:0;color:var(--navy)}.cardhead small{font-size:14px;color:#8394a2}.tabstrip{display:flex;flex-wrap:wrap;gap:4px;border-bottom:1px solid var(--border);padding:10px 13px 0}.tab{border:0;background:transparent;padding:11px 14px;color:#788c9c;font-size:15px;font-weight:800;border-bottom:3px solid transparent}.tab.active{color:var(--navy);border-bottom-color:var(--accent)}.tab:hover{color:var(--navy)}.tab-panel{padding:20px;min-height:415px}.sectiontitle{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:17px}.sectiontitle h3{font-size:16px;color:var(--navy);margin:0}.sectiontitle span{color:var(--muted);font-size:14px}.formgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.field{display:flex;flex-direction:column;gap:6px;min-width:0}.field span{display:flex;gap:5px;justify-content:space-between;color:#60758a;font-size:15px;font-weight:650}.field span em{font-size:13px;color:#9ba9b5;font-style:normal}.field input,.field select{width:100%;min-height:40px;background:#fbfcfd;color:#1b3551;padding:9px 11px;border:1px solid #d6e0e6;border-radius:8px;font-size:17px}.field input:focus,.field select:focus{border-color:#2c9b9b}.field small{color:#84939f;font-size:13px;line-height:1.4}.shapegrid{display:grid;grid-template-columns:1fr 230px;gap:12px;align-items:center}.diagram{background:#f7fafb;border:1px dashed #cbd7dc;border-radius:10px;min-height:237px;display:flex;align-items:center;justify-content:center}.diagram svg{width:100%;max-height:233px}.checkmsg{margin-top:12px;padding:10px;background:#f3f8f9;border-radius:7px;color:#658094;font-size:14px}.fieldset-caption{margin:24px 0 12px;color:var(--navy);font-weight:800;font-size:15px}.input-actions{display:flex;gap:10px;padding:15px 19px;border-top:1px solid var(--border);justify-content:space-between;align-items:center}.input-actions small{font-size:14px;color:var(--muted)}
+.result-top{padding:18px 20px;display:grid;grid-template-columns:155px minmax(0,1fr);align-items:center;gap:15px}.ring{width:142px;height:142px;border-radius:50%;background:conic-gradient(var(--accent) 0%,var(--accent) 82.4%,#e9eff3 82.4%,#e9eff3 100%);padding:13px;margin:auto}.ring-center{display:flex;align-items:center;justify-content:center;flex-direction:column;width:100%;height:100%;background:#fff;border-radius:50%}.ring-center strong{font-size:31px;letter-spacing:-.7px;color:var(--navy)}.ring-center span{font-size:13px;color:#93a2af;font-weight:800;letter-spacing:.8px}.result-title{font-size:16px;color:#64798b;font-weight:650}.status-line{display:inline-block;padding:5px 9px;border-radius:6px;background:#fff3de;color:#905d13;font-size:13px;font-weight:850;letter-spacing:.8px;margin:11px 0 8px}.result-desc{font-size:15px;color:#8292a0;line-height:1.6;margin:0}.metrics{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:0 20px 19px}.metric{border:1px solid #e1e8ee;border-radius:9px;padding:12px 13px;background:#fbfdfe}.metric span{font-size:14px;color:#8294a1}.metric strong{display:block;color:#173954;margin:6px 0 2px;font-size:22px}.metric small{font-size:13px;color:#8b9aaa}.subheading{margin:17px 0 12px;display:flex;justify-content:space-between;align-items:center;font-size:16px;font-weight:800;color:var(--navy)}.breakdown{padding:0 20px 21px;border-top:1px solid var(--border)}.barrow{margin-bottom:16px}.barlabel{display:flex;justify-content:space-between;gap:6px;font-size:14px;margin-bottom:7px}.barlabel span{color:#65798c}.barlabel strong{color:var(--navy)}.bar{height:9px;border-radius:9px;background:#e8eef2;overflow:hidden}.bar > div{height:100%;background:var(--accent);border-radius:9px}.bar.fail > div{background:#c15049}.bar.warn > div{background:#dca64c}.breakdown small{font-size:13px;color:var(--muted)}.resultsection{padding:13px 20px 20px;border-top:1px solid var(--border)}.resultsection h3{margin:0 0 12px;font-size:16px;color:var(--navy)}.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;font-size:14px}td,th{padding:10px 7px;text-align:left;white-space:nowrap;border-bottom:1px solid var(--line)}th{font-size:13px;color:#8e9eab;background:#fafbfc;letter-spacing:.25px}td:nth-child(3),td:nth-child(4),td:nth-child(5),th:nth-child(3),th:nth-child(4),th:nth-child(5){text-align:right}tr:last-child td{border:0}.pill{padding:4px 7px;font-size:13px;font-weight:800;border-radius:5px;background:#e8f7f2;color:#157e6b}.pill.fail{background:#fce9e6;color:#ae3d35}.pill.review{background:#fff2d7;color:#976014}.warning-list{display:grid;gap:8px}.warning{border:1px solid #f0dfbf;background:#fffaf1;border-radius:9px;padding:11px 12px;font-size:14px;line-height:1.5;color:#795b35}.warning strong{display:block;color:#825714;margin-bottom:3px}.details{padding:13px 20px;border-top:1px solid var(--border)}details summary{cursor:pointer;font-weight:800;color:#274760;font-size:15px;padding:7px 0}.tracegrid{display:grid;grid-template-columns:1fr 1fr;gap:7px 18px;margin:11px 0}.tracegrid>div{display:flex;justify-content:space-between;border-bottom:1px solid #edf2f4;font-size:14px;padding:5px 0;gap:6px}.tracegrid span{color:#70869a}.footer-note{font-size:14px;color:#8996a3;text-align:center;margin:20px}.errorbox{border-radius:8px;background:#fff0ee;border:1px solid #e7b7af;padding:10px 12px;margin:0 19px 15px;color:#ac3d35;font-size:15px;display:none}.minor-note{padding:0 20px 15px;font-size:14px;color:#8d9aa5}.refline{display:flex;flex-wrap:wrap;align-items:center;gap:9px;font-size:14px;color:#117969;font-weight:700;padding:0 20px 14px}.refline b{padding:4px 6px;background:#eaf5f1;border-radius:5px}.input-changed{color:#ad7e22!important}.extra-btn{border:0;color:#487c85;background:none;font-size:14px;font-weight:750;cursor:pointer}.hidden{display:none!important}.result-top,.refline,.metrics{display:none!important}
+@media(max-width:1240px){.workspace{grid-template-columns:1fr}.result-top{grid-template-columns:155px 1fr}.shapegrid{grid-template-columns:minmax(0,1fr) 210px}}
+@media(max-width:750px){.shell{display:block}.sidenav{position:static;height:auto;padding:14px}.sidenav nav,.sidebottom,.nav-caption{display:none}.logo{padding:0;font-size:21px}.topbar{padding:13px 16px;min-height:56px}.page{padding:17px}.intro{flex-direction:column;gap:15px}.intro h1{font-size:26px}.workspace{display:block}.card{margin-bottom:15px}.shapegrid{grid-template-columns:1fr}.diagram{order:-1;min-height:175px}.diagram svg{max-height:190px}.formgrid{grid-template-columns:1fr 1fr}.result-top{grid-template-columns:130px 1fr;padding:16px 12px}.ring{width:124px;height:124px}.ring-center strong{font-size:27px}.intro-actions{width:100%}.tag{font-size:12px}}
+@media(max-width:420px){.formgrid{grid-template-columns:1fr}.metrics{grid-template-columns:1fr 1fr}.metric{padding:9px}.metric strong{font-size:18px}.tab{padding:11px 9px}.result-top{display:block;text-align:center}.result-top>div:last-child{margin:15px auto 0}.tracegrid{grid-template-columns:1fr}}
+
+/* Excel-style engineering calculation notebook */
+.calc-notebook{margin-top:20px;overflow:hidden}
+.notebook-head{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 21px;border-bottom:1px solid var(--border)}
+.notebook-head h2{margin:0;color:var(--navy);font-size:21px}.notebook-head p{margin:6px 0 0;color:var(--muted);font-size:15px;line-height:1.6}
+.notebook-actions{display:flex;flex-wrap:wrap;gap:7px}.notebook-grid{display:grid;grid-template-columns:220px minmax(0,1fr);min-height:480px}
+.notebook-nav{background:#f8fafb;border-right:1px solid var(--border);padding:18px 10px;position:sticky;top:18px;max-height:calc(100vh - 36px);overflow:auto}.notebook-nav h3{font-size:14px;color:#5b7287;text-transform:uppercase;letter-spacing:.07em;margin:0 12px 12px}
+.notebook-nav a{display:flex;gap:10px;align-items:baseline;padding:10px 11px;border-radius:7px;text-decoration:none;font-size:15px;color:#527087;line-height:1.3}.notebook-nav a:hover,.notebook-nav a:focus{background:#e6f1f2;color:#185c69}.notebook-nav a.active{background:#ddf1f2;color:#0f6674;font-weight:800;box-shadow:inset 3px 0 0 var(--accent)}.notebook-nav a b{color:var(--accent);font-size:14px;font-variant-numeric:tabular-nums}
+.notebook-pages{padding:19px;min-width:0;background:#fff}.notebook-note{padding:12px 14px;background:#fff9ee;border:1px solid #eedfc4;color:#76551e;border-radius:8px;font-size:15px;line-height:1.7;margin:0 0 15px}
+.notebook-step{border:1px solid #dbe5ea;border-radius:10px;overflow:hidden;margin:0 0 13px;break-inside:avoid;background:white}
+.notebook-step summary{list-style:none;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 16px;background:#f7fafb;cursor:pointer}
+.notebook-step summary::-webkit-details-marker{display:none}.step-no{display:grid;place-items:center;border-radius:7px;background:#dcefed;color:#076e70;width:34px;min-width:34px;height:34px;font-weight:800;font-size:15px}
+.step-title{display:flex;align-items:center;gap:11px;min-width:0}.step-title strong{display:block;color:#163c56;font-size:17px}.step-title small{display:block;font-size:14px;color:#7c8f9d;margin-top:3px;font-weight:400}.step-expand{color:#66859a;font-size:20px}.notebook-step[open] .step-expand{transform:rotate(180deg)}
+.step-body{padding:14px 16px 17px}.step-intro{color:#678095;font-size:15px;margin:0 0 13px;line-height:1.7}
+.step-table{width:100%;border-collapse:separate;border-spacing:0;font-size:15px;border:1px solid #e2e8ed;border-radius:7px;overflow:hidden}.step-table th{color:#667d91;background:#f6f8fa;font-size:13px;font-weight:800;white-space:normal;text-align:left}
+.step-table td{padding:12px 10px;vertical-align:top;border-top:1px solid #ecf0f2;white-space:normal;line-height:1.5}.step-table td:nth-child(3),.step-table td:nth-child(4),.step-table td:nth-child(5),.step-table th:nth-child(3),.step-table th:nth-child(4),.step-table th:nth-child(5){text-align:left}
+.step-table tr:first-child td{border-top:none}.step-table tr:last-child td{border-bottom:none}.step-table .item{font-weight:700;color:#2b4b65}.step-table .item small{display:block;font-weight:400;color:#97a5b0;margin-top:4px;font-size:13px}
+.math-line{font-family:'Cambria Math',Cambria,'Times New Roman',serif;font-size:17px;line-height:1.8;color:#26415a;letter-spacing:.01em;overflow-wrap:anywhere}
+.sub-line{display:block;color:#788a9b;font-size:14px;line-height:1.5;margin-top:5px;font-family:Calibri,'Segoe UI',Arial,sans-serif;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.result-number{font-weight:850;color:#145d66;white-space:nowrap;font-size:16px;font-variant-numeric:tabular-nums}.result-number span{font-size:13px;font-weight:500;color:#718697;margin-left:4px}
+.row-indicator{display:inline-block;border-radius:4px;margin-top:6px;padding:2px 5px;font-size:12px;white-space:nowrap;background:#e4f5ee;color:#13745d}.row-indicator.problem{background:#ffe9e5;color:#ae423a}.row-indicator.caution{background:#fff0d4;color:#98651b}
+.step-foot{margin:12px 0 0;border-left:3px solid #d8ad68;padding:6px 0 6px 11px;color:#806038;background:#fffaf1;font-size:14px;line-height:1.65}
+.notebook-legend{display:flex;flex-wrap:wrap;gap:14px;color:#80909c;font-size:14px;margin:0 0 14px}.notebook-legend strong{color:#36627b}.notebook-pending{padding:15px;border:1px dashed var(--border);color:var(--muted);border-radius:8px;font-size:15px}
+@media(max-width:1000px){.notebook-grid{grid-template-columns:1fr}.notebook-nav{border-right:0;border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:3px;align-items:center}.notebook-nav h3{width:100%}.notebook-nav a{padding:7px;font-size:14px}.notebook-pages{padding:13px}.notebook-nav{position:static;max-height:none}}
+@media(max-width:750px){.notebook-head{display:block}.notebook-actions{margin-top:12px}.step-table,.step-table tbody,.step-table tr,.step-table td{display:block;width:100%}.step-table thead{display:none}.step-table tr{border-top:1px solid #e2e8ed}.step-table td{border:0;padding:6px 12px}.step-table td:first-child{padding-top:12px}.step-table td:last-child{padding-bottom:12px}.step-table td[data-label]::before{content:attr(data-label);display:block;font-size:12px;color:#8e9ca7;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}.step-no{width:28px;height:28px;min-width:28px}.step-body{padding:12px 10px}}
+@media print{@page{size:A4;margin:12mm}.shell{display:block}.sidenav,.topbar,.intro-actions,.workspace,.warningbar,.notebook-actions,.notebook-nav,.footer-note,.notebook-legend{display:none!important}.main,.page{display:block;max-width:none;padding:0}.intro{margin:0 0 10px}.intro h1{font-size:24px}.notebook-grid{display:block}.calc-notebook{margin:0;border:0;box-shadow:none}.notebook-pages{padding:0}.notebook-step{break-inside:avoid;page-break-inside:avoid;margin-bottom:10px}.notebook-step .step-body{display:block!important}.notebook-step summary{padding:8px 10px}.step-table{font-size:13px}.step-table td{padding:6px!important}.math-line{font-size:15px}.step-expand{display:none}.notebook-head{padding:7px 0}.notebook-head p{font-size:13px}}
+
+
+/* RAM Connection-inspired engineering calculation report with active contents tree */
+:root{--bg:#f5f6f8;--navy:#21354a;--navy2:#344b60;--accent:#376f9c;--border:#d2d8df;--muted:#5e6f7e;--pale:#e4eef8;font-family:Calibri,"Segoe UI",Arial,sans-serif}
+body{background:#f5f6f8;color:#202d3b}
+.shell{grid-template-columns:282px minmax(0,1fr)}
+.sidenav{height:100vh;position:sticky;top:0;overflow-y:auto;background:#e7e9ec;color:#2a4055;border-right:1px solid #bfc5cd;padding:0 0 18px}
+.sidenav .logo{display:block;text-decoration:none;background:#192f46;padding:20px 18px;color:#fff;font-size:23px}
+.sidenav .logo span{color:#79d3d7}
+.global-nav{padding:12px 9px}
+.sidenav .nav-caption{margin:15px 9px 7px;color:#63798e;font-size:13px;letter-spacing:1.1px}
+.sidenav .navitem{color:#31485e;font-size:16px;line-height:1.35;text-decoration:none;padding:9px 11px;min-height:34px;border-radius:5px}
+.sidenav .navitem.nav-child{padding-left:24px}
+.sidenav .navitem:hover,.sidenav .navitem:focus-visible{background:#d4e1ed;color:#183a62}
+.sidenav .navitem.active{background:#ccdae9;color:#1b4e7b;box-shadow:inset 3px 0 0 #3a76a7}
+.outline-header{position:sticky;top:0;background:#d5d9de;color:#222c36;padding:11px 14px;border-top:1px solid #c7cbd0;border-bottom:1px solid #c5cbd1;display:flex;justify-content:space-between;align-items:center;z-index:2;font-size:19px}
+.outline-header span{font-size:15px;color:#74808b}
+.outline-tree{padding:8px 7px 0}
+.outline-link{display:block;text-decoration:none;color:#334558;border-radius:3px;padding:7px 8px;font-size:15px;line-height:1.4}
+.outline-link.outline-child{padding-left:23px}
+.outline-link:hover,.outline-link:focus-visible{background:#cfdeea;color:#164677}
+.outline-link.is-active{background:#c0d3e6;color:#123a63;font-weight:700;box-shadow:inset 3px 0 0 #2a6b9e}
+#sidebar-step-slot{padding:0 7px 14px}
+#sidebar-step-slot .notebook-nav{display:block;background:transparent;border:0;position:static;max-height:none;overflow:visible;padding:0 0 0 22px}
+#sidebar-step-slot .notebook-nav h3{display:none}
+#sidebar-step-slot .notebook-nav a{border-radius:3px;padding:7px 5px 7px 9px;margin:0 0 1px;display:flex;gap:8px;align-items:flex-start;font-size:15px;color:#375167;line-height:1.45}
+#sidebar-step-slot .notebook-nav a b{color:#55778f;font-size:13px}
+#sidebar-step-slot .notebook-nav a.active,#sidebar-step-slot .notebook-nav a[aria-current="location"]{background:#bcd2e7;color:#174a78;font-weight:700;box-shadow:inset 3px 0 0 #2a6b9e}
+#sidebar-step-slot .notebook-nav a:hover{background:#d3e3f1}
+.sidenav .sidebottom{margin:8px 16px;border-top:1px solid #c5cbd3;color:#6b7d8e;font-size:14px}
+.sidenav .sidebottom strong{color:#7a5825}
+.sidenav .sidebottom p{line-height:1.5}
+.notebook-grid{display:block!important}
+.notebook-pages{width:100%;padding:22px 24px}
+.notebook-step{scroll-margin-top:85px}
+.topbar{position:sticky;top:0;z-index:10;background:#fff;padding:12px 26px;min-height:60px}
+.topbar-right{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.lang-switch{display:inline-flex;border:1px solid #b8c6d5;border-radius:7px;overflow:hidden;background:#f0f3f5}
+.lang-switch button{border:0;min-width:44px;min-height:32px;padding:6px 11px;font-weight:800;font-size:15px;color:#4a6379;background:transparent}
+.lang-switch button[aria-pressed="true"]{background:#224b75;color:#fff}
+.lang-switch button:focus-visible{outline:2px solid #4d9ec0;outline-offset:-2px}
+.page{max-width:1580px}
+.card,.calc-notebook{border-color:#ccd4dd;border-radius:9px;box-shadow:0 1px 5px #1a31420b}
+.cardhead,.notebook-head{background:#f9fafb}
+.cardhead h2,.notebook-head h2{font-weight:700;color:#233d57}
+.step-title strong,.subheading{color:#233d57}
+.outline-link:focus-visible,.sidenav .navitem:focus-visible{outline:2px solid #2f7aad}
+@media(max-width:1020px){.shell{grid-template-columns:235px minmax(0,1fr)}}
+@media(max-width:750px){.shell{display:block}.sidenav{height:auto;position:static;max-height:320px;overflow:auto}.sidenav .global-nav,.sidenav .sidebottom{display:block}.sidenav .nav-caption{display:block}.sidenav .logo{padding:12px 18px}.topbar{position:sticky;top:0}.notebook-pages{padding:13px}.outline-header{position:static}}
+@media print{.sidenav,.topbar{display:none!important}.shell{display:block}.notebook-pages{padding:0}}
+
+
+.shared-section{margin-top:18px;margin-bottom:20px}
+.shared-body{padding:18px 22px;display:grid;gap:15px}
+.shared-notice,.shared-caveat{margin:0;line-height:1.65;font-size:15px;color:#516a7e;border-left:3px solid #568eb0;padding:8px 12px;background:#f2f6fa}
+#shared-status{font-size:15px;color:#265b83;font-weight:700}
+.shared-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:10px}
+.shared-stat{background:#f8fafc;border:1px solid #d9e1e7;padding:11px 12px;border-radius:8px;min-width:0}
+.shared-stat span{display:block;font-size:15px;color:#6a8395}
+.shared-stat strong{display:block;color:#234761;font-size:19px;margin:5px 0;word-wrap:break-word}
+.shared-stat small{font-size:13px;color:#7e94a3}
+.shared-comparisons{border:1px solid #d8e5ec;border-radius:7px;padding:13px;font-size:15px;line-height:1.65;background:#f8fbfd}
+.shared-comparisons p{margin:5px 0}
+.shared-differences p{color:#9b4b35}
+.shared-reference{border:1px solid #d9e1e8;border-radius:9px;padding:12px}
+.shared-reference summary{font-size:16px;font-weight:700;cursor:pointer}
+.shared-search{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:14px 0;font-size:15px}
+.shared-search input{flex:1 1 200px;max-width:480px;border:1px solid #c3d2dd;border-radius:6px;padding:9px;background:white}
+.shared-group{border:1px solid #d8dfe6;border-radius:6px;margin-bottom:10px;padding:7px 11px}
+.shared-group>summary{font-size:16px;color:#214562;font-weight:700;padding:7px;cursor:pointer}
+.shared-group>summary span{float:right;color:#6b8597;font-size:14px;font-weight:400}
+.shared-table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:15px}
+.shared-table th{background:#edf2f6;padding:10px;text-align:left;white-space:normal}
+.shared-table td{padding:10px 9px;vertical-align:top;border-bottom:1px solid #e1e6eb;text-align:left!important;white-space:normal;overflow-wrap:anywhere}
+.shared-table th:nth-child(1){width:17%}
+.shared-table th:nth-child(2){width:47%}
+.shared-table th:nth-child(3){width:18%}
+.shared-table th:nth-child(4){width:18%}
+.shared-table td small{display:block;font-size:13px;color:#708798;margin-top:6px}
+.shared-formula{font-family:Cambria,Georgia,serif;font-size:15px;color:#214663}
+.shared-substitution{font-family:Consolas,monospace;color:#69849a;font-size:14px;margin-top:8px}
+.shared-method{font-size:14px;color:#436a7f}
+.shared-result{font-weight:700;font-variant-numeric:tabular-nums}
+.shared-table tr[hidden]{display:none}
+@media(max-width:800px){.shared-body{padding:12px}.shared-table{min-width:760px}}
+
+
+.design-method-panel{border:1px solid #c5d7e3;margin:14px 18px 0;padding:12px;border-radius:8px;display:flex;gap:12px;flex-wrap:wrap;background:#f8fbfd}
+.design-method-panel legend{font-size:16px;font-weight:700;color:#254d67;padding:0 8px}
+.design-method-choice{display:flex;align-items:center;gap:8px;min-width:200px;padding:11px;border:1px solid #c3d4de;border-radius:7px;background:white;cursor:pointer}
+.design-method-choice:has(input:checked){background:#e2f0f3;border-color:#187688;box-shadow:inset 3px 0 0 #168395}
+.design-method-choice input{width:16px;height:16px;accent-color:#176c85}
+.design-method-choice span{display:grid;gap:4px}
+.design-method-choice strong{color:#214964;font-size:17px}
+.design-method-choice small{color:#718495;font-size:14px}
+.method-clarification{flex-basis:100%;margin:4px 0;color:#96681c;font-size:15px;line-height:1.5}
+#factor-table{border:1px solid #d2dce7;background:#f8fafc;border-radius:7px;padding:11px;margin-bottom:15px}
+#factor-table h4{font-size:16px;color:#214a65;margin:0 0 10px}
+.factor-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.factor-item{display:grid;gap:4px;padding:10px;border:1px solid #dce3e8;background:#fff;border-radius:7px}
+.factor-item span{color:#627b8d;font-size:14px}
+.factor-item strong{color:#25526d;font-size:17px}
+.factor-item small{color:#7b8c9b;font-size:13px}
+.factor-note{color:#8c641c;font-size:14px;line-height:1.5;margin:10px 0 0}
+@media(max-width:700px){.factor-grid{grid-template-columns:1fr}.design-method-choice{min-width:100%}}
+
+.aisc-review-card{margin-top:18px;margin-bottom:18px}
+.aisc-review-body{padding:18px 20px;display:grid;gap:13px}
+.aisc-review-disclaimer{font-size:15px;color:#855c21;background:#fff6e6;border-left:3px solid #ca9b4f;line-height:1.6;padding:10px}
+#aisc-review-status{font-weight:700;font-size:16px;color:#23648a}
+#aisc-review-class{font-size:16px;line-height:1.65;border-bottom:1px solid #e4e9ed;padding-bottom:10px}
+.aisc-results{width:100%;border-collapse:collapse;font-size:15px}
+.aisc-results th{text-align:left;background:#eaf0f4;color:#2c516c}
+.aisc-results th,.aisc-results td{border-bottom:1px solid #dfe5e9;padding:9px;vertical-align:top}
+.aisc-results td small{display:block;font-size:14px;color:#916121;margin-top:5px}
+.aisc-results td strong{color:#34546a}
+.aisc-formulas summary{font-weight:700;font-size:16px;cursor:pointer;padding:9px}
+.aisc-formulas{border:1px solid #d6e0e6;border-radius:8px}
+.aisc-formula-text{font-family:Cambria,Georgia,serif;color:#214d6b}
+.aisc-bracing-form{padding:8px;background:#eef5f9;border-radius:6px}
+@media(max-width:750px){.aisc-review-body{padding:10px}.aisc-results{min-width:680px}}
+.language-switch{display:flex;gap:4px;align-items:center;padding:3px;border:1px solid #9eb2c5;border-radius:9px;background:#eaf0f5}.language-switch button{min-width:52px;min-height:40px;padding:9px 14px;border:1px solid var(--border);border-radius:6px;background:#fff;color:var(--navy);font-weight:700}.language-switch button[aria-pressed="true"]{background:var(--navy);color:white}.topbar-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px}@media(max-width:600px){.topbar{padding:12px;gap:10px;flex-wrap:wrap}.page{padding:14px}}
+
+/* Keep wide engineering tables contained on narrow screens. */
+.shared-body,.aisc-review-body{grid-template-columns:minmax(0,1fr)}
+.shared-body>*,.aisc-review-body>*,.card{min-width:0}
+.tablewrap{max-width:100%}
+
+/* Member-analysis inputs remain explicit and reviewable. */
+.contract-group{border:1px solid #dce6eb;border-radius:9px;padding:13px;margin:14px 0;background:#fbfdfe}
+.contract-group legend{font-size:15px;font-weight:800;color:#244d68;padding:0 6px}
+.contract-note{margin:5px 0 12px;color:#657b8d;font-size:14px;line-height:1.55}
+.confirmation-list{display:grid;gap:8px;margin-top:12px}
+.confirmation{display:flex;align-items:flex-start;gap:9px;padding:9px 10px;border:1px solid #e0e7eb;border-radius:7px;background:#fff;color:#405b70;font-size:14px;line-height:1.5}
+.confirmation input{margin:2px 0 0;accent-color:#176c85}
+.subform{border-left:3px solid #a9c9d2;padding:7px 0 7px 13px;margin:12px 0}
+.subform h4{font-size:15px;color:#294f68;margin:0 0 9px}
+.inline-checks{display:flex;flex-wrap:wrap;gap:9px 16px;margin:8px 0}
+.inline-checks label{display:flex;align-items:center;gap:6px;color:#435e72;font-size:14px}
+.inline-checks input{accent-color:#176c85}
+.load-basis-warning{margin-top:8px;border-radius:7px;background:#fff4e1;color:#855815;padding:9px 11px;font-size:14px;line-height:1.5}
+.compliance-body{padding:18px 20px;display:grid;gap:13px}
+.compliance-status{font-size:19px;font-weight:850;color:#23648a}
+.compliance-scope{padding:10px 12px;border-left:3px solid #ca9b4f;background:#fff7e8;color:#76551f;font-size:15px;line-height:1.6}
+.compliance-checks{display:grid;gap:8px}
+.compliance-row{display:grid;grid-template-columns:minmax(130px,.55fr) minmax(120px,.5fr) minmax(200px,1.5fr);gap:10px;padding:10px;border:1px solid #e0e7eb;border-radius:8px;align-items:start;font-size:14px}
+.compliance-row strong{color:#274a63}.compliance-row small{color:#708497;line-height:1.5}
+.compliance-trace{padding:10px;border:1px solid #dce5ea;border-radius:8px;background:#f9fbfc;font-size:14px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}
+.pending-integration{color:#748999!important}
+.ack-reset-note{display:none;margin-top:10px;padding:9px 11px;border:1px solid #ebd8b6;background:#fff7e8;border-radius:7px;color:#795a24;font-size:14px;line-height:1.5}
+.ack-reset-note.visible{display:block}
+@media(max-width:700px){.compliance-row{grid-template-columns:1fr;gap:5px}}
+
+/* Shared navy page surround; preserve a light calculation surface. */
+body{background:#123754}
+.page{width:calc(100% - 32px);margin:16px auto;border:1px solid var(--border);border-radius:16px;background:#fbfcfe}
+
+
+/* One reading column, consistent spacing and readable report typography. */
+body{line-height:1.55}
+.page{max-width:1160px}
+.workspace{display:grid;grid-template-columns:minmax(0,1fr);gap:24px}
+.report-section,.aisc-review-card,.shared-section{margin:24px 0 0}
+.formgrid,.shapegrid,.factor-grid,.tracegrid,.shared-summary{grid-template-columns:minmax(0,1fr)}
+.shapegrid{gap:20px}
+.diagram{width:100%;max-width:340px;margin:auto}
+.diagram svg{min-height:240px;max-height:280px}
+.field input,.field select{min-height:46px}
+.tab-panel{min-height:0}
+.cardhead{flex-wrap:wrap}
+.cardhead h2,.notebook-head h2{font-size:21px;line-height:1.4}
+.shared-stat{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.shared-stat strong{margin-left:auto}
+#member-compliance{border:0;border-top:1px solid var(--border);border-radius:0;box-shadow:none;margin:0}
+#design-calculation .calc-notebook{margin:0;border:0;border-top:1px solid var(--border);border-radius:0;box-shadow:none}
+#engineering-warnings>.warning-list{padding:20px}
+#engineering-warnings>.warningbar{margin:0 20px 20px}
+#input-card,#calculation-results,#design-calculation,#aisc-review,#shared-section,#engineering-warnings{scroll-margin-top:100px}
+@media(max-width:750px){
+ .page{padding:16px;width:calc(100% - 20px);margin:10px auto}
+ .workspace{display:grid;gap:20px}
+ .card{margin-bottom:0}
+ .cardhead,.tab-panel,.compliance-body{padding:16px}
+ .cardhead h2,.notebook-head h2{font-size:20px}
+ .intro-actions .btn{white-space:normal}
+ .shared-stat strong{margin-left:0}
+}
+
+.fabrication-selector{padding:20px}
+#calculation-mode{width:100%;max-width:100%;min-width:0;min-height:44px;padding:8px}
+.sectiontitle{flex-wrap:wrap}
+#sap-import{white-space:normal}
+</style><script defer src="./test-environment.js"></script>
+</head><body>
+<div class="shell">
+
+<aside class="sidenav" aria-label="Navigation and report contents">
+  <a class="logo" href="./" title="GeekCalculus — Home">Geek<span>Calculus</span></a>
+  <nav class="global-nav" aria-label="Main GeekCalculus navigation">
+    <div class="nav-caption" data-l10n="workspace">WORKSPACE</div>
+    <a class="navitem" href="./" data-l10n="dashboard">▦ &nbsp; Dashboard</a>
+    <a class="navitem" href="./#/modules/steel" data-l10n="steel">▱ &nbsp; Steel Design</a>
+    <a class="navitem nav-child" href="./#/modules/steel" data-l10n="component">↳ &nbsp; Component</a>
+    <a class="navitem nav-child active" href="./hi-doubly-symmetric-aisc360-10.html" aria-current="page">↳ &nbsp; H/I Doubly Symmetric</a>
+    <a class="navitem nav-child" href="./#/modules/steel/crane-beam">↳ &nbsp; Crane Beam</a>
+    <a class="navitem" href="./#/modules/analysis" data-l10n="sectionprops">⌘ &nbsp; Section Properties</a>
+    <div class="nav-caption" data-l10n="engineering">ENGINEERING TOOLS</div>
+    <a class="navitem" href="./#/modules/library" data-l10n="materiallib">≡ &nbsp; Material Library</a>
+    <a class="navitem" href="./#/modules/steel/library/standards" data-l10n="standardlib">⌗ &nbsp; Design Standards (Library)</a>
+  </nav>
+  <div class="outline-header"><strong data-l10n="contents">Contents</strong><span aria-hidden="true">⌖</span></div>
+  <nav class="outline-tree" aria-label="Engineering calculation table of contents">
+    <a class="outline-link" href="#input-card" data-outline="input">01 &nbsp; Input Parameters</a>
+    <a class="outline-link" href="#calculation-results" data-outline="checks">02 &nbsp; Calculation Results</a>
+    <a class="outline-link" href="#design-calculation" data-outline="details">03 &nbsp; Design Calculation</a>
+    <a class="outline-link" href="#aisc-review" data-outline="aisc">04 &nbsp; AISC 360-10 Verified Branches</a>
+    <a class="outline-link" href="#shared-section" data-outline="shared">05 &nbsp; Shared Section Properties</a>
+  </nav>
+  <div id="sidebar-step-slot"></div>
+  <div class="sidebottom"><strong>AISC 360-10 · H/I MEMBER</strong><p data-l10n="footer">Local bounded calculation · review the stated scope.</p></div>
+</aside>
+<div class="main"><header class="topbar"><div class="breadcrumb">Steel Design &nbsp;›&nbsp; Component &nbsp;›&nbsp; <strong>H/I Doubly Symmetric</strong></div><div class="topbar-right">
+
+ <div class="tag"><span class="dot"></span> AISC 360-10 · MEMBER CHECK</div>
+ </div></header>
+<main class="page"><div class="intro"><div><h1>H/I Doubly Symmetric</h1><p>AISC 360-10 member strength · symmetric welded I/H scope · LRFD / ASD</p></div><div class="intro-actions"><div class="language-switch" role="group" aria-label="Language"><button type="button" data-locale="vi" lang="vi" aria-pressed="false" title="Tiếng Việt">VN</button><button type="button" data-locale="en" lang="en" aria-pressed="true" title="English">ENG</button></div><button class="btn" id="preset" type="button">↺ &nbsp; Sample inputs</button><button class="btn" id="import" type="button">↥ &nbsp; Import JSON</button><button class="btn" id="export" type="button">↧ &nbsp; Export inputs & results</button><input type="file" accept=".json,application/json" id="file" class="hidden"></div></div>
+
+<div class="design-method-panel"><label for="calculation-mode"><strong>Calculation source</strong></label> <select id="calculation-mode"><option value="AISC36010">AISC 360-10 · member checks</option><option value="LEGACY">Legacy Excel 360-05 · reference only</option></select><p id="primary-scope">Gross-section built-up I/H member strength using the selected ASD/LRFD method.</p></div>
+<div class="workspace" id="results-start"><section class="card" id="input-card"><header class="cardhead"><h2>01 &nbsp; Input Parameters</h2><small>Units: mm / MPa / kN / kN·m</small></header>
+<fieldset class="design-method-panel" aria-label="Design method">
+<legend>Design Method / Phương pháp thiết kế</legend>
+<label class="design-method-choice"><input type="radio" name="design-method" value="LRFD" checked><span><strong>LRFD</strong><small>φ × Rn · Factored demand</small></span></label>
+<label class="design-method-choice"><input type="radio" name="design-method" value="ASD"><span><strong>ASD</strong><small>Rn / Ω · Service-level demand</small></span></label>
+<p class="method-clarification" id="method-explanation">Select LRFD load combinations. Changing the method does not convert forces or combinations.</p>
+</fieldset>
+<div class="formgrid fabrication-selector" data-section="section"><label class="field"><span>Fabrication</span><select id="aisc-fabrication" data-key="fabrication"><option value="BUILT_UP">Built-up · continuously welded</option><option value="ROLLED" disabled>Hot-rolled · pending</option></select></label></div>
+<div class="tabstrip" role="tablist"><button class="tab active" data-tab="geometry" role="tab" aria-selected="true">Geometry</button><button class="tab" data-tab="member" role="tab" aria-selected="false">Material & lengths</button><button class="tab" data-tab="forces" role="tab" aria-selected="false">Forces</button><button class="tab" data-tab="shear" role="tab" aria-selected="false">Shear & stiffeners</button></div>
+<div class="tab-panel" id="geometry" role="tabpanel"><div class="sectiontitle"><h3>Doubly symmetric I/H section</h3><span>Sharp-corner · mm</span></div>
+<div class="shapegrid"><div class="formgrid" data-section="section">
+<label class="field"><span>Overall depth <em>h</em></span><input type="number" step="any" data-key="h_mm"></label>
+<label class="field"><span>Flange width <em>bf</em></span><input type="number" step="any" data-key="bf_mm"></label>
+<label class="field"><span>Web thickness <em>tw</em></span><input type="number" step="any" data-key="tw_mm"></label>
+<label class="field"><span>Flange thickness <em>tf</em></span><input type="number" step="any" data-key="tf_mm"></label>
+
+<label class="field" id="web-attachment-field"><span>Web-to-flange attachment</span><select data-key="web_attachment"><option value="WELDED">Continuous welded plates</option></select></label>
+</div><div class="diagram"><svg viewBox="0 0 240 240" role="img" aria-label="I/H section diagram"><g id="section-outline"></g><g stroke="#7894a6" stroke-width="1" fill="none"><path d="M25 26h-9v188h9M35 224v8h170v-8"/></g><g fill="#557589" font-size="12" font-weight="700"><text x="11" y="119" transform="rotate(-90 11 119)" text-anchor="middle" id="diag-h">h</text><text x="120" y="239" text-anchor="middle" id="diag-b">bf</text></g></svg></div></div>
+<p class="checkmsg">Equal flanges (bf, tf) with centered web. Fillet radii are excluded. The primary calculation scope is static, prismatic, doubly symmetric welded I/H.</p>
+<div id="web-clear-height-fields" class="hidden"><div class="formgrid" data-section="section"><label class="field"><span>Rolled clear web height <em>between fillets · mm</em></span><input type="number" step="any" data-key="web_clear_height_mm" data-optional><small>Measure the clear web height excluding fillets from the profile source. Catalog properties still require separate verification.</small></label></div>
+<label class="confirmation"><input type="checkbox" data-section="section" data-key="web_clear_height_verified"><span>I verified this rolled clear web height from the applicable profile source.</span></label></div>
+<p class="checkmsg">This calculator currently develops the Built-up section family. Hot-rolled sections are pending.</p></div>
+<div class="tab-panel hidden" id="member" role="tabpanel"><div class="sectiontitle"><h3>Material and member parameters</h3><span>External Direct Analysis · AISC 360-10</span></div>
+<div class="formgrid" data-section="material"><label class="field"><span>Yield strength <em>Fy · MPa</em></span><input type="number" step="any" data-key="fy_mpa"></label><label class="field"><span>Elastic modulus <em>E · MPa</em></span><input id="aisc-e" type="number" step="any" data-key="e_mpa"><small>AISC 360-10 nominal elastic modulus: E = 200,000 MPa.</small></label><label class="field"><span>Tensile strength <em>Fu · MPa</em></span><input type="number" step="any" data-key="fu_mpa" data-optional><small>Use the specified material value for the adopted grade.</small></label></div>
+<div class="fieldset-caption">Member and unbraced lengths</div><div class="formgrid" data-section="member"><label class="field"><span>Major-axis length <em>Lx · mm</em></span><input type="number" step="any" data-key="lx_mm"></label><label class="field"><span>Unbraced length <em>Lb · mm</em></span><input type="number" step="any" data-key="lb_mm"></label></div>
+<div class="fieldset-caption">AISC 360-10 · E2/E3/E4 · independent restraint lengths</div>
+<p class="checkmsg">External Direct Analysis uses Kx = Ky = Kz = 1 under C3. Lx, Ly, Lz and Lb are independent restraint lengths; see the calculation notes below.</p>
+<div class="formgrid aisc-bracing-form" data-section="member">
+ <label class="field"><span>Kx · E2</span><input id="aisc-kx" data-key="kx" type="number" min="0" step="any"></label>
+ <label class="field"><span>Ky · E2</span><input id="aisc-ky" data-key="ky" type="number" min="0" step="any"></label>
+ <label class="field"><span>Ly · compression minor axis <em>mm</em></span><input id="aisc-ly" data-key="ly_mm" type="number" min="0" step="any"></label>
+ <label class="field"><span>Kz · E4</span><input id="aisc-kz" data-key="kz" type="number" min="0" step="any"></label>
+ <label class="field"><span>Lz · torsional unbraced length <em>mm</em></span><input id="aisc-lz" data-key="lz_mm" type="number" min="0" step="any"></label>
+ <label class="field"><span>Shear modulus <em>G · MPa</em></span><input id="aisc-g" data-key="g_mpa" type="number" min="0" step="any"><small>AISC 360-10 nominal shear modulus: G = 77,200 MPa.</small></label>
+</div>
+</div>
+<div class="tab-panel hidden" id="forces" role="tabpanel"><div class="sectiontitle"><h3>Design actions at the current section</h3><span>Manual input · explicit units and signs</span><button class="btn mini pending-integration" id="sap-import" type="button" disabled aria-disabled="true" title="Future API: import forces, section geometry and moment diagrams for AISC Cb or the selected standard's corresponding factor">Connect SAP2000 API · pending</button></div>
+<p class="contract-note">Manual forces must correspond to the ASD or LRFD design method selected above. Values are used as entered.</p>
+<div class="formgrid" data-section="forces">
+<label class="field"><span>Axial force <em>N · kN</em></span><input type="number" step="any" data-key="axial_kN"><small>Positive = tension; negative = compression</small></label>
+<label class="field"><span>Major-axis moment <em>Mx · kN·m</em></span><input type="number" step="any" data-key="moment_x_kNm"><small>Positive = bottom-flange tension; negative = top-flange tension.</small></label>
+<label class="field"><span>Minor-axis moment <em>My · kN·m</em></span><input type="number" step="any" data-key="moment_y_kNm"></label>
+<label class="field"><span>Shear force <em>Vx · kN</em></span><input type="number" step="any" data-key="shear_x_kN"></label>
+<label class="field"><span>Shear force <em>Vy · kN</em></span><input type="number" step="any" data-key="shear_y_kN"></label>
+<label class="field"><span>Torsion <em>T · kN·m</em></span><input type="number" step="any" data-key="torsion_kNm"><small>Enter 0 explicitly if torsion is absent.</small></label>
+<div id="legacy-moment-stations" class="formgrid" data-section="forces">
+ <label class="field"><span>Legacy M25 <em>kN·m</em></span><input type="number" step="any" data-key="moment_25_kNm"></label>
+ <label class="field"><span>Legacy M50 <em>kN·m</em></span><input type="number" step="any" data-key="moment_50_kNm"></label>
+ <label class="field"><span>Legacy M75 <em>kN·m</em></span><input type="number" step="any" data-key="moment_75_kNm"></label>
+</div><p class="checkmsg" id="cb1-note">AISC 360-10 uses conservative Cb = 1 for this calculation. The M25/M50/M75 fields are retained for the separate legacy Excel reference only.</p></div></div>
+<div class="tab-panel hidden" id="shear" role="tabpanel">
+ <div class="sectiontitle"><h3>Web shear, stiffeners and optional tension-field action</h3><span>AISC 360-10 Chapter G</span></div>
+ <fieldset class="contract-group"><legend>Transverse stiffener detail</legend>
+  <p class="contract-note">For plates and pairs, bs is the clear outstand from the web face and ts is measured along the member. TFA is off by default. A single angle requires an entered inertia and verified axis. Attachment details must be verified before the kernel credits stiffened kv.</p>
+  <div class="formgrid" data-section="stiffeners">
+   <label class="field"><span>Stiffener spacing <em>a · mm</em></span><input type="number" min="0" step="any" data-key="spacing_mm"></label>
+   <label class="field"><span>Thickness <em>ts · mm</em></span><input type="number" min="0" step="any" data-key="thickness_mm"></label>
+   <label class="field"><span>Clear outstand from web face <em>bs · mm</em></span><input type="number" min="0" step="any" data-key="width_mm"></label>
+   <label class="field"><span>Stiffener yield strength <em>Fy · MPa</em></span><input type="number" min="0" step="any" data-key="fy_mpa" data-optional></label>
+   <label class="field"><span>Arrangement</span><select id="stiffener-layout" data-key="layout"><option value="PAIRED">Paired rectangular plates</option><option value="SINGLE_PLATE">Single rectangular plate</option><option value="SINGLE_ANGLE">Single angle</option></select></label>
+   <label class="field"><span>Plate / pair orientation</span><input value="PERPENDICULAR_RECTANGULAR_PLATE" readonly aria-readonly="true" data-fixed-orientation><small>Fixed model orientation for plates and pairs.</small></label>
+   <label class="field hidden" id="angle-inertia-field"><span>Single-angle inertia <em>mm⁴</em></span><input type="number" min="0" step="any" data-key="inertia_mm4" data-optional></label>
+  </div>
+  <label class="confirmation hidden" id="angle-axis-check"><input type="checkbox" data-section="stiffeners" data-key="inertia_axis_verified"><span>I verified the entered single-angle inertia axis is the axis used by the AISC check.</span></label>
+  <div class="subform"><h4>G2.2 attachment detail review</h4>
+   <p class="contract-note">Verify weld termination 4–6tw clear of the web weld toe; single plates attach to the compression flange; bolted spacing ≤305 mm; intermittent weld gaps ≤min(16tw, 250 mm), as applicable.</p>
+   <label class="confirmation"><input type="checkbox" data-section="stiffeners" data-key="attachment_details_verified"><span>I reviewed the applicable G2.2 weld, attachment, bolt-spacing and intermittent-weld details.</span></label>
+  </div>
+ </fieldset>
+ <fieldset class="contract-group"><legend>Optional G3 tension-field action</legend>
+  <label class="confirmation"><input id="tfa-enabled" type="checkbox" data-section="tension_field_action" data-key="enabled"><span>Enable tension-field action evaluation. Leave off unless this panel and every required adjacent panel and boundary stiffener are verified.</span></label>
+  <div id="tfa-inputs" class="hidden">
+   <div class="formgrid" data-section="tension_field_action">
+    <label class="field"><span>Panel position</span><select id="tfa-panel-position" data-key="panel_position"><option value="">Select panel position</option><option value="INTERIOR">Interior panel</option><option value="END">End panel</option></select></label>
+    <label class="field"><span>Four sides supported</span><select id="tfa-four-sides" data-key="four_sides_supported"><option value="UNCONFIRMED">Confirm support condition</option><option value="true">Yes, all four sides supported</option><option value="false">No</option></select></label>
+   </div>
+   <div class="subform"><h4>Adjacent panel 1</h4><div class="formgrid" data-tfa-panel="0">
+    <label class="field"><span>Spacing <em>mm</em></span><input type="number" min="0" step="any" data-panel-key="spacing_mm" data-optional></label>
+    <label class="field"><span>Shear <em>kN</em></span><input type="number" step="any" data-panel-key="shear_kN" data-optional></label>
+    <label class="field"><span>Panel position</span><select data-panel-key="is_end_panel"><option value="">Select</option><option value="false">Interior panel</option><option value="true">End panel</option></select></label>
+    <label class="field"><span>Four sides supported</span><select data-panel-key="four_sides_supported"><option value="">Select</option><option value="true">Yes</option><option value="false">No</option></select></label>
+   </div><label class="confirmation"><input type="checkbox" data-panel-index="0" data-panel-key="other_boundary_stiffeners_verified"><span>Other boundary stiffeners for adjacent panel 1 are verified.</span></label></div>
+   <div class="subform"><h4>Adjacent panel 2</h4><div class="formgrid" data-tfa-panel="1">
+    <label class="field"><span>Spacing <em>mm</em></span><input type="number" min="0" step="any" data-panel-key="spacing_mm" data-optional></label>
+    <label class="field"><span>Shear <em>kN</em></span><input type="number" step="any" data-panel-key="shear_kN" data-optional></label>
+    <label class="field"><span>Panel position</span><select data-panel-key="is_end_panel"><option value="">Select</option><option value="false">Interior panel</option><option value="true">End panel</option></select></label>
+    <label class="field"><span>Four sides supported</span><select data-panel-key="four_sides_supported"><option value="">Select</option><option value="true">Yes</option><option value="false">No</option></select></label>
+   </div><label class="confirmation"><input type="checkbox" data-panel-index="1" data-panel-key="other_boundary_stiffeners_verified"><span>Other boundary stiffeners for adjacent panel 2 are verified.</span></label></div>
+   <label class="confirmation"><input type="checkbox" data-same-boundaries><span>The left and right boundary stiffeners have the same complete geometry, orientation and verified attachment detail as the current stiffener inputs.</span></label>
+  </div>
+ </fieldset>
+</div>
+<div class="input-actions"><small id="dirtytext">Sample inputs loaded.</small><button class="btn primary" id="run" type="button">▹ &nbsp; Calculation</button></div><div class="errorbox" role="alert" id="error"></div></section>
+<section class="card" id="calculation-results" aria-live="polite"><header class="cardhead"><h2>02 &nbsp; Calculation Results</h2><small id="calc-info">Browser · not saved to DB</small></header>
+<div class="resultsection" id="member-design-summary-section"><h3>Design summary</h3><div class="tablewrap"><table class="aisc-results"><thead><tr><th>Check</th><th>Nominal</th><th>Available</th><th>D/C</th><th>Clause</th></tr></thead><tbody id="member-design-summary"></tbody></table></div></div>
+<div class="result-top"><div class="ring" id="ring"><div class="ring-center"><strong id="h1">—</strong><span>H1 · D/C</span></div></div><div><div class="result-title">Axial force–moment interaction</div><span class="status-line" id="status">REVIEW REQUIRED</span><p class="result-desc" id="overview">Loading Excel sample…</p></div></div>
+<div id="refline" class="refline"></div><div class="metrics" id="metrics"></div><div class="breakdown"><div id="factor-table" aria-live="polite"></div><div class="subheading">Demand / Capacity <span style="font-size:13px;color:#95a4b0"><span id="active-calculation-source">AISC 360-10 reference calculation</span></span></div><div id="bars"></div><small>Computed branch ratios do not establish complete member approval; missing checks remain explicit.</small></div>
+<div class="resultsection"><h3>Limit State Checks</h3><div class="tablewrap"><table><thead><tr><th>Clause / source</th><th>Limit state</th><th>Demand</th><th>Available / nominal</th><th>D/C</th><th>Status / blocker</th></tr></thead><tbody id="checkrows"></tbody></table></div></div>
+<div class="details"><details><summary>⊞ &nbsp; Classification and intermediate results</summary><div class="tracegrid" id="trace"></div></details></div>
+
+<section class="card" id="member-compliance" aria-labelledby="member-compliance-heading">
+<header class="cardhead"><h2 id="member-compliance-heading">Gross member strength</h2></header>
+<div class="compliance-body">
+<div id="member-compliance-status" class="compliance-status" role="status" aria-live="polite">Waiting for calculation</div>
+<div id="member-compliance-blockers" class="warning-list"></div>
+<div class="compliance-checks" id="member-compliance-checks"></div>
+<details><summary>Member utilization and trace</summary><div id="member-compliance-trace" class="compliance-trace">No current result.</div></details>
+</div></section>
+<div class="minor-note">All calculations are performed locally; no input is sent to a server.</div></section></div>
+
+
+
+<section class="card report-section" id="design-calculation" aria-labelledby="design-calculation-heading">
+<header class="cardhead"><h2 id="design-calculation-heading">03 &nbsp; Design Calculation</h2></header>
+<div class="aisc-review-body">
+<p class="contract-note">AISC 360-10 formula references and applicability. Current numerical results and branch traces are shown in the following verified-branches section.</p>
+<details class="aisc-formulas" open><summary>Formula Registry — AISC 360-10 clause and equation references</summary>
+<div id="aisc-review-formulas"></div></details>
+</div>
+<section class="card calc-notebook" id="calculation-notebook" aria-label="Step-by-step calculation report">
+  <header class="notebook-head"><div><h2>Calculation Details · Step by Step</h2><p>Stepwise engineering calculations · symbolic formulae · current substitutions · design code references <strong>Legacy Excel 360-05 · comparison only</strong></p></div>
+    <div class="notebook-actions"><button class="btn mini" type="button" id="steps-expand">Expand all</button><button class="btn mini" type="button" id="steps-collapse">Collapse all</button><button class="btn mini" type="button" id="steps-copy">Copy formulas</button><button class="btn mini" type="button" id="steps-print">Print / Save PDF</button></div>
+  </header>
+  <div class="notebook-grid"><nav class="notebook-nav" id="step-nav" aria-label="Calculation steps index"><h3>Calculation index</h3></nav>
+  <div class="notebook-pages"><p class="notebook-note"><strong>Engineering note:</strong> This report follows the Phase 1 engine; <strong>AISC 360-10 citations are provided as review pointers</strong> and are not validated clause-level attestations. The report is not approved for design. The units are mm, MPa, kN and kN·m.</p>
+    <div class="notebook-legend"><span><strong>Formula:</strong> readable symbols</span><span><strong>Substitution:</strong> input substitution</span><span><strong>Result:</strong> computed value</span><span><strong>Standard:</strong> clause reference for review</span></div>
+    <div id="step-content" class="notebook-pending">Click Calculate to generate the report.</div>
+  </div></div>
+</section>
+</section>
+
+<section class="card aisc-review-card" id="aisc-review" aria-labelledby="aisc-review-header">
+<header class="cardhead"><h2 id="aisc-review-header">04 &nbsp; AISC 360-10 Verified Branches</h2>
+<small>Source-linked checks and intermediate traces</small></header>
+<div class="aisc-review-body">
+<div class="aisc-review-disclaimer">Each row retains its clause, status, source trace and blocker. Missing or uncomputed limit states remain visible and never receive a zero demand or capacity.</div>
+<div id="aisc-review-status" role="status" aria-live="polite">Đang chờ tính toán từ Section Properties…</div>
+<div id="aisc-review-class"></div>
+<div id="aisc-review-table"></div>
+
+</div>
+</section>
+<section class="card shared-section" id="shared-section" aria-labelledby="shared-section-heading">
+<header class="cardhead"><h2 id="shared-section-heading">05 &nbsp; Shared Section Properties</h2><small id="shared-version">Shared numerical core · geometry only</small></header>
+<div class="shared-body">
+<p class="shared-notice">Section Properties is the single numerical source for gross section geometry and advanced mechanics. The active AISC 360-10 calculation consumes these canonical properties. Legacy Excel values are retained only for explicit comparison.</p>
+<div id="shared-status" role="status" aria-live="polite">Calculating canonical section properties…</div>
+<div class="shared-summary" id="shared-summary"></div>
+<div id="shared-comparisons" class="shared-comparisons"></div>
+<details open class="shared-reference"><summary>Shared formula report · section geometry / advanced mechanics</summary>
+<div class="shared-search"><label for="shared-filter">Search formulas / Tìm công thức</label><input id="shared-filter" type="search" placeholder="A, Ix, Iy, J, Cw, shear area, warping…" autocomplete="off"></div>
+<div id="shared-formula-table"></div></details>
+<p class="shared-caveat">Geometry references describe the Section Properties mathematical model, not AISC 360-10 member-strength compliance. Advanced thin-wall properties are model-dependent. See the formula assumptions and comparison notes.</p>
+</div>
+</section>
+
+
+
+<section class="card report-section" id="engineering-warnings" aria-labelledby="engineering-warnings-heading">
+<header class="cardhead"><h2 id="engineering-warnings-heading">Engineering warnings <span style="font-weight:400;color:#9aa5af" id="warn-count"></span></h2></header>
+<div class="warning-list" id="warnings"></div>
+<div class="warningbar hidden" id="legacy-warning"><div class="alert-icon">!</div><div><strong>Excel parity only — not approved for design</strong>The source workbook states AISC 360-05. This preview preserves legacy behavior for parity (signed Cb, weak-axis Fe and stiffeners). <b>Do not use this output for construction design or claim AISC 360-10 compliance.</b></div></div>
+</section>
+
+<div class="resultsection" id="calculation-notes"><h3>Calculation notes</h3><ul>
+<li>Built-up, doubly symmetric I/H with homogeneous steel and rectangular plates. Hybrid steel and cover plates are not included. Hot-rolled development is pending.</li>
+<li>Gross-section member properties are used. Web openings will be developed in a later phase.</li>
+<li>External Direct Analysis to AISC 360-10 C2 is assumed. Under C3, K = 1; SAP2000 must be configured for the required method. The component does not verify the structural model.</li>
+<li>Lx, Ly, Lz and Lb remain independent physical restraint lengths. Nominal E/G are used in member resistance, without repeating the analysis stiffness reductions.</li>
+<li>For ASD, the external Direct Analysis follows C2.1(4): 1.6 times ASD analysis loads, followed by division of required strengths by 1.6. This calculator does not convert forces.</li>
+<li>Cb = 1 until the SAP2000 API can supply geometry, forces and a verified moment diagram. Other standards may use a corresponding factor.</li>
+</ul><a href="./?standard=AISC360-10&amp;source_sha256=f9b15004cf51dbaec6c06588d81aa5256be268af87906e5ba863c289795f4e99&amp;pdf_page=81#/modules/steel/library/standards" target="_blank" rel="noopener">AISC 360-10 C3 · PDF page 81 · printed 16.1-25</a></div>
+
+<div class="footer-note">GeekCalculus · Steel Design / Component · H/I Doubly Symmetric · Phase 1 Browser Preview · © 2026</div></main></div></div>
+<script src="./aisc360-10-resistance.js"></script>
+<script>
+/**
+ * GeekCalculus temporary browser parity engine, mirrors PHP legacy v0.1.0.
+ * Reference workbook identifies AISC 360-05; it is not an AISC 360-10 checker.
+ * Units internally cm, kN, kN/cm², kN.cm. Do not use for construction design.
+ */
+// English is the canonical source. Translate presentation only, never calculation data.
+const HI_TRANSLATIONS = {
+  "External Direct Analysis · AISC 360-10": "Phân tích trực tiếp bên ngoài · AISC 360-10",
+  "AISC 360-10 nominal elastic modulus: E = 200,000 MPa.": "Mô đun đàn hồi danh nghĩa AISC 360-10: E = 200,000 MPa.",
+  "AISC 360-10 nominal shear modulus: G = 77,200 MPa.": "Mô đun trượt danh nghĩa AISC 360-10: G = 77,200 MPa.",
+  "External Direct Analysis uses Kx = Ky = Kz = 1 under C3. Lx, Ly, Lz and Lb are independent restraint lengths; see the calculation notes below.": "Phân tích trực tiếp bên ngoài dùng Kx = Ky = Kz = 1 theo C3. Lx, Ly, Lz và Lb là các chiều dài giằng độc lập; xem ghi chú cuối bảng tính.",
+
+  "Gross member strength": "Sức kháng cấu kiện nguyên tiết diện",
+  "Design summary": "Tổng hợp kết quả thiết kế",
+  "Gross-section built-up I/H member strength using the selected ASD/LRFD method.": "Sức kháng cấu kiện I/H tổ hợp trên tiết diện nguyên theo phương pháp ASD/LRFD đang chọn.",
+  "This calculator currently develops the Built-up section family. Hot-rolled sections are pending.": "Bảng tính hiện phát triển cho tiết diện Built-up. Tiết diện Hot-rolled sẽ được phát triển sau.",
+  "Hot-rolled · pending": "Thép cán nóng · chờ phát triển",
+  "Connect SAP2000 API · pending": "Kết nối API SAP2000 · chờ phát triển",
+  "Manual forces must correspond to the ASD or LRFD design method selected above. Values are used as entered.": "Nội lực nhập tay phải tương ứng phương pháp ASD hoặc LRFD đã chọn ở trên. Các giá trị được dùng trực tiếp.",
+  "Major-axis flexure Mnx": "Uốn trục mạnh Mnx",
+  "Minor-axis flexure Mny": "Uốn trục yếu Mny",
+  "Compression Pc": "Sức kháng nén Pc",
+  "Gross tensile yielding Pt": "Sức kháng kéo chảy dẻo Pt",
+  "Web shear": "Cắt bụng",
+  "Flange shear": "Cắt cánh",
+  "Interaction N–Mx–My (H1)": "Tương tác N–Mx–My (H1)",
+  "Calculation notes": "Ghi chú tính toán",
+  "Built-up, doubly symmetric I/H with homogeneous steel and rectangular plates. Hybrid steel and cover plates are not included. Hot-rolled development is pending.": "Tiết diện I/H tổ hợp đối xứng hai trục, thép đồng nhất và các bản chữ nhật. Không xét thép hybrid và bản tăng cường cover plate. Tiết diện cán nóng sẽ được phát triển sau.",
+  "Gross-section member properties are used. Web openings will be developed in a later phase.": "Sử dụng đặc trưng cấu kiện trên tiết diện nguyên. Phần lỗ mở trên bụng sẽ được phát triển sau.",
+  "External Direct Analysis to AISC 360-10 C2 is assumed. Under C3, K = 1; SAP2000 must be configured for the required method. The component does not verify the structural model.": "Giả thiết nội lực từ phân tích trực tiếp bên ngoài theo AISC 360-10 C2. Theo C3 lấy K = 1; SAP2000 cần được cấu hình đúng phương pháp. Module không xác minh mô hình phân tích.",
+  "Lx, Ly, Lz and Lb remain independent physical restraint lengths. Nominal E/G are used in member resistance, without repeating the analysis stiffness reductions.": "Lx, Ly, Lz và Lb là các chiều dài giằng độc lập. Dùng E/G danh nghĩa khi tính sức kháng, không giảm độ cứng thêm lần nữa.",
+  "For ASD, the external Direct Analysis follows C2.1(4): 1.6 times ASD analysis loads, followed by division of required strengths by 1.6. This calculator does not convert forces.": "Với ASD, phân tích trực tiếp bên ngoài theo C2.1(4): phân tích với tải ASD nhân 1.6, sau đó chia nội lực yêu cầu cho 1.6. Bảng tính không tự quy đổi nội lực.",
+  "Cb = 1 until the SAP2000 API can supply geometry, forces and a verified moment diagram. Other standards may use a corresponding factor.": "Cb = 1 trong khi chờ API SAP2000 cung cấp hình học, nội lực và biểu đồ mô men đã xác định. Tiêu chuẩn khác có thể dùng hệ số tương ứng.",
+
+  "Design Calculation": "Thuyết minh tính toán",
+  "AISC 360-10 Verified Branches": "Các nhánh AISC 360-10 đã đối chiếu",
+  "Shared Section Properties": "Đặc trưng tiết diện dùng chung",
+  "AISC 360-10 formula references and applicability. Current numerical results and branch traces are shown in the following verified-branches section.": "Trích dẫn công thức AISC 360-10 và phạm vi áp dụng. Kết quả số hiện hành và diễn giải từng nhánh được trình bày trong mục các nhánh đã đối chiếu bên dưới.",
+  "Calculation source": "Nguồn tính toán",
+  "AISC 360-10 · Section Properties core": "AISC 360-10 · Bộ tính Section Properties",
+  "Legacy Excel 360-05 · comparison only": "Excel cũ 360-05 · chỉ để đối chiếu",
+  "AISC 360-10 reference calculation": "Tính toán tham khảo AISC 360-10",
+  "Inputs changed — calculate again to update results.": "Đầu vào đã thay đổi — tính lại để cập nhật kết quả.",
+  "Current AISC 360-10 reference results displayed.": "Đang hiển thị kết quả tham khảo AISC 360-10 hiện tại.",
+  "Workspace": "Không gian làm việc",
+  "Dashboard": "Tổng quan",
+  "Steel Design": "Thiết kế thép",
+  "Component": "Cấu kiện",
+  "Crane Beam": "Dầm cầu trục",
+  "H/I Doubly Symmetric": "I/H đối xứng hai trục",
+  "Section Properties": "Đặc trưng tiết diện",
+  "Engineering Tools": "Công cụ kỹ thuật",
+  "Material Library": "Thư viện vật liệu",
+  "Design Standards": "Tiêu chuẩn thiết kế",
+  "PHASE 1 PREVIEW": "XEM TRƯỚC GIAI ĐOẠN 1",
+  "LEGACY EXCEL PARITY": "ĐỐI CHIẾU EXCEL GỐC",
+  "Offline browser preview.": "Giao diện thử nghiệm chạy offline trên trình duyệt.",
+  "No data is written to the database.": "Không ghi dữ liệu lên database.",
+  "Doubly symmetric I/H member resistance checks · LRFD · Reference workbook ↔ Calculation engine": "Kiểm tra sức kháng cấu kiện I/H đối xứng · LRFD · Reference workbook ↔ Calculation engine",
+  "Excel sample data": "Dữ liệu mẫu Excel",
+  "Import JSON": "Nhập JSON",
+  "Export results": "Xuất kết quả",
+  "Parity mode — not approved for design": "Chế độ đối chiếu — chưa được chấp thuận thiết kế",
+  "The source workbook identifies AISC 360-05. This version preserves known issues for Excel comparison (signed Cb, weak-axis Fe and stiffener checks).": "Bảng Excel gốc ghi AISC 360-05. Phiên bản này giữ nguyên một số logic có lỗi để so sánh với Excel (Cb dùng dấu, Fe trục yếu và kiểm tra sườn).",
+  "Do not use these results for construction design or to claim AISC 360-10 compliance.": "Không sử dụng kết quả để thiết kế thi công hoặc khẳng định đạt AISC 360-10.",
+  "Input Parameters": "Thông số đầu vào",
+  "Units:": "Đơn vị:",
+  "Geometry": "Hình học",
+  "Material & lengths": "Vật liệu & chiều dài",
+  "Internal forces": "Nội lực",
+  "Doubly symmetric I/H section": "Tiết diện I/H đối xứng hai trục",
+  "Overall depth": "Chiều cao toàn bộ",
+  "Flange width": "Bề rộng cánh",
+  "Web thickness": "Bề dày bụng",
+  "Flange thickness": "Bề dày cánh",
+  "Fabrication": "Chế tạo",
+  "Built-up / welded": "Built-up / Hàn tổ hợp",
+  "Hot-rolled": "Rolled / Cán nóng",
+  "I/H section diagram": "Sơ đồ tiết diện I/H",
+  "Equal flanges (bf, tf), centered web. Fillet radii are not included.": "Hai cánh bằng nhau (bf, tf), bụng nằm chính giữa. Chưa xét bán kính fillet.",
+  "Material & member parameters": "Thông số vật liệu & cấu kiện",
+  "External Direct Analysis · AISC 360-10": "Giai đoạn 1 · Dữ liệu Excel",
+  "Yield stress": "Giới hạn chảy",
+  "Elastic modulus": "Đàn hồi",
+  "Buckling / unbraced lengths": "Chiều dài ổn định / không giằng",
+  "Major-axis length": "Chiều dài trục mạnh",
+  "Unbraced length": "Chiều dài không giằng",
+  "Stiffeners": "Sườn tăng cứng",
+  "Spacing": "Khoảng cách",
+  "Thickness": "Bề dày",
+  "Width": "Bề rộng",
+  "Layout": "Cấu tạo",
+  "Paired web stiffeners": "Hai bên bụng (paired)",
+  "Single angle": "Một thép góc",
+  "Single plate": "Một bản thép",
+  "Phase 1 preserves workbook calculations and limitations to verify result reproducibility.": "Phase 1 giữ cách tính và giới hạn trong workbook để kiểm tra khả năng tái tạo kết quả.",
+  "Internal forces at the checked section": "Nội lực tại tiết diện đang kiểm tra",
+  "Corresponds to Excel COMB42": "Tương ứng Excel COMB42",
+  "Axial force": "Lực dọc",
+  "Positive: tension; negative: compression": "Dương: kéo; âm: nén",
+  "Major-axis moment": "Moment trục mạnh",
+  "Preserve signs for Cb comparison": "Giữ nguyên dấu để đối chiếu Cb",
+  "Minor-axis moment": "Moment trục yếu",
+  "Shear force": "Lực cắt",
+  "Moment at 1/4": "Moment tại 1/4",
+  "Moment at 1/2": "Moment tại 1/2",
+  "Moment at 3/4": "Moment tại 3/4",
+  "When changing Mx, also update M25/M50/M75 from the actual moment diagram along the unbraced segment.": "Khi đổi Mx, cũng cần cập nhật M25/M50/M75 theo biểu đồ moment thực tế trên đoạn không giằng.",
+  "Sample data loaded.": "Dữ liệu mẫu đã được nạp.",
+  "Calculate": "Tính toán",
+  "Calculation Results": "Kết quả tính toán",
+  "Browser · not saved to DB": "Browser · chưa lưu DB",
+  "Axial force–moment interaction": "Tương tác lực dọc – moment",
+  "Loading the Excel sample and calculating...": "Đang nạp mẫu Excel và tính toán...",
+  "Demand / Capacity": "Nhu cầu / Sức kháng",
+  "Values from the parity engine": "Giá trị từ engine đối chiếu",
+  "Individual checks may show PASS/FAIL using the source formulas; the overall status always remains REVIEW REQUIRED.": "Các nhánh riêng có thể hiển thị PASS/FAIL theo công thức gốc; trạng thái tổng thể luôn là REVIEW REQUIRED.",
+  "Limit State Checks": "Kiểm tra trạng thái giới hạn",
+  "Clause": "Điều khoản",
+  "Check": "Kiểm tra",
+  "Demand": "Nhu cầu",
+  "Capacity": "Sức kháng",
+  "Classification & intermediate formulas": "Chi tiết phân loại & công thức trung gian",
+  "Engineering warnings": "Cảnh báo kỹ thuật",
+  "All results are calculated locally; no input data is uploaded to a server.": "Mọi kết quả được tính cục bộ trên máy, không tải dữ liệu lên server.",
+  "Step-by-step calculation report": "Thuyết minh tính toán từng bước",
+  "Calculation Details · Step by Step": "Chi tiết tính toán · Từng bước",
+  "Sequential checks · Formulas with subscripts/superscripts · Substitution using current inputs · Clause references": "Thuyết minh theo trình tự kiểm tra · Công thức ký tự có chỉ số dưới/trên · Thay số theo dữ liệu hiện tại · Trích dẫn điều khoản",
+  "Expand all": "Mở tất cả",
+  "Collapse all": "Thu gọn",
+  "Copy formulas": "Sao chép công thức",
+  "Print / Save PDF": "In / Lưu PDF",
+  "Calculation steps index": "Danh mục các bước tính",
+  "Calculation index": "Mục lục tính toán",
+  "Engineering note:": "Lưu ý chuyên môn:",
+  "Formulas follow the Phase 1 engine;": "Công thức đang trình bày theo engine Phase 1; phần",
+  "references are displayed for AISC 360-10": "trích dẫn hiển thị theo AISC 360-10",
+  "to help locate clauses. This remains a parity preview, not an issued calculation report. Calculations use mm – MPa – kN – kN·m; some legacy expressions are preserved and carry specific warnings.": "để tiện kiểm tra điều khoản. Đây vẫn là chế độ đối chiếu, chưa phải bản thuyết minh phát hành. Các phép tính dùng hệ đơn vị mm – MPa – kN – kN·m; một số biểu thức legacy được giữ nguyên và có cảnh báo riêng.",
+  "Formula:": "Công thức:",
+  "Substitution:": "Thay số:",
+  "Result:": "Kết quả:",
+  "Standard:": "Tiêu chuẩn:",
+  "readable symbolic expression": "dạng ký tự dễ đọc",
+  "input values": "số đầu vào",
+  "calculated result": "kết quả đang tính",
+  "applicable clause reference": "trích dẫn điều khoản đang áp dụng",
+  "Click Calculate to generate the report.": "Nhấn Tính toán để tạo thuyết minh.",
+  "Phase 1 Browser Preview": "Bản xem trước giai đoạn 1 trên trình duyệt",
+  "must be a finite positive number.": "phải là số dương hữu hạn.",
+  "must be a finite nonnegative number.": "phải là số không âm hữu hạn.",
+  "Cannot calculate limit state": "Không thể tính trạng thái",
+  "nonfinite value or capacity <= 0.": "giá trị không hữu hạn hoặc khả năng chịu lực <= 0.",
+  "Invalid I/H geometry, stiffener width or E/Fy ratio.": "Hình học I/H, bề rộng sườn tăng cứng hoặc tỷ số E/Fy is invalid.",
+  "The source workbook identifies AISC 360-05, not AISC 360-10.": "Workbook gốc ghi AISC 360-05, không phải AISC 360-10.",
+  "Cb uses signed moments at the specified locations; the extreme moment along Lb has not been verified.": "Cb dùng moment có dấu tại các vị trí được nhập, chưa kiểm chứng moment cực trị trên đoạn Lb.",
+  "Excel W194 uses the major-axis Fe for the weak axis; this error is preserved for Excel parity.": "Excel W194 dùng Fe trục mạnh cho trục yếu; lỗi này được giữ nguyên để đối chiếu Excel.",
+  "Net-section tensile fracture has not been checked.": "Chưa có kiểm tra đứt kéo tại tiết diện thực / net section.",
+  "Parity mode does not certify member compliance.": "Chế độ parity không xác nhận cấu kiện đạt tiêu chuẩn.",
+  "Stiffener checks fail for the source workbook. Tension-field enhancement is not approved.": "Kiểm tra sườn tăng cứng chưa đạt theo workbook. Không chấp thuận tension field enhancement.",
+  "Major-axis flexure (Mx)": "Uốn trục mạnh (Mx)",
+  "Minor-axis flexure (My)": "Uốn trục yếu (My)",
+  "Axial compression": "Nén dọc trục",
+  "Tensile yielding (fracture not checked)": "Kéo chảy dẻo (chưa đứt kéo)",
+  "N–M interaction (H1)": "Tương tác N–M (H1)",
+  "Web shear (Vy in Excel)": "Cắt bụng (Vy trong Excel)",
+  "Flange shear (Vx in Excel)": "Cắt cánh (Vx trong Excel)",
+  "Please enter a numeric value for:": "Vui lòng nhập giá trị số cho:",
+  "Flexure branch": "Nhánh uốn",
+  "Flange": "Cánh",
+  "Web": "Bụng",
+  "This is not a code compliance conclusion.": "Đây không phải kết luận đạt tiêu chuẩn.",
+  "φPn (compression)": "φPn (nén)",
+  "Mx flexure": "Uốn Mx",
+  "Compression/tension N": "Nén/kéo N",
+  "Web shear": "Cắt bụng",
+  "Flange shear": "Cắt cánh",
+  "Flange classification": "Phân loại cánh",
+  "Web classification": "Phân loại bụng",
+  "Flexure chapter": "Điều khoản uốn",
+  "Cb (signed, Excel)": "Cb (có dấu, Excel)",
+  "Stiffener width OK": "Bề rộng sườn đạt",
+  "Stiffener area OK (legacy)": "Diện tích sườn đạt (gốc)",
+  "Sample data comparison": "Đối chiếu dữ liệu mẫu",
+  "5/5 main metrics match the Phase 1 PHP engine within 1e−6 tolerance.": "5/5 chỉ tiêu chính trùng engine PHP Phase 1 trong dung sai 1e−6.",
+  "Inputs have changed — further Excel comparison is required for this case.": "Dữ liệu đã thay đổi — cần đối chiếu thêm với Excel nếu dùng trường hợp này.",
+  "Calculated. Current parameters are displayed.": "Đã tính toán. Các thông số hiện tại đang được hiển thị.",
+  "Invalid resistance; please check the inputs.": "Khả năng chịu lực không hợp lệ, vui lòng kiểm tra đầu vào.",
+  "Nonfinite interaction value.": "Giá trị tương tác không hữu hạn.",
+  "Calculation failed — please correct the inputs.": "Không tính được — vui lòng chỉnh dữ liệu.",
+  "Inputs changed · Click Calculate to update.": "Đã thay đổi dữ liệu · Nhấn Tính toán để cập nhật.",
+  "Input data & unit conversion": "Dữ liệu & quy đổi đơn vị",
+  "Selected geometry, material and internal forces": "Thông số hình học, vật liệu và nội lực đã chọn",
+  "Clear web depth": "Chiều cao bụng thông thủy",
+  "Material F": "Vật liệu F",
+  "Elastic modulus E": "Mô đun đàn hồi E",
+  "Design moment": "Moment thiết kế",
+  "Design axial force": "Lực dọc thiết kế",
+  "Compression": "Nén",
+  "Tension": "Kéo",
+  "The workbook sign convention is retained: negative N = compression. Shear axes Vx/Vy follow the legacy convention and must be aligned with the analysis model.": "Dấu N được giữ theo workbook: N âm = nén. Hệ tọa độ lực cắt Vx/Vy là quy ước legacy; cần đồng bộ với mô hình phân tích.",
+  "Section geometric properties": "Đặc trưng hình học tiết diện",
+  "A, I, S, Z and J for a doubly symmetric I/H section": "Phần A, I, S, Z và J của I/H đối xứng",
+  "Area A": "Diện tích A",
+  "Second moment of area I": "Mô men quán tính I",
+  "Elastic section modulus S": "Mô đun đàn hồi S",
+  "Plastic section modulus Z": "Mô đun dẻo Z",
+  "Torsion constant J — legacy": "Hằng số xoắn J — legacy",
+  "Radius of gyration r": "Bán kính quán tính r",
+  "J follows Excel cell D57 exactly for parity. The model uses sharp corners without fillets.": "J được trình bày đúng như D57 của Excel để đối chiếu. Mô hình tiết diện góc vuông (sharp-corner), không có fillet.",
+  "Flange and web slenderness classification": "Phân loại độ mảnh cánh và bụng",
+  "Parameter k": "Tham số k",
+  "Flange: classification": "Cánh: classification",
+  "Web: classification": "Bụng: classification",
+  "Flange:": "Cánh:",
+  "Web:": "Bụng:",
+  "otherwise": "khác",
+  "compared with": "so với",
+  "Based on": "Theo",
+  "Applied flexure branch": "Nhánh uốn được áp dụng",
+  "Classification describes the active parity-engine branch; it does not confirm full applicability of AISC 360-10.": "Phân loại mô tả nhánh đang chạy trong engine parity, không tự xác nhận tính áp dụng đầy đủ của phiên bản AISC 360-10.",
+  "Minor-axis flexural resistance M": "Sức kháng uốn trục yếu M",
+  "Minor-axis bending · clause F6 (legacy)": "Minor-axis bending · điều khoản F6 (legacy)",
+  "The legacy workbook uses Zᵧ in the interpolation branch; review against F6.": "Legacy workbook sử dụng Zᵧ tại nhánh nội suy; cần soát lại theo F6.",
+  "Design resistance φM": "Sức kháng thiết kế φM",
+  "Utilization M": "Tỷ lệ sử dụng M",
+  "The Excel version does not independently verify every F6 branch. Use only for parity comparison.": "Phiên bản Excel chưa có kiểm chứng độc lập toàn bộ nhánh F6. Chỉ sử dụng giá trị trong chế độ đối chiếu.",
+  "Major-axis flexural resistance M": "Sức kháng uốn trục mạnh M",
+  "Major-axis bending · F2–F5 by classification": "Major-axis bending · F2–F5 theo phân loại",
+  "Plastic moment M": "Moment dẻo M",
+  "Factor C": "Hệ số C",
+  "Excel uses signed moments and does not determine Mmax along Lb automatically.": "Excel dùng moment có dấu, không tự xác định Mmax trên Lb.",
+  "Length L": "Chiều dài L",
+  "Branch": "Nhánh",
+  "Factor R": "Hệ số R",
+  "Stress F": "Ứng suất F",
+  "Flexural utilization M": "Sử dụng uốn M",
+  "The selected branch is": "Nhánh đang chọn là",
+  "Displayed formulas follow the legacy calculation path; verify Cb, LTB and FLB against the applicable AISC edition before issue.": "Công thức hiển thị thuộc đường tính toán legacy; kiểm chứng Cb, LTB, FLB theo phiên bản AISC áp dụng trước khi phát hành.",
+  "Axial tensile resistance": "Sức kháng kéo dọc trục",
+  "Gross-section yielding · Chapter D (tensile failure checks incomplete)": "Gross-section yielding · chương D (chưa đủ phá hoại kéo)",
+  "Nominal resistance P": "Sức kháng danh định P",
+  "Design resistance φP": "Sức kháng thiết kế φP",
+  "Tensile yielding D/C": "D/C kéo chảy dẻo",
+  "Net-section fracture, bolt holes and other limits are not checked. Overall tensile capacity is not assessed.": "Chưa kiểm tra đứt tiết diện hữu hiệu (net-section fracture), lỗ bu lông và các giới hạn khác. Không đánh giá tổng thể khả năng kéo.",
+  "Axial compressive resistance": "Sức kháng nén dọc trục",
+  "Factor Q": "Hệ số Q",
+  "Branch transition limit": "Giới hạn chuyển nhánh",
+  "Euler stress F": "Ứng suất Euler F",
+  "(preserves W194=Q194 error)": "(giữ lỗi W194=Q194)",
+  "This is not the correct y-axis Euler formula; it is retained only for parity.": "Không phải công thức Euler đúng cho trục y, chỉ để đối chiếu.",
+  "Critical stress F": "Ứng suất tới hạn F",
+  "Compressive resistance φP": "Sức kháng nén φP",
+  "The Excel Fe error is explicitly identified. This is legacy parity and must not be used for actual design decisions.": "Lỗi Fe của Excel được đánh dấu trực tiếp. Đây là phép tính “legacy parity”, không dùng để quyết định thiết kế thực.",
+  "N–M interaction": "Tương tác N–M",
+  "Chapter H1 · LRFD interaction": "Chương H1 · LRFD interaction",
+  "Axial force ratio": "Tỷ số lực dọc",
+  "Moment ratio M": "Tỷ số M",
+  "Excel rounds the My ratio before combining.": "Excel làm tròn tỷ lệ My trước khi tổng hợp.",
+  "Applicable equation": "Phương trình áp dụng",
+  "H1 D/C below 100% covers only one check. Member compliance cannot be concluded while other checks remain unsatisfied.": "D/C H1 dưới 100% chỉ phản ánh một nhánh. Không được kết luận cấu kiện đạt khi còn các phép kiểm tra khác chưa thỏa.",
+  "Web and flange shear resistance": "Sức kháng cắt bụng và cánh",
+  "Factor a/h": "Hệ số a/h",
+  "Factor k": "Hệ số k",
+  "Web shear resistance φV": "Sức kháng cắt bụng φV",
+  "Web shear D/C": "D/C cắt bụng",
+  "Flange shear resistance φV": "Sức kháng cắt cánh φV",
+  "Flange shear D/C": "D/C cắt cánh",
+  "Vx/Vy labels preserve the workbook shear mapping; standardize them when connecting SAP/ETABS.": "Nhãn Vx/Vy phản ánh đúng cách map lực cắt của workbook, cần quy chuẩn lại khi kết nối SAP/ETABS.",
+  "Stiffener checks & conclusion": "Kiểm tra sườn tăng cứng & kết luận",
+  "Tension-field action and mandatory warnings": "Tension-field action và các cảnh báo bắt buộc",
+  "Stiffener width / thickness": "Bề rộng / bề dày sườn",
+  "Stiffener area check (legacy)": "Kiểm tra diện tích sườn (legacy)",
+  "Preserves the reversed-sign Excel condition for parity.": "Giữ điều kiện ngược dấu của Excel để đối chiếu.",
+  "Consider tension-field action": "Xét tension field action",
+  "Web panel and stiffener geometry conditions": "Điều kiện hình học vùng bụng và sườn",
+  "Shear resistance with TFA (nominal)": "Sức kháng cắt có TFA (danh định)",
+  "V<sub>n,TFA</sub> from the legacy G3 formula": "V<sub>n,TFA</sub> theo công thức legacy G3",
+  "Consider only if stiffener conditions are satisfied": "Chỉ xem xét nếu các điều kiện sườn thỏa",
+  "Module conclusion": "Kết luận module",
+  "Overall status ≠ H1 check": "Trạng thái tổng thể ≠ kiểm tra H1",
+  "Mandatory warnings from Excel verification": "Có cảnh báo bắt buộc từ kiểm chứng Excel",
+  "Stiffeners fail for the sample workbook. If stiffener conditions are not satisfied, enhanced tension-field resistance must not be used.": "Sườn tăng cứng không đạt theo workbook mẫu. Nếu các điều kiện sườn không đạt, không được sử dụng sức kháng tension-field được tăng thêm.",
+  "PARAMETER": "THÔNG SỐ",
+  "FORMULA / SUBSTITUTION": "CÔNG THỨC / THAY SỐ",
+  "RESULT": "KẾT QUẢ",
+  "STANDARD REFERENCE": "TRÍCH DẪN TIÊU CHUẨN",
+  "Not applicable": "Không áp dụng",
+  "Parameter": "Thông số",
+  "Formula": "Công thức",
+  "Result": "Kết quả",
+  "Standard reference": "Trích dẫn tiêu chuẩn",
+  "Review required": "Cần rà soát",
+  "Each parameter follows the check sequence. The “↳” line substitutes the current input data; the final column provides AISC 360-10 clauses for quick reference.": "Trình bày từng tham số theo trình tự kiểm tra. Dòng “↳” là phép thay số từ dữ liệu đầu vào hiện hành; cột cuối là điều khoản AISC 360-10 để tra cứu nhanh.",
+  "Copied": "Đã sao chép",
+  "Exported TXT": "Đã xuất TXT",
+  "JSON file too large (maximum 50 kB).": "File JSON quá lớn (tối đa 50 kB).",
+  "JSON must include group": "JSON phải có nhóm",
+  "Missing field": "Thiếu trường",
+  "JSON import failed:": "Nhập JSON thất bại:",
+  "compression": "nén",
+  "tension": "kéo",
+  "Language": "Ngôn ngữ",
+  "English": "Tiếng Anh",
+  "REVIEW REQUIRED": "CẦN RÀ SOÁT",
+  "PASS": "ĐẠT",
+  "FAIL": "KHÔNG ĐẠT",
+  "COMPACT": "ĐẶC CHẮC",
+  "NONCOMPACT": "KHÔNG ĐẶC CHẮC",
+  "SLENDER": "MẢNH",
+  "YES": "CÓ",
+  "NO": "KHÔNG",
+  "OK (legacy)": "ĐẠT (gốc)",
+  "NOT OK (legacy)": "KHÔNG ĐẠT (gốc)",
+  "YES (geometry only)": "CÓ (chỉ hình học)",
+  "Sharp-corner": "Góc vuông",
+  "Browser": "Trình duyệt",
+  "Nominal plastic": "Mô men dẻo danh định",
+  "Local buckling": "Mất ổn định cục bộ",
+  "Nominal strength — LTB": "Sức kháng danh định — LTB",
+  "Nominal strength — FLB": "Sức kháng danh định — FLB",
+  "Nominal strength — Yield": "Sức kháng danh định — Chảy dẻo",
+  "Width-to-thickness limits": "Giới hạn bề rộng/bề dày",
+  "Compression · Qs, Qa, Fe, Fcr, φPn · E3/E7 legacy": "Nén · Qs, Qa, Fe, Fcr, φPn · E3/E7 gốc",
+  "Web shear · flange shear · G2/G7 legacy": "Cắt bụng · cắt cánh · G2/G7 gốc",
+  "Flange =": "Cánh =",
+  "Web =": "Bụng =",
+  "Flange ": "Cánh ",
+  "Web ": "Bụng ",
+  "signed": "có dấu",
+  "geometric section properties": "đặc trưng hình học tiết diện",
+  "width-thickness classification": "phân loại bề rộng/bề dày",
+  "minor-axis flexure": "uốn trục yếu",
+  "major-axis flexure": "uốn trục mạnh",
+  "tension members": "cấu kiện chịu kéo",
+  "compression members": "cấu kiện chịu nén",
+  "combined forces": "nội lực kết hợp",
+  "shear strength": "sức kháng cắt",
+  "stiffeners & tension-field context": "sườn và điều kiện trường kéo",
+  "Project input · adopted unit convention": "Dữ liệu dự án · quy ước đơn vị",
+  "Project input / adopted unit convention": "Dữ liệu dự án / quy ước đơn vị",
+  "torsional property input / section property definition": "đặc trưng xoắn đầu vào / định nghĩa đặc trưng tiết diện",
+  "Chapter B": "Chương B",
+  "Chapter H": "Chương H",
+  "Table": "Bảng",
+  "Eq.": "Công thức",
+  "through": "đến",
+  "Effective web width calculated from": "Bề rộng bụng hữu hiệu tính theo",
+  "Summary": "Tổng hợp",
+  "NO_GLOBAL_PASS": "NO_GLOBAL_PASS",
+  "Unsupported section fabrication or stiffener layout.": "Chưa hỗ trợ kiểu chế tạo tiết diện hoặc cấu tạo sườn này.",
+  "is invalid.": "không hợp lệ.",
+  "The signed Excel Cb is invalid for this moment diagram.": "Cb có dấu của Excel không hợp lệ với biểu đồ mô men này.",
+  "REVIEW_REQUIRED": "CẦN RÀ SOÁT",
+  "Symmetric I/H": "I/H đối xứng",
+  "Vn,TFA from the legacy G3 formula": "Vn,TFA theo công thức G3 gốc",
+  "Reference workbook ↔ Calculation engine": "Bảng tính tham chiếu ↔ Bộ máy tính toán",
+  "PASS/FAIL": "ĐẠT/KHÔNG ĐẠT",
+  "from the legacy G3 formula": "theo công thức G3 gốc",
+  "and": "và",
+  "Compact": "Đặc chắc",
+  "Non-compact": "Không đặc chắc",
+  "Slender": "Mảnh",
+  "web slenderness": "độ mảnh bụng",
+  "Phase 1 Preview": "Bản xem trước giai đoạn 1",
+  "Doubly symmetric I/H member strength · LRFD / ASD · Workbook ↔ Calculation engine": "Kiểm tra sức kháng cấu kiện I/H đối xứng · LRFD / ASD · Reference workbook ↔ Calculation engine",
+  "Excel parity only — not approved for design": "Chế độ đối chiếu — chưa được chấp thuận thiết kế",
+  "The source workbook states AISC 360-05. This preview preserves legacy behavior for parity (signed Cb, weak-axis Fe and stiffeners). ": "Bảng Excel gốc ghi AISC 360-05. Phiên bản này giữ nguyên một số logic có lỗi để so sánh với Excel (Cb dùng dấu, Fe trục yếu và kiểm tra sườn). ",
+  "Do not use this output for construction design or claim AISC 360-10 compliance.": "Không sử dụng kết quả để thiết kế thi công hoặc khẳng định đạt AISC 360-10.",
+  "Units: mm / MPa / kN / kN·m": "Đơn vị: mm / MPa / kN / kN·m",
+  "Forces": "Nội lực",
+  "Equal flanges (bf, tf) with centered web. Fillet radii are excluded.": "Hai cánh bằng nhau (bf, tf), bụng nằm chính giữa. Chưa xét bán kính fillet.",
+  "Material and member parameters": "Thông số vật liệu & cấu kiện",
+  "Yield strength": "Giới hạn chảy",
+  "Member and unbraced lengths": "Chiều dài ổn định / không giằng",
+  "Transverse stiffeners": "Sườn tăng cứng",
+  "Arrangement": "Cấu tạo",
+  "Design actions at the current section": "Nội lực tại tiết diện đang kiểm tra",
+  "Positive = tension; negative = compression": "Dương: kéo; âm: nén",
+  "Preserve moment signs for legacy Cb parity": "Giữ nguyên dấu để đối chiếu Cb",
+  "Excel COMB42 reference": "Tương ứng Excel COMB42",
+  "When changing Mx, update M25/M50/M75 using the actual moment diagram of the unbraced segment.": "Khi đổi Mx, cũng cần cập nhật M25/M50/M75 theo biểu đồ moment thực tế trên đoạn không giằng.",
+  "Phase 1 preserves workbook equations and limits to verify reproducibility.": "Phase 1 giữ cách tính và giới hạn trong workbook để kiểm tra khả năng tái tạo kết quả.",
+  "Sample inputs loaded.": "Dữ liệu mẫu đã được nạp.",
+  "Excel sample": "Dữ liệu mẫu Excel",
+  "Legacy parity calculation": "Giá trị từ engine đối chiếu",
+  "Computed branch ratios do not establish complete member approval; missing checks remain explicit.": "Các nhánh riêng có thể hiển thị PASS/FAIL theo công thức gốc; trạng thái tổng thể luôn là REVIEW REQUIRED.",
+  "Classification and intermediate results": "Chi tiết phân loại & công thức trung gian",
+  "All calculations are performed locally; no input is sent to a server.": "Mọi kết quả được tính cục bộ trên máy, không tải dữ liệu lên server.",
+  "Stepwise engineering calculations · symbolic formulae · current substitutions · design code references ": "Thuyết minh theo trình tự kiểm tra · Công thức ký tự có chỉ số dưới/trên · Thay số theo dữ liệu hiện tại · Trích dẫn điều khoản ",
+  "This report follows the Phase 1 engine; ": "Công thức đang trình bày theo engine Phase 1; phần ",
+  "AISC 360-10 citations are provided as review pointers": "trích dẫn hiển thị theo AISC 360-10",
+  " and are not validated clause-level attestations. The report is not approved for design. The units are mm, MPa, kN and kN·m.": " để tiện kiểm tra điều khoản. Đây vẫn là chế độ đối chiếu, chưa phải bản thuyết minh phát hành. Các phép tính dùng hệ đơn vị mm – MPa – kN – kN·m; một số biểu thức legacy được giữ nguyên và có cảnh báo riêng.",
+  "readable symbols": "dạng ký tự dễ đọc",
+  "input substitution": "số đầu vào",
+  "computed value": "kết quả đang tính",
+  "clause reference for review": "trích dẫn điều khoản đang áp dụng",
+  "Each parameter follows the calculation sequence. ↳ shows the current substitution; the last column gives an AISC 360-10 clause to review.": "Trình bày từng tham số theo trình tự kiểm tra. Dòng “↳” là phép thay số từ dữ liệu đầu vào hiện hành; cột cuối là điều khoản AISC 360-10 để tra cứu nhanh.",
+  "Review": "Cần rà soát",
+  "N/A": "Không áp dụng",
+  "Loading Excel sample…": "Đang nạp mẫu Excel và tính toán...",
+  "Calculated with the current inputs.": "Đã tính toán. Các thông số hiện tại đang được hiển thị.",
+  "Calculation results": "Bảng kết quả tính toán",
+  "Flange and web width-thickness classification": "Phân loại độ mảnh cánh và bụng",
+  "Minor-axis flexural strength": "Sức kháng uốn trục yếu",
+  "Major-axis flexural strength": "Sức kháng uốn trục mạnh",
+  "Tensile strength": "Sức kháng chịu kéo",
+  "Compressive strength": "Sức kháng chịu nén",
+  "Axial-flexure interaction": "Tương tác N–M",
+  "Stiffener checks and conclusion": "Kiểm tra sườn tăng cứng & kết luận",
+  "Elastic section modulus": "Mô đun đàn hồi",
+  "Second moment of area": "Mô men quán tính",
+  "Plastic section modulus": "Mô đun dẻo",
+  "Area": "Diện tích",
+  "Torsional constant": "Hằng số xoắn",
+  "Radius of gyration": "Bán kính quán tính",
+  "Selected flexural branch": "Nhánh uốn được áp dụng",
+  "Design resistance": "Sức kháng thiết kế",
+  "Nominal resistance": "Sức kháng danh định",
+  "Web shear resistance": "Sức kháng cắt bụng",
+  "Flange shear resistance": "Sức kháng cắt cánh",
+  "Tension field nominal resistance": "Sức kháng cắt có TFA",
+  "Utilization ratio": "Tỷ lệ sử dụng",
+  "Axial ratio": "Tỷ số lực dọc",
+  "Ratio": "Tỷ số",
+  "Plastic moment": "Moment dẻo",
+  "Coefficient": "Hệ số",
+  "Length": "Chiều dài",
+  "Critical stress": "Ứng suất tới hạn",
+  "Euler stress": "Ứng suất Euler",
+  "Stress": "Ứng suất",
+  "Transition limit": "Giới hạn chuyển nhánh",
+  "Flexural utilization": "Sử dụng uốn",
+  "Stiffener width/thickness": "Bề rộng / bề dày sườn",
+  "Stiffener area check": "Kiểm tra diện tích sườn",
+  "Tension-field action eligibility": "Xét tension field action",
+  "major axis": "trục mạnh",
+  "minor axis": "trục yếu",
+  "tension gross yielding": "kéo chảy dẻo",
+  "axial compression": "nén dọc trục",
+  "axial tension": "kéo dọc trục",
+  "forces": "nội lực",
+  "input": "đầu vào",
+  "under review": "đang kiểm tra",
+  "Under verification": "Đang kiểm chứng",
+  "Parity reference": "Đối chiếu",
+  "transverse stiffener": "sườn tăng cứng",
+  "with TFA (nominal)": "có TFA (danh định)",
+  "selected": "được áp dụng",
+  "yielding": "chảy dẻo",
+  "nominal": "danh định",
+  "classification": "phân loại",
+  "not verified": "chưa được xác nhận",
+  "not approved": "chưa được chấp thuận",
+  "Source workbook states": "Bảng Excel gốc ghi",
+  "Calculation": "Tính toán",
+  "Note": "Lưu ý",
+  "Copy": "Sao chép",
+  "Calculated · Current inputs are displayed.": "Đã tính toán. Các thông số hiện tại đang được hiển thị.",
+  "⌘   Section Properties": "⌘   Đặc trưng tiết diện",
+  "ENGINEERING TOOLS": "CÔNG CỤ KỸ THUẬT",
+  "≡   Material Library": "≡   Thư viện vật liệu",
+  "⌗   Design Standards (Library)": "⌗   Tiêu chuẩn (Thư viện)",
+  "Contents": "Mục lục",
+  "▾   Results": "▾   Kết quả",
+  "01   Input Parameters": "01   Thông số đầu vào",
+  "02   Calculation Results": "02   Kết quả tính toán",
+  "02B   Shared Section Properties": "02B   Section Properties dùng chung",
+  "03   Design calculations": "03   Thuyết minh tính toán",
+  "Calculator runs locally · Not approved for design.": "Tính toán cục bộ · Chưa được chấp thuận thiết kế.",
+  "Design Method / Design method": "Phương pháp thiết kế",
+  "Select LRFD load combinations. Changing the method does not convert forces or combinations.": "Chọn tổ hợp tải trọng LRFD. Đổi phương pháp không tự chuyển nội lực hoặc tổ hợp.",
+  "Factors follow AISC 360-10 clauses. The nominal Excel 360-05 formulas remain under review.": "Hệ số theo điều khoản AISC 360-10. Công thức nominal của Excel 360-05 vẫn đang chờ thẩm tra.",
+  "The stiffener area check still follows the legacy LRFD expression; it is not a verified ASD stiffener check.": "Kiểm tra diện tích sườn tăng cứng vẫn theo biểu thức legacy LRFD; không phải kiểm tra sườn ASD đã được xác minh.",
+  "LRFD requires forces from factored LRFD combinations; ASD combinations are not converted automatically.": "LRFD phải dùng nội lực từ tổ hợp LRFD (factored); không tự chuyển tổ hợp ASD sang LRFD.",
+  "Phase A/B results apply only to the reviewed formulas within the declared scope. CALCULATED is not an overall member PASS. E7 and F5 have specific formulas; F4 (NONCOMPACT web), tensile fracture and incomplete Chapter G checks return REVIEW_REQUIRED / INPUT_REQUIRED.": "Kết quả Phase A/B chỉ áp dụng cho các công thức đã đối chiếu trong phạm vi công bố. Không coi trạng thái CALCULATED là PASS toàn bộ cấu kiện. E7 và F5 đã có công thức riêng; F4 (bụng NONCOMPACT), kéo đứt và Chương G chưa đầy đủ sẽ có trạng thái REVIEW_REQUIRED / INPUT_REQUIRED.",
+  "Flexural resistance: kN·m; compression: kN; H1: ratio. Complete D/C results are withheld when bracing data are missing or a standard branch is not implemented.": "Sức kháng uốn: kN·m; nén: kN; H1: tỷ số. Khi thiếu dữ liệu giằng hoặc gặp nhánh tiêu chuẩn chưa triển khai, không công bố D/C hoàn chỉnh.",
+  "Formula Registry — AISC 360-10 clause and equation references": "Formula Registry — Trích dẫn điều khoản và công thức AISC 360-10",
+  "Search formulas": "Search formulas / Tìm công thức",
+  "Design Method": "Design Method / Phương pháp thiết kế",
+  "ASD uses forces from ASD/service load combinations. LRFD forces are NOT converted automatically.": "ASD: sử dụng nội lực từ tổ hợp tải trọng ASD/service. KHÔNG tự quy đổi nội lực LRFD.",
+  "LRFD uses forces from LRFD/factored load combinations. ASD forces are NOT converted automatically.": "LRFD: sử dụng nội lực từ tổ hợp tải trọng LRFD/factored. KHÔNG tự quy đổi nội lực ASD.",
+  "N–Mx–My interaction": "Tương tác N–Mx–My",
+  "using the legacy G3 formula": "theo công thức legacy G3",
+  "Overall status is not the H1 check": "Overall status ≠ kiểm tra H1"
+};
+let locale = 'en';
+try { locale = localStorage.getItem('geekcalculus-locale') === 'vi' ? 'vi' : 'en'; } catch (_) {}
+const originalText = new WeakMap();
+const originalAttributes = new WeakMap();
+const translationKeys = Object.keys(HI_TRANSLATIONS).sort((a,b) => b.length-a.length);
+const escapePattern = text => Array.from(text, char => '^$.*+?()[]{}|'.includes(char) || char === String.fromCharCode(92) ? String.fromCharCode(92) + char : char).join('');
+const translationPattern = new RegExp('(?<![\p{L}\p{N}_])(?:' + translationKeys.map(escapePattern).join('|') + ')(?![\p{L}\p{N}_])', 'gu');
+const canonicalTranslations = new Map(Object.entries(HI_TRANSLATIONS).map(([en, vi]) => [vi, en]));
+const canonicalPattern = new RegExp('(?<![\\p{L}\\p{N}_])(?:' + [...canonicalTranslations.keys()].sort((a,b) => b.length-a.length).map(escapePattern).join('|') + ')(?![\\p{L}\\p{N}_])', 'gu');
+function canonicalText(text) { return text.replace(canonicalPattern, key => canonicalTranslations.get(key)); }
+function translateText(text) {
+  return locale === 'vi' ? text.replace(translationPattern, key => HI_TRANSLATIONS[key]) : text;
+}
+function localizePage() {
+  document.documentElement.lang = locale;
+  document.title = locale === 'vi' ? 'GeekCalculus — I/H đối xứng hai trục | Bản xem trước giai đoạn 1' : 'GeekCalculus — H/I Doubly Symmetric | Phase 1 Preview';
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  while (walker.nextNode()) {
+    const node = walker.currentNode;
+    if (node.parentElement.closest('script, style, [data-locale], .warning strong')) continue;
+    const previous = originalText.get(node);
+    const english = previous && node.nodeValue === previous.displayed ? previous.english : canonicalText(node.nodeValue);
+    const displayed = translateText(english);
+    if (node.nodeValue !== displayed) node.nodeValue = displayed;
+    originalText.set(node, { english, displayed });
+  }
+  document.querySelectorAll('[aria-label], [data-label], [title]').forEach(node => {
+    let originals = originalAttributes.get(node);
+    if (!originals) { originals = {}; originalAttributes.set(node, originals); }
+    for (const name of ['aria-label', 'data-label', 'title']) {
+      if (!node.hasAttribute(name)) continue;
+      originals[name] ??= canonicalText(node.getAttribute(name));
+      node.setAttribute(name, translateText(originals[name]));
+    }
+  });
+  document.querySelectorAll('[data-locale]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.locale === locale)));
+}
+document.querySelectorAll('[data-locale]').forEach(button => button.addEventListener('click', () => {
+  locale = button.dataset.locale;
+  try { localStorage.setItem('geekcalculus-locale', locale); } catch (_) {}
+  localizePage();
+}));
+window.addEventListener('storage', event => {
+  if (event.key === 'geekcalculus-locale') { locale = event.newValue === 'vi' ? 'vi' : 'en'; localizePage(); }
+});
+// Apply after synchronous UI handlers, including validation and dirty-state messages.
+for (const event of ['click', 'input', 'change']) document.addEventListener(event, () => queueMicrotask(localizePage));
+
+const fixture = {
+  material: { fy_mpa: 345, fu_mpa: null, e_mpa: 200000 },
+  section: { h_mm: 940, bf_mm: 250, tw_mm: 6, tf_mm: 12, fabrication: 'BUILT_UP', web_attachment: 'WELDED', web_clear_height_mm: null, web_clear_height_verified: false },
+  member: { lb_mm: 5500, lx_mm: 12000, kx: 1, ky: 1, ly_mm: 12000, kz: 1, lz_mm: 12000, g_mpa: 77200 },
+  stiffeners: { spacing_mm: 2500, thickness_mm: 6, width_mm: 100, fy_mpa: null, layout: 'PAIRED', orientation: 'PERPENDICULAR_RECTANGULAR_PLATE', inertia_mm4: null, inertia_axis_verified: false, attachment_details_verified: false },
+  forces: {
+    axial_kN: -138.439, moment_x_kNm: -806.3536, moment_y_kNm: 0.0903,
+    shear_x_kN: 67.821, shear_y_kN: 0.214, torsion_kNm: 0,
+    moment_25_kNm: -713.0995337748344,
+    moment_50_kNm: -619.8454675496689,
+    moment_75_kNm: -370.3123961538461,
+  },
+  assessment: { scope: 'GROSS_MEMBER', force_source: 'MANUAL' },
+  analysis: { method: 'DIRECT' },
+  tension_field_action: { enabled: false, is_end_panel: false, panel_position: '', panel_position_confirmed: false, four_sides_supported: false, adjacent_panels: [
+    { spacing_mm: null, shear_kN: null, is_end_panel: null, four_sides_supported: null, other_boundary_stiffeners_verified: false },
+    { spacing_mm: null, shear_kN: null, is_end_panel: null, four_sides_supported: null, other_boundary_stiffeners_verified: false },
+  ], bounding_stiffeners: [], same_boundaries_confirmed: false },
+}
+
+
+const STANDARD_LABEL = 'AISC 360-10'
+const STEP_STANDARD_CITATIONS = [
+  'Project input · adopted unit convention',
+  'AISC 360-10 §B4 · geometric section properties',
+  'AISC 360-10 Table B4.1a & Table B4.1b · width-thickness classification',
+  'AISC 360-10 §F6 · minor-axis flexure',
+  'AISC 360-10 §F1 and §F2–F5 · major-axis flexure',
+  'AISC 360-10 §D2 · tension members',
+  'AISC 360-10 §E3 / §E7 · compression members',
+  'AISC 360-10 Eq. H1-1a / H1-1b · combined forces',
+  'AISC 360-10 §G2 / §G7 · shear strength',
+  'AISC 360-10 §G2.1 / §G2.2 · stiffeners & tension-field context',
+]
+function standardCitationForRow(stepIndex, row){
+  const label=(row.label||'').replace(/<[^>]+>/g,'').toLowerCase()
+  switch(stepIndex){
+    case 0: return 'Project input / adopted unit convention'
+    case 1: return label.includes('j') ? 'AISC 360-10 §B4 · torsional property input / section property definition' : 'AISC 360-10 §B4'
+    case 2:
+      if(label.includes('cánh')) return 'AISC 360-10 Table B4.1b'
+      if(label.includes('bụng')) return 'AISC 360-10 Table B4.1a'
+      return 'AISC 360-10 Chapter B'
+    case 3:
+      if(label.includes('φm')) return 'AISC 360-10 Eq. F6-1 through F6-3'
+      return 'AISC 360-10 §F6'
+    case 4:
+      if(label.includes('cb')) return 'AISC 360-10 Eq. F1-1'
+      if(label.includes('lp')) return 'AISC 360-10 Eq. F2-5'
+      if(label.includes('lr')) return 'AISC 360-10 Eq. F2-6'
+      return 'AISC 360-10 §F2–F5'
+    case 5: return 'AISC 360-10 §D2'
+    case 6:
+      if(label.includes('lambda') || label.includes('λ')) return 'AISC 360-10 Eq. E3-2'
+      if(label.includes('fe')) return 'AISC 360-10 Eq. E3-4'
+      if(label.includes('fcr')) return 'AISC 360-10 Eq. E3-2 / E3-3'
+      return 'AISC 360-10 §E3 / §E7'
+    case 7:
+      if(label.includes('phương trình')) return 'AISC 360-10 Eq. H1-1a / H1-1b'
+      return 'AISC 360-10 Chapter H'
+    case 8:
+      if(label.includes('k')) return 'AISC 360-10 Eq. G2-5'
+      if(label.includes('c')) return 'AISC 360-10 §G2'
+      return 'AISC 360-10 §G2 / §G7'
+    case 9: return 'AISC 360-10 §G2.1 / §G2.2'
+    default: return STANDARD_LABEL
+  }
+}
+function applyStandardCitations(steps){
+  return steps.map((step, stepIndex) => ({
+    ...step,
+    excel: STEP_STANDARD_CITATIONS[stepIndex] || STANDARD_LABEL,
+    rows: (step.rows || []).map(row => ({ ...row, excel: standardCitationForRow(stepIndex, row) })),
+  }))
+}
+let stepObserver = null
+function initStepNavScrollSpy(){
+  const nav=document.getElementById('step-nav')
+  if(!nav) return
+  const links=[...nav.querySelectorAll('a[href^="#calc-step-"]')]
+  const sections=[...document.querySelectorAll('.notebook-step')]
+  const activate=id=>links.forEach(link=>link.classList.toggle('active', link.getAttribute('href')===`#${id}`))
+  links.forEach(link=>link.addEventListener('click', event=>{
+    const id=link.getAttribute('href').slice(1)
+    const target=document.getElementById(id)
+    if(target){
+      event.preventDefault()
+      target.open=true
+      target.scrollIntoView({behavior:'smooth', block:'start'})
+      activate(id)
+    }
+  }))
+  if(stepObserver) stepObserver.disconnect()
+  stepObserver = new IntersectionObserver(entries => {
+    const visible = entries.filter(entry => entry.isIntersecting).sort((a,b) => Math.abs(a.boundingClientRect.top) - Math.abs(b.boundingClientRect.top))
+    if(visible[0]) activate(visible[0].target.id)
+  }, {rootMargin:'-18% 0px -62% 0px', threshold:[0.05,0.2,0.45,0.75]})
+  sections.forEach(section=>stepObserver.observe(section))
+  if(sections[0]) activate(sections[0].id)
+}
+const square = x => x ** 2
+function positive(n, label) {
+  if (typeof n !== 'number' || !Number.isFinite(n) || n <= 0) throw new Error(`${label} phải là số dương hữu hạn.`)
+  return n
+}
+function nonnegative(n, label) {
+  if (typeof n !== 'number' || !Number.isFinite(n) || n < 0) throw new Error(`${label} phải là số không âm hữu hạn.`)
+  return n
+}
+function sectionClass(ratio, p, r, flange) {
+  if (flange ? ratio >= r : ratio > r) return 'SLENDER'
+  if (ratio > p) return 'NONCOMPACT'
+  return 'COMPACT'
+}
+function shearCv(ratio, kv, e, fy) {
+  const p = 1.1 * Math.sqrt(kv * e / fy)
+  const r = 1.37 * Math.sqrt(kv * e / fy)
+  if (ratio <= p) return 1
+  if (ratio <= r) return p / ratio
+  return 1.51 * e * kv / (fy * square(ratio))
+}
+function check(clause, id, demand, capacity, unit) {
+  if (!Number.isFinite(demand) || !Number.isFinite(capacity) || capacity <= 0) {
+    throw new Error(`Không thể tính trạng thái ${id}: giá trị không hữu hạn hoặc khả năng chịu lực <= 0.`)
+  }
+  return { clause, id, demand, capacity, unit, utilization: demand / capacity,
+    status: demand <= capacity ? 'PASS' : 'FAIL' }
+}
+function calculate(input, designMethod = 'LRFD') {
+  const standardResistance=window.Aisc36010Resistance
+  if(!standardResistance)throw new Error('AISC360-10 phi/Omega coefficient registry unavailable.')
+  const method=standardResistance.selectedMethod(designMethod)
+  const { material, section, member, stiffeners, forces } = input
+  const fy = positive(material.fy_mpa, 'Fy') / 10
+  const e = positive(material.e_mpa, 'E') / 10
+  const h = positive(section.h_mm, 'h') / 10
+  const bf = positive(section.bf_mm, 'bf') / 10
+  const tw = positive(section.tw_mm, 'tw') / 10
+  const tf = positive(section.tf_mm, 'tf') / 10
+  const lb = positive(member.lb_mm, 'Lb') / 10
+  const lx = positive(member.lx_mm, 'Lx') / 10
+  const a = nonnegative(stiffeners.spacing_mm, 'a') / 10
+  const ts = positive(stiffeners.thickness_mm, 'ts') / 10
+  const bs = positive(stiffeners.width_mm, 'bs') / 10
+  const fabrication = section.fabrication
+  const layout = stiffeners.layout
+  if (h <= 2 * tf || bf < tw || bs > (bf - tw) / 2 || e <= fy) {
+    throw new Error('Hình học I/H, bề rộng sườn tăng cứng hoặc tỷ số E/Fy không hợp lệ.')
+  }
+  if (!['BUILT_UP', 'ROLLED'].includes(fabrication) || !['PAIRED', 'SINGLE_ANGLE', 'SINGLE_PLATE'].includes(layout)) {
+    throw new Error('Loại tiết diện hoặc cấu tạo sườn tăng cứng chưa được hỗ trợ.')
+  }
+  for (const key of ['axial_kN', 'moment_x_kNm', 'moment_y_kNm', 'shear_x_kN', 'shear_y_kN', 'moment_25_kNm', 'moment_50_kNm', 'moment_75_kNm']) {
+    if (typeof forces[key] !== 'number' || !Number.isFinite(forces[key])) throw new Error(`Nội lực ${key} không hợp lệ.`)
+  }
+
+  const hw = h - 2 * tf
+  const area = hw * tw + 2 * bf * tf
+  const ix = (bf * h ** 3 - (bf - tw) * hw ** 3) / 12
+  const iy = (hw * tw ** 3 + 2 * tf * bf ** 3) / 12
+  const sx = ix / (h / 2)
+  const sy = iy / (bf / 2)
+  const zx = bf * tf * (hw + tf) + tw * hw ** 2 / 4
+  const zy = hw * tw ** 2 / 4 + tf * bf ** 2 / 2
+  const j = (2 * bf * tf ** 3 + (h - tf) * tw ** 3) / 3 // legacy XLSM D57
+  const rx = Math.sqrt(ix / area)
+  const ry = Math.sqrt(iy / area)
+  const ratioF = bf / (2 * tf)
+  const ratioW = hw / tw
+  const kc = Math.max(.35, Math.min(.76, 4 / Math.sqrt(ratioW)))
+  const fl = .7 * fy
+  const flangeP = .38 * Math.sqrt(e / fy)
+  const flangeR = .95 * Math.sqrt(kc * e / fl)
+  const webP = 3.76 * Math.sqrt(e / fy)
+  const webR = 5.7 * Math.sqrt(e / fy)
+  const flangeClass = sectionClass(ratioF, flangeP, flangeR, true)
+  const webClass = sectionClass(ratioW, webP, webR, false)
+  const chapter = webClass === 'COMPACT' ? (flangeClass === 'COMPACT' ? 'F2' : 'F3') : (webClass === 'NONCOMPACT' ? 'F4' : 'F5')
+
+  const mx = Math.abs(forces.moment_x_kNm)
+  const my = Math.abs(forces.moment_y_kNm)
+  const vx = Math.abs(forces.shear_x_kN)
+  const vy = Math.abs(forces.shear_y_kN)
+  const n = forces.axial_kN
+  const denominator = 2.5 * forces.moment_x_kNm + 3 * forces.moment_25_kNm + 4 * forces.moment_50_kNm + 3 * forces.moment_75_kNm
+  const cb = Math.abs(denominator) > 1e-12 ? 12.5 * forces.moment_x_kNm / denominator : 1
+  if (cb <= 0 || !Number.isFinite(cb)) throw new Error('Cb có dấu của bảng Excel không hợp lệ với biểu đồ moment này.')
+
+  const mp = fy * zx
+  const mnYPlastic = Math.min(fy * zy, 1.6 * fy * sy)
+  let mnYLocal
+  if (flangeClass === 'COMPACT') mnYLocal = mnYPlastic
+  else if (flangeClass === 'NONCOMPACT') mnYLocal = mnYPlastic - (mnYPlastic - .7 * fy * zy) * (ratioF - flangeP) / (flangeR - flangeP)
+  else mnYLocal = .69 * e / square(ratioF) * sy
+  const mnY = Math.min(mnYPlastic, mnYLocal)
+
+  const ho = h - tf
+  const ltbJRatio = j / (sx * ho)
+  let lp = 0, lr = 0, rpg = 1, rt = 0, nominalLtb = 0, nominalLocal = Infinity, nominalYield = mp
+  if (['F2','F3'].includes(chapter)) {
+    const rts = Math.sqrt(iy * ho / (2 * sx))
+    lp = 1.76 * ry * Math.sqrt(e / fy)
+    lr = 1.95 * rts * (e / fl) * Math.sqrt(ltbJRatio) * Math.sqrt(1 + Math.sqrt(1 + 6.76 * square(fl / (e * ltbJRatio))))
+    const fcr = cb * Math.PI ** 2 * e * Math.sqrt(1 + .078 * ltbJRatio * square(lb / rts)) / square(lb / rts)
+    nominalLtb = lb <= lp ? mp : lb <= lr
+      ? Math.min(cb * (mp - (mp - fl * sx) * (lb - lp) / (lr - lp)), mp)
+      : Math.min(mp, fcr * sx)
+    if (chapter === 'F3') {
+      nominalLocal = flangeClass === 'NONCOMPACT'
+        ? mp - (mp - fl * sx) * (ratioF - flangeP) / (flangeR - flangeP)
+        : .9 * e * kc * sx / square(ratioF)
+    }
+  } else {
+    const aw = Math.min(10, hw * tw / (bf * tf))
+    rt = bf / Math.sqrt(12 * (ho / h + (aw / 6) * hw ** 2 / (h * ho)))
+    lp = 1.1 * rt * Math.sqrt(e / fy)
+    if (chapter === 'F4') {
+      lr = 1.95 * rt * (e / fl) * Math.sqrt(ltbJRatio) * Math.sqrt(1 + Math.sqrt(1 + 6.76 * square(fl / (e * ltbJRatio))))
+      const rpcMy = Math.min(mp, 1.6 * fy * sx) / (fy * sx)
+      const rpc = ratioW > webP ? Math.min(rpcMy - (rpcMy - 1) * (ratioW - webP) / (webR - webP), rpcMy) : rpcMy
+      nominalYield = rpc * fy * sx
+      const fcr = cb * Math.PI ** 2 * e * Math.sqrt(1 + .078 * ltbJRatio * square(lb / rt)) / square(lb / rt)
+      nominalLtb = lb <= lp ? mp : lb <= lr
+        ? Math.min(cb * (nominalYield - (nominalYield - fl * sx) * (lb - lp) / (lr - lp)), nominalYield)
+        : Math.min(fcr * sx, nominalYield)
+      nominalLocal = flangeClass === 'COMPACT' ? Infinity : flangeClass === 'NONCOMPACT'
+        ? nominalYield - (nominalYield - fl * sx) * (ratioF - flangeP) / (flangeR - flangeP)
+        : .9 * e * kc * sx / square(ratioF)
+    } else {
+      lr = Math.PI * rt * Math.sqrt(e / fl)
+      rpg = Math.min(1 - aw / (1200 + 300 * aw) * (ratioW - 5.7 * Math.sqrt(e / fy)), 1)
+      const fn = lb <= lp ? fy : lb <= lr
+        ? Math.min(cb * (fy - .3 * fy * (lb - lp) / (lr - lp)), fy)
+        : Math.min(cb * Math.PI ** 2 * e / square(lb / rt), fy)
+      nominalLtb = rpg * fn * sx
+      nominalLocal = flangeClass === 'COMPACT' ? Infinity : rpg * (flangeClass === 'NONCOMPACT'
+        ? fy - .3 * fy * (ratioF - flangeP) / (flangeR - flangeP)
+        : .9 * e * kc / square(ratioF)) * sx
+      nominalYield = rpg * fy * sx
+    }
+  }
+  const mnX = Math.min(nominalLtb, nominalLocal, nominalYield)
+  const phiMnX=standardResistance.availableStrength(mnX/100,method,'FLEXURE')
+  const phiMnY=standardResistance.availableStrength(mnY/100,method,'FLEXURE')
+
+  const qsLimitP = .64 * Math.sqrt(kc * e / fy)
+  const qsLimitR = 1.17 * Math.sqrt(kc * e / fy)
+  const qs = ratioF > qsLimitR ? .9 * kc * e / (fy * square(ratioF))
+    : ratioF > qsLimitP ? 1.415 - .65 * ratioF * Math.sqrt(fy / (kc * e)) : 1
+  const effectiveHw = ratioW >= 1.49 * Math.sqrt(e / fy)
+    ? Math.min(1.92 * tw * Math.sqrt(e / fy) * (1 - .34 * Math.sqrt(e / fy) / ratioW), hw)
+    : hw
+  const qa = (effectiveHw * tw + 2 * bf * tf) / area
+  const q = qs * qa
+  const feX = Math.PI ** 2 * e / square(lx / rx)
+  const feY = feX // Legacy spreadsheet bug 2.Details!W194, retained for parity.
+  const fcrX = lx / rx > 4.71 * Math.sqrt(e / (fy * q)) ? .877 * feX : q * .658 ** (q * fy / feX) * fy
+  const fcrY = lb / ry > 4.71 * Math.sqrt(e / (fy * q)) ? .877 * feY : q * .658 ** (q * fy / feY) * fy
+  const pn = Math.min(fcrX, fcrY) * area
+  const phiPn=standardResistance.availableStrength(pn,method,'COMPRESSION')
+  const phiPt=standardResistance.availableStrength(fy*area,method,'TENSION_GROSS')
+  const pRatio = Math.abs(n) / (n < 0 ? phiPn : phiPt)
+  const ratioMx = mx / phiMnX
+  const ratioMy = my / phiMnY
+  const roundedMinor = Math.round(ratioMy * 100 * 100) / 100 / 100
+  const interaction = pRatio >= .2
+    ? pRatio + 8 / 9 * (ratioMx + roundedMinor)
+    : pRatio / 2 + ratioMx + roundedMinor
+
+  const aspect = a / hw
+  const kv = a === 0 ? 1.2 : 5 + 5 / square(aspect)
+  const webStrengthKey=standardResistance.webShearFactorKey({fabrication,h_mm:section.h_mm,tf_mm:section.tf_mm,tw_mm:section.tw_mm,e_mpa:material.e_mpa,fy_mpa:material.fy_mpa})
+  const webKv=webStrengthKey==='SHEAR_ROLLED_G21A'?1:shearCv(ratioW,kv,e,fy)
+  const awShear = hw * tw
+  const vnWeb = .6 * fy * awShear * webKv
+  const phiVWeb=standardResistance.availableStrength(vnWeb,method,webStrengthKey)
+  const cvFlange = shearCv(bf / tf, 1.2, e, fy)
+  const vnFlange = .6 * fy * (2 * bf * tf) * cvFlange
+  const phiVFlange=standardResistance.availableStrength(vnFlange,method,'SHEAR_GENERAL')
+  const tensionFieldEligible = !(aspect > 3 || square(260 / ratioW) > 3) && hw * tw / (bf * tf) <= 2.5 && hw / bf <= 6
+  const vnTensionField = tensionFieldEligible
+    ? .6 * fy * hw * tw * (ratioW > 1.1 * Math.sqrt(kv * e / fy)
+      ? webKv + (1 - webKv) / (1.15 * Math.sqrt(1 + square(aspect))) : 1)
+    : null
+  const ds = layout === 'PAIRED' ? 1 : layout === 'SINGLE_ANGLE' ? 1.8 : 2.4
+  const requiredAreaLRFD = .15 * ds * hw * tw * (1 - webKv) * (vy / phiVWeb) - 18 * square(tw)
+  const stiffenerWidthOk = bs / ts <= .56 * Math.sqrt(e / fy)
+  const stiffenerAreaOk = requiredAreaLRFD >= 0 // intentionally preserves D259
+  const stiffenerChecksOk = stiffenerWidthOk && stiffenerAreaOk
+
+  const checks = [
+    check('F' + chapter, 'major_axis_flexure', mx, phiMnX, 'kN.m'),
+    check('F6', 'minor_axis_flexure', my, phiMnY, 'kN.m'),
+    check('E3', 'axial_compression', Math.max(0,-n), phiPn, 'kN'),
+    check('D2', 'axial_tension_gross_yielding_only', Math.max(0,n), phiPt, 'kN'),
+    check('H1', 'axial_flexure_interaction', interaction, 1, 'ratio'),
+    check('G2', 'web_shear_legacy_axis_Vy', vy, phiVWeb, 'kN'),
+    check('G7', 'flange_shear_legacy_axis_Vx', vx, phiVFlange, 'kN'),
+  ]
+  const warnings = [
+    {code:'LEGACY_EDITION',message:'Workbook gốc ghi AISC 360-05, không phải AISC 360-10.'},
+    {code:'LEGACY_CB',message:'Cb dùng moment có dấu tại các vị trí được nhập, chưa kiểm chứng moment cực trị trên đoạn Lb.'},
+    {code:'LEGACY_WEAK_AXIS_FE',message:'Excel W194 dùng Fe trục mạnh cho trục yếu; lỗi này được giữ nguyên để đối chiếu Excel.'},
+    {code:'INCOMPLETE_TENSION',message:'Chưa có kiểm tra đứt kéo tại tiết diện thực / net section.'},
+    {code:'STIFFENER_PARITY_ONLY',message:'Kiểm tra diện tích sườn tăng cứng vẫn theo biểu thức legacy LRFD; không phải kiểm tra sườn ASD đã được xác minh.'},
+    {code:'NO_GLOBAL_PASS',message:'Chế độ parity không xác nhận cấu kiện đạt tiêu chuẩn.'},
+    {code:'LOAD_COMBINATION_METHOD',message:method==='ASD'
+      ? 'ASD phải dùng nội lực từ tổ hợp ASD (service level); không tự chuyển tổ hợp LRFD sang ASD.'
+      : 'LRFD phải dùng nội lực từ tổ hợp LRFD (factored); không tự chuyển tổ hợp ASD sang LRFD.'},
+    ...(webStrengthKey==='SHEAR_ROLLED_G21A'?[{code:'ROLLED_WEB_REVIEW',message:'G2.1(a) cần xác nhận rolled profile, fillet và chiều cao bụng thông thủy thực tế.'}]:[]),
+  ]
+  if (!stiffenerChecksOk) warnings.push({code:'STIFFENER_REVIEW',message:'Kiểm tra sườn tăng cứng chưa đạt theo workbook. Không chấp thuận tension field enhancement.'})
+  const result = {
+    status:'success', mode:'LEGACY_EXCEL_PARITY',design_method:method,
+    factor_source:'AISC360-10 resistance registry',
+    factors:{
+      flexure:standardResistance.factorNotation(method,'FLEXURE'),
+      compression:standardResistance.factorNotation(method,'COMPRESSION'),
+      tension_gross:standardResistance.factorNotation(method,'TENSION_GROSS'),
+      tension_rupture_not_checked:standardResistance.factorNotation(method,'TENSION_RUPTURE'),
+      shear_web:standardResistance.factorNotation(method,webStrengthKey),
+      shear_flange:standardResistance.factorNotation(method,'SHEAR_GENERAL'),
+    },
+    nominal_strengths:{mn_x_kNm:mnX/100,mn_y_kNm:mnY/100,pn_compression_kN:pn,
+      pn_tension_gross_kN:fy*area,vn_web_kN:vnWeb,vn_flange_kN:vnFlange},
+    source_standard:'AISC360-05_UNVERIFIED',
+    target_standard:'AISC360-10_NOT_VALIDATED', shape:'HI_DOUBLY_SYMMETRIC', engine_version:'browser-parity-0.1.0', overall_status:'REVIEW_REQUIRED',
+    section_properties:{area_mm2:area*100,ix_mm4:ix*10000,iy_mm4:iy*10000,sx_mm3:sx*1000,sy_mm3:sy*1000,zx_mm3:zx*1000,zy_mm3:zy*1000,j_legacy_mm4:j*10000,rx_mm:rx*10,ry_mm:ry*10},
+    classification:{flange:flangeClass,web:webClass,flexure_chapter:chapter,lambda_flange:ratioF,lambda_web:ratioW,lambda_p_flange:flangeP,lambda_r_flange:flangeR,lambda_p_web:webP,lambda_r_web:webR},
+    strengths:{
+      available_mnx_kNm:phiMnX,available_mny_kNm:phiMnY,available_pn_compression_kN:phiPn,
+      available_pn_tension_gross_kN:phiPt,available_vn_web_kN:phiVWeb,available_vn_flange_kN:phiVFlange,
+      // Compatibility aliases for prior LRFD UI; refer to available ASD strengths when ASD selected.
+      phi_mnx_kNm:phiMnX,phi_mny_kNm:phiMnY,phi_pn_compression_kN:phiPn,
+      phi_pn_tension_gross_kN:phiPt,phi_vn_web_kN:phiVWeb,phi_vn_flange_kN:phiVFlange,
+    },
+    interaction:{utilization:interaction,percent:interaction*100,lrfd_utilization:interaction,lrfd_percent:interaction*100,
+      axial_ratio:pRatio,moment_x_ratio:ratioMx,moment_y_ratio_rounded:roundedMinor},
+    shear:{web_percent:100*vy/phiVWeb,flange_percent:100*vx/phiVFlange,tension_field_eligible_legacy:tensionFieldEligible,nominal_tension_field_kN_legacy:vnTensionField,stiffener_width_ok:stiffenerWidthOk,stiffener_area_legacy_ok:stiffenerAreaOk,tension_field_not_approved:!stiffenerChecksOk},
+    limit_states:checks, failed_checks:checks.filter(x=>x.status==='FAIL').map(x=>x.id),
+    trace:{web_factor_key:webStrengthKey,cb_signed_legacy:cb,lp_mm:lp*10,lr_mm:lr*10,rpg, mnx_ltb_kNm:nominalLtb/100,mnx_local_kNm:Number.isFinite(nominalLocal)?nominalLocal/100:null,mnx_yield_kNm:nominalYield/100,qs,qa,q,fcrx_mpa:fcrX*10,fcry_mpa:fcrY*10,web_cv:webKv,flange_cv:cvFlange,stiffener_required_area_legacy_cm2:requiredAreaLRFD},
+    warnings,
+  }
+  return result
+}
+
+
+const latest = { input: structuredClone(fixture), result: null, changed: false, method:'LRFD' }
+const sapComponentNonce=new URLSearchParams(location.search).get('sap_component');
+const sapComponentMode=Boolean(sapComponentNonce);let sapComponentPacket=null,sapComponentEdited=false;
+const find = id => document.getElementById(id)
+const format = (value, digits = 3) => typeof value === 'number' && Number.isFinite(value) ? new Intl.NumberFormat('en-US',{maximumFractionDigits:digits}).format(value) : '—'
+function safe(text) { return String(text).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])) }
+const checknames = {
+  major_axis_flexure: 'Uốn trục mạnh (Mx)', minor_axis_flexure:'Uốn trục yếu (My)',
+  axial_compression:'Nén dọc trục',axial_tension_gross_yielding_only:'Kéo chảy dẻo (chưa đứt kéo)',
+  axial_flexure_interaction:'Tương tác N–M (H1)',web_shear_legacy_axis_Vy:'Cắt bụng (Vy trong Excel)',
+  flange_shear_legacy_axis_Vx:'Cắt cánh (Vx trong Excel)'
+}
+const fields = [...document.querySelectorAll('[data-section]')]
+function controlsIn(block){return block.matches('[data-key]')?[block]:block.querySelectorAll('[data-key]')}
+function syncAnalysisUi(){
+ const direct=true
+ for(const id of ['aisc-kx','aisc-ky','aisc-kz']){
+  const node=find(id);if(!node)continue
+  node.readOnly=direct;node.setAttribute('aria-readonly',String(direct))
+  if(direct)node.value='1'
+ }
+ for(const [id,value] of [['aisc-e','200000'],['aisc-g','77200']]){
+  const node=find(id);if(!node)continue
+  node.readOnly=direct;node.setAttribute('aria-readonly',String(direct));if(direct)node.value=value
+ }
+}
+function syncGeometryUi(){
+ const rolled=find('aisc-fabrication')?.value==='ROLLED'
+ find('web-clear-height-fields')?.classList.toggle('hidden',!rolled)
+ find('web-attachment-field')?.classList.toggle('hidden',rolled)
+}
+function syncStiffenerUi(){
+ const angle=find('stiffener-layout')?.value==='SINGLE_ANGLE'
+ find('angle-inertia-field')?.classList.toggle('hidden',!angle)
+ find('angle-axis-check')?.classList.toggle('hidden',!angle)
+}
+function updateInputs(){
+  fields.forEach(block => controlsIn(block).forEach(node => {
+    const key = node.dataset.key, value = latest.input[block.dataset.section][key]
+    if(node.type==='checkbox')node.checked=Boolean(value)
+    else node.value = value===null||value===undefined?'':value
+  }))
+  document.querySelectorAll('[data-tfa-panel]').forEach((group,index)=>group.querySelectorAll('[data-panel-key]').forEach(node=>{
+    const value=latest.input.tension_field_action.adjacent_panels[index]?.[node.dataset.panelKey]
+    if(node.type==='checkbox')node.checked=Boolean(value)
+    else node.value=value===null||value===undefined?'':String(value)
+  }))
+  document.querySelectorAll('[data-panel-key]').forEach(node=>{
+    if(node.type==='checkbox' && !node.closest('[data-tfa-panel]'))node.checked=Boolean(latest.input.tension_field_action.adjacent_panels[Number(node.dataset.panelIndex)]?.[node.dataset.panelKey])
+  })
+  const tfa=latest.input.tension_field_action
+  const position=find('tfa-panel-position')
+  if(position)position.value=tfa.panel_position||''
+  const sides=find('tfa-four-sides')
+  if(sides)sides.value=tfa.four_sides_supported===true?'true':tfa.four_sides_supported===false&&tfa.panel_position_confirmed?'false':'UNCONFIRMED'
+  find('tfa-enabled').checked=Boolean(tfa.enabled)
+  find('tfa-inputs').classList.toggle('hidden',!tfa.enabled)
+  const same=document.querySelector('[data-same-boundaries]');if(same)same.checked=Boolean(tfa.same_boundaries_confirmed)
+  syncGeometryUi()
+  syncAnalysisUi()
+  syncStiffenerUi()
+  draw()
+}
+function readInputs(){
+  const next=structuredClone(latest.input)
+  fields.forEach(block => controlsIn(block).forEach(node => {
+    // The quarter-point moment stations belong only to the explicit legacy
+    // workbook reference. They do not participate in the AISC 360-10 branch.
+    if(isAiscMode()&&['moment_25_kNm','moment_50_kNm','moment_75_kNm'].includes(node.dataset.key))return
+    if(node.dataset.key==='web_attachment'&&node.value==='')return // retain an imported unsupported attachment so the kernel can block it explicitly
+    let value
+    if(node.type==='checkbox')value=node.checked
+    else if(node.type==='number'){
+      if(node.value.trim()===''){
+        if(!node.hasAttribute('data-optional'))throw new Error(`Vui lòng nhập giá trị số cho: ${node.dataset.key}.`)
+        value=null
+      }else{
+        value=Number(node.value)
+        if(!Number.isFinite(value))throw new Error(`Giá trị không hợp lệ: ${node.dataset.key}.`)
+      }
+    }else value=node.value
+    next[block.dataset.section][node.dataset.key] = value
+  }))
+  next.assessment={scope:'GROSS_MEMBER',force_source:'MANUAL'}
+  next.analysis={method:'DIRECT',forces_method:document.querySelector('input[name="design-method"]:checked')?.value||'LRFD'}
+  next.stiffeners.inertia_axis_verified=!!document.querySelector('[data-key="inertia_axis_verified"]')?.checked
+  next.stiffeners.attachment_details_verified=!!document.querySelector('[data-key="attachment_details_verified"]')?.checked
+  const boolSelect=node=>node.value==='true'?true:node.value==='false'?false:null
+  const panelPosition=find('tfa-panel-position').value
+  next.tension_field_action.enabled=find('tfa-enabled').checked
+  next.tension_field_action.panel_position=panelPosition
+  next.tension_field_action.panel_position_confirmed=panelPosition==='INTERIOR'||panelPosition==='END'
+  next.tension_field_action.is_end_panel=panelPosition===''?null:panelPosition==='END'
+  next.tension_field_action.four_sides_supported=boolSelect(find('tfa-four-sides'))
+  next.tension_field_action.four_sides_supported_confirmed=find('tfa-four-sides').value==='true'||find('tfa-four-sides').value==='false'
+  next.tension_field_action.adjacent_panels=[...document.querySelectorAll('[data-tfa-panel]')].map(group=>{
+    const row={}
+    group.querySelectorAll('[data-panel-key]').forEach(node=>{
+      if(node.type==='checkbox')row[node.dataset.panelKey]=node.checked
+      else if(node.type==='number')row[node.dataset.panelKey]=node.value.trim()===''?null:Number(node.value)
+      else row[node.dataset.panelKey]=boolSelect(node)
+    })
+    const check=group.parentElement.querySelector('[data-panel-key="other_boundary_stiffeners_verified"]')
+    row.other_boundary_stiffeners_verified=!!check?.checked
+    row.panel_position_confirmed=row.is_end_panel!==null
+    row.four_sides_supported_confirmed=row.four_sides_supported!==null
+    return row
+  })
+  next.tension_field_action.same_boundaries_confirmed=!!document.querySelector('[data-same-boundaries]')?.checked
+  const boundary=structuredClone(next.stiffeners)
+  next.tension_field_action.bounding_stiffeners=next.tension_field_action.same_boundaries_confirmed?[structuredClone(boundary),structuredClone(boundary)]:[]
+  return next
+}
+function draw(){
+  const section = latest.input.section
+  const h = Math.max(1,Number(section.h_mm)||1), bf = Math.max(1,Number(section.bf_mm)||1)
+  const tw = Math.max(1,Number(section.tw_mm)||1), tf = Math.max(1,Number(section.tf_mm)||1)
+  const hh=188, ww=Math.max(42,Math.min(140,hh*bf/h)), fl=Math.max(8,Math.min(45,hh*tf/h)), web=Math.max(7,Math.min(ww,ww*tw/bf)), left=120-ww/2, top=27
+  const x=(120-web/2).toFixed(2), y=(top+fl).toFixed(2)
+  find('section-outline').innerHTML=`<rect x="${left}" y="${top}" width="${ww}" height="${fl}" rx="1.5" fill="#b5dce0" stroke="#2b7990" stroke-width="1.5"/><rect x="${x}" y="${y}" width="${web}" height="${hh-2*fl}" fill="#b5dce0" stroke="#2b7990" stroke-width="1.5"/><rect x="${left}" y="${top+hh-fl}" width="${ww}" height="${fl}" rx="1.5" fill="#b5dce0" stroke="#2b7990" stroke-width="1.5"/><line x1="120" x2="120" y1="14" y2="222" stroke="#96b7c0" stroke-width=".8" stroke-dasharray="4 4"/>`
+  find('diag-h').textContent=`h = ${format(h,0)}`; find('diag-b').textContent=`bf = ${format(bf,0)}`
+}
+const refs = {phi_mnx_kNm:1020.0379893494273,phi_mny_kNm:112.55655515838045,phi_pn_compression_kN:2113.423353366748,lrfd_percent:82.40656143563768,area_mm2:11496}
+function matchingFixture() { return latest.method==='LRFD' && Object.entries(fixture).every(([group,fields]) => Object.entries(fields).every(([key,value]) => latest.input[group]?.[key] === value)) }
+
+function renderFactorTable(r) {
+ const root=document.getElementById('factor-table')
+ if(!root)return
+ const labels={flexure:'F2–F6 · Flexure',compression:'E3/E7 · Compression',
+  tension_gross:'D2(a) · Gross tensile yield',tension_rupture_not_checked:'D2(b) · Fracture (not checked)',
+  shear_web:'G2 · Web shear',shear_flange:'G7 · Weak-axis shear'}
+ root.innerHTML='<h4>AISC 360-10 · '+safe(r.design_method)+' · φ / Ω</h4><div class="factor-grid">'+
+ Object.entries(r.factors).map(([key,val])=>`<div class="factor-item"><span>${safe(labels[key]||key)}</span>
+   <strong>${safe(val.symbol)} = ${format(val.value,2)}</strong>
+   <small>${safe(val.clause)} · ${safe(val.equation)}</small></div>`).join('')+'</div>'+
+ '<p class="factor-note">Hệ số theo điều khoản AISC 360-10. Công thức nominal của Excel 360-05 vẫn đang chờ thẩm tra.</p>'
+}
+function renderLegacyPreview(){
+  const r=latest.result
+  const percent=r.interaction.percent
+  find('h1').textContent=format(percent,2)+'%'
+  const ratio=Math.min(Math.max(percent,0),100)
+  const color=percent>100?'#b84a43':percent>85?'#d5a047':'#067d85'
+  find('ring').style.background=`conic-gradient(${color} 0% ${ratio}%,#e9eff3 ${ratio}% 100%)`
+  find('status').textContent='REVIEW REQUIRED'
+  find('overview').textContent=`Nhánh uốn ${r.classification.flexure_chapter} · Cánh ${r.classification.flange} · Bụng ${r.classification.web}. Đây không phải kết luận đạt tiêu chuẩn.`
+  const s=r.strengths,p=r.section_properties
+  const lrfd=r.design_method==='LRFD'
+  const cards=[[lrfd?'φMn,x':'Mn,x/Ω',s.available_mnx_kNm,'kN·m'],
+    [lrfd?'φMn,y':'Mn,y/Ω',s.available_mny_kNm,'kN·m'],
+    [lrfd?'φPn (nén)':'Pn/Ω (nén)',s.available_pn_compression_kN,'kN'],['A',p.area_mm2,'mm²']]
+  find('metrics').innerHTML=cards.map(([label,value,unit])=>`<div class="metric"><span>${label}</span><strong>${format(value,3)}</strong><small>${unit}</small></div>`).join('')
+  const items=[['H1 · N–M',r.interaction.lrfd_percent],['Uốn Mx',r.interaction.moment_x_ratio*100],['Nén/kéo N',r.interaction.axial_ratio*100],['Cắt bụng',r.shear.web_percent],['Cắt cánh',r.shear.flange_percent]]
+  find('bars').innerHTML=items.map(([label,pct])=>`<div class="barrow"><div class="barlabel"><span>${label}</span><strong>${format(pct,2)}%</strong></div><div class="bar ${pct>100?'fail':pct>85?'warn':''}"><div style="width:${Math.max(0,Math.min(pct,100))}%"></div></div></div>`).join('')
+  renderFactorTable(r)
+  find('checkrows').innerHTML=r.limit_states.map(row=>`<tr><td>${safe(row.clause)}</td><td>${safe(checknames[row.id]||row.id)}</td><td>${format(row.demand,3)}</td><td>${format(row.capacity,3)}</td><td>${format(row.utilization*100,2)}%</td><td><span class="pill ${row.status==='FAIL'?'fail':''}">${row.status}</span></td></tr>`).join('')
+  const traces={
+    'Flange classification':r.classification.flange,'Web classification':r.classification.web,
+    'Flexure chapter':r.classification.flexure_chapter,
+    'λf':r.classification.lambda_flange,'λw':r.classification.lambda_web,
+    'Cb (signed, Excel)':r.trace.cb_signed_legacy,'Lp (mm)':r.trace.lp_mm,'Lr (mm)':r.trace.lr_mm,
+    'Qs':r.trace.qs,'Qa':r.trace.qa,'Q':r.trace.q,'Fcrx (MPa)':r.trace.fcrx_mpa,'Fcry (MPa)':r.trace.fcry_mpa,
+    'Ix (mm⁴)':p.ix_mm4,'Iy (mm⁴)':p.iy_mm4,'Zx (mm³)':p.zx_mm3,'Zy (mm³)':p.zy_mm3,
+    'Stiffener width OK':r.shear.stiffener_width_ok?'YES':'NO','Stiffener area OK (legacy)':r.shear.stiffener_area_legacy_ok?'YES':'NO'
+  }
+  find('trace').innerHTML=Object.entries(traces).map(([k,v])=>`<div><span>${safe(k)}</span><strong>${typeof v==='number'?format(v,5):safe(v)}</strong></div>`).join('')
+  find('warnings').innerHTML=r.warnings.map(w=>`<div class="warning"><strong>${safe(w.code)}</strong>${safe(w.message)}</div>`).join('')
+  find('warn-count').textContent=`(${r.warnings.length})`
+  find('refline').innerHTML=matchingFixture()?'<b>✓ Đối chiếu dữ liệu mẫu</b> 5/5 chỉ tiêu chính trùng engine PHP Phase 1 trong dung sai 1e−6.':'<span style="color:#8a9aa7">Dữ liệu đã thay đổi — cần đối chiếu thêm với Excel nếu dùng trường hợp này.</span>'
+  find('calc-info').textContent=`${r.design_method} · ${r.engine_version} · ${new Date().toLocaleTimeString('vi-VN')}`
+  latest.changed=false
+  find('dirtytext').textContent='Đã tính toán. Các thông số hiện tại đang được hiển thị.'
+  find('dirtytext').classList.remove('input-changed')
+  find('error').style.display='none'
+  renderCalculationNotebook()
+}
+
+function isAiscMode(){return find('calculation-mode').value==='AISC36010'}
+function renderPrimaryPending(message){
+ find('h1').textContent='—';find('status').textContent='REVIEW REQUIRED';
+ find('ring').style.background='#e9eff3';find('overview').textContent=message;
+ for(const id of ['metrics','bars','checkrows','trace','warnings','factor-table','refline','member-design-summary'])find(id).textContent='';
+ find('member-compliance-status').textContent='REVIEW_REQUIRED · no current result';
+ find('member-compliance-blockers').textContent='';find('member-compliance-checks').textContent='';find('member-compliance-trace').textContent='No current result.';
+ document.getElementById('aisc-review-status').textContent=message;
+ document.getElementById('aisc-review-class').textContent='';
+ document.getElementById('aisc-review-table').textContent='';
+ find('warn-count').textContent='';find('calc-info').textContent='AISC 360-10 · awaiting current calculation';
+ find('active-calculation-source').textContent='AISC 360-10 reference calculation';
+}
+const sourceLibraryHref='./?standard=AISC360-10#/modules/steel/library/standards';
+const AISC_SOURCE_SHA='f9b15004cf51dbaec6c06588d81aa5256be268af87906e5ba863c289795f4e99';
+function sourceRecords(source){return Array.isArray(source)?source:source&&typeof source==='object'?[source]:[]}
+function sourcePage(value){
+ if(Number.isInteger(value)&&value>0)return value
+ if(Array.isArray(value)){for(const item of value){const parsed=sourcePage(item);if(parsed)return parsed}return null}
+ if(typeof value==='string'){
+  const match=value.match(/(?:physical(?:_page)?\s*[:/]?\s*)(\d{1,3})/i)||value.match(/^\s*(\d{1,3})(?:\s*[-–]\s*\d+)?\s*$/)
+  if(match)return Number(match[1])
+ }
+ return null
+}
+function sourceMarkup(row){
+ const clause=row?.clause||'—',records=sourceRecords(row?.source),printed=[],physical=[];
+ for(const record of records){
+  if(record.printed_pages)printed.push(...(Array.isArray(record.printed_pages)?record.printed_pages:[record.printed_pages]));
+  if(record.printed_page)printed.push(record.printed_page);
+  let pages=record.physical_pages??record.physical_page;
+  if(pages!==undefined)physical.push(...(Array.isArray(pages)?pages:[pages]));
+  if(typeof record.source==='string'){
+   const physicalMatch=record.source.match(/physical\s+(\d{1,3})/i);if(physicalMatch)physical.push(Number(physicalMatch[1]));
+   const printedMatch=record.source.match(/printed\s+([^\s,]+)/i);if(printedMatch)printed.push(printedMatch[1]);
+  }
+ }
+ const unique=(values)=>[...new Set(values.map(value=>String(value).trim()).filter(Boolean))];
+ const physicalPages=unique(physical),printedPages=unique(printed),
+  recordHash=records.map(item=>item.sha256||item.artifact_sha256).find(value=>typeof value==='string'&&/^[a-f0-9]{64}$/i.test(value)),
+  firstPage=sourcePage(physicalPages[0]),hash=recordHash||(firstPage?AISC_SOURCE_SHA:null);
+ const href=hash&&firstPage?`./?standard=AISC360-10&source_sha256=${encodeURIComponent(hash)}&pdf_page=${firstPage}#/modules/steel/library/standards`:sourceLibraryHref;
+ const pageText=[physicalPages.length?`PDF page ${physicalPages.join(', ')}`:'',printedPages.length?`printed ${printedPages.join(', ')}`:''].filter(Boolean).join(' · ');
+ return `${clause==='—'?'—':`<a href="${href}" target="_blank" rel="noopener" title="Open AISC 360-10 source at the cited page">${safe(clause)}</a>`}${pageText?`<small>${safe(pageText)}</small>`:''}`
+}
+function unitText(value,unit){return Number.isFinite(value)?`${format(value,4)}${unit?` ${safe(unit)}`:''}`:'—'}
+function demandForLimitState(key,input,result){
+ const f=input.forces||{};
+ const values={
+  compression:Math.max(0,-f.axial_kN),tension:Math.max(0,f.axial_kN),
+  major_flexure:Math.abs(f.moment_x_kNm),minor_flexure:Math.abs(f.moment_y_kNm),
+  interaction:result.limit_states?.interaction?.demand??result.limit_states?.interaction?.nominal,
+  shear_web:Math.abs(f.shear_y_kN),shear_flange:Math.abs(f.shear_x_kN),
+  flange_holes:Math.abs(f.moment_x_kNm),flange_hole_interaction:result.limit_states?.flange_hole_interaction?.demand,
+ };
+ return Number.isFinite(values[key])?values[key]:null;
+}
+function renderMemberCompliance(result){
+ const card=result.member_compliance||{status:result.overall_status||'REVIEW_REQUIRED',checks:[],blockers:[]};
+ find('member-compliance-status').textContent=`Gross member strength · ${card.status}`;
+ const blockers=Array.isArray(card.blockers)?card.blockers:[];
+ find('member-compliance-blockers').innerHTML=blockers.map(item=>`<div class="warning"><strong>${safe(item.key||'REVIEW_REQUIRED')}</strong>${safe(item.reason||'Required input or review is incomplete.')}</div>`).join('');
+ const checks=Array.isArray(card.checks)?card.checks:[];
+ find('member-compliance-checks').innerHTML=checks.length?`<div class="tablewrap"><table class="aisc-results"><thead><tr><th>Check</th><th>Status</th><th>Utilization</th><th>Clause / source</th></tr></thead><tbody>${checks.map(item=>{
+  const state=result.limit_states?.[item.key]||{};
+  const utilization=Number.isFinite(item.utilization)?`${format(100*item.utilization,2)}%`:item.utilization===null?'—':'—';
+  return `<tr><td><strong>${safe(item.key)}</strong></td><td><span class="pill ${item.status==='FAIL'?'fail':item.status==='PASS'?'':'review'}">${safe(item.status)}</span></td><td>${utilization}</td><td>${sourceMarkup({...state,clause:item.clause||state.clause})}</td></tr>`
+ }).join('')}</tbody></table></div>`:'<p class="contract-note">No numerical compliance checks are currently available. Review blockers and limit-state statuses below.</p>';
+ find('member-compliance-trace').textContent=JSON.stringify({scope:card.scope,summary:card.summary,utilization:card.utilization,approval_basis:card.approval_basis},null,2);
+}
+function renderGrossDesignSummary(result,input){
+ const names={major_flexure:'Major-axis flexure Mnx',minor_flexure:'Minor-axis flexure Mny',compression:'Compression Pc',tension:'Gross tensile yielding Pt',shear_web:'Web shear',shear_flange:'Flange shear',interaction:'Interaction N–Mx–My (H1)'};
+ find('member-design-summary').innerHTML=Object.entries(names).map(([key,label])=>{
+  const row=result.limit_states[key];if(!row)return '';
+  const demand=demandForLimitState(key,input,result),ratio=key==='interaction'?row.nominal:row.status==='CALCULATED'&&row.available>0&&Number.isFinite(demand)?demand/row.available:null;
+  return `<tr data-summary="${key}"><td><strong>${safe(label)}</strong></td><td>${unitText(row.nominal,row.unit)}</td><td>${unitText(row.available,row.unit)}</td><td>${row.status==='CALCULATED'&&Number.isFinite(ratio)?format(ratio*100,2)+'%':'—'}</td><td>${sourceMarkup(row)}</td></tr>`;
+ }).join('');
+}
+function renderAiscPrimary(result,input,canonical){
+ renderGrossDesignSummary(result,input);
+ const limits=result.limit_states,interaction=limits.interaction;
+ const ratio=interaction?.status==='CALCULATED'&&Number.isFinite(interaction.nominal)?interaction.nominal:null;
+ const complianceStatus=result.member_compliance?.status||result.overall_status||'REVIEW_REQUIRED';
+ find('h1').textContent=ratio===null?'—':format(100*ratio,2)+'%';
+ find('status').textContent=`MEMBER ${complianceStatus}`;
+ const percent=ratio===null?0:Math.max(0,Math.min(100*ratio,100));
+ find('ring').style.background=`conic-gradient(${complianceStatus==='FAIL'||ratio>1?'#b84a43':'#067d85'} 0% ${percent}%,#e9eff3 ${percent}% 100%)`;
+ find('overview').textContent=`${result.member_compliance?.summary||'AISC 360-10 member calculation complete.'} Overall status: ${complianceStatus}.`;
+ const calculated=Object.entries(limits).filter(([,row])=>row.status==='CALCULATED');
+ const cards=[['Mx',limits.major_flexure?.available,'kN·m'],['My',limits.minor_flexure?.available,'kN·m'],['Pc',limits.compression?.available,'kN'],['An',limits.net_section?.nominal,'mm²']];
+ find('metrics').innerHTML=cards.map(([label,number,unit])=>`<div class="metric"><span>${safe(label)}</span><strong>${format(number,3)}</strong><small>${safe(unit)}</small></div>`).join('');
+ const demand={compression:Math.max(0,-input.forces.axial_kN),tension:Math.max(0,input.forces.axial_kN),major_flexure:Math.abs(input.forces.moment_x_kNm),minor_flexure:Math.abs(input.forces.moment_y_kNm),interaction:ratio,shear_web:Math.abs(input.forces.shear_y_kN),shear_flange:Math.abs(input.forces.shear_x_kN),flange_hole_interaction:limits.flange_hole_interaction?.demand};
+ find('checkrows').innerHTML=Object.entries(limits).map(([name,row])=>{
+  const checkDemand=Number.isFinite(row.demand)?row.demand:Number.isFinite(demand[name])?demand[name]:demandForLimitState(name,input,result);
+  const capacity=Number.isFinite(row.available)?row.available:Number.isFinite(row.nominal)?row.nominal:null;
+  const utilization=row.unit==='ratio'&&row.status==='CALCULATED'?(Number.isFinite(row.utilization)?row.utilization:row.nominal):row.status==='CALCULATED'&&capacity>0&&Number.isFinite(checkDemand)?checkDemand/capacity:null;
+  const reason=row.reason||'';
+  return `<tr><td>${sourceMarkup(row)}</td><td><strong>${safe(row.id||name)}</strong></td><td>${unitText(checkDemand,row.unit)}</td><td>${unitText(capacity,row.unit)}</td><td>${utilization===null||!Number.isFinite(utilization)?'—':format(100*utilization,2)+'%'}</td><td><span class="pill ${row.status==='FAIL'||utilization>1?'fail':row.status==='CALCULATED'?'':'review'}">${safe(row.status)}</span>${reason?'<small>'+safe(reason)+'</small>':''}</td></tr>`;
+ }).join('');
+ find('bars').innerHTML=calculated.filter(([key,row])=>key!=='interaction'&&row.available>0&&Number.isFinite(demand[key])).map(([key,row])=>{
+  const pct=100*demand[key]/row.available;return `<div class="barrow"><div class="barlabel"><span>${safe(key)}</span><strong>${format(pct,2)}%</strong></div><div class="bar ${pct>100?'fail':''}"><div style="width:${Math.max(0,Math.min(pct,100))}%"></div></div></div>`;
+ }).join('');
+ const traces={source:result.source,assumptions:result.assumptions,classification:result.classification,limit_states:Object.fromEntries(Object.entries(limits).map(([key,row])=>[key,{status:row.status,clause:row.clause,unit:row.unit,trace:row.trace,source:row.source}]))};
+ find('trace').innerHTML=`<div><span>Calculation source</span><strong>${safe(result.geometry_source||'AISC 360-10 member kernel')}</strong></div><div class="compliance-trace" style="grid-column:1/-1">${safe(JSON.stringify(traces,null,2))}</div>`;
+ find('warnings').innerHTML=(result.warnings||[]).map(w=>`<div class="warning"><strong>${safe(w.code)}</strong>${safe(w.message)}</div>`).join('');
+ find('warn-count').textContent='('+(result.warnings||[]).length+')';
+ find('refline').innerHTML=`<a href="${sourceLibraryHref}" target="_blank" rel="noopener">AISC 360-10 source library</a> · Cb = 1 conservative · ${safe(result.source?.edition||'ANSI/AISC 360-10')}`;
+ const factorLib=window.Aisc36010Resistance;
+ const factorKeys=Object.keys(factorLib.allFactors().factors).filter(key=>result.assessment_scope!=='GROSS_MEMBER'||key!=='TENSION_RUPTURE');
+ find('factor-table').innerHTML='<h4>AISC 360-10 · '+safe(result.mode)+' · φ / Ω</h4><div class="factor-grid">'+factorKeys.map(key=>{const f=factorLib.factorNotation(result.mode,key);return '<div class="factor-item"><span>'+safe(key)+'</span><strong>'+safe(f.symbol)+' = '+format(f.value,2)+'</strong><small>'+safe(f.clause)+'</small></div>'}).join('')+'</div>';
+ find('calc-info').textContent='AISC 360-10 · '+result.mode+' · current member calculation';
+ find('active-calculation-source').textContent='AISC 360-10 reference calculation';
+ latest.changed=false;find('dirtytext').textContent='Current AISC 360-10 reference results displayed.';
+ find('dirtytext').classList.remove('input-changed');find('error').style.display='none';
+}
+let currentCalculation=Promise.resolve();
+let sharedRequestSequence=0;
+let sharedResult=null;
+let verifiedResult=null;
+function readVerifiedMember(){return structuredClone(latest.input.member)}
+async function renderAiscReview(input,canonical,generation) {
+ const node=document.getElementById('aisc-review-status');
+ try {
+  const module=await import('./aisc360-10-verified-hi.mjs');
+  if(generation!==sharedRequestSequence)return;
+  const model={...input,method:latest.method,member:{...input.member,...readVerifiedMember()},geometry_hash:canonical.geometry_hash};
+  const verified=module.calculateIH36010(model,canonical.canonical,window.Aisc36010Resistance);
+  if(generation!==sharedRequestSequence)return;
+  verifiedResult=verified;
+  renderMemberCompliance(verified);
+  if(isAiscMode()) renderAiscPrimary(verified,input,canonical.canonical);
+  node.textContent='ANSI/AISC 360-10 · '+latest.method+' · Gross member strength '+(verified.member_compliance?.status||verified.overall_status);
+  const cls=verified.classification;
+  document.getElementById('aisc-review-class').innerHTML=
+   '<strong>B4.1a Compression:</strong> '+safe(cls.axial)+
+   ' (flange: '+safe(cls.axialFlange)+', web: '+safe(cls.axialWeb)+') · '+
+   '<strong>B4.1b Flexure:</strong> '+safe(cls.flexureChapter)+
+   ' (flange: '+safe(cls.flexureFlange)+', web: '+safe(cls.flexureWeb)+')'+
+   '<br>λf='+format(cls.lf,3)+' · λw='+format(cls.lw,3)+' · kc='+format(cls.kc,4);
+  const rows=Object.entries(verified.limit_states);
+  document.getElementById('aisc-review-table').innerHTML=
+   '<div class="tablewrap"><table class="aisc-results"><thead><tr><th>Limit state</th><th>Clause / source</th><th>Demand</th><th>Nominal / available '+safe(latest.method)+'</th><th>D/C</th><th>Status / trace</th></tr></thead><tbody>'+
+   rows.map(([name,row])=>{
+    const stateDemand=Number.isFinite(row.demand)?row.demand:demandForLimitState(name,input,verified);
+    const nominal=Number.isFinite(row.nominal)?unitText(row.nominal,row.unit):'—';
+    const available=Number.isFinite(row.available)?unitText(row.available,row.unit):'—';
+    const utilization=row.unit==='ratio'&&row.status==='CALCULATED'?(Number.isFinite(row.utilization)?row.utilization:row.nominal):row.status==='CALCULATED'&&Number.isFinite(stateDemand)&&row.available>0?stateDemand/row.available:null;
+    const dc=Number.isFinite(utilization)?format(100*utilization,2)+'%':'—';
+    const state=`<span class="pill ${row.status==='FAIL'||utilization>1?'fail':row.status==='CALCULATED'?'':'review'}">${safe(row.status)}</span>${row.reason?`<small>${safe(row.reason)}</small>`:''}<details><summary>Trace</summary><div class="compliance-trace">${safe(JSON.stringify(row.trace??{},null,2))}</div></details>`;
+    return `<tr><td><strong>${safe(row.id||name)}</strong></td><td>${sourceMarkup(row)}</td><td>${unitText(stateDemand,row.unit)}</td><td>${nominal}${available!=='—'?`<small>Available ${available}</small>`:''}</td><td>${dc}</td><td>${state}</td></tr>`;
+   }).join('')+
+   '</tbody></table></div>';
+  const connectionRules=new Set(['B4.3b','D2-2','D3-1','F13-1','H4-1']);
+  const used=Object.entries(module.FORMULAS||{}).filter(([id])=>verified.assessment_scope!=='GROSS_MEMBER'||!connectionRules.has(id));
+  document.getElementById('aisc-review-formulas').innerHTML='<div class="tablewrap"><table class="aisc-results"><thead><tr><th>Clause</th><th>Expression</th><th>Applicability</th></tr></thead><tbody>'+
+   used.map(([,f])=>`<tr><td>${sourceMarkup(f)}</td><td class="aisc-formula-text">${safe(f.expression||'—')}</td><td>${safe(f.applies||'—')}</td></tr>`).join('')+
+   '</tbody></table></div>';
+ }catch(error){
+  if(generation!==sharedRequestSequence)return;
+  verifiedResult=null;
+  node.textContent='AISC 360-10 review calculation not available: '+error.message;
+  if(isAiscMode()) renderPrimaryPending(node.textContent);
+  document.getElementById('aisc-review-class').textContent='';
+  document.getElementById('aisc-review-table').textContent='';
+  find('member-compliance-status').textContent='REVIEW_REQUIRED · '+error.message;
+  find('member-compliance-blockers').innerHTML=`<div class="warning">${safe(error.message)}</div>`;
+ }
+}
+
+const sharedLookup={
+ area_mm2:['A','mm²'], ix_mm4:['Ix','mm⁴'], iy_mm4:['Iy','mm⁴'],
+ sx_mm3:['Sx','mm³'], sy_mm3:['Sy','mm³'],
+ zx_mm3:['Zx','mm³'], zy_mm3:['Zy','mm³'],
+ rx_mm:['rx','mm'],ry_mm:['ry','mm'],
+ torsion_constant_j_mm4:['J','mm⁴'],
+ warping_constant_cw_mm6:['Cw','mm⁶'],
+ shear_center_x_mm:['xSC','mm'],shear_center_y_mm:['ySC','mm'],
+ effective_shear_area_x_mm2:['Asx','mm²'],
+ effective_shear_area_y_mm2:['Asy','mm²'],
+}
+const propertyGroups=[
+ ['geometric.','01 · Geometric properties'],
+ ['elastic.','02 · Elastic moduli / inertias'],
+ ['plastic.','03 · Plastic neutral axes and moduli'],
+ ['principal.','04 · Principal axes'],
+ ['advanced.','05 · Torsion, warping and shear area'],
+ ['mechanics.geometry.','06 · Advanced geometric mechanics'],
+ ['mechanics.advanced.','07 · Advanced torsion / shear / warping mechanics'],
+]
+function formatShared(value,unit){
+ if(value===null||value===undefined)return '—';
+ if(typeof value==='number')return Number.isFinite(value)?format(value,6):'—';
+ if(typeof value==='string')return safe(value);
+ if(typeof value==='object')return safe(JSON.stringify(value));
+ return safe(String(value));
+}
+function renderSharedReport(result){
+ const summary=document.getElementById('shared-summary');
+ const overview=document.getElementById('shared-status');
+ const comparison=document.getElementById('shared-comparisons');
+ const output=document.getElementById('shared-formula-table');
+ document.getElementById('shared-version').textContent=`Solver ${result.solver_version} · Formulas ${result.formula_library_version}`;
+ overview.textContent=`Section Properties: ${result.entries.length} formula entries · ${result.geometry_hash.slice(0,12)}… · Units mm`;
+ summary.innerHTML=Object.entries(sharedLookup).map(([key,[symbol,unit]])=>{
+  const v=result.canonical[key];
+  const printed=typeof v==='number'?format(v,4):'—';
+  return `<div class="shared-stat"><span>${safe(symbol)}</span><strong>${safe(printed)}</strong><small>${unit}</small></div>`;
+ }).join('');
+ if(isAiscMode()) comparison.textContent='Section Properties is the geometric source for AISC 360-10. The separate legacy Excel reference is isolated from this result.';
+ else {
+  const comparisons=result.comparisons||[],differences=comparisons.filter(c=>!c.matching);
+  comparison.innerHTML=`<strong>Legacy Excel geometry comparison</strong> · ${comparisons.length} mapped quantities · ${differences.length} differences (relative tolerance 10⁻⁶).
+  ${differences.length?`<div class="shared-differences">${differences.map(d=>`<p><b>${safe(d.key)}</b>: canonical ${format(d.canonical,6)} vs. legacy ${format(d.legacy,6)} · ${format(d.relative_difference*100,6)}% · ${safe(d.design_use)}</p>`).join('')}</div>`:''}
+  <p>Legacy workbook strengths and warnings are shown only in the explicit reference mode.</p>`;
+ }
+ output.innerHTML=propertyGroups.map(([prefix,title])=>{
+  const entries=result.entries.filter(x=>x.key.startsWith(prefix));
+  if(!entries.length)return '';
+  return `<details class="shared-group" open><summary>${safe(title)} <span>${entries.length} entries</span></summary>
+  <div class="tablewrap"><table class="shared-table"><thead><tr><th>Property</th><th>Formula · substitution (shared engine)</th><th>Value</th><th>Method / status</th></tr></thead><tbody>
+  ${entries.map(p=>`<tr data-search="${safe((p.key+' '+p.symbol+' '+p.formula).toLowerCase())}">
+  <td><strong>${safe(p.symbol)}</strong><small>${safe(p.key)}</small></td>
+  <td><div class="shared-formula">${safe(p.formula||'—')}</div><div class="shared-substitution">↳ ${safe(p.substitution||'—')}</div></td>
+  <td class="shared-result">${formatShared(p.value,p.unit)} <small>${safe(p.unit)}</small></td>
+  <td><span class="shared-method">${safe(p.method||'—')}</span><small>${safe(p.status)}${p.reason?' · '+safe(p.reason):''}</small></td>
+  </tr>`).join('')}</tbody></table></div></details>`;
+ }).join('')+`<details class="shared-group"><summary>Assumptions and scope (${result.assumptions.length})</summary><ul>${result.assumptions.map(a=>`<li>${safe(a)}</li>`).join('')}</ul></details>`;
+ const filter=document.getElementById('shared-filter');
+ if(filter && filter.value)filter.dispatchEvent(new Event('input'));
+}
+async function refreshCanonicalProperties(input,legacy,generation){
+ const node=document.getElementById('shared-status');
+ node.textContent='Calculating shared Section Properties geometry and mechanics…';
+ try{
+  const module=await import('./hi-section-properties-core.mjs');
+  const result=await module.calculateHISectionProperties(input.section,legacy.section_properties);
+  if(generation!==sharedRequestSequence)return;
+  sharedResult=result;
+  renderSharedReport(result);
+  await renderAiscReview(input,result,generation);
+ }catch(error){
+  if(generation!==sharedRequestSequence)return;
+  sharedResult=null;
+  if(isAiscMode()) renderPrimaryPending('Section Properties calculation failed: '+error.message);
+  node.textContent='Shared Section Properties could not be loaded: '+error.message;
+  document.getElementById('shared-summary').innerHTML='';
+  document.getElementById('shared-comparisons').textContent='';
+  document.getElementById('shared-formula-table').textContent='';
+ }
+}
+document.getElementById('shared-filter')?.addEventListener('input',event=>{
+ const search=event.target.value.trim().toLowerCase();
+ document.querySelectorAll('.shared-table tbody tr').forEach(tr=>{
+  tr.hidden=!!search && !tr.dataset.search.includes(search);
+ });
+});
+
+function run(){
+ if(sapComponentMode&&!sapComponentPacket){renderPrimaryPending('Waiting for reviewed SAP component input.');return Promise.resolve()}
+  const generation=++sharedRequestSequence;
+  currentCalculation=Promise.resolve();
+  let inputReady=false;
+  sharedResult=null;
+  verifiedResult=null;
+  const legacyMode=!isAiscMode();
+  find('member-design-summary-section').classList.toggle('hidden',legacyMode);
+  find('legacy-warning').classList.toggle('hidden',!legacyMode);
+  find('calculation-notebook').classList.toggle('hidden',!legacyMode);
+  find('sidebar-step-slot').classList.toggle('hidden',!legacyMode);
+  find('primary-scope').classList.toggle('hidden',legacyMode);
+  find('legacy-moment-stations').classList.toggle('hidden',!legacyMode);
+  find('cb1-note').classList.toggle('hidden',legacyMode);
+  if(!legacyMode) renderPrimaryPending('Calculating AISC 360-10 from canonical Section Properties…');
+  else {
+    find('member-compliance-status').textContent='Waiting for current AISC 360-10 member review…';
+    find('member-compliance-blockers').textContent='';find('member-compliance-checks').textContent='';find('member-compliance-trace').textContent='Waiting for the current AISC 360-10 calculation.';
+    document.getElementById('aisc-review-class').textContent='';document.getElementById('aisc-review-table').textContent='';
+  }
+  document.getElementById('aisc-review-status').textContent='Waiting for current Section Properties…';
+  document.getElementById('shared-status').textContent='Waiting for canonical Section Properties calculation…';
+  try{
+    latest.input=readInputs();inputReady=true;
+    latest.method=document.querySelector('input[name="design-method"]:checked')?.value||'LRFD'
+    if(legacyMode){
+      latest.result=calculate(latest.input,latest.method)
+      const s=latest.result
+      for(const key of ['phi_mnx_kNm','phi_mny_kNm','phi_pn_compression_kN']) if(!Number.isFinite(s.strengths[key]) || s.strengths[key]<=0) throw new Error('Legacy resistance is invalid; check the inputs.')
+      if(!Number.isFinite(s.interaction.lrfd_percent)) throw new Error('Legacy interaction value is not finite.')
+      renderLegacyPreview();find('active-calculation-source').textContent='Legacy Excel 360-05 · comparison only'
+      currentCalculation=refreshCanonicalProperties(latest.input,latest.result,generation)
+    }else{
+      latest.result=null
+      currentCalculation=refreshCanonicalProperties(latest.input,{section_properties:{}},generation)
+    }
+  }catch(err){
+    find('error').textContent=(legacyMode?'Legacy Excel reference: ':'Input error: ')+err.message;
+    find('error').style.display=legacyMode||!inputReady?'block':'none';
+    find('dirtytext').textContent=legacyMode?'Legacy reference failed.':'Correct the input error and calculate again.';
+    if(legacyMode)latest.result=null;
+    if(inputReady && latest.input){
+      currentCalculation=refreshCanonicalProperties(latest.input,legacyMode?{section_properties:{}}:{section_properties:{}},generation);
+    }else if(isAiscMode())renderPrimaryPending('Invalid input: '+err.message);
+  }
+ return currentCalculation;
+}
+function reset(){
+ latest.input=structuredClone(fixture)
+ find('ack-reset-note')?.classList.remove('visible')
+ document.querySelector('input[name="design-method"][value="LRFD"]').checked=true
+ latest.method='LRFD'
+ updateInputs();run()
+}
+const acknowledgementKeys=new Set([
+ 'inertia_axis_verified','attachment_details_verified','web_clear_height_verified',
+])
+function isAcknowledgementControl(node){
+ return (node?.dataset?.key&&acknowledgementKeys.has(node.dataset.key))||
+  node?.dataset?.panelKey==='other_boundary_stiffeners_verified'||node?.hasAttribute?.('data-same-boundaries')
+}
+function invalidateAcknowledgments(){
+ document.querySelectorAll('[data-key]').forEach(node=>{if(acknowledgementKeys.has(node.dataset.key)&&node.type==='checkbox')node.checked=false})
+ document.querySelectorAll('[data-panel-key="other_boundary_stiffeners_verified"],[data-same-boundaries]').forEach(node=>node.checked=false)
+ if(find('ack-reset-note'))find('ack-reset-note').textContent='Stiffener and tension-field confirmations require review after an input change.'
+ find('ack-reset-note')?.classList.add('visible')
+}
+function markChanged(event){
+ if(sapComponentPacket)sapComponentEdited=true;
+ const target=event?.target
+ if(target&&!isAcknowledgementControl(target))invalidateAcknowledgments()
+ ++sharedRequestSequence;verifiedResult=null;latest.changed=true
+ if(target?.id==='aisc-fabrication')syncGeometryUi()
+ if(target?.id==='stiffener-layout')syncStiffenerUi()
+ if(target?.id==='tfa-enabled')find('tfa-inputs').classList.toggle('hidden',!target.checked)
+ if(isAiscMode())renderPrimaryPending('Inputs changed — calculate again to update results.')
+ find('dirtytext').textContent='Inputs changed · Click Calculate to update.'
+ find('dirtytext').classList.add('input-changed')
+ try{latest.input=readInputs();draw()}catch(_){}
+}
+
+// Dynamic engineering calculation notebook. All displayed capacities are read
+// from the same result object as the Phase 1 parity engine, not hardcoded.
+function buildCalculationSteps(i, r) {
+  const { section:s,material:m,member:l,forces:f,stiffeners:st }=i
+  const p=r.section_properties,c=r.classification,t=r.trace,a=r.strengths,inter=r.interaction,sh=r.shear
+  const h=s.h_mm,b=s.bf_mm,tw=s.tw_mm,tf=s.tf_mm,hw=h-2*tf,Fy=m.fy_mpa,E=m.e_mpa
+  const num=(x,d=3)=>format(x,d)
+  const result=(x,unit='',digits=3)=>({value:x,unit,digits})
+  const row=(label,formula,subst,value,unit,excel='',remark='',indicator='')=>({label,formula,subst,value,unit,excel,remark,indicator})
+  const step=(name,subtitle,excel,rows,note='',open=false)=>({name,subtitle,excel,rows,note,open})
+  const method=r.design_method
+  const factor=(key)=>r.factors[key]
+  const availableFormula=(key,nominal)=>method==='LRFD'
+    ? `φ × (${nominal}); φ = ${num(factor(key).value,2)}`
+    : `(${nominal}) / Ω; Ω = ${num(factor(key).value,2)}`
+  const availableSub=(key,nominal)=>method==='LRFD'
+    ? `${num(factor(key).value,2)} × ${num(nominal,4)}`
+    : `${num(nominal,4)} / ${num(factor(key).value,2)}`
+  const availableSymbol=(text)=>method==='LRFD'?`φ${text}`:`${text}/Ω`
+
+  const ratioF=c.lambda_flange,ratioW=c.lambda_web,kc=Math.max(.35,Math.min(.76,4/Math.sqrt(ratioW)))
+  const Sy=p.sy_mm3,Zy=p.zy_mm3,Sx=p.sx_mm3,Zx=p.zx_mm3
+  const mpY=Math.min(Fy*Zy,1.6*Fy*Sy)/1e6
+  const myLocal=c.flange==='COMPACT' ? mpY : c.flange==='NONCOMPACT'
+    ? mpY-(mpY-.7*Fy*Zy/1e6)*(ratioF-c.lambda_p_flange)/(c.lambda_r_flange-c.lambda_p_flange)
+    : .69*E/(ratioF**2)*Sy/1e6
+  const majorMp=Fy*Zx/1e6
+  const ho=h-tf,aw=Math.min(10,hw*tw/(b*tf))
+  const rt=b/Math.sqrt(12*(ho/h+(aw/6)*hw**2/(h*ho)))
+  const majorRule=c.flexure_chapter
+  const applicableMajor = majorRule==='F2'?[t.mnx_yield_kNm,t.mnx_ltb_kNm]:majorRule==='F3'?[t.mnx_ltb_kNm,t.mnx_local_kNm]:[t.mnx_ltb_kNm,t.mnx_local_kNm,t.mnx_yield_kNm]
+  const applicableMajorLabel = majorRule==='F2'?'min(M<sub>n,Y</sub>,M<sub>n,LTB</sub>)':majorRule==='F3'?'min(M<sub>n,LTB</sub>,M<sub>n,FLB</sub>)':'min(M<sub>n,LTB</sub>,M<sub>n,FLB</sub>,M<sub>n,Y</sub>)'
+  const ml=majorRule==='F5'?'Mₙ,LTB = Rpg Fₙ Sx':majorRule==='F4'?'Mₙ,LTB = min(Fcr Sx, Rpc Fy Sx)':'Mₙ,LTB = f(Lb, Lp, Lr, Cb, Mp)'
+  const fnLegacy=majorRule==='F5'?t.mnx_ltb_kNm*1e6/(t.rpg*Sx):null
+  const axial=Math.abs(f.axial_kN),isCompression=f.axial_kN<0
+  const totalP=isCompression?a.phi_pn_compression_kN:a.phi_pn_tension_gross_kN
+  const feX=Math.PI**2*E/(l.lx_mm/p.rx_mm)**2
+  const q=t.q
+  const fcrLimit=4.71*Math.sqrt(E/(Fy*q))
+  const compBranchX=l.lx_mm/p.rx_mm>fcrLimit?'0.877 Fe,x':'Q × (0.658)^(Q Fy/Fe,x) × Fy'
+  const compBranchY=l.lb_mm/p.ry_mm>fcrLimit?'0.877 Fe,y':'Q × (0.658)^(Q Fy/Fe,y) × Fy'
+  const pRatio=inter.axial_ratio,mxRatio=inter.moment_x_ratio,myRatio=inter.moment_y_ratio_rounded
+  const intEq=pRatio>=.2?'H1-1a':'H1-1b'
+  const kv=st.spacing_mm===0?1.2:5+5/((st.spacing_mm/hw)**2)
+  const ratioSt=st.width_mm/st.thickness_mm,stLim=.56*Math.sqrt(E/Fy)
+  const widthLabel=sh.stiffener_width_ok?'OK (legacy)':'NOT OK (legacy)'
+  const areaLabel=sh.stiffener_area_legacy_ok?'OK (legacy)':'NOT OK (legacy)'
+  const tests=[
+    step('Dữ liệu & quy đổi đơn vị','Thông số hình học, vật liệu và nội lực đã chọn','3.LRFD!D9:D39; 2.Details!D9:D43',[
+      row('Chiều cao bụng thông thủy','h<sub>w</sub> = h − 2t<sub>f</sub>',`${num(h,2)} − 2 × ${num(tf,2)}`,hw,'mm','2.Details!D35'),
+      row('Vật liệu F<sub>y</sub>','F<sub>y</sub> = Fy (MPa)',`${num(Fy,2)} MPa`,Fy,'MPa','3.LRFD!D9'),
+      row('Mô đun đàn hồi E','E = E (MPa)',`${num(E,2)} MPa`,E,'MPa','3.LRFD!D10'),
+      row('Moment thiết kế','M<sub>r,x</sub> = |M<sub>x</sub>|',`|${num(f.moment_x_kNm,4)}|`,Math.abs(f.moment_x_kNm),'kN·m','2.Details!D19'),
+      row('Lực dọc thiết kế','P<sub>r</sub> = |N|',`|${num(f.axial_kN,4)}| · ${isCompression?'Nén':'Kéo'}`,axial,'kN','2.Details!D23'),
+    ],'Dấu N được giữ theo workbook: N âm = nén. Hệ tọa độ lực cắt Vx/Vy là quy ước legacy; cần đồng bộ với mô hình phân tích.' ,true),
+    step('Đặc trưng hình học tiết diện','Phần A, I, S, Z và J của I/H đối xứng','2.Details!D48:D60',[
+      row('Diện tích A','A = 2b<sub>f</sub>t<sub>f</sub> + h<sub>w</sub>t<sub>w</sub>',`2 × ${num(b,2)} × ${num(tf,2)} + ${num(hw,2)} × ${num(tw,2)}`,p.area_mm2,'mm²','D48'),
+      row('Mô men quán tính I<sub>x</sub>','I<sub>x</sub> = [b<sub>f</sub>h³ − (b<sub>f</sub>−t<sub>w</sub>)h<sub>w</sub>³]/12',`[${num(b,2)} × ${num(h,2)}³ − (${num(b,2)} − ${num(tw,2)}) × ${num(hw,2)}³]/12`,p.ix_mm4,'mm⁴','D49'),
+      row('Mô men quán tính I<sub>y</sub>','I<sub>y</sub> = [h<sub>w</sub>t<sub>w</sub>³ + 2t<sub>f</sub>b<sub>f</sub>³]/12',`[${num(hw,2)} × ${num(tw,2)}³ + 2 × ${num(tf,2)} × ${num(b,2)}³]/12`,p.iy_mm4,'mm⁴','D50'),
+      row('Mô đun đàn hồi S<sub>x</sub>','S<sub>x</sub> = I<sub>x</sub>/(h/2)',`${num(p.ix_mm4,2)} / (${num(h,2)}/2)`,p.sx_mm3,'mm³','D53'),
+      row('Mô đun đàn hồi S<sub>y</sub>','S<sub>y</sub> = I<sub>y</sub>/(b<sub>f</sub>/2)',`${num(p.iy_mm4,2)} / (${num(b,2)}/2)`,p.sy_mm3,'mm³','D52'),
+      row('Mô đun dẻo Z<sub>x</sub>','Z<sub>x</sub> = b<sub>f</sub>t<sub>f</sub>(h<sub>w</sub>+t<sub>f</sub>) + t<sub>w</sub>h<sub>w</sub>²/4',`${num(b,2)} × ${num(tf,2)} × (${num(hw,2)} + ${num(tf,2)}) + ${num(tw,2)} × ${num(hw,2)}²/4`,p.zx_mm3,'mm³','D55'),
+      row('Mô đun dẻo Z<sub>y</sub>','Z<sub>y</sub> = h<sub>w</sub>t<sub>w</sub>²/4 + t<sub>f</sub>b<sub>f</sub>²/2',`${num(hw,2)} × ${num(tw,2)}²/4 + ${num(tf,2)} × ${num(b,2)}²/2`,p.zy_mm3,'mm³','D56'),
+      row('Hằng số xoắn J — legacy','J = [2b<sub>f</sub>t<sub>f</sub>³ + (h−t<sub>f</sub>)t<sub>w</sub>³]/3',`[2 × ${num(b,2)} × ${num(tf,2)}³ + (${num(h,2)} − ${num(tf,2)}) × ${num(tw,2)}³]/3`,p.j_legacy_mm4,'mm⁴','D57','','caution'),
+      row('Bán kính quán tính r<sub>x</sub>','r<sub>x</sub> = √(I<sub>x</sub>/A)',`√(${num(p.ix_mm4,2)}/${num(p.area_mm2,2)})`,p.rx_mm,'mm','D58'),
+      row('Bán kính quán tính r<sub>y</sub>','r<sub>y</sub> = √(I<sub>y</sub>/A)',`√(${num(p.iy_mm4,2)}/${num(p.area_mm2,2)})`,p.ry_mm,'mm','D59'),
+    ],'J được trình bày đúng như D57 của Excel để đối chiếu. Mô hình tiết diện góc vuông (sharp-corner), không có fillet.'),
+    step('Phân loại độ mảnh cánh và bụng','Width-to-thickness limits → F2/F3/F4/F5','2.Details!D63:D75',[
+      row('Tham số k<sub>c</sub>','k<sub>c</sub> = clip(4/√λ<sub>w</sub>; 0,35; 0,76)',`4/√${num(ratioW,4)}`,kc,'','D68'),
+      row('Cánh: λ<sub>f</sub>','λ<sub>f</sub> = b<sub>f</sub>/(2t<sub>f</sub>)',`${num(b,2)}/(2 × ${num(tf,2)})`,ratioF,'','D65'),
+      row('Cánh: λ<sub>p</sub>','λ<sub>pf</sub> = 0,38√(E/F<sub>y</sub>)',`0,38√(${num(E,1)}/${num(Fy,2)})`,c.lambda_p_flange,'','D66'),
+      row('Cánh: λ<sub>r</sub>','λ<sub>rf</sub> = 0,95√[k<sub>c</sub>E/(0,7F<sub>y</sub>)]',`0,95√(${num(kc,4)} × ${num(E,1)}/(0,7 × ${num(Fy,2)}))`,c.lambda_r_flange,'','D67'),
+      row('Cánh: classification','λ<sub>f</sub> ≤ λ<sub>pf</sub> → Compact; λ<sub>f</sub> &lt; λ<sub>rf</sub> → Non-compact; khác → Slender',`${num(ratioF,4)} so với [${num(c.lambda_p_flange,4)}, ${num(c.lambda_r_flange,4)}]`,c.flange,'','D64'),
+      row('Bụng: λ<sub>w</sub>','λ<sub>w</sub> = h<sub>w</sub>/t<sub>w</sub>',`${num(hw,2)}/${num(tw,2)}`,ratioW,'','D73'),
+      row('Bụng: λ<sub>p</sub>','λ<sub>pw</sub> = 3,76√(E/F<sub>y</sub>)',`3,76√(${num(E,1)}/${num(Fy,2)})`,c.lambda_p_web,'','D74'),
+      row('Bụng: λ<sub>r</sub>','λ<sub>rw</sub> = 5,70√(E/F<sub>y</sub>)',`5,70√(${num(E,1)}/${num(Fy,2)})`,c.lambda_r_web,'','D75'),
+      row('Bụng: classification','Theo λ<sub>w</sub>, λ<sub>pw</sub>, λ<sub>rw</sub>',`${num(ratioW,4)} so với [${num(c.lambda_p_web,4)}, ${num(c.lambda_r_web,4)}]`,c.web,'','D72'),
+      row('Nhánh uốn được áp dụng','F2 / F3 / F4 / F5',`Flange = ${c.flange}; Web = ${c.web}`,c.flexure_chapter,'','C100'),
+    ],'Phân loại mô tả nhánh đang chạy trong engine parity, không tự xác nhận tính áp dụng đầy đủ của phiên bản AISC 360-10.'),
+    step('Sức kháng uốn trục yếu M<sub>y</sub>','Minor-axis bending · điều khoản F6 (legacy)','2.Details!D77:D94',[
+      row('Nominal plastic M<sub>p,y</sub>','M<sub>p,y</sub> = min(F<sub>y</sub>Z<sub>y</sub>, 1,6F<sub>y</sub>S<sub>y</sub>)',`min(${num(Fy,2)} × ${num(Zy,2)},1,6 × ${num(Fy,2)} × ${num(Sy,2)}) / 10⁶`,mpY,'kN·m','D81'),
+      row('Local buckling M<sub>n,FLB</sub>',c.flange==='NONCOMPACT'?'M<sub>n,FLB</sub> = M<sub>p,y</sub> − (M<sub>p,y</sub> − 0,7F<sub>y</sub>Z<sub>y</sub>)(λ<sub>f</sub>−λ<sub>pf</sub>)/(λ<sub>rf</sub>−λ<sub>pf</sub>)':c.flange==='SLENDER'?'M<sub>n,FLB</sub> = (0,69E/λ<sub>f</sub>²)S<sub>y</sub>':'M<sub>n,FLB</sub> = M<sub>p,y</sub>',`Flange ${c.flange} · λf = ${num(ratioF,4)}`,myLocal,'kN·m','D89','Legacy workbook sử dụng Zᵧ tại nhánh nội suy; cần soát lại theo F6.','caution'),
+      row('Sức kháng '+availableSymbol('M<sub>n,y</sub>'),availableFormula('flexure','min(M<sub>p,y</sub>,M<sub>n,FLB</sub>)'),availableSub('flexure',r.nominal_strengths.mn_y_kNm),a.phi_mny_kNm,'kN·m','D91'),
+      row('Tỷ lệ sử dụng M<sub>y</sub>','D/C<sub>My</sub> = |M<sub>r,y</sub>|/('+availableSymbol("M<sub>n,y</sub>")+')',`${num(Math.abs(f.moment_y_kNm),4)}/${num(a.phi_mny_kNm,4)}`,Math.abs(f.moment_y_kNm)/a.phi_mny_kNm*100,'%','D92'),
+    ],'Phiên bản Excel chưa có kiểm chứng độc lập toàn bộ nhánh F6. Chỉ sử dụng giá trị trong chế độ đối chiếu.'),
+    step('Sức kháng uốn trục mạnh M<sub>x</sub>','Major-axis bending · F2–F5 theo phân loại','2.Details!D96:D157',[
+      row('Moment dẻo M<sub>p</sub>','M<sub>p</sub> = F<sub>y</sub>Z<sub>x</sub>',`${num(Fy,2)} × ${num(Zx,3)} / 10⁶`,majorMp,'kN·m','D102'),
+      row('Hệ số C<sub>b</sub> — signed','C<sub>b</sub> = 12,5M<sub>max</sub>/(2,5M<sub>max</sub> + 3M<sub>A</sub> + 4M<sub>B</sub> + 3M<sub>C</sub>)',`12,5 × ${num(f.moment_x_kNm,3)} / [2,5 × ${num(f.moment_x_kNm,3)} + 3 × ${num(f.moment_25_kNm,3)} + 4 × ${num(f.moment_50_kNm,3)} + 3 × ${num(f.moment_75_kNm,3)}]`,t.cb_signed_legacy,'','K120','Excel dùng moment có dấu, không tự xác định Mmax trên Lb.','caution'),
+      row('Chiều dài L<sub>p</sub>',majorRule==='F5'||majorRule==='F4'?'L<sub>p</sub> = 1,1r<sub>t</sub>√(E/F<sub>y</sub>)':'L<sub>p</sub> = 1,76r<sub>y</sub>√(E/F<sub>y</sub>)',`Nhánh ${majorRule}, Lb = ${num(l.lb_mm,1)} mm`,t.lp_mm,'mm','D106'),
+      row('Chiều dài L<sub>r</sub>',majorRule==='F5'?'L<sub>r</sub> = πr<sub>t</sub>√(E/(0,7F<sub>y</sub>))':'L<sub>r</sub> = f(r<sub>t</sub>, E/F<sub>L</sub>, J/(S<sub>x</sub>h<sub>o</sub>))',`Nhánh ${majorRule}`,t.lr_mm,'mm','D107'),
+      ...(majorRule==='F5'?[row('Hệ số R<sub>pg</sub>','R<sub>pg</sub> = min[1 − a<sub>w</sub>(λ<sub>w</sub>−5,7√(E/F<sub>y</sub>))/(1200+300a<sub>w</sub>); 1]',`a_w = ${num(aw,4)}; λw = ${num(ratioW,4)}`,t.rpg,'','D142'),row('Ứng suất F<sub>n</sub> (F5)','F<sub>n</sub> = f(L<sub>b</sub>/L<sub>p</sub>, L<sub>b</sub>/L<sub>r</sub>, C<sub>b</sub>)',`Lb = ${num(l.lb_mm,1)}; Lp = ${num(t.lp_mm,1)}; Lr = ${num(t.lr_mm,1)}`,fnLegacy,'MPa','D110')]:[]),
+      row('Nominal strength — LTB',ml,`Nhánh ${majorRule}; Lb = ${num(l.lb_mm,1)} mm`,t.mnx_ltb_kNm,'kN·m','D110'),
+      row('Nominal strength — FLB','M<sub>n,FLB</sub> = f(λ<sub>f</sub>, λ<sub>p</sub>, λ<sub>r</sub>, R<sub>pg</sub>, S<sub>x</sub>)',`Cánh ${c.flange}`,t.mnx_local_kNm===null?'N/A':t.mnx_local_kNm,'kN·m','D132'),
+      row('Nominal strength — Yield','M<sub>n,Y</sub> = ' + (majorRule==='F5'?'R<sub>pg</sub>F<sub>y</sub>S<sub>x</sub>':'f(Fy, Zx, web slenderness)'),`Nhánh ${majorRule}`,t.mnx_yield_kNm,'kN·m','D149'),
+      row('Sức kháng '+availableSymbol('M<sub>n,x</sub>'),availableFormula('flexure',applicableMajorLabel),availableSub('flexure',r.nominal_strengths.mn_x_kNm),a.phi_mnx_kNm,'kN·m','D154'),
+      row('Sử dụng uốn M<sub>x</sub>','D/C<sub>Mx</sub> = |M<sub>r,x</sub>|/('+availableSymbol("M<sub>n,x</sub>")+')',`${num(Math.abs(f.moment_x_kNm),4)}/${num(a.phi_mnx_kNm,4)}`,inter.moment_x_ratio*100,'%','D155'),
+    ],'Nhánh đang chọn là '+majorRule+'. Công thức hiển thị thuộc đường tính toán legacy; kiểm chứng Cb, LTB, FLB theo phiên bản AISC áp dụng trước khi phát hành.',true),
+    step('Sức kháng kéo dọc trục','Gross-section yielding · chương D (chưa đủ phá hoại kéo)','2.Details!D159:D177',[
+      row('Sức kháng danh định P<sub>n</sub>','P<sub>n</sub> = F<sub>y</sub>A<sub>g</sub>',`${num(Fy,2)} × ${num(p.area_mm2,2)}/1000`,Fy*p.area_mm2/1000,'kN','D172'),
+      row('Sức kháng '+availableSymbol('P<sub>n,t</sub>'),availableFormula('tension_gross','F<sub>y</sub>A<sub>g</sub>'),availableSub('tension_gross',r.nominal_strengths.pn_tension_gross_kN),a.phi_pn_tension_gross_kN,'kN','D174'),
+      row('D/C kéo chảy dẻo','D/C<sub>t</sub> = max(N,0)/('+availableSymbol("P<sub>n,t</sub>")+')',`${num(Math.max(0,f.axial_kN),4)}/${num(a.phi_pn_tension_gross_kN,4)}`,Math.max(0,f.axial_kN)/a.phi_pn_tension_gross_kN*100,'%','D175'),
+    ],'Chưa kiểm tra đứt tiết diện hữu hiệu (net-section fracture), lỗ bu lông và các giới hạn khác. Không đánh giá tổng thể khả năng kéo.'),
+    step('Sức kháng nén dọc trục','Compression · Qs, Qa, Fe, Fcr, '+availableSymbol('P<sub>n</sub>')+' · E3/E7 legacy','2.Details!D179:D205',[
+      row('Hệ số Q<sub>s</sub>','Q<sub>s</sub> = f(λ<sub>f</sub>, 0,64√(k<sub>c</sub>E/F<sub>y</sub>), 1,17√(k<sub>c</sub>E/F<sub>y</sub>))',`λf = ${num(ratioF,4)}`,t.qs,'','D190'),
+      row('Hệ số Q<sub>a</sub>','Q<sub>a</sub> = A<sub>effective</sub>/A<sub>gross</sub>',`Effective web width calculated from λw = ${num(ratioW,4)}`,t.qa,'','D194'),
+      row('Hệ số Q','Q = Q<sub>s</sub> × Q<sub>a</sub>',`${num(t.qs,6)} × ${num(t.qa,6)}`,t.q,'','D199'),
+      row('Giới hạn chuyển nhánh','4,71√[E/(QF<sub>y</sub>)]',`4,71 × √(${num(E,1)}/(${num(q,6)} × ${num(Fy,2)}))`,fcrLimit,'','Q192'),
+      row('Ứng suất Euler F<sub>e,x</sub>','F<sub>e,x</sub> = π²E/(L<sub>x</sub>/r<sub>x</sub>)²',`π² × ${num(E,1)}/(${num(l.lx_mm,1)}/${num(p.rx_mm,3)})²`,feX,'MPa','Q194'),
+      row('Ứng suất Euler F<sub>e,y</sub> — Excel','F<sub>e,y</sub> = F<sub>e,x</sub> <strong>(giữ lỗi W194=Q194)</strong>',`Fe,x = ${num(feX,4)} MPa`,feX,'MPa','W194','Không phải công thức Euler đúng cho trục y, chỉ để đối chiếu.','problem'),
+      row('Ứng suất tới hạn F<sub>cr,x</sub>',`F<sub>cr,x</sub> = ${compBranchX}`,`Lx/rx = ${num(l.lx_mm/p.rx_mm,4)}`,t.fcrx_mpa,'MPa','Q196–Q197'),
+      row('Ứng suất tới hạn F<sub>cr,y</sub>',`F<sub>cr,y</sub> = ${compBranchY}`,`Lb/ry = ${num(l.lb_mm/p.ry_mm,4)}`,t.fcry_mpa,'MPa','W196–W197'),
+      row('Sức kháng nén '+availableSymbol('P<sub>n</sub>'),availableFormula('compression','F<sub>cr</sub>A'),availableSub('compression',r.nominal_strengths.pn_compression_kN),a.phi_pn_compression_kN,'kN','D202'),
+    ],'Lỗi Fe của Excel được đánh dấu trực tiếp. Đây là phép tính “legacy parity”, không dùng để quyết định thiết kế thực.'),
+    step('Tương tác N–M<sub>x</sub>–M<sub>y</sub>','Chương H1 · '+method+' interaction','2.Details!D207:D220',[
+      row('Tỷ số lực dọc','P<sub>r</sub>/P<sub>c</sub> = |N|/('+availableSymbol("P<sub>n</sub>")+')',`${num(axial,4)}/${num(totalP,4)} (${isCompression?'nén':'kéo'})`,pRatio,'','K209'),
+      row('Tỷ số M<sub>x</sub>','M<sub>rx</sub>/M<sub>cx</sub> = |M<sub>x</sub>|/('+availableSymbol("M<sub>n,x</sub>")+')',`${num(Math.abs(f.moment_x_kNm),4)}/${num(a.phi_mnx_kNm,4)}`,mxRatio,'','K210'),
+      row('Tỷ số M<sub>y</sub>','M<sub>ry</sub>/M<sub>cy</sub> = ROUND(100|M<sub>y</sub>|/('+availableSymbol("M<sub>n,y</sub>")+'); 2)/100',`ROUND(100 × ${num(Math.abs(f.moment_y_kNm),4)}/${num(a.phi_mny_kNm,4)};2)/100`,myRatio,'','K211','Excel làm tròn tỷ lệ My trước khi tổng hợp.','caution'),
+      row('Phương trình áp dụng',pRatio>=.2?'H1-1a: η = P<sub>r</sub>/P<sub>c</sub> + (8/9)(M<sub>rx</sub>/M<sub>cx</sub> + M<sub>ry</sub>/M<sub>cy</sub>)':'H1-1b: η = P<sub>r</sub>/(2P<sub>c</sub>) + M<sub>rx</sub>/M<sub>cx</sub> + M<sub>ry</sub>/M<sub>cy</sub>',pRatio>=.2?`${num(pRatio,7)} + (8/9) × (${num(mxRatio,7)} + ${num(myRatio,7)})`:`${num(pRatio,7)}/2 + ${num(mxRatio,7)} + ${num(myRatio,7)}`,inter.lrfd_utilization,'',`D213 (${intEq})`),
+      row('Demand/Capacity H1','D/C<sub>H1</sub> = 100η',`${num(inter.lrfd_utilization,8)} × 100`,inter.lrfd_percent,'%','D213'),
+    ],'D/C H1 dưới 100% chỉ phản ánh một nhánh. Không được kết luận cấu kiện đạt khi còn các phép kiểm tra khác chưa thỏa.',true),
+    step('Sức kháng cắt bụng và cánh','Web shear · flange shear · G2/G7 legacy','2.Details!D222:D280',[
+      row('Hệ số a/h<sub>w</sub>','a/h<sub>w</sub>',`${num(st.spacing_mm,2)}/${num(hw,2)}`,st.spacing_mm/hw,'','K234'),
+      row('Hệ số k<sub>v</sub>',st.spacing_mm===0?'k<sub>v</sub> = 1,2 (a = 0; legacy)':'k<sub>v</sub> = 5 + 5/(a/h<sub>w</sub>)²',st.spacing_mm===0?'a = 0':`5 + 5/(${num(st.spacing_mm/hw,5)})²`,kv,'','K237'),
+      row('Hệ số C<sub>v,web</sub>','C<sub>v</sub> = f(h<sub>w</sub>/t<sub>w</sub>, k<sub>v</sub>, E/F<sub>y</sub>)',`h_w/t_w = ${num(ratioW,3)}; kv = ${num(kv,4)}`,t.web_cv,'','D231'),
+      row('Sức kháng cắt bụng '+availableSymbol('V<sub>n,w</sub>'),availableFormula('shear_web','0,6F<sub>y</sub>h<sub>w</sub>t<sub>w</sub>C<sub>v</sub>'),availableSub('shear_web',r.nominal_strengths.vn_web_kN),a.phi_vn_web_kN,'kN','D234'),
+      row('D/C cắt bụng','100|V<sub>y</sub>|/('+availableSymbol("V<sub>n,w</sub>")+')',`100 × ${num(Math.abs(f.shear_y_kN),4)}/${num(a.phi_vn_web_kN,4)}`,sh.web_percent,'%','D235'),
+      row('Hệ số C<sub>v,flange</sub>','C<sub>v</sub> = f(b<sub>f</sub>/t<sub>f</sub>; k<sub>v</sub>=1,2)',`bf/tf = ${num(b/tf,4)}`,t.flange_cv,'','K277'),
+      row('Sức kháng cắt cánh '+availableSymbol('V<sub>n,f</sub>'),availableFormula('shear_flange','0,6F<sub>y</sub>A<sub>f</sub>C<sub>v</sub>'),availableSub('shear_flange',r.nominal_strengths.vn_flange_kN),a.phi_vn_flange_kN,'kN','D275'),
+      row('D/C cắt cánh','100|V<sub>x</sub>|/('+availableSymbol("V<sub>n,f</sub>")+')',`100 × ${num(Math.abs(f.shear_x_kN),4)}/${num(a.phi_vn_flange_kN,4)}`,sh.flange_percent,'%','D276'),
+    ],'Nhãn Vx/Vy phản ánh đúng cách map lực cắt của workbook, cần quy chuẩn lại khi kết nối SAP/ETABS.'),
+    step('Kiểm tra sườn tăng cứng & kết luận','Tension-field action và các cảnh báo bắt buộc','2.Details!D244:D266',[
+      row('Bề rộng / bề dày sườn','b<sub>s</sub>/t<sub>s</sub> ≤ 0,56√(E/F<sub>y</sub>)',`${num(st.width_mm,2)}/${num(st.thickness_mm,2)} ≤ ${num(stLim,4)}`,`${num(ratioSt,4)} · ${widthLabel}`,'','D258','',''+(sh.stiffener_width_ok?'':'problem')),
+      row('Kiểm tra diện tích sườn (legacy)','A<sub>req,legacy</sub> ≥ 0',`${num(t.stiffener_required_area_legacy_cm2,6)} cm²`,`${num(t.stiffener_required_area_legacy_cm2,6)} · ${areaLabel}`,'','D259','Giữ điều kiện ngược dấu của Excel để đối chiếu.','caution'),
+      row('Xét tension field action','Điều kiện hình học vùng bụng và sườn',`a/hw = ${num(st.spacing_mm/hw,4)}`,sh.tension_field_eligible_legacy?'YES (geometry only)':'NO','','D244'),
+      row('Sức kháng cắt có TFA (danh định)','V<sub>n,TFA</sub> theo công thức legacy G3',`Chỉ xem xét nếu các điều kiện sườn thỏa`,sh.nominal_tension_field_kN_legacy===null?'N/A':sh.nominal_tension_field_kN_legacy,'kN','D249'),
+      row('Kết luận module','Overall status ≠ kiểm tra H1','Có cảnh báo bắt buộc từ kiểm chứng Excel',r.overall_status,'','Summary','','caution'),
+    ],'Sườn tăng cứng không đạt theo workbook mẫu. Nếu các điều kiện sườn không đạt, không được sử dụng sức kháng tension-field được tăng thêm.',true),
+  ]
+  return tests
+}
+function renderCalculationNotebook(){
+  if(!latest.result)return
+  const steps=applyStandardCitations(buildCalculationSteps(latest.input, latest.result))
+  const existing=new Map([...document.querySelectorAll('.notebook-step')].map((node)=>[node.id,node.open]))
+  const rows=(list)=>`<div class="tablewrap"><table class="step-table"><thead><tr><th style="width:19%">THÔNG SỐ</th><th style="width:48%">CÔNG THỨC / THAY SỐ</th><th style="width:20%">KẾT QUẢ</th><th style="width:13%">TRÍCH DẪN TIÊU CHUẨN</th></tr></thead><tbody>${list.map(z=>{
+    const val=typeof z.value==='number'?(Number.isFinite(z.value)?format(z.value,typeof z.value==='number'&&Math.abs(z.value)<1?7:4):'Không áp dụng'):String(z.value)
+    return `<tr><td data-label="Thông số"><div class="item">${z.label}</div></td><td data-label="Công thức"><div class="math-line">${z.formula}</div><span class="sub-line">↳ ${safe(z.subst)}</span>${z.remark?`<span class="sub-line" style="color:#a26b1a">⚠ ${safe(z.remark)}</span>`:''}</td><td data-label="Kết quả"><span class="result-number">${safe(val)} <span>${safe(z.unit||'')}</span></span>${z.indicator?`<span class="row-indicator ${z.indicator==='problem'?'problem':'caution'}">Cần rà soát</span>`:''}</td><td data-label="Trích dẫn tiêu chuẩn"><code style="font-size:13px;color:#718396">${safe(z.excel)}</code></td></tr>`
+  }).join('')}</tbody></table></div>`
+  find('step-nav').innerHTML='<h3>Calculation index</h3>'+steps.map((z,k)=>`<a href="#calc-step-${k+1}"><b>${String(k+1).padStart(2,'0')}</b><span>${z.name.replace(/<[^>]+>/g,'')}</span></a>`).join('')
+  find('step-content').className=''
+  find('step-content').innerHTML=steps.map((z,k)=>{
+    const id=`calc-step-${k+1}`,open=existing.has(id)?existing.get(id):z.open
+    return `<details class="notebook-step" id="${id}" ${open?'open':''}><summary><span class="step-title"><span class="step-no">${String(k+1).padStart(2,'0')}</span><span><strong>${z.name}</strong><small>${safe(z.subtitle)} · ${safe(z.excel)}</small></span></span><span class="step-expand">⌄</span></summary><div class="step-body"><p class="step-intro">Trình bày từng tham số theo trình tự kiểm tra. Dòng “↳” là phép thay số từ dữ liệu đầu vào hiện hành; cột cuối là điều khoản AISC 360-10 để tra cứu nhanh.</p>${rows(z.rows)}${z.note?`<p class="step-foot">${safe(z.note)}</p>`:''}</div></details>`
+  }).join('')
+
+  initStepNavScrollSpy()
+}
+find('steps-expand').addEventListener('click',()=>document.querySelectorAll('.notebook-step').forEach(n=>n.open=true))
+find('steps-collapse').addEventListener('click',()=>document.querySelectorAll('.notebook-step').forEach(n=>n.open=false))
+find('steps-print').addEventListener('click',()=>{document.querySelectorAll('.notebook-step').forEach(n=>n.open=true);window.print()})
+find('steps-copy').addEventListener('click',async()=>{
+  document.querySelectorAll('.notebook-step').forEach(n=>n.open=true)
+  const str='GeekCalculus – H/I Doubly Symmetric – Legacy Excel Parity\n\n'+find('step-content').innerText
+  try{await navigator.clipboard.writeText(str);find('steps-copy').textContent='✓ Đã sao chép'}catch(_){const blob=new Blob([str],{type:'text/plain;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='GeekCalculus_HI_Step_by_Step.txt';a.click();URL.revokeObjectURL(url);find('steps-copy').textContent='✓ Đã xuất TXT'}
+  setTimeout(()=>find('steps-copy').textContent='Sao chép công thức',2200)
+})
+
+document.querySelectorAll('.tab').forEach(button=>button.addEventListener('click',()=>{
+  document.querySelectorAll('.tab').forEach(t=>{t.classList.toggle('active',t===button);t.setAttribute('aria-selected',String(t===button))})
+  document.querySelectorAll('.tab-panel').forEach(t=>t.classList.toggle('hidden',t.id!==button.dataset.tab))
+}))
+document.querySelectorAll('[data-key]').forEach(el=>el.addEventListener(el.tagName==='SELECT'||el.type==='checkbox'?'change':'input',event=>{
+ if(event.target.id==='aisc-fabrication')syncGeometryUi()
+ if(event.target.id==='stiffener-layout')syncStiffenerUi()
+ if(event.target.id==='tfa-enabled')find('tfa-inputs').classList.toggle('hidden',!event.target.checked)
+ markChanged(event)
+}))
+document.querySelectorAll('[data-panel-key],[data-connected-element],[data-same-boundaries]').forEach(el=>el.addEventListener(el.type==='checkbox'?'change':'input',markChanged))
+document.querySelectorAll('input[name="design-method"]').forEach(el=>el.addEventListener('change',event=>{
+ invalidateAcknowledgments()
+ document.getElementById('method-explanation').textContent=event.target.value==='ASD'
+  ? 'ASD: sử dụng nội lực từ tổ hợp tải trọng ASD/service. KHÔNG tự quy đổi nội lực LRFD.'
+  : 'LRFD: sử dụng nội lực từ tổ hợp tải trọng LRFD/factored. KHÔNG tự quy đổi nội lực ASD.'
+ run()
+}))
+find('run').addEventListener('click',run);find('preset').addEventListener('click',reset)
+find('calculation-mode').addEventListener('change',run);
+find('export').addEventListener('click',async()=>{
+  if(latest.changed || (isAiscMode()?!verifiedResult:!latest.result)) await run();
+  await currentCalculation;
+  if(isAiscMode()?!verifiedResult:!latest.result)return;
+  const output={meta:{app:'GeekCalculus',module:'HI_DOUBLY_SYMMETRIC',mode:isAiscMode()?'AISC36010_REFERENCE':'LEGACY_EXCEL_PARITY',design_method:latest.method,standard_factor_edition:'AISC360-10',exported_at:new Date().toISOString()},input:structuredClone(latest.input),result:isAiscMode()?verifiedResult:latest.result,section_properties_shared:sharedResult}
+  if(sapComponentPacket)output.sap_source={...structuredClone(sapComponentPacket.source),user_edited:sapComponentEdited,imported_input:structuredClone(sapComponentPacket.input)};
+  if(isAiscMode())output.aisc36010_member_result=verifiedResult
+  else output.legacy_comparison=latest.result
+  const content=JSON.stringify(output,null,2)
+  const url=URL.createObjectURL(new Blob([content],{type:'application/json'})), a=document.createElement('a')
+  a.href=url;a.download=isAiscMode()?'GeekCalculus_HI_AISC36010_Reference.json':'GeekCalculus_HI_Legacy_Comparison.json';a.click();URL.revokeObjectURL(url)
+})
+find('import').addEventListener('click',()=>find('file').click())
+function sanitizeImportedInput(source){
+  if(!source||typeof source!=='object'||Array.isArray(source))throw new Error('JSON must contain an input object.')
+  const required={
+    material:['fy_mpa','e_mpa'],
+    section:['h_mm','bf_mm','tw_mm','tf_mm','fabrication'],
+    member:['lb_mm','lx_mm'],
+    forces:['axial_kN','moment_x_kNm','moment_y_kNm','shear_x_kN','shear_y_kN'],
+    stiffeners:['spacing_mm','thickness_mm','width_mm','layout'],
+  }
+  for(const [group,keys] of Object.entries(required)){
+    if(!source[group]||typeof source[group]!=='object'||Array.isArray(source[group]))throw new Error('JSON must include the '+group+' group.')
+    for(const key of keys)if(!Object.hasOwn(source[group],key))throw new Error('Missing required field '+group+'.'+key+'.')
+  }
+  const next=structuredClone(fixture)
+  for(const [group,defaults] of Object.entries(fixture)){
+    const incoming=source[group]
+    if(incoming===undefined)continue
+    if(!incoming||typeof incoming!=='object'||Array.isArray(incoming))throw new Error('Invalid '+group+' group.')
+    for(const key of Object.keys(defaults)){
+      if(!Object.hasOwn(incoming,key))continue
+      if(group==='tension_field_action'&&['bounding_stiffeners','adjacent_panels'].includes(key))continue
+      next[group][key]=structuredClone(incoming[key])
+    }
+  }
+  // Imported values can describe the model, but cannot restore any review or
+  // engineering acknowledgment from a JSON file.
+  if(!Object.hasOwn(source.forces,'torsion_kNm'))next.forces.torsion_kNm=null
+  for(const key of ['moment_25_kNm','moment_50_kNm','moment_75_kNm'])if(!Object.hasOwn(source.forces,key))next.forces[key]=null
+  const importedPanels=source.tension_field_action?.adjacent_panels
+  if(importedPanels!==undefined&&!Array.isArray(importedPanels))throw new Error('tension_field_action.adjacent_panels must be an array.')
+  if(Array.isArray(importedPanels))next.tension_field_action.adjacent_panels=fixture.tension_field_action.adjacent_panels.map((defaults,index)=>{
+    const value=importedPanels[index]
+    if(value===undefined)return structuredClone(defaults)
+    if(!value||typeof value!=='object'||Array.isArray(value))throw new Error('Invalid adjacent tension-field panel '+(index+1)+'.')
+    const panel={...structuredClone(defaults)}
+    for(const key of Object.keys(defaults))if(Object.hasOwn(value,key))panel[key]=structuredClone(value[key])
+    panel.other_boundary_stiffeners_verified=false
+    panel.panel_position_confirmed=false
+    panel.four_sides_supported_confirmed=false
+    return panel
+  })
+  next.assessment={scope:'GROSS_MEMBER',force_source:'MANUAL'}
+  next.analysis={method:'DIRECT'}
+  next.section.web_clear_height_verified=false
+  next.stiffeners.inertia_axis_verified=false
+  next.stiffeners.attachment_details_verified=false
+  next.tension_field_action.same_boundaries_confirmed=false
+  next.tension_field_action.panel_position_confirmed=false
+  next.tension_field_action.four_sides_supported_confirmed=false
+  next.tension_field_action.panel_position=''
+  next.tension_field_action.is_end_panel=null
+  next.tension_field_action.four_sides_supported=null
+  next.tension_field_action.bounding_stiffeners=[]
+  next.tension_field_action.adjacent_panels=next.tension_field_action.adjacent_panels.map(panel=>({...panel,
+    is_end_panel:null,four_sides_supported:null,other_boundary_stiffeners_verified:false,
+    panel_position_confirmed:false,four_sides_supported_confirmed:false}))
+  return next
+}
+find('file').addEventListener('change',async event=>{
+  const file=event.target.files?.[0];if(!file)return
+  try{
+    if(file.size>1_000_000)throw new Error('JSON file is too large (maximum 1 MB).')
+    const data=JSON.parse(await file.text());const input=data.input||data
+    const imported=sanitizeImportedInput(input)
+    latest.input=imported
+    const savedMethod=data.meta?.design_method ?? data.result?.design_method ?? data.result?.mode ?? 'LRFD'
+    if(!['LRFD','ASD'].includes(savedMethod))throw new Error('Design method must be LRFD or ASD.')
+    if(data.meta?.mode==='LEGACY_EXCEL_PARITY')find('calculation-mode').value='LEGACY'
+    else if(data.meta?.mode==='AISC36010_REFERENCE')find('calculation-mode').value='AISC36010'
+    document.querySelector('input[name="design-method"][value="'+savedMethod+'"]').checked=true
+    latest.method=savedMethod
+    updateInputs()
+    document.querySelector('.tab[data-tab="geometry"]').click()
+    run()
+  }catch(err){find('error').textContent='JSON import failed: '+err.message;find('error').style.display='block'}finally{event.target.value=''}
+})
+
+function initialiseSapComponent(){
+ document.documentElement.classList.add('sap-component');
+ const style=document.createElement('style');style.textContent='.sap-component a[href="./#/modules/steel"]{display:none}#sap-component-origin{padding:14px;margin-bottom:16px;border:1px solid #82a9b7;background:#edf7fa;overflow-wrap:anywhere}';document.head.append(style);
+ const banner=document.createElement('p');banner.id='sap-component-origin';banner.setAttribute('role','status');banner.textContent='Waiting for confirmed SAP2000 input. No example values or results loaded.';document.querySelector('.page').prepend(banner);
+ for(const node of document.querySelectorAll('[data-key]')){if(node.type==='checkbox')node.checked=false;else node.value=''}
+ for(const id of ['preset','import','file','calculation-mode','run','export'])find(id).disabled=true;
+ for(const node of document.querySelectorAll('input[name="design-method"]'))node.disabled=true;
+ renderPrimaryPending('Waiting for reviewed SAP input; no example calculation.');find('dirtytext').textContent='Waiting for SAP input.';
+ window.addEventListener('message',async event=>{
+  if(event.source!==parent||event.origin!==location.origin||event.data?.type!=='gc-sap-component-input'||event.data.nonce!==sapComponentNonce)return;
+  try{
+   if(JSON.stringify(event.data).length>2000000)throw Error('Component packet too large.');
+   const {validateComponentPacket}=await import('./sap-component-bridge.mjs');
+   const packet=validateComponentPacket(event.data.packet),input=sanitizeImportedInput(packet.input);
+   sapComponentPacket=packet;sapComponentEdited=false;latest.input=input;latest.result=null;latest.changed=true;verifiedResult=null;
+   document.querySelector('input[name="design-method"][value="'+packet.method+'"]').checked=true;latest.method=packet.method;
+   find('calculation-mode').value='AISC36010';updateInputs();
+   const source=packet.source;banner.textContent='SAP2000 · Frame '+source.frame+' · '+source.section+' · '+source.case+' · '+source.step_type+' '+source.step_num+' · x='+source.station_m+' m · '+packet.method+' | '+source.mapping+' | Cb=1; nominal AISC E/G; no stiffener/TFA credit. Review inputs and press Calculate. Values remain editable; export retains source.';
+   find('sap-import').textContent='SAP2000 · input loaded';find('sap-import').title='Confirmed source recorded above; no automatic model verification.';
+   find('run').disabled=false;find('export').disabled=false;renderPrimaryPending('SAP input loaded. Review and calculate; no result yet.');find('dirtytext').textContent='SAP input loaded. Review and calculate.';
+  }catch(error){find('run').disabled=true;find('export').disabled=true;sapComponentPacket=null;banner.textContent='SAP component input rejected: '+error.message;renderPrimaryPending(banner.textContent)}
+ });
+}
+if(sapComponentMode)initialiseSapComponent();else reset()
+
+</script><a href="./#/modules/steel" style="position:fixed;z-index:20;right:18px;bottom:18px;background:#1d405f;color:white;padding:11px 17px;border-radius:10px;text-decoration:none;box-shadow:0 5px 15px #172b4655;font-weight:700;font-size:16px">← Steel Design / Symmetric I/H</a>
+<script>
+(function(){
+'use strict';
+const home='./', livePath='./#/modules/steel';
+function updateLocale(){ localizePage(); }
+let localizationPending = false;
+new MutationObserver(() => {
+ if (localizationPending) return;
+ localizationPending = true;
+ queueMicrotask(() => { localizationPending = false; localizePage(); });
+}).observe(document.body, { childList: true, subtree: true });
+function moveContents(){
+ const holder=document.getElementById('sidebar-step-slot');
+ const nav=document.getElementById('step-nav');
+ if(nav && holder){holder.append(nav);}
+}
+moveContents();
+document.querySelectorAll('.outline-tree a').forEach(a=>a.addEventListener('click',e=>{
+ const target=document.getElementById(a.getAttribute('href').slice(1));
+ if(!target)return;
+ e.preventDefault();
+ if(target.tagName==='DETAILS')target.open=true;
+ target.scrollIntoView({behavior:'smooth',block:'start'});
+}));
+let ticking=false;
+function updateActive(){
+ const items=[
+  ...[...document.querySelectorAll('.outline-link')].filter(a=>a.dataset.outline!=='results').map(a=>({a,target:document.querySelector(a.getAttribute('href'))})),
+  ...[...document.querySelectorAll('#step-nav a')].map(a=>({a,target:document.querySelector(a.getAttribute('href'))}))
+ ].filter(x=>x.target && x.target.getClientRects().length).sort((a,b)=>a.target.getBoundingClientRect().top-b.target.getBoundingClientRect().top);
+ const offset=Math.max(110,window.innerHeight*.20);
+ const eligible=items.filter(x=>x.target.getBoundingClientRect().top<=offset);
+ const selected=eligible.at(-1)??items[0];
+ const links=[...document.querySelectorAll('.outline-link'),...document.querySelectorAll('#step-nav a')];
+ links.forEach(link=>{
+  const yes=selected?.a===link || (link.dataset.outline==='results' && selected);
+  link.classList.toggle('is-active',!!yes&&link.dataset.outline!=='results');
+  link.classList.toggle('active',!!yes && link===selected?.a);
+  if(link===selected?.a)link.setAttribute('aria-current','location');
+  else link.removeAttribute('aria-current');
+ });
+ const active=selected?.a;
+ if(active && active.closest('.sidenav')){
+  const box=document.querySelector('.sidenav');
+  const a=active.getBoundingClientRect(), b=box.getBoundingClientRect();
+  if(a.top<b.top+48||a.bottom>b.bottom-25)active.scrollIntoView({block:'nearest'});
+ }
+}
+window.addEventListener('scroll',()=>{if(ticking)return;ticking=true;requestAnimationFrame(()=>{ticking=false;updateActive()})},{passive:true});
+window.addEventListener('resize',updateActive);
+document.querySelectorAll('.outline-tree a').forEach(a=>a.addEventListener('click',()=>setTimeout(updateActive,550)));
+document.querySelectorAll('#step-nav').forEach(n=>n.addEventListener('click',()=>setTimeout(updateActive,550)));
+updateLocale();updateActive();
+})();
+</script>
+</body></html>

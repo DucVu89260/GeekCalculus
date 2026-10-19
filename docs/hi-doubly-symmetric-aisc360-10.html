@@ -1321,6 +1321,8 @@ function calculate(input, designMethod = 'LRFD') {
 
 
 const latest = { input: structuredClone(fixture), result: null, changed: false, method:'LRFD' }
+const sapComponentNonce=new URLSearchParams(location.search).get('sap_component');
+const sapComponentMode=Boolean(sapComponentNonce);let sapComponentPacket=null,sapComponentEdited=false;
 const find = id => document.getElementById(id)
 const format = (value, digits = 3) => typeof value === 'number' && Number.isFinite(value) ? new Intl.NumberFormat('en-US',{maximumFractionDigits:digits}).format(value) : '—'
 function safe(text) { return String(text).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])) }
@@ -1753,6 +1755,7 @@ document.getElementById('shared-filter')?.addEventListener('input',event=>{
 });
 
 function run(){
+ if(sapComponentMode&&!sapComponentPacket){renderPrimaryPending('Waiting for reviewed SAP component input.');return Promise.resolve()}
   const generation=++sharedRequestSequence;
   currentCalculation=Promise.resolve();
   let inputReady=false;
@@ -1820,6 +1823,7 @@ function invalidateAcknowledgments(){
  find('ack-reset-note')?.classList.add('visible')
 }
 function markChanged(event){
+ if(sapComponentPacket)sapComponentEdited=true;
  const target=event?.target
  if(target&&!isAcknowledgementControl(target))invalidateAcknowledgments()
  ++sharedRequestSequence;verifiedResult=null;latest.changed=true
@@ -2024,6 +2028,7 @@ find('export').addEventListener('click',async()=>{
   await currentCalculation;
   if(isAiscMode()?!verifiedResult:!latest.result)return;
   const output={meta:{app:'GeekCalculus',module:'HI_DOUBLY_SYMMETRIC',mode:isAiscMode()?'AISC36010_REFERENCE':'LEGACY_EXCEL_PARITY',design_method:latest.method,standard_factor_edition:'AISC360-10',exported_at:new Date().toISOString()},input:structuredClone(latest.input),result:isAiscMode()?verifiedResult:latest.result,section_properties_shared:sharedResult}
+  if(sapComponentPacket)output.sap_source={...structuredClone(sapComponentPacket.source),user_edited:sapComponentEdited,imported_input:structuredClone(sapComponentPacket.input)};
   if(isAiscMode())output.aisc36010_member_result=verifiedResult
   else output.legacy_comparison=latest.result
   const content=JSON.stringify(output,null,2)
@@ -2107,7 +2112,31 @@ find('file').addEventListener('change',async event=>{
     run()
   }catch(err){find('error').textContent='JSON import failed: '+err.message;find('error').style.display='block'}finally{event.target.value=''}
 })
-reset()
+
+function initialiseSapComponent(){
+ document.documentElement.classList.add('sap-component');
+ const style=document.createElement('style');style.textContent='.sap-component a[href="./#/modules/steel"]{display:none}#sap-component-origin{padding:14px;margin-bottom:16px;border:1px solid #82a9b7;background:#edf7fa;overflow-wrap:anywhere}';document.head.append(style);
+ const banner=document.createElement('p');banner.id='sap-component-origin';banner.setAttribute('role','status');banner.textContent='Waiting for confirmed SAP2000 input. No example values or results loaded.';document.querySelector('.page').prepend(banner);
+ for(const node of document.querySelectorAll('[data-key]')){if(node.type==='checkbox')node.checked=false;else node.value=''}
+ for(const id of ['preset','import','file','calculation-mode','run','export'])find(id).disabled=true;
+ for(const node of document.querySelectorAll('input[name="design-method"]'))node.disabled=true;
+ renderPrimaryPending('Waiting for reviewed SAP input; no example calculation.');find('dirtytext').textContent='Waiting for SAP input.';
+ window.addEventListener('message',async event=>{
+  if(event.source!==parent||event.origin!==location.origin||event.data?.type!=='gc-sap-component-input'||event.data.nonce!==sapComponentNonce)return;
+  try{
+   if(JSON.stringify(event.data).length>2000000)throw Error('Component packet too large.');
+   const {validateComponentPacket}=await import('./sap-component-bridge.mjs');
+   const packet=validateComponentPacket(event.data.packet),input=sanitizeImportedInput(packet.input);
+   sapComponentPacket=packet;sapComponentEdited=false;latest.input=input;latest.result=null;latest.changed=true;verifiedResult=null;
+   document.querySelector('input[name="design-method"][value="'+packet.method+'"]').checked=true;latest.method=packet.method;
+   find('calculation-mode').value='AISC36010';updateInputs();
+   const source=packet.source;banner.textContent='SAP2000 · Frame '+source.frame+' · '+source.section+' · '+source.case+' · '+source.step_type+' '+source.step_num+' · x='+source.station_m+' m · '+packet.method+' | '+source.mapping+' | Cb=1; nominal AISC E/G; no stiffener/TFA credit. Review inputs and press Calculate. Values remain editable; export retains source.';
+   find('sap-import').textContent='SAP2000 · input loaded';find('sap-import').title='Confirmed source recorded above; no automatic model verification.';
+   find('run').disabled=false;find('export').disabled=false;renderPrimaryPending('SAP input loaded. Review and calculate; no result yet.');find('dirtytext').textContent='SAP input loaded. Review and calculate.';
+  }catch(error){find('run').disabled=true;find('export').disabled=true;sapComponentPacket=null;banner.textContent='SAP component input rejected: '+error.message;renderPrimaryPending(banner.textContent)}
+ });
+}
+if(sapComponentMode)initialiseSapComponent();else reset()
 
 </script><a href="./#/modules/steel" style="position:fixed;z-index:20;right:18px;bottom:18px;background:#1d405f;color:white;padding:11px 17px;border-radius:10px;text-decoration:none;box-shadow:0 5px 15px #172b4655;font-weight:700;font-size:16px">← Steel Design / Symmetric I/H</a>
 <script>

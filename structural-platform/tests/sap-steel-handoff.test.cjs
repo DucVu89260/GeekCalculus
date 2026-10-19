@@ -90,3 +90,40 @@ test('component blocks missing confirmations, lengths, nonconcurrent/tapered/asy
  const copy=structuredClone(job);copy.members[0].section_type.key='nonprismatic';assert.throws(()=>prepareSymmetricComponent(copy,0,approvals),/Nonprismatic/)
  copy.members[0].section_type.key='i_wide_flange';copy.members[0].unbraced_lengths.major.value=null;assert.throws(()=>prepareSymmetricComponent(copy,0,approvals),/lengths/)
 })
+
+test('Cb diagram stays in one signed combo/step and uses full segment stations',async()=>{
+ const {comboMomentDiagram}=await import('../frontend/vue/public/sap-steel-report.mjs')
+ const row={frame:'1',case_kind:'combination',output_case:'ULS',step_type:'',step_num:0,station_m:5}
+ const source=(id,x,m,extra={})=>({...row,record_id:id,element:'E',station:x,M3:m,...extra})
+ const dataset={rows:[source('a',0,-100),source('b',10,0),source('foreign',5,9999,{output_case:'WIND'}),source('step',5,8888,{step_num:1})]}
+ const member={length:{value:10},unbraced_lengths:{ltb:{value:10}}}
+ const diagram=comboMomentDiagram(dataset,row,member,{segmentStart:0,segmentEnd:10,endsBraced:true})
+ assert.equal(diagram.mmax,100);assert.equal(diagram.ma,-75);assert.equal(diagram.mb,-50);assert.equal(diagram.mc,-25)
+ const {cbF11}=await import('../standards/aisc360-10-verified-hi.mjs');assert.ok(Math.abs(cbF11(diagram).value-5/3)<1e-12)
+ assert.deepEqual(diagram.source.source_record_ids,['a','b'])
+ assert.throws(()=>comboMomentDiagram({rows:[source('b',10,0)]},row,member,{segmentStart:0,segmentEnd:10,endsBraced:true}),/không ngoại suy/)
+ assert.throws(()=>comboMomentDiagram(dataset,row,member,{segmentStart:0,segmentEnd:5,endsBraced:true}),/bằng Lb/)
+})
+
+test('report ranks calculated shear as well as H1 without combining vectors',async()=>{
+ const {prepareDesignJob}=await load(),{calculateReport}=await import('../frontend/vue/public/sap-steel-report.mjs')
+ const f=fixtures();f.positions=null;const a={...f.dataset.rows[0],P:0,M3:1,T:0,V2:0}
+ f.dataset.rows=[a,{...a,record_id:'high-shear',station:10,V2:1e6}]
+ const job=prepareDesignJob({...f,frames:['1'],lengthSource:'manual',manualLengths:{'1':{major:5,minor:5,ltb:10}}})
+ const fs=require('node:fs'),vm=require('node:vm'),factors=vm.runInNewContext(fs.readFileSync(require('node:path').join(__dirname,'../frontend/vue/public/aisc360-10-resistance.js'),'utf8')+';Aisc36010Resistance')
+ const report=await calculateReport(job,f.dataset,()=>({lz_m:5,segmentStart:0,segmentEnd:10,endsBraced:true,unstiffenedConfirmed:true}),factors)
+ assert.equal(report.length,1);assert.equal(report[0].coverage,2)
+ assert.equal(report[0].governing.packet.source.record_id,'high-shear')
+ assert.equal(report[0].governing.packet.input.forces.shear_y_kN,1e6)
+ assert.equal(report[0].governing.packet.input.forces.moment_x_kNm,1)
+})
+
+test('zero/reversed moments and cantilever retain combo-specific Cb basis',async()=>{
+ const {comboMomentDiagram}=await import('../frontend/vue/public/sap-steel-report.mjs'),{cbF11}=await import('../standards/aisc360-10-verified-hi.mjs')
+ const row={frame:'F',case_kind:'combination',output_case:'C',step_type:'Min',step_num:0,station_m:2}
+ const member={length:{value:4},unbraced_lengths:{ltb:{value:4}}},options={segmentStart:0,segmentEnd:4,endsBraced:true}
+ const source=scale=>({rows:[{...row,station:0,record_id:'a',element:'E',M3:-100*scale},{...row,station:4,record_id:'b',element:'E',M3:100*scale}]})
+ for(const scale of [1,-1,2])assert.ok(Math.abs(cbF11(comboMomentDiagram(source(scale),row,member,options)).value-25/11)<1e-12)
+ assert.equal(cbF11(comboMomentDiagram(source(0),row,member,options)).value,1)
+ assert.equal(cbF11(comboMomentDiagram(source(1),row,member,{...options,cantilever:true,endsBraced:false})).value,1)
+})

@@ -66,15 +66,13 @@ const base=process.env.SAP_WEB_BASE||'http://127.0.0.1/GeekCalculus/'
   assert.equal(await live.locator('#steel-standard').inputValue(),'AISC360-10')
   assert.match(await live.locator('#steel-review-status').textContent(),/INPUT_REVIEW_ONLY/)
   await live.selectOption('#steel-length-source','manual');await live.selectOption('#steel-method','LRFD')
-  for(const key of ['major','minor','ltb']){const input=live.getByRole('spinbutton',{name:'F1 '+key+' m',exact:true});await input.fill('2');await input.press('Tab')}
-  await live.fill('#steel-lz','1.5')
-  for(const id of ['steel-map-confirmed','steel-builtup-confirmed','steel-dam-confirmed','steel-cb-confirmed','steel-unstiffened-confirmed'])await live.check('#'+id)
-  await live.click('#steel-open-component')
-  assert.equal(await live.locator('#steel-launch-status').textContent(),'')
-  const component=live.frameLocator('#steel-component-frame')
-  await component.locator('#sap-component-origin').filter({hasText:'Frame F1'}).waitFor()
+  for(const [key,value] of [['major','2'],['minor','2'],['ltb','4']]){const input=live.getByRole('spinbutton',{name:'F1 '+key+' m',exact:true});await input.fill(value);await input.press('Tab')}
+  for(const [name,value] of [['F1 Lz m','1.5'],['F1 LTB end m','4']]){const input=live.getByRole('spinbutton',{name,exact:true});await input.fill(value);await input.press('Tab')}
+  await live.click('#steel-run-report');await live.waitForFunction(()=>/nhóm Frame\/Combo|Frame\/Combo groups/.test(document.querySelector('#steel-report-status').textContent))
+  await live.locator('#steel-report-results tbody tr').filter({hasText:'F1 · I300'}).getByRole('button',{name:/Xem chi tiết|View details/}).click()
+  const component=live.frameLocator('#steel-component-frame');await component.locator('#sap-component-origin').filter({hasText:'Frame F1'}).waitFor()
   assert.equal(await component.locator('#aisc-lz').inputValue(),'1500')
-  await component.locator('#run').click();await component.locator('#aisc-review-status').filter({hasText:/Gross member strength/}).waitFor()
+  await component.locator('#aisc-review-status').filter({hasText:/Gross member strength/}).waitFor()
   await live.setViewportSize({width:390,height:844})
   assert.equal(await component.locator('html').evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true)
   await live.click('#steel-component-close');await live.setViewportSize({width:1280,height:900})

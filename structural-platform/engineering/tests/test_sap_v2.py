@@ -31,6 +31,8 @@ def test_identity_geometry_material_override_units_scaling_and_modifiers():
     props=data['sections']['I300']['properties_mm']
     assert props['A_mm2']==10000 and props['I33_mm4']==150000000 and props['J_mm4']==800000
     material=data['materials']['SteelA']['normalized']
+    assert material['poisson_ratio']==.3
+    assert material['G_MPa']==pytest.approx(76923.07692307694)
     assert material['Fy_MPa']==345 and material['E_MPa']==200000 and material['mass_density_kg_m3']==7850
     assert data['sections']['I300']['properties']['data']['Area']==.01
     assert data['sections']['I300']['modifiers']['components']['I33']==.6

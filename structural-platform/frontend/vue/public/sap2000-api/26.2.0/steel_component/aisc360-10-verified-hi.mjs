@@ -204,7 +204,7 @@ export function calculateIH36010(input,canonical,factorLib) {
  if(section.web_attachment==='BOLTED')comp=status('COMPRESSION','REVIEW_REQUIRED','Bolted built-up member attachment, fastener-line dimensions and Chapter E6 are outside the welded rectangular-plate component scope.',{clause:'B4/E6',trace:{reference_only:comp}});
  limits.compression=comp;
  // F1: permit conservative Cb=1, even before SAP2000 Importer provides a segment.
- const cb=cbF11({mode:'CONSERVATIVE'}); // User-specified phase: lock Cb=1 until the SAP moment API is integrated.
+ const cb=cbF11(input.moment_diagram??{mode:'CONSERVATIVE'}); // Explicit source-bound segment diagram; manual default remains conservative.
  const lb=member.lb_mm;
  let major;
  if(!Number.isFinite(lb)||lb<=0){
@@ -377,7 +377,7 @@ export function calculateIH36010(input,canonical,factorLib) {
  result.warnings=[
   ...(cls.geometry_model==='SHARP_CORNER_ROLLED_APPROXIMATION'?[{code:'ROLLED_FILLET_GEOMETRY',message:'Rolled profile requires actual fillet and effective h from catalogue.'}]:[]),
  ];
- result.assumptions={cb:1,cb_basis:'Conservative fixed Cb=1; SAP2000/API integration pending.',force_signs:'N>0 tension; Mx>0 bottom flange tension; Mx<0 top flange tension; shear checked by magnitude.',
+ result.assumptions={cb:cb.value,cb_basis:cb.source,cb_diagram:input.moment_diagram??null,force_signs:'N>0 tension; Mx>0 bottom flange tension; Mx<0 top flange tension; shear checked by magnitude.',
   scope:result.member_compliance.scope,load_method:'No automatic conversion of ASD/LRFD demands.',external_analysis:grossMember?'External C2 Direct Analysis assumed; C3 K=1. No SAP model verification is asserted.':'Chapter C analysis declarations are supplied by the engineer, not calculated by this module.'};
  for(const entry of Object.values(limits))if(entry.required_for_current_actions && (entry.status==='INPUT_REQUIRED'||entry.status==='REVIEW_REQUIRED')){
   result.warnings.push({code:entry.id, message:entry.reason});

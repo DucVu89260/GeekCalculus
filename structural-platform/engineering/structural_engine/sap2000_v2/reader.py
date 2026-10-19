@@ -187,6 +187,8 @@ class SteelReader:
         for source,target in [('e','E_MPa'),('g','G_MPa')]:
             value=field(iso,source)
             if isinstance(value,(int,float)):normalized[target]=value/1000.
+        poisson=field(iso,'u')
+        if isinstance(poisson,(int,float)):normalized['poisson_ratio']=poisson
         for source,target in [('Fy','Fy_MPa'),('Fu','Fu_MPa'),('eFy','expected_Fy_MPa'),('eFu','expected_Fu_MPa')]:
             value=field(strength,source)
             if isinstance(value,(int,float)):normalized[target]=value/1000.

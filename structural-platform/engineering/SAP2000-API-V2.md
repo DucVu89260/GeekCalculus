@@ -1,6 +1,6 @@
 # SAP2000-API V2 — Web / Local
 
-Build `2026.10.19-v2-component.1` · Compatible with SAP2000 v26.2.0 · Windows64-bit, Python3.11–3.13 x64.
+Build `2026.10.19-v2-report.1` · Compatible with SAP2000 v26.2.0 · Windows64-bit, Python3.11–3.13 x64.
 
 ## Cài mới / Nâng cấp từ V1 hoặc V2 local
 
@@ -57,23 +57,20 @@ Không cần nhập token nếu mở qua launcher. Nếu đang chạy thủ côn
 - Preferences35 và overwrites43 hiện chỉ ánh xạ AISC360-10. Kết quả member chưa có design: **Members have not been designed** khi getter xác nhận. Getter lỗi/không rõ availability báo riêng, không tự chạy Design.
 - DatabaseTables giữ cho phát triển: inventory/getter thực từ DLL, raw table strings, display selection hiện có của SAP độc lập panel cases; default5000/max50000 records, preview200. Kiểm tra units/axes/selection trước khi dùng tính.
 
-## Steel Design — Chuẩn bị đầu vào / Input review
+## Thuyết minh Symmetric I/H · AISC 360-10
 
-Sau khi đọc hồ sơ và xuất nội lực cùng model, bấm **Kiểm tra Steel Design** ở mục3; hoặc tạo Summary ở4.3 rồi bấm **Kiểm tra nhanh từ Summary**. Bảng giữa màn hình cho chọn AISC360-10, component I/H đối xứng, ASD/LRFD, chế độ nhanh/đầy đủ, nguồn chiều dài SAP/nhập tay. Component I/H bất đối xứng hiển thị nhưng chưa hỗ trợ; family khác giữ yêu cầu kiểm tra thủ công.
+Từ **Kiểm tra Steel Design** ở mục3 hoặc **Kiểm tra nhanh từ Summary** ở4.3, mở cửa sổ báo cáo3 phần: cơ sở/đầu vào, mô men-Cb, kết quả theo Frame/Combo. Chọn ASD/LRFD, nguồn chiều dài, nhập Lz và đoạn LTB rồi bấm **Kiểm tra các tổ hợp**. Có thể chọn riêng một Case/Combo. **Xem chi tiết** tự nạp dữ liệu và chạy cùng component, không tải/nạp JSON. JSON chỉ là tùy chọn trong mục thu gọn Dữ liệu nguồn.
 
-Mỗi Frame có bảng hình học, vật liệu, Length và unbraced lengths kèm đơn vị/nguồn/trạng thái, thông số còn thiếu. Nonprismatic giữ kích thước section con và segment gốc, không tự áp công thức sức chịu tải prismatic. Ratio SAP chỉ dùng khi getter OK, ProgDet=false, giá trị dương và người dùng xác nhận chiều dài I–J tham chiếu; không suy Program Determined. Nhập tay lưu độc lập từng frame.
+- Cơ sở DAM và Kx=Ky=Kz=1 ghi ở đầu. K không phải thuộc tính vật liệu. Lx khống chế uốn quanh trục chính; Ly quanh trục phụ; Lz khống chế xoắn; Lb chống uốn xoắn. Không suy Lz=major hoặc Lz=Lb. Ratio Major/Minor/LTB SAP × Length giữ theo quy ước đã chọn, ProgDet/0/thiếu dữ liệu không tự thành chiều dài hữu hiệu.
+- Quy ước cố định N=P, Mx=M3, My=M2, Vy=V2, Vx=V3, T=T chỉ ghi chú, không checkbox lặp lại. Giữ nguyên dấu và độ chính xác; bảng lực làm tròn2chữ số để hiển thị.
+- API đọc E/G/Fy/Fu và Poisson từ thư viện SAP Temp0; material overwrite/eFy/eFu/design overwrites giữ riêng. E/G SAP hiển thị cạnh nguồn; bộ tính AISC vẫn dùng nominal E200000/G77200 MPa. Hai nguồn khác nhau được nêu rõ, không mặc định giống hoặc tự thay. Mục tiêu đối chiếu SAP cần thống nhất cơ sở này, tiêu chuẩn, ASD/LRFD, section phân tích/design, overwrites và phạm vi.
+- F1-1 dùng Mmax và MA/MB/MC của cùng Frame/case-kind/case/step-type/step-number và cùng đoạn LTB. Đoạn start/end phải có chiều dài bằng Lb, nằm trong frame; không suy điểm giằng từ releases. Chỉ tự đề xuất0…L khi Lb=L. Quarters nội suy tuyến tính cùng element nếu thiếu đúng mốc, không ngoại suy; Mmax lấy tất cả station gốc trong đoạn cùng các mốc. Giả thiết người dùng đã xuất đủ station SAP bắt điểm đột biến; không coi5mốc tự xác nhận Mmax. Cb1 bảo thủ là lựa chọn riêng; console đầu tự do theo nhánh F1-1 hiện có. Cb và nguồn/moment mẫu đi thẳng vào component và kết quả JSON; sửa đầu vào component sẽ làm Cb nguồn hết hiệu lực cho tới khi tính lại từ báo cáo.
+- Không kể sườn ngang/TFA mặc định được tích; đây là phạm vi lần kiểm tra, không suy từ model rằng không có sườn. Bỏ tích yêu cầu một workflow sườn được xác nhận riêng, không tự cấp kích thước mẫu.
+- Kết quả gom theo Frame/Case-kind/Combo, chọn dòng có D/C đã tính lớn nhất trong các kiểm tra hiện có (không chỉ H1). Mỗi dòng giữ nguyên bộ6lực của chính nó; không ghép cực trị. Có H1, Cb, trạng thái, nguồn và chi tiết. Các dòng thiếu/ngoài đoạn/ngoài phạm vi làm nhóm chưa đầy đủ; không công bố PASS toàn member khi còn thiếu. Summary chỉ bao phủ các dòng chi phối xem trước; Full bao phủ dữ liệu đã xuất, không phải mọi vị trí chưa xuất. Cache hình học/biểu đồ và chỉ giữ chi tiết dòng chi phối mỗi nhóm để hạn chế bộ nhớ.
 
-Chế độ đầy đủ giữ mọi member/dòng gốc đã xuất cùng các mốc5 vị trí khả dụng; chế độ nhanh chỉ giữ các dòng chi phối xem trước trong Summary, không đại diện mọi combo hoặc toàn bộ đồng hạng. Mỗi bộ lực giữ đủ6 thành phần, dấu, step, station, nguồn nội suy/gốc và trạng thái đồng thời; bảng xem trước100 dòng, JSON chứa toàn bộ đầu vào đã chuẩn bị. Thiếu snapshot hoặc dữ liệu sai model/đơn vị hay kết quả dẫn xuất cũ được báo lỗi.
+Prismatic I/H hàn đối xứng và lực concurrent là phạm vi hiện tại. Nonprismatic/rolled/asymmetric/envelope hoặc thiếu đầu vào được báo rõ, không thay bằng tiết diện đều. Không khẳng định sai số so với SAP khi chưa có kết quả design cùng tổ hợp/vị trí/cơ sở. Cần snapshot kèm Preferences/Overwrites/Steel Design và nội lực của cùng trạng thái phân tích để đối chiếu thực tế. Source-bound Cb được nối vào hàm F1-1 đã có; không đổi hệ số/công thức sức chịu tải. Mẫu bên ngoài SkyCiv/Tekla đã thử truy cập nhưng proxy403, không ghi nhận là mẫu đã xem.
 
-Bấm **Tải đầu vào / Download prepared job JSON** để kiểm tra. Đây là bước chuẩn bị đầu vào, chưa gọi bộ tính sức chịu tải, chưa tính Cb hay đưa ra D/C/PASS/FAIL. Dữ liệu model/token không được tải lên server trong bước này. Cần cập nhật kit local để có module JS và route phục vụ panel local.
-
-## Mở Component Symmetric I/H · AISC 360-10
-
-Trong bảng chuẩn bị đầu vào, chọn số thứ tự dòng nội lực (1…N), khai báo Lz độc lập (m), chọn ASD/LRFD và hoàn thiện Major/Minor/LTB của Frame đó. Xác nhận ánh xạ N=P, Mx=M3, My=M2, Vy=V2, Vx=V3, T=T theo trục/dấu thực tế; tiết diện hàn liên tục đối xứng; cơ sở DAM/nội lực/nominal AISC E/G; chủ động dùng Cb=1; không kể sườn ngang/TFA trong lần kiểm tra này. Sau đó bấm **Mở Symmetric I/H · AISC 360-10**.
-
-Bảng giữa màn hình mở đúng component hiện có, tự nạp hình học mm, Fy/Fu MPa, chiều dài m→mm và nguyên bộ6 nội lực có dấu. Component không dùng ví dụ mẫu trong chế độ này và không tự tính; xem lại rồi bấm Calculate. Có thể sửa đầu vào; JSON kết quả giữ input gốc đã nạp, nguồn Frame/section/case/step/station và cờ đã sửa. Mô hình SAP không được kiểm chứng bởi bước nạp này.
-
-Chỉ hỗ trợ tiết diện prismatic đối xứng và vector concurrent. Nonprismatic, envelope/modal/nonconcurrent hoặc thiếu dữ liệu được báo rõ để xem xét riêng; không tự ghép các cực trị thành bộ lực. Component này chạy từng dòng, chưa tự tìm chi phối bằng sức chịu tải trên mọi member/case/station. **Asymmetric I/H — Chờ phát triển**. Công thức AISC của component không đổi; Cb tự động theo từng đoạn Lb chưa triển khai, Lz không suy bằng LTB. Các nhánh chưa hỗ trợ của component tiếp tục trả REVIEW_REQUIRED/INPUT_REQUIRED. Chạy trên HTTPS (GitHub Pages) hoặc localhost để bảo toàn băm hình học; HTTP tên miền tùy ý không đủ secure context. Phương pháp ASD/LRFD trong component được khóa theo bộ lực đã nạp; muốn đổi, quay lại bảng đầu vào và xác nhận lại cơ sở tải. Bản local mới cần toàn bộ ZIP vì có thêm các asset của component; không chỉ sao chép panel.html.
+Local/web dùng cùng asset canonical trong ZIP, chạy HTTPS/localhost; giữ bootstrap portable và toàn bộ các bộ lọc release. Phải giải nén toàn bộ kit mới, không chỉ panel.html. Các nhánh REVIEW_REQUIRED/INPUT_REQUIRED của bộ tính vẫn giữ. Không tự sửa model SAP hoặc chạy analysis/design.
 
 ## Vị trí cực trị / Extreme positions
 

@@ -1,5 +1,6 @@
 """Authenticated loopback V2 endpoints. V1 force DTOs/processing are reused unchanged."""
 import os
+import json
 from pathlib import Path
 import secrets
 import threading
@@ -43,6 +44,16 @@ def create_app(token=None,operation_runner=None,instance_scanner=None):
         return FileResponse(Path(__file__).with_name('panel.html'),headers={
             'Cache-Control':'no-store','Referrer-Policy':'no-referrer','X-Content-Type-Options':'nosniff',
             'Content-Security-Policy':"default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'"})
+    component_assets=set(json.loads(Path(__file__).with_name('steel_component_assets.json').read_text()))
+    @app.get('/steel_component/{filename}',include_in_schema=False)
+    def component_asset(filename:str):
+        if filename not in component_assets:raise HTTPException(404,'Unknown component asset')
+        asset=Path(__file__).with_name('steel_component')/filename
+        if not asset.is_file():asset=Path(__file__).resolve().parents[3]/'frontend/vue/public'/filename
+        if not asset.is_file():raise HTTPException(503,'Component asset missing; update the complete kit')
+        media='text/html' if filename.endswith('.html') else 'text/javascript'
+        return FileResponse(asset,media_type=media,headers={'Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer',
+            'Content-Security-Policy':"default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline'; frame-ancestors 'self'; base-uri 'none'; form-action 'none'"})
     @app.get('/design_handoff.mjs',include_in_schema=False)
     def handoff_module():return FileResponse(Path(__file__).with_name('design_handoff.mjs'),media_type='text/javascript',headers={'Cache-Control':'no-store'})
     @app.get(API_PREFIX+'/connection',dependencies=auth)

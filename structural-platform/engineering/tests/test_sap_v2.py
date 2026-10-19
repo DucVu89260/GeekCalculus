@@ -265,3 +265,15 @@ def test_preferences_only_reads_model_once_without_any_frame_selection():
     assert len([key for key,_,_ in model.v2_calls if key=='preference'])==35
     assert not any(key in ('section_assignment','overwrite') for key,_,_ in model.v2_calls)
     assert model.units==9
+
+
+def test_component_assets_are_allowlisted_and_same_origin_only():
+    client=TestClient(create_app(TOKEN))
+    response=client.get('/steel_component/hi-doubly-symmetric-aisc360-10.html')
+    assert response.status_code==200
+    assert 'frame-ancestors \'self\'' in response.headers['content-security-policy']
+    assert 'initialiseSapComponent' in response.text
+    assert client.get('/steel_component/sap-component-bridge.mjs').status_code==200
+    assert client.get('/steel_component/private-model.sdb').status_code==404
+    assert client.get('/steel_component/connector.py').status_code==404
+    assert client.get(API_PREFIX+'/connection').status_code==401

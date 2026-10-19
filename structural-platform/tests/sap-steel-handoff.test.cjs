@@ -70,3 +70,23 @@ test('nonprismatic review includes child geometry without inventing intermediate
  member.component_sections[0].geometry.value.h=999
  assert.equal(f.snapshot.sections.I1.i_dimensions_mm.h,400)
 })
+
+const loadComponent=()=>import('../frontend/vue/public/sap-component-bridge.mjs')
+const approvals={lz_m:2.2,mappingConfirmed:true,builtUpConfirmed:true,damConfirmed:true,cbOneConfirmed:true,unstiffenedConfirmed:true}
+test('component transfer has explicit axis/unit mapping and independent lengths, no strength formulas',async()=>{
+ const {prepareDesignJob}=await load(),{prepareSymmetricComponent,validateComponentPacket}=await loadComponent()
+ const job=prepareDesignJob(fixtures()),before=JSON.stringify(job),packet=prepareSymmetricComponent(job,0,approvals)
+ assert.deepEqual(packet.input.forces,{axial_kN:-11,moment_x_kNm:-55,moment_y_kNm:4,shear_y_kN:2,shear_x_kN:-3,torsion_kNm:0,moment_25_kNm:null,moment_50_kNm:null,moment_75_kNm:null})
+ assert.equal(packet.input.member.lx_mm,5000);assert.equal(packet.input.member.lb_mm,5000);assert.equal(packet.input.member.lz_mm,2200)
+ assert.equal(packet.input.material.fu_mpa,450);assert.equal(packet.input.material.e_mpa,200000)
+ assert.equal(packet.source.frame,'1');assert.equal(packet.source.record_id,'a');assert.equal(packet.source.forces.M3,-55)
+ assert.equal(JSON.stringify(job),before);assert.deepEqual(validateComponentPacket(packet),packet)
+})
+test('component blocks missing confirmations, lengths, nonconcurrent/tapered/asymmetric and editions',async()=>{
+ const {prepareDesignJob}=await load(),{prepareSymmetricComponent}=await loadComponent(),job=prepareDesignJob(fixtures())
+ for(const key of Object.keys(approvals))assert.throws(()=>prepareSymmetricComponent(job,0,{...approvals,[key]:null}))
+ for(const patch of [{standard:'AISC360-22'},{module:'asymmetric_i'},{method:null}])assert.throws(()=>prepareSymmetricComponent({...job,...patch},0,approvals))
+ assert.throws(()=>prepareSymmetricComponent({...job,cases:[{...job.cases[0],concurrency:'nonconcurrent'}]},0,approvals),/concurrent/)
+ const copy=structuredClone(job);copy.members[0].section_type.key='nonprismatic';assert.throws(()=>prepareSymmetricComponent(copy,0,approvals),/Nonprismatic/)
+ copy.members[0].section_type.key='i_wide_flange';copy.members[0].unbraced_lengths.major.value=null;assert.throws(()=>prepareSymmetricComponent(copy,0,approvals),/lengths/)
+})

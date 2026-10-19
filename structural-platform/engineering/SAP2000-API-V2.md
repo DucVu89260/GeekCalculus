@@ -1,6 +1,6 @@
 # SAP2000-API V2 — Web / Local
 
-Build `2026.10.19-v2-release-filter.1` · Compatible with SAP2000 v26.2.0 · Windows64-bit, Python3.11–3.13 x64.
+Build `2026.10.19-v2-component.1` · Compatible with SAP2000 v26.2.0 · Windows64-bit, Python3.11–3.13 x64.
 
 ## Cài mới / Nâng cấp từ V1 hoặc V2 local
 
@@ -66,6 +66,14 @@ Mỗi Frame có bảng hình học, vật liệu, Length và unbraced lengths k�
 Chế độ đầy đủ giữ mọi member/dòng gốc đã xuất cùng các mốc5 vị trí khả dụng; chế độ nhanh chỉ giữ các dòng chi phối xem trước trong Summary, không đại diện mọi combo hoặc toàn bộ đồng hạng. Mỗi bộ lực giữ đủ6 thành phần, dấu, step, station, nguồn nội suy/gốc và trạng thái đồng thời; bảng xem trước100 dòng, JSON chứa toàn bộ đầu vào đã chuẩn bị. Thiếu snapshot hoặc dữ liệu sai model/đơn vị hay kết quả dẫn xuất cũ được báo lỗi.
 
 Bấm **Tải đầu vào / Download prepared job JSON** để kiểm tra. Đây là bước chuẩn bị đầu vào, chưa gọi bộ tính sức chịu tải, chưa tính Cb hay đưa ra D/C/PASS/FAIL. Dữ liệu model/token không được tải lên server trong bước này. Cần cập nhật kit local để có module JS và route phục vụ panel local.
+
+## Mở Component Symmetric I/H · AISC 360-10
+
+Trong bảng chuẩn bị đầu vào, chọn số thứ tự dòng nội lực (1…N), khai báo Lz độc lập (m), chọn ASD/LRFD và hoàn thiện Major/Minor/LTB của Frame đó. Xác nhận ánh xạ N=P, Mx=M3, My=M2, Vy=V2, Vx=V3, T=T theo trục/dấu thực tế; tiết diện hàn liên tục đối xứng; cơ sở DAM/nội lực/nominal AISC E/G; chủ động dùng Cb=1; không kể sườn ngang/TFA trong lần kiểm tra này. Sau đó bấm **Mở Symmetric I/H · AISC 360-10**.
+
+Bảng giữa màn hình mở đúng component hiện có, tự nạp hình học mm, Fy/Fu MPa, chiều dài m→mm và nguyên bộ6 nội lực có dấu. Component không dùng ví dụ mẫu trong chế độ này và không tự tính; xem lại rồi bấm Calculate. Có thể sửa đầu vào; JSON kết quả giữ input gốc đã nạp, nguồn Frame/section/case/step/station và cờ đã sửa. Mô hình SAP không được kiểm chứng bởi bước nạp này.
+
+Chỉ hỗ trợ tiết diện prismatic đối xứng và vector concurrent. Nonprismatic, envelope/modal/nonconcurrent hoặc thiếu dữ liệu được báo rõ để xem xét riêng; không tự ghép các cực trị thành bộ lực. Component này chạy từng dòng, chưa tự tìm chi phối bằng sức chịu tải trên mọi member/case/station. **Asymmetric I/H — Chờ phát triển**. Công thức AISC của component không đổi; Cb tự động theo từng đoạn Lb chưa triển khai, Lz không suy bằng LTB. Các nhánh chưa hỗ trợ của component tiếp tục trả REVIEW_REQUIRED/INPUT_REQUIRED. Chạy trên HTTPS (GitHub Pages) hoặc localhost để bảo toàn băm hình học; HTTP tên miền tùy ý không đủ secure context. Phương pháp ASD/LRFD trong component được khóa theo bộ lực đã nạp; muốn đổi, quay lại bảng đầu vào và xác nhận lại cơ sở tải. Bản local mới cần toàn bộ ZIP vì có thêm các asset của component; không chỉ sao chép panel.html.
 
 ## Vị trí cực trị / Extreme positions
 

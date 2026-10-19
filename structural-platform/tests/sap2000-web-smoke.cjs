@@ -3,7 +3,7 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright')
 const {signIn}=require('./browser-auth.cjs')
 const base=process.env.SAP_WEB_BASE||'http://127.0.0.1/GeekCalculus/'
 ;(async()=>{
- const browser=await chromium.launch({executablePath:'/usr/bin/chromium',headless:true,args:['--no-sandbox','--no-proxy-server','--host-resolver-rules=MAP geekcalculus.com 127.0.0.1']})
+ const browser=await chromium.launch({executablePath:'/usr/bin/chromium',headless:true,args:['--no-sandbox','--unsafely-treat-insecure-origin-as-secure=http://geekcalculus.com','--no-proxy-server','--host-resolver-rules=MAP geekcalculus.com 127.0.0.1']})
  try{
   const context=await browser.newContext(),page=await context.newPage(),errors=[]
   context.on('page',p=>p.on('pageerror',e=>errors.push(e.message)))
@@ -65,6 +65,19 @@ const base=process.env.SAP_WEB_BASE||'http://127.0.0.1/GeekCalculus/'
   await live.click('#design-members');await live.locator('#steel-review').waitFor({state:'visible'})
   assert.equal(await live.locator('#steel-standard').inputValue(),'AISC360-10')
   assert.match(await live.locator('#steel-review-status').textContent(),/INPUT_REVIEW_ONLY/)
+  await live.selectOption('#steel-length-source','manual');await live.selectOption('#steel-method','LRFD')
+  for(const key of ['major','minor','ltb']){const input=live.getByRole('spinbutton',{name:'F1 '+key+' m',exact:true});await input.fill('2');await input.press('Tab')}
+  await live.fill('#steel-lz','1.5')
+  for(const id of ['steel-map-confirmed','steel-builtup-confirmed','steel-dam-confirmed','steel-cb-confirmed','steel-unstiffened-confirmed'])await live.check('#'+id)
+  await live.click('#steel-open-component')
+  assert.equal(await live.locator('#steel-launch-status').textContent(),'')
+  const component=live.frameLocator('#steel-component-frame')
+  await component.locator('#sap-component-origin').filter({hasText:'Frame F1'}).waitFor()
+  assert.equal(await component.locator('#aisc-lz').inputValue(),'1500')
+  await component.locator('#run').click();await component.locator('#aisc-review-status').filter({hasText:/Gross member strength/}).waitFor()
+  await live.setViewportSize({width:390,height:844})
+  assert.equal(await component.locator('html').evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true)
+  await live.click('#steel-component-close');await live.setViewportSize({width:1280,height:900})
   await live.click('#steel-review-close')
   await live.screenshot({path:'/tmp/sap2000-web-en.png',fullPage:true})
   assert.deepEqual(errors,[])

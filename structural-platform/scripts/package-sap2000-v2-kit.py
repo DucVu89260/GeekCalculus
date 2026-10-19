@@ -28,12 +28,18 @@ def main():
                 data = path.read_text().replace('\r\n', '\n').replace('\n', '\r\n').encode()
             archive.writestr(name, data)
             manifest[name] = hashlib.sha256(data).hexdigest()
+        assets = json.loads((source / 'structural_engine/sap2000_v2/steel_component_assets.json').read_text())
+        for filename in assets:
+            name = 'structural_engine/sap2000_v2/steel_component/' + filename
+            data = (repo / 'structural-platform/frontend/vue/public' / filename).read_bytes()
+            archive.writestr(name, data)
+            manifest[name] = hashlib.sha256(data).hexdigest()
         alias=(source / 'install-web-launcher-v2.cmd').read_text().replace('\r\n','\n').replace('\n','\r\n').encode()
         archive.writestr('install-web-launcher.cmd',alias)
         manifest['install-web-launcher.cmd']=hashlib.sha256(alias).hexdigest()
         archive.writestr('manifest.sha256.json', json.dumps(manifest, indent=2))
         archive.writestr('BAT-DAU.txt',
-            'SAP2000-API V2 web/local release — 2026.10.19-v2-release-filter.1\n'
+            'SAP2000-API V2 web/local release — 2026.10.19-v2-component.1\n'
             'Extract ALL files to C:\\geek_calculus\\SAP2000-API\n'
             'Stop the old connector with Ctrl+C; keep SAP2000 26.2.0 open.\n'
             'Python 3.13 x64 + py recommended on each PC; 3.12/3.11 x64 also supported.\n'

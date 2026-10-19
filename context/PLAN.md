@@ -1,5 +1,12 @@
 # Repository implementation plan
 
+## SAP release boundary positions — 2026-10-19
+
+Build2026.10.19-v2-release-stations.1 on `fix/sap2000-portable-bootstrap`, after stable portable releaseefdf604. Added release_start/release_end request enums: exact min/max original object station per frame/case-kind/output/step-type/step-number, retaining every boundary row/discontinuity tie and raw six-force vector; no interpolation, length inference or assertion that a release is assigned. Source rows and basis exported. start/end presentation replaces EndI/J; existing enum names retained for compatibility. V2 UI/extremes/section Summary support both options, bilingual explanatory note. Core DTO/processing shared with V1 gains additive enums and start/end response labels; V1 HTML unchanged. Existing five-point sampling unchanged.
+
+Acceptance:58 matching Python tests passed (positions/extremes/forces/V2/kit), including offset boundary data without length, all output/step partitions, tie sides, signed vectors/immutability and API frame/case filtering. V2 real Chromium/HTTP simulated-SAP smoke passed both new positions, labels, existing extraction/Summary/profile/VI-EN/mobile. ZIP CRC/per-file hashes and hosted ZIP/hash parity passed. Actual Windows/SAP use pending user acceptance. User must update local kit, stop/restart connector and refresh hosted page; web source publication does not update local Python code. Private model/token data excluded. Root docs remain CI-owned.
+
+
 ## SAP V2 portable bootstrap — 2026-10-19
 
 `SAP-PORTABLE-01`: isolated stable hotfix on `fix/sap2000-portable-bootstrap`, base main559f474. Automatically validate/reuse or archive/recreate machine-bound venv with full Python3.13/3.12/3.11 x64; no default3.15, no model/.env edits or process kills. Acceptance: real temporary venv create/reuse/rebuild, missing-old-account simulation, version/architecture/prefix rejection, occupied-port preservation, complete locked dependency contract, ZIP hashes and hosted parity. Windows batch/UAC acceptance remains unrun here. Keep Steel Design preparation preview on feature branch; exclude from stable hotfix.

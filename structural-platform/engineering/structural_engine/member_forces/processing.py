@@ -30,7 +30,18 @@ def extremes(request: ExtremeRequest):
     members = {m.frame:m for m in request.dataset.members}
     provenance, unavailable, source_rows = {}, [], []
     fractions = {'end_i':0.,'quarter':.25,'mid':.5,'three_quarter':.75,'end_j':1.}
-    if request.position != 'all':
+    if request.position in ('release_start', 'release_end'):
+        # Object stations per output/step; retain all sides of discontinuities.
+        boundaries = {}
+        def output_key(row):
+            return (row.frame, row.case_kind, row.output_case, row.step_type, row.step_num)
+        choose = min if request.position == 'release_start' else max
+        for row in rows:
+            key = output_key(row)
+            boundaries[key] = choose(boundaries.get(key, row.station), row.station)
+        rows = [row for row in rows if row.station == boundaries[output_key(row)]]
+        source_rows = [row.model_dump() for row in rows]
+    elif request.position != 'all':
         sampled = position_samples(PositionRequest(dataset=request.dataset.model_copy(update={'rows':rows})))
         samples = [s for s in sampled['data'] if request.position == 'five' or s['fraction'] == fractions[request.position]]
         unavailable = [{k:v for k,v in s.items() if k != 'rows'} for s in samples if s['method'] == 'unavailable']
@@ -49,12 +60,12 @@ def extremes(request: ExtremeRequest):
     def location(row):
         member = members.get(row.frame)
         length = member.length if member and member.units_code == 6 else None
-        marks = ((0.,'End I'),(.25,'1/4 L'),(.5,'1/2 L'),(.75,'3/4 L'),(1.,'End J'))
+        marks = ((0.,'start'),(.25,'1/4 L'),(.5,'1/2 L'),(.75,'3/4 L'),(1.,'end'))
         labels = [label for fraction,label in marks if length and abs(row.station-length*fraction) <= max(1e-6,length*1e-8)]
         return {'frame':row.frame,'element':row.element,'local_axis':'local_1_from_I',
                 'station':row.station,'element_station':row.element_station,
                 'relative_station':row.station/length if length else None,
-                'position':', '.join(labels) if labels else 'Station khác',
+                'position':request.position.replace('_','-') if request.position in ('release_start','release_end') else (', '.join(labels) if labels else 'Station khác'),
                 **provenance.get(row.record_id,{'method':'original','source_record_ids':[row.record_id],'weight':None})}
 
     def governing(value, tied):
@@ -78,7 +89,7 @@ def extremes(request: ExtremeRequest):
     return {**request.dataset.model_dump(exclude={'rows'}), 'scope': request.scope, 'position':request.position,
             'components':list(dict.fromkeys(request.components)), 'data': output,
             'unavailable_positions':unavailable,'source_rows':source_rows,
-            'basis': 'exported_stations_only' if request.position == 'all' else 'whole_frame_position_samples',
+            'basis': ('exported_boundary_stations_per_output_step' if request.position in ('release_start','release_end') else 'exported_stations_only' if request.position == 'all' else 'whole_frame_position_samples'),
             'warning': 'Independent component extremes are not one design action. Preserve each governing row vector; envelope/modal rows remain nonconcurrent. Position samples may use signed linear interpolation.'}
 
 

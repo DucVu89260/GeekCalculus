@@ -82,6 +82,15 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright')
 
   for(const value of await page.locator('#results td:nth-child(n+9):nth-child(-n+14)').allTextContents())assert.match(value,/^-?\d+\.\d{2}$/)
   await page.click('#extremes');await page.waitForFunction(()=>document.querySelectorAll('#extreme-results tr').length===36&&!document.querySelector('#controls').disabled)
+  assert.equal(await page.locator('#extreme-position option[value="end_i"]').textContent(),'start')
+  assert.equal(await page.locator('#extreme-position option[value="end_j"]').textContent(),'end')
+  for(const position of ['release_start','release_end']){
+   await page.selectOption('#extreme-position',position)
+   await page.click('#extremes')
+   await page.waitForFunction(()=>document.querySelectorAll('#extreme-results tr').length===36&&!document.querySelector('#controls').disabled)
+   assert.ok((await page.locator('#extreme-results').textContent()).includes(position.replace('_','-')))
+  }
+  await page.selectOption('#extreme-position','all')
   await page.click('#section-summary');await page.waitForFunction(()=>document.querySelectorAll('#section-summary-results tr').length===12&&!document.querySelector('#controls').disabled)
   await page.click('#profile-capabilities');await page.waitForFunction(()=>document.querySelector('#profile-target').value==='@capabilities'&&!document.querySelector('#controls').disabled)
   const caps=await downloadJson('#profile-capabilities-json');assert.ok(caps.data.length>60)

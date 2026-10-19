@@ -22,7 +22,7 @@ def test_all_station_extreme_reports_governing_case_and_local_ij_position():
     assert high['locations'][0]['frame']=='F2'
     assert high['locations'][0]['station']==8. and high['locations'][0]['relative_station']==1.
     assert high['locations'][0]['local_axis']=='local_1_from_I'
-    assert high['locations'][0]['position']=='End J'
+    assert high['locations'][0]['position']=='end'
     assert high['rows'][0]['P']==-456.
 
 
@@ -86,3 +86,44 @@ def test_position_api_validation_and_existing_frame_case_filters():
     assert response.status_code==200
     assert response.json()['data'][0]['max']['locations'][0]['station']==8.
     assert post('extremes',dict(dataset=data.model_dump(),position='end_k')).status_code==422
+
+
+@pytest.mark.parametrize(('position','station','force'), [('release_start',.4,-80.),('release_end',3.6,90.)])
+def test_exported_boundaries_need_no_endpoints_or_member_length(position,station,force):
+    data=dataset();a,b=data.rows
+    data.members=[]
+    data.rows=[a.model_copy(update={'station':.4,'M3':-80.}), b.model_copy(update={'station':3.6,'M3':90.})]
+    before=data.model_dump()
+    result=extremes(ExtremeRequest(dataset=data,position=position,components=['M3']))
+    item=result['data'][0]['min']
+    assert item['value']==force
+    assert item['locations'][0]['station']==station
+    assert item['locations'][0]['position']==position.replace('_','-')
+    assert item['locations'][0]['method']=='original'
+    assert item['locations'][0]['weight'] is None
+    assert item['rows'][0]==data.rows[0 if position=='release_start' else 1].model_dump()
+    assert result['unavailable_positions']==[]
+    assert data.model_dump()==before
+
+
+@pytest.mark.parametrize('position',['release_start','release_end'])
+def test_release_boundaries_per_output_step_preserve_discontinuity_ties(position):
+    data=dataset();a=data.rows[0];data.rows=[];expected=[]
+    for index,(frame,kind,case,step,num) in enumerate([
+        ('F1','case','D','',0.),('F1','case','D','Max',0.),
+        ('F1','case','D','Max',1.),('F1','combination','D','Max',0.),
+        ('F1','case','W','',0.),('F2','case','D','',0.)]):
+        for side,x in enumerate((.1+index*.1,2.,3.+index*.1)):
+            row=a.model_copy(update={'record_id':str(index)+'-'+str(side), 'frame':frame,
+                 'case_kind':kind,'output_case':case,'step_type':step,'step_num':num,'station':x,'M3':-50.})
+            data.rows.append(row)
+            if side==(0 if position=='release_start' else 2):
+                expected.append(row.record_id)
+                twin=row.model_copy(update={'record_id':row.record_id+'-other-element','element':'other'})
+                data.rows.append(twin);expected.append(twin.record_id)
+    result=extremes(ExtremeRequest(dataset=data,scope='global',position=position,components=['M3']))
+    assert result['basis']=='exported_boundary_stations_per_output_step'
+    assert result['data'][0]['min']['record_ids']==expected
+    filtered=post('extremes',dict(dataset=data.model_dump(),position=position,frames=['F2'],output_cases=['D']))
+    assert filtered.status_code==200
+    assert all(r['frame']=='F2' for r in filtered.json()['source_rows'])

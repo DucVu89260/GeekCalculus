@@ -1,6 +1,6 @@
 # SAP2000-API V2 — Web / Local
 
-Build `2026.10.19-v2-web-portable.1` · Compatible with SAP2000 v26.2.0 · Windows64-bit, Python3.11–3.13 x64.
+Build `2026.10.19-v2-release-stations.1` · Compatible with SAP2000 v26.2.0 · Windows64-bit, Python3.11–3.13 x64.
 
 ## Cài mới / Nâng cấp từ V1 hoặc V2 local
 
@@ -56,6 +56,12 @@ Không cần nhập token nếu mở qua launcher. Nếu đang chạy thủ côn
 - Releases: bảngI/J5 cột,0–5=P/V2/V3/T/M2/M3 ↔ U1/U2/U3/R1/R2/R3. true=có giải phóng, false=không giải phóng. Partial fixity tách riêng; không suy giằng/Cb chỉ từ Releases.
 - Preferences35 và overwrites43 hiện chỉ ánh xạ AISC360-10. Kết quả member chưa có design: **Members have not been designed** khi getter xác nhận. Getter lỗi/không rõ availability báo riêng, không tự chạy Design.
 - DatabaseTables giữ cho phát triển: inventory/getter thực từ DLL, raw table strings, display selection hiện có của SAP độc lập panel cases; default5000/max50000 records, preview200. Kiểm tra units/axes/selection trước khi dùng tính.
+
+## Vị trí cực trị / Extreme positions
+
+`start` = x0 (đầu I), `end` = xL (đầu J), giữ nguyên các mốc chia tư và cả 5 vị trí. `release-start` / `release-end` chọn station gốc nhỏ nhất / lớn nhất riêng cho mỗi frame, case/combo và step. Dùng station trên toàn frame, không phải element station; giữ mọi dòng tại cùng station và bộ 6 nội lực gốc, không nội suy. Áp dụng cả cực trị và Summary. Hai vị trí có thể trùng start/end; không suy từ tên này rằng release đã được gán. Nếu SAP xuất cả đầu nút và mặt offset, thuật toán vẫn chọn biên ngoài cùng của dữ liệu đã xuất, không tự nhận diện mặt offset.
+
+`release-start` / `release-end` use minimum / maximum original object station per frame/output/step; preserve tied rows, original vectors and signs, with no interpolation or assertion of release assignment. Update the local kit as well as the hosted UI to enable these new API options.
 
 ## Đơn vị, dữ liệu gốc và giới hạn
 

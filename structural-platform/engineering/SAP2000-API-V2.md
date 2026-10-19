@@ -1,6 +1,6 @@
 # SAP2000-API V2 — Web / Local
 
-Build `2026.10.19-v2-release-stations.1` · Compatible with SAP2000 v26.2.0 · Windows64-bit, Python3.11–3.13 x64.
+Build `2026.10.19-v2-input-review.1` · Compatible with SAP2000 v26.2.0 · Windows64-bit, Python3.11–3.13 x64.
 
 ## Cài mới / Nâng cấp từ V1 hoặc V2 local
 
@@ -56,6 +56,16 @@ Không cần nhập token nếu mở qua launcher. Nếu đang chạy thủ côn
 - Releases: bảngI/J5 cột,0–5=P/V2/V3/T/M2/M3 ↔ U1/U2/U3/R1/R2/R3. true=có giải phóng, false=không giải phóng. Partial fixity tách riêng; không suy giằng/Cb chỉ từ Releases.
 - Preferences35 và overwrites43 hiện chỉ ánh xạ AISC360-10. Kết quả member chưa có design: **Members have not been designed** khi getter xác nhận. Getter lỗi/không rõ availability báo riêng, không tự chạy Design.
 - DatabaseTables giữ cho phát triển: inventory/getter thực từ DLL, raw table strings, display selection hiện có của SAP độc lập panel cases; default5000/max50000 records, preview200. Kiểm tra units/axes/selection trước khi dùng tính.
+
+## Steel Design — Chuẩn bị đầu vào / Input review
+
+Sau khi đọc hồ sơ và xuất nội lực cùng model, bấm **Kiểm tra Steel Design** ở mục3; hoặc tạo Summary ở4.3 rồi bấm **Kiểm tra nhanh từ Summary**. Bảng giữa màn hình cho chọn AISC360-10, component I/H đối xứng, ASD/LRFD, chế độ nhanh/đầy đủ, nguồn chiều dài SAP/nhập tay. Component I/H bất đối xứng hiển thị nhưng chưa hỗ trợ; family khác giữ yêu cầu kiểm tra thủ công.
+
+Mỗi Frame có bảng hình học, vật liệu, Length và unbraced lengths kèm đơn vị/nguồn/trạng thái, thông số còn thiếu. Nonprismatic giữ kích thước section con và segment gốc, không tự áp công thức sức chịu tải prismatic. Ratio SAP chỉ dùng khi getter OK, ProgDet=false, giá trị dương và người dùng xác nhận chiều dài I–J tham chiếu; không suy Program Determined. Nhập tay lưu độc lập từng frame.
+
+Chế độ đầy đủ giữ mọi member/dòng gốc đã xuất cùng các mốc5 vị trí khả dụng; chế độ nhanh chỉ giữ các dòng chi phối xem trước trong Summary, không đại diện mọi combo hoặc toàn bộ đồng hạng. Mỗi bộ lực giữ đủ6 thành phần, dấu, step, station, nguồn nội suy/gốc và trạng thái đồng thời; bảng xem trước100 dòng, JSON chứa toàn bộ đầu vào đã chuẩn bị. Thiếu snapshot hoặc dữ liệu sai model/đơn vị hay kết quả dẫn xuất cũ được báo lỗi.
+
+Bấm **Tải đầu vào / Download prepared job JSON** để kiểm tra. Đây là bước chuẩn bị đầu vào, chưa gọi bộ tính sức chịu tải, chưa tính Cb hay đưa ra D/C/PASS/FAIL. Dữ liệu model/token không được tải lên server trong bước này. Cần cập nhật kit local để có module JS và route phục vụ panel local.
 
 ## Vị trí cực trị / Extreme positions
 

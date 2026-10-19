@@ -42,7 +42,9 @@ def create_app(token=None,operation_runner=None,instance_scanner=None):
     def panel():
         return FileResponse(Path(__file__).with_name('panel.html'),headers={
             'Cache-Control':'no-store','Referrer-Policy':'no-referrer','X-Content-Type-Options':'nosniff',
-            'Content-Security-Policy':"default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'"})
+            'Content-Security-Policy':"default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'"})
+    @app.get('/design_handoff.mjs',include_in_schema=False)
+    def handoff_module():return FileResponse(Path(__file__).with_name('design_handoff.mjs'),media_type='text/javascript',headers={'Cache-Control':'no-store'})
     @app.get(API_PREFIX+'/connection',dependencies=auth)
     def connection():
         with lock:return {'api_name':API_NAME,'build_id':BUILD_ID,'transport':'dotnet','web_panel_supported':True,'pid':settings.pid,'dll_path':settings.dll_path,'expected_model':settings.expected_model}

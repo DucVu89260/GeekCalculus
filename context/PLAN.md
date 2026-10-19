@@ -1,5 +1,9 @@
 # Repository implementation plan
 
+## SAP V2 Steel Design input review — 2026-10-19
+
+`SAP-STEEL-INPUT-01`: integrate preparation preview9dd9dff into current stable2e0bb6d, preserving portable bootstrap and release-position filters. Modal from member/Summary, full/quick, edition-scoped I/H selector, ASD/LRFD, per-frame material/geometry/length sources/missing inputs, signed concurrent-vector provenance and JSON. No capacity/Cb engine invocation. Nonprismatic child geometry visible, no invented intermediate section. Acceptance: pure data-contract tests, V2 local+hosted HTTP/browser flows, typecheck/build, package-module integrity. Actual Windows SAP acceptance remains separate.
+
 ## SAP release boundary positions — 2026-10-19
 
 Build2026.10.19-v2-release-stations.1 on `fix/sap2000-portable-bootstrap`, after stable portable releaseefdf604. Added release_start/release_end request enums: exact min/max original object station per frame/case-kind/output/step-type/step-number, retaining every boundary row/discontinuity tie and raw six-force vector; no interpolation, length inference or assertion that a release is assigned. Source rows and basis exported. start/end presentation replaces EndI/J; existing enum names retained for compatibility. V2 UI/extremes/section Summary support both options, bilingual explanatory note. Core DTO/processing shared with V1 gains additive enums and start/end response labels; V1 HTML unchanged. Existing five-point sampling unchanged.

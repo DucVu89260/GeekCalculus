@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "build": "vite build",
-    "test": "node --test tests/geometry/*.test.js ../../tests/section-properties-core.test.cjs ../../tests/section-mechanics-advanced.test.cjs ../../tests/section-build-targets.test.cjs",
+    "test": "node --test tests/geometry/*.test.js ../../tests/section-properties-core.test.cjs ../../tests/section-mechanics-advanced.test.cjs ../../tests/section-build-targets.test.cjs ../../tests/sap-steel-handoff.test.cjs",
     "build:section-properties-browser": "node ../../scripts/build-section-properties-core.cjs --target=browser",
     "build:section-properties-library": "node ../../scripts/build-section-properties-core.cjs --target=library",
     "preview": "vite preview --host 0.0.0.0",

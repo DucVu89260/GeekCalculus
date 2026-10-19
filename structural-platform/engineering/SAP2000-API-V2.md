@@ -1,6 +1,6 @@
 # SAP2000-API V2 — Web / Local
 
-Build `2026.10.19-v2-input-review.1` · Compatible with SAP2000 v26.2.0 · Windows64-bit, Python3.11–3.13 x64.
+Build `2026.10.19-v2-release-filter.1` · Compatible with SAP2000 v26.2.0 · Windows64-bit, Python3.11–3.13 x64.
 
 ## Cài mới / Nâng cấp từ V1 hoặc V2 local
 
@@ -69,7 +69,7 @@ Bấm **Tải đầu vào / Download prepared job JSON** để kiểm tra. Đây
 
 ## Vị trí cực trị / Extreme positions
 
-`start` = x0 (đầu I), `end` = xL (đầu J), giữ nguyên các mốc chia tư và cả 5 vị trí. `release-start` / `release-end` chọn station gốc nhỏ nhất / lớn nhất riêng cho mỗi frame, case/combo và step. Dùng station trên toàn frame, không phải element station; giữ mọi dòng tại cùng station và bộ 6 nội lực gốc, không nội suy. Áp dụng cả cực trị và Summary. Hai vị trí có thể trùng start/end; không suy từ tên này rằng release đã được gán. Nếu SAP xuất cả đầu nút và mặt offset, thuật toán vẫn chọn biên ngoài cùng của dữ liệu đã xuất, không tự nhận diện mặt offset.
+`start` = x0 (đầu I), `end` = xL (đầu J), giữ nguyên các mốc chia tư và cả 5 vị trí. `release-start` / `release-end` chọn station gốc nhỏ nhất / lớn nhất riêng cho mỗi frame, case/combo và step. Dùng station trên toàn frame, không phải element station; giữ mọi dòng tại cùng station và bộ 6 nội lực gốc, không nội suy. Áp dụng cả bộ lọc nội lực4.1, cực trị và Summary. Bộ lọc4.1 dùng trực tiếp dữ liệu gốc trong trình duyệt, không cần lấy mẫu/nội suy hay cập nhật API connector. Hai vị trí có thể trùng start/end; không suy từ tên này rằng release đã được gán. Nếu SAP xuất cả đầu nút và mặt offset, thuật toán vẫn chọn biên ngoài cùng của dữ liệu đã xuất, không tự nhận diện mặt offset.
 
 `release-start` / `release-end` use minimum / maximum original object station per frame/output/step; preserve tied rows, original vectors and signs, with no interpolation or assertion of release assignment. Update the local kit as well as the hosted UI to enable these new API options.
 

@@ -1,5 +1,10 @@
 # Repository handoff
 
+## SAP 4.1 release boundary filter — 2026-10-19
+
+Build2026.10.19-v2-release-filter.1 on current `fix/sap2000-portable-bootstrap` after input-review0a171f3. Add release_start/release_end to initial force position dropdown, deriving exact min/max original object station independently per frame/case-kind/output/step-type/step-number. Keep every equal-station row, raw vectors and signs. No interpolation/length inference; standard other selectors still apply. Original-station notice bypasses five-point sampling requirement. Extrema/Summary/API unchanged. Web change works with existing connector; ZIP updated for local-panel parity. Browser smoke passed both4-row boundary selections/zero interpolated rows and notice, synthetic offset stations with2steps/ties/unaltered signed values, reset and all inherited input-review/profile/force/extreme/summary/VI-EN/mobile flows. No new Windows live SAP execution. ZIP and hosted manifest rebuilt; CI owns root docs. Other untracked build directory preserved.
+
+
 ## SAP V2 integrated Steel Design input review — 2026-10-19
 
 - User explicitly requests input-review workflow. Integrated source preview9dd9dff selectively into stable2e0bb6d on current branch `fix/sap2000-portable-bootstrap`; resolved build-ID-only source conflicts while retaining portable bootstrap, release_start/end filters, start/end names and existing protocol. Build2026.10.19-v2-input-review.1. No unverified capacity/Cb engine connected.

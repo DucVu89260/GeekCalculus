@@ -11,7 +11,7 @@ def main():
     output = repo / 'downloads/API_IF_SAP26.2.0_V2.zip'
     output.parent.mkdir(exist_ok=True)
     names = ['requirements-test.lock', 'requirements-windows.txt',
-             'start-sap2000-v2.cmd', 'diagnose-sap2000-v2.cmd',
+             'start-sap2000-v2.cmd', 'diagnose-sap2000-v2.cmd', 'bootstrap-sap2000-env.py',
              'install-web-launcher-v2.cmd', 'install-web-launcher-v2.ps1', 'open-sap2000-v2-web.ps1',
              'SAP2000-API-V2.md', 'structural_engine/__init__.py']
     files = [source / name for name in names]

@@ -48,8 +48,8 @@ export function prepareDesignJob({snapshot,dataset,positions,summary,mode='full'
   issues.push('Confirm both exports represent the same analysis state, local-axis/sign mapping, fabrication, DAM assumptions, Lz and module-specific inputs before calculation')
   return {frame,section:m?.analysis_section??null,section_type:section?.section_type??null,material_name:materialName??null,
    geometry:item(d??null,'mm','SAP GetISection'),material:item(material?.normalized?Object.fromEntries(['Fy_MPa','Fu_MPa','E_MPa','G_MPa','expected_Fy_MPa','expected_Fu_MPa'].map(k=>[k,material.normalized[k]??null])):null,'MPa','Assigned SAP material; design overrides remain separate'),
-   length:item(positive(length)?length:null,'m','SAP Global I/J coordinates'),unbraced_lengths:lengths,
-   component_sections:componentSections,nonprismatic_segments:structuredClone(section?.segments||[]),design_overwrites:structuredClone(overwrites??null),issues}
+   poisson_ratio:item(material?.normalized?.poisson_ratio??null,'—','SAP GetMPIsotropic'),length:item(positive(length)?length:null,'m','SAP Global I/J coordinates'),unbraced_lengths:lengths,
+   sap_design_results:structuredClone(m?.data?.design_results??null),component_sections:componentSections,nonprismatic_segments:structuredClone(section?.segments||[]),design_overwrites:structuredClone(overwrites??null),issues}
  })
  const cases=[...rows.values()].map(row=>({frame:row.frame,record_id:row.record_id,output_case:row.output_case,case_kind:row.case_kind,step_type:row.step_type,step_num:row.step_num,element:row.element,station_m:row.station,
   provenance:provenance.get(row.record_id)||{method:'SAP_original',source_record_ids:[row.record_id],weight:null},forces:Object.fromEntries(['P','V2','V3','T','M2','M3'].map(k=>[k,row[k]])),force_units:{P:'kN',V2:'kN',V3:'kN',T:'kN·m',M2:'kN·m',M3:'kN·m'},axes:'SAP2000_local_123',concurrency:row.concurrency,

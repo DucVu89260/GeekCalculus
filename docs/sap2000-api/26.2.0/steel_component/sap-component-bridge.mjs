@@ -1,3 +1,4 @@
+import {cbF11} from './aisc360-10-verified-hi.mjs';
 /** Explicit, reviewed SAP local123 → existing AISC360-10 symmetric I/H input. No strength formulas. */
 const positive=v=>typeof v==='number'&&Number.isFinite(v)&&v>0;
 const finite=v=>typeof v==='number'&&Number.isFinite(v);
@@ -14,7 +15,10 @@ export function prepareSymmetricComponent(job,index,options={}){
  if(!positive(options.lz_m))throw Error('Enter independent torsional restraint length Lz (m).');
  if(row.axes!=='SAP2000_local_123'||!['P','V2','V3','T','M2','M3'].every(k=>finite(row.forces?.[k])&&row.force_units?.[k]===(['P','V2','V3'].includes(k)?'kN':'kN·m')))throw Error('Expected finite six-force vector in confirmed SAP local123 kN / kN·m.');
  if(row.concurrency!=='concurrent')throw Error('Envelope/modal/nonconcurrent vector: choose a concurrent constituent case/combo/step.');
- for(const key of ['mappingConfirmed','builtUpConfirmed','damConfirmed','cbOneConfirmed','unstiffenedConfirmed'])if(options[key]!==true)throw Error('Confirm axes/signs, welded built-up section, DAM, conservative Cb=1 and unstiffened web before loading.');
+ for(const key of ['mappingConfirmed','builtUpConfirmed','damConfirmed','unstiffenedConfirmed'])if(options[key]!==true)throw Error('Confirm axes/signs, welded built-up section, DAM, conservative Cb=1 and unstiffened web before loading.');
+ if(!options.momentDiagram&&options.cbOneConfirmed!==true)throw Error('Adopt conservative Cb=1 or supply a source-bound moment diagram.');
+ if(options.momentDiagram?.source&&(options.momentDiagram.source.frame!==row.frame||options.momentDiagram.source.case!==row.output_case||options.momentDiagram.source.step!==row.step_type||options.momentDiagram.source.step_num!==row.step_num))throw Error('Cb source does not match the current frame/combo/step.');
+ if(options.momentDiagram&&cbF11(options.momentDiagram).value==null)throw Error('Cb diagram requires complete same-combo segment input.');
  const f=row.forces;
  const input={material:{fy_mpa:mat.Fy_MPa,fu_mpa:mat.Fu_MPa,e_mpa:200000},
  section:{h_mm:d.h,bf_mm:d.bf_top,tw_mm:d.tw,tf_mm:d.tf_top,fabrication:'BUILT_UP',web_attachment:'WELDED',web_clear_height_mm:null,web_clear_height_verified:false},
@@ -23,8 +27,9 @@ export function prepareSymmetricComponent(job,index,options={}){
  stiffeners:{spacing_mm:0,thickness_mm:0,width_mm:0,fy_mpa:null,layout:'PAIRED',orientation:'PERPENDICULAR_RECTANGULAR_PLATE',inertia_mm4:null,inertia_axis_verified:false,attachment_details_verified:false},
  assessment:{scope:'GROSS_MEMBER',force_source:'MANUAL'},analysis:{method:'DIRECT',forces_method:job.method},
  tension_field_action:{enabled:false,is_end_panel:null,panel_position:'',panel_position_confirmed:false,four_sides_supported:null,four_sides_supported_confirmed:false,adjacent_panels:[],bounding_stiffeners:[],same_boundaries_confirmed:false}};
+ if(options.momentDiagram)input.moment_diagram=structuredClone(options.momentDiagram);
  return {schema:'gc-sap-symmetric-component-1',standard:job.standard,component:'symmetric_i',method:job.method,input,
- source:{demand_method:job.method,model:job.model,pid:job.pid,source_times:structuredClone(job.source_times),mode:job.mode,frame:row.frame,section:member.section,material:member.material_name,record_id:row.record_id,case:row.output_case,case_kind:row.case_kind,step_type:row.step_type,step_num:row.step_num,station_m:row.station_m,element:row.element,forces:structuredClone(row.forces),provenance:structuredClone(row.provenance),geometry:structuredClone(member.geometry),material_values:structuredClone(member.material),length:structuredClone(member.length),unbraced_lengths:structuredClone(lengths),mapping:'N=P; Mx=M3; My=M2; Vy=V2; Vx=V3; torsion=T; signs retained, confirmed by user',nominal_moduli:'AISC resistance E=200000 MPa, G=77200 MPa; original SAP values retained separately',Cb:'1 explicitly adopted conservatively; not calculated',Lz:{value:options.lz_m,unit:'m',source:'manual'},assumptions:structuredClone(options),review:'User-reviewed SAP values enter the existing manual-input gross member engine. Analysis model not verified; no automatic batch or full-member certification.'}};
+ source:{demand_method:job.method,model:job.model,pid:job.pid,source_times:structuredClone(job.source_times),mode:job.mode,frame:row.frame,section:member.section,material:member.material_name,record_id:row.record_id,case:row.output_case,case_kind:row.case_kind,step_type:row.step_type,step_num:row.step_num,station_m:row.station_m,element:row.element,forces:structuredClone(row.forces),provenance:structuredClone(row.provenance),geometry:structuredClone(member.geometry),material_values:structuredClone(member.material),poisson_ratio:structuredClone(member.poisson_ratio??null),length:structuredClone(member.length),unbraced_lengths:structuredClone(lengths),mapping:'N=P; Mx=M3; My=M2; Vy=V2; Vx=V3; torsion=T; signs retained, confirmed by user',nominal_moduli:'AISC resistance E=200000 MPa, G=77200 MPa; original SAP values retained separately',Cb:cbF11(options.momentDiagram??{mode:'CONSERVATIVE'}),Lz:{value:options.lz_m,unit:'m',source:'manual'},assumptions:structuredClone(options),review:'User-reviewed SAP values enter the existing manual-input gross member engine. Analysis model not verified; no automatic batch or full-member certification.'}};
 }
 export function validateComponentPacket(packet){
  if(packet?.schema!=='gc-sap-symmetric-component-1'||packet.standard!=='AISC360-10'||packet.component!=='symmetric_i'||!['LRFD','ASD'].includes(packet.method))throw Error('Unsupported component packet/edition.');
@@ -34,6 +39,8 @@ export function validateComponentPacket(packet){
  if(!['lx_mm','ly_mm','lb_mm','lz_mm'].every(k=>positive(i.member[k]))||!['kx','ky','kz'].every(k=>i.member[k]===1))throw Error('Invalid member lengths/K.');
  if(!['axial_kN','moment_x_kNm','moment_y_kNm','shear_x_kN','shear_y_kN','torsion_kNm'].every(k=>finite(i.forces?.[k])))throw Error('Invalid component forces.');
  if(!packet.source||typeof packet.source.frame!=='string'||typeof packet.source.case!=='string')throw Error('Missing source trace.');
- for(const key of ['mappingConfirmed','builtUpConfirmed','damConfirmed','cbOneConfirmed','unstiffenedConfirmed'])if(packet.source.assumptions?.[key]!==true)throw Error('Missing input confirmation.');
+ for(const key of ['mappingConfirmed','builtUpConfirmed','damConfirmed','unstiffenedConfirmed'])if(packet.source.assumptions?.[key]!==true)throw Error('Missing input confirmation.');
+ if(!i.moment_diagram&&packet.source.assumptions?.cbOneConfirmed!==true)throw Error('Missing Cb basis.');
+ if(i.moment_diagram&&cbF11(i.moment_diagram).value==null)throw Error('Invalid Cb diagram.');
  return structuredClone(packet);
 }

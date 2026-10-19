@@ -1603,7 +1603,7 @@ function renderAiscPrimary(result,input,canonical){
  find('trace').innerHTML=`<div><span>Calculation source</span><strong>${safe(result.geometry_source||'AISC 360-10 member kernel')}</strong></div><div class="compliance-trace" style="grid-column:1/-1">${safe(JSON.stringify(traces,null,2))}</div>`;
  find('warnings').innerHTML=(result.warnings||[]).map(w=>`<div class="warning"><strong>${safe(w.code)}</strong>${safe(w.message)}</div>`).join('');
  find('warn-count').textContent='('+(result.warnings||[]).length+')';
- find('refline').innerHTML=`<a href="${sourceLibraryHref}" target="_blank" rel="noopener">AISC 360-10 source library</a> · Cb = 1 conservative · ${safe(result.source?.edition||'ANSI/AISC 360-10')}`;
+ find('refline').innerHTML=`<a href="${sourceLibraryHref}" target="_blank" rel="noopener">AISC 360-10 source library</a> · Cb = ${safe(String(result.assumptions?.cb??'—'))} (${safe(result.assumptions?.cb_basis||'')}) · ${safe(result.source?.edition||'ANSI/AISC 360-10')}`;
  const factorLib=window.Aisc36010Resistance;
  const factorKeys=Object.keys(factorLib.allFactors().factors).filter(key=>result.assessment_scope!=='GROSS_MEMBER'||key!=='TENSION_RUPTURE');
  find('factor-table').innerHTML='<h4>AISC 360-10 · '+safe(result.mode)+' · φ / Ω</h4><div class="factor-grid">'+factorKeys.map(key=>{const f=factorLib.factorNotation(result.mode,key);return '<div class="factor-item"><span>'+safe(key)+'</span><strong>'+safe(f.symbol)+' = '+format(f.value,2)+'</strong><small>'+safe(f.clause)+'</small></div>'}).join('')+'</div>';
@@ -1823,7 +1823,7 @@ function invalidateAcknowledgments(){
  find('ack-reset-note')?.classList.add('visible')
 }
 function markChanged(event){
- if(sapComponentPacket)sapComponentEdited=true;
+ if(sapComponentPacket){sapComponentEdited=true;if(latest.input.moment_diagram)latest.input.moment_diagram={mode:'UNCONFIRMED'};}
  const target=event?.target
  if(target&&!isAcknowledgementControl(target))invalidateAcknowledgments()
  ++sharedRequestSequence;verifiedResult=null;latest.changed=true
@@ -2126,13 +2126,13 @@ function initialiseSapComponent(){
   try{
    if(JSON.stringify(event.data).length>2000000)throw Error('Component packet too large.');
    const {validateComponentPacket}=await import('./sap-component-bridge.mjs');
-   const packet=validateComponentPacket(event.data.packet),input=sanitizeImportedInput(packet.input);
+   const packet=validateComponentPacket(event.data.packet),input=sanitizeImportedInput(packet.input);if(packet.input.moment_diagram)input.moment_diagram=structuredClone(packet.input.moment_diagram);
    sapComponentPacket=packet;sapComponentEdited=false;latest.input=input;latest.result=null;latest.changed=true;verifiedResult=null;
    document.querySelector('input[name="design-method"][value="'+packet.method+'"]').checked=true;latest.method=packet.method;
    find('calculation-mode').value='AISC36010';updateInputs();
-   const source=packet.source;banner.textContent='SAP2000 · Frame '+source.frame+' · '+source.section+' · '+source.case+' · '+source.step_type+' '+source.step_num+' · x='+source.station_m+' m · '+packet.method+' | '+source.mapping+' | Cb=1; nominal AISC E/G; no stiffener/TFA credit. Review inputs and press Calculate. Values remain editable; export retains source.';
-   find('sap-import').textContent='SAP2000 · input loaded';find('sap-import').title='Confirmed source recorded above; no automatic model verification.';
-   find('run').disabled=false;find('export').disabled=false;renderPrimaryPending('SAP input loaded. Review and calculate; no result yet.');find('dirtytext').textContent='SAP input loaded. Review and calculate.';
+   const source=packet.source;banner.textContent='SAP2000 · Frame '+source.frame+' · '+source.section+' · '+source.case+' · '+source.step_type+' '+source.step_num+' · x='+source.station_m+' m · '+packet.method+' | '+source.mapping+' | Cb='+packet.source.Cb.value+' ('+packet.source.Cb.source+'); nominal AISC E/G; no stiffener/TFA credit. Review inputs and press Calculate. Values remain editable; export retains source.';
+   find('cb1-note').textContent='Cb = '+packet.source.Cb.value+' · '+packet.source.Cb.source+' · same case/step/LTB segment. Editing inputs requires recomputing the source-bound Cb.';if(packet.input.moment_diagram){const d=packet.input.moment_diagram;find('cb1-note').textContent+=' · Mmax='+d.mmax+'; MA='+d.ma+'; MB='+d.mb+'; MC='+d.mc+' kN·m · '+packet.source.case+' / '+packet.source.step_type+' '+packet.source.step_num;}find('sap-import').textContent='SAP2000 · input loaded';find('sap-import').title='Confirmed source recorded above; no automatic model verification.';
+   find('run').disabled=false;find('export').disabled=false;renderPrimaryPending('SAP input loaded. Review and calculate; no result yet.');find('dirtytext').textContent='SAP input loaded. Review and calculate.';if(packet.autoCalculate===true)await run();
   }catch(error){find('run').disabled=true;find('export').disabled=true;sapComponentPacket=null;banner.textContent='SAP component input rejected: '+error.message;renderPrimaryPending(banner.textContent)}
  });
 }

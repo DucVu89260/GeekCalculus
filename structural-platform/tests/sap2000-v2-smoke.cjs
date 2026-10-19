@@ -81,6 +81,29 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright')
   await page.click('#extract');await page.waitForFunction(()=>document.querySelectorAll('#results tr').length===8&&!document.querySelector('#controls').disabled)
 
   for(const value of await page.locator('#results td:nth-child(n+9):nth-child(-n+14)').allTextContents())assert.match(value,/^-?\d+\.\d{2}$/)
+  for(const position of ['release_start','release_end']){
+   await page.selectOption('#filter-position',position)
+   assert.equal(await page.locator('#results tr').count(),4)
+   assert.equal(await page.locator('#results tr.interpolated').count(),0)
+   assert.match(await page.locator('#position-notice').textContent(),/không nội suy/)
+  }
+  const boundaryCheck=await page.evaluate(()=>{
+   const original=dataset;const row=dataset.rows[0];
+   dataset={...dataset,rows:[]};
+   for(const [i,step] of ['', 'Max'].entries())for(const [j,x] of [0.4+i,2.8+i].entries()){
+    const r={...row,record_id:i+'-'+j,step_type:step,station:x,element_station:0,M3:-123.456};dataset.rows.push(r)
+    if(j===0)dataset.rows.push({...r,record_id:r.record_id+'-tie',element:'other'})
+   }
+   try{
+    const result={};for(const pos of ['release_start','release_end']){
+     document.querySelector('#filter-position').value=pos;
+     result[pos]=filteredRows().map(r=>[r.record_id,r.station,r.M3]);
+    }return result;
+   }finally{dataset=original}
+  })
+  assert.deepEqual(boundaryCheck.release_start,[['0-0',.4,-123.456],['0-0-tie',.4,-123.456],['1-0',1.4,-123.456],['1-0-tie',1.4,-123.456]])
+  assert.deepEqual(boundaryCheck.release_end,[['0-1',2.8,-123.456],['1-1',3.8,-123.456]])
+  await page.selectOption('#filter-position','')
   await page.click('#extremes');await page.waitForFunction(()=>document.querySelectorAll('#extreme-results tr').length===36&&!document.querySelector('#controls').disabled)
   assert.equal(await page.locator('#extreme-position option[value="end_i"]').textContent(),'start')
   assert.equal(await page.locator('#extreme-position option[value="end_j"]').textContent(),'end')

@@ -33,9 +33,12 @@ def main():
         manifest['install-web-launcher.cmd']=hashlib.sha256(alias).hexdigest()
         archive.writestr('manifest.sha256.json', json.dumps(manifest, indent=2))
         archive.writestr('BAT-DAU.txt',
-            'SAP2000-API V2 web/local release — 2026.10.18-v2-web.1\n'
+            'SAP2000-API V2 web/local release — 2026.10.19-v2-web-portable.1\n'
             'Extract ALL files to C:\\geek_calculus\\SAP2000-API\n'
-            'Stop V1 connector with Ctrl+C; keep SAP2000 26.2.0 open.\n'
+            'Stop the old connector with Ctrl+C; keep SAP2000 26.2.0 open.\n'
+            'Python 3.13 x64 + py recommended on each PC; 3.12/3.11 x64 also supported.\n'
+            'Startup repairs machine-specific .venv automatically; old .venv is backed up.\n'
+            'Python runtime is not bundled. First dependency installation needs Internet.\n'
             'Run install-web-launcher.cmd once to upgrade the web protocol to V2.\n'
             'Then click SAP2000-API on GeekCalculus; keep the connector running.\n'
             'Read SAP2000-API-V2.md for Vietnamese/English instructions and preview limits.\n'

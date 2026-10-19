@@ -1,5 +1,9 @@
 # Repository implementation plan
 
+## SAP V2 portable bootstrap — 2026-10-19
+
+`SAP-PORTABLE-01`: isolated stable hotfix on `fix/sap2000-portable-bootstrap`, base main559f474. Automatically validate/reuse or archive/recreate machine-bound venv with full Python3.13/3.12/3.11 x64; no default3.15, no model/.env edits or process kills. Acceptance: real temporary venv create/reuse/rebuild, missing-old-account simulation, version/architecture/prefix rejection, occupied-port preservation, complete locked dependency contract, ZIP hashes and hosted parity. Windows batch/UAC acceptance remains unrun here. Keep Steel Design preparation preview on feature branch; exclude from stable hotfix.
+
 ## CFS source sample review — 2026-10-18
 
 `CFS-CONNECT-01 / P0-A` (offline artifact review completed, base `bfeb4be`): [evidence and capability decision](CFS-P0-REVIEW.md). Received actual CFSA, three referenced CFSS and nine-page native-text PDF. Compared all 8 member references/16 endpoints, 27 supports and 6 distributed-load rows at PDF precision; extracted 12 combinations/3 section inputs/1 localized AISI S100-16/S1-18 LRFD check. Sample mappings only, no production conversion/formula change. No moment graph/envelope/station table or complete design output is present. Full run fingerprint, binary CFSS/settings/combination semantics, Windows rerun and automation capability remain unverified. P1-A input/combination/localized-check reader is the next viable slice; P1-B/P2 numeric envelope needs further CFS results. Keep original files, full extracted tables and project-specific review outside Git/Pages; no application feature was implemented by this audit.

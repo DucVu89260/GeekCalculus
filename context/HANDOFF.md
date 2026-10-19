@@ -1,5 +1,12 @@
 # Repository handoff
 
+## SAP V2 portable environment repair — 2026-10-19
+
+- Stable hotfix branch `fix/sap2000-portable-bootstrap` based on main559f474, bootstrap commitab083a1 (also preserved on preview branch asbb12d3d). Task-specific branch switch isolates this fix from Steel Design input-preview9dd9dff. Build2026.10.19-v2-web-portable.1; no design preview in stable ZIP/UI.
+- Standard-library bootstrap checks actual venv interpreter/pip/version/bits/current prefix, reuses healthy environment or preserves old directory as timestamp/UUID backup and creates a replacement. Launcher explicitly tries full optional .runtime, then py3.13/3.12/3.11 x64; never default3.15. Checks occupied8010 before rebuild, refuses junction/shared target, never deletes data/kills SAP. Diagnose check is read-only. Locked complete dependencies/preflight retained. Python is not bundled; first install requires dependencies via Internet. Each new machine still needs a compatible full Python and per-user protocol registration.
+- Engineering cwd: PYTHONPATH=.:tests .venv/bin/python -m pytest tests/test_sap_portable_env.py tests/test_sap_v2_kit.py -q →15 passed. Includes actual temporary venv create/reuse/rebuild and missing ADMIN base simulation; version/bits/prefix and active-port guards. ZIP CRC, every listed payload hash, CMD CRLF, no model/runtime/venv/secrets or preview module, hosted ZIP/hash parity and git diff --check passed. ZIP SHA256 a9a810cdbce66d49c9e0644259aa96eabfdf9b695245cb03b7bd66ed408a162e. Windows CMD/PowerShell/UAC/SAP execution unrun on Linux; user acceptance is next. Root docs left to CI; push/publication evidence separate below.
+
+
 ## V2 publication evidence and upgrade instructions — 2026-10-18
 
 - Main source push2067147 succeeded. CI bot commit7ff09ec generated docs with API_IF_SAP26.2.0_V2/build2026.10.18-v2-web.1, new3/4 hierarchy and exact release ZIP hash; verified via remote git objects and fast-forwarded checkout (no manual docs edits). Frontend npm test157 passed, no skipped tests. Follow-up verified Windows root escaping: parsed manifest/help/BAT-DAU already use correct single separators; no launcher/builder path source change was needed. Repacking unchanged payload refreshed ZIP timestamps/hash and hosted manifest checksum. Next CI publication uses this refreshed archive hash.

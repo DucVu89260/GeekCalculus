@@ -1,6 +1,8 @@
 # SAP2000-API V2 — current web/local kit
 
-Download [API_IF_SAP26.2.0_V2.zip](API_IF_SAP26.2.0_V2.zip?raw=true). Build **2026.10.18-v2-web.1**, SAP2000 **26.2.0**.
+Download [API_IF_SAP26.2.0_V2.zip](API_IF_SAP26.2.0_V2.zip?raw=true). Build **2026.10.19-v2-web-portable.1**, SAP2000 **26.2.0**.
+
+Portable update: startup automatically backs up and recreates a broken machine-specific `.venv`. Install Python 3.13 x64 with `py` on each PC (3.12/3.11 also supported); Python 3.15 is not selected. Runtime is not bundled; initial dependency installation needs Internet. Extract at `C:\geek_calculus\SAP2000-API` and run `start-sap2000-v2.cmd` or the existing web launcher.
 
 1. Finish active reads and stop the old connector with Ctrl+C; keep SAP2000 open.
 2. Extract all files directly to **`C:\geek_calculus\SAP2000-API`**, keeping an existing compatible `.venv`. No V2 subfolder.

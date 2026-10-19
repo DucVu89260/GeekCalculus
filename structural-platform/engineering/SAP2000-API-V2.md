@@ -1,6 +1,6 @@
 # SAP2000-API V2 — Web / Local
 
-Build `2026.10.18-v2-web.1` · Compatible with SAP2000 v26.2.0 · Windows64-bit, Python3.11+.
+Build `2026.10.19-v2-web-portable.1` · Compatible with SAP2000 v26.2.0 · Windows64-bit, Python3.11–3.13 x64.
 
 ## Cài mới / Nâng cấp từ V1 hoặc V2 local
 
@@ -15,6 +15,17 @@ Build `2026.10.18-v2-web.1` · Compatible with SAP2000 v26.2.0 · Windows64-bit,
 **Địa chỉ web:** https://ducvu89260.github.io/GeekCalculus/sap2000-api/26.2.0/?lang=vi
 
 Nếu trang vẫn hiện V1, tải lại bỏ cache (Ctrl+F5). Nếu cổng8010 bị chiếm hoặc launcher báo connector khác, dừng cửa sổ connector cũ khi không có tác vụ xuất rồi mở lại từ web. Không cần đóng SAP hay Repair. Cả V1/V2 sử dụng cổng8010, không chạy đồng thời.
+
+## Portable giữa các máy / Portable across machines
+
+Thư mục kit có thể sao chép nguyên bộ giữa các máy tại `C:\geek_calculus\SAP2000-API`. `.venv` chứa đường dẫn Python theo máy/tài khoản nên không phải runtime portable. Launcher nay tự kiểm tra Python thực thi, phiên bản, kiến trúc 64-bit và pip; môi trường hỏng do đường dẫn tài khoản cũ được đổi tên thành `.venv-backup-<ngày-giờ>-<mã>` rồi tạo lại tự động. Môi trường hợp lệ được giữ lại. Không cần xóa hay đổi tên `.venv` thủ công; model và `.env` không bị sửa.
+
+- Trên mỗi máy, cài **Python 3.13 x64** kèm Python Launcher (`py`); cũng hỗ trợ 3.12/3.11 x64. Launcher chọn lần lượt **3.13 → 3.12 → 3.11**, không lấy Python 3.15 mặc định. Trường hợp có Python 3.13 dưới tài khoản Windows mới, đường dẫn của tài khoản đó được sử dụng tự động.
+- Có thể cung cấp một **full Python runtime** tương thích tại `.runtime\python.exe`; cần đủ `venv` và `ensurepip`, không dùng riêng bản embeddable tối giản. ZIP không kèm Python runtime. Lần cài dependencies đầu cần Internet; đây chưa phải gói standalone/offline hoàn toàn.
+- Dừng connector trước khi chuyển máy/cập nhật hoặc sửa môi trường. Nếu cổng 8010 đang bận, bootstrap không đổi tên môi trường và báo cần dừng connector cũ; không tự tắt SAP2000.
+- Mỗi máy/tài khoản mới chạy `install-web-launcher.cmd` một lần. Máy đã đăng ký V2 không cần đăng ký lại chỉ vì cập nhật bản sửa Python.
+
+The source kit is portable; virtual environments are machine-specific. Startup automatically preserves an invalid environment as `.venv-backup-*` and creates a replacement using a supported local 64-bit Python. Install Python 3.13 with `py` on each machine (3.12/3.11 also supported), or supply a full compatible `.runtime`. Python and first-install dependencies are not bundled. Old backups are kept; no model or `.env` is changed.
 
 ## Chạy thủ công
 

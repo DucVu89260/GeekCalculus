@@ -1,6 +1,6 @@
 # SAP2000-API V2 — Web / Local
 
-Build `2026.10.20-v2-results.1` · Compatible with SAP2000 v26.2.0 · Windows64-bit, Python3.11–3.13 x64.
+Build `2026.10.20-v2-ltb.1` · Compatible with SAP2000 v26.2.0 · Windows64-bit, Python3.11–3.13 x64.
 
 ## Cài mới / Nâng cấp từ V1 hoặc V2 local
 
@@ -119,3 +119,9 @@ LTB start/end là tọa độ theo local1 của hai đầu đoạn không giằn
 ## Cb và kết quả chưa tính được
 
 Cb được xử lý độc lập từ biểu đồ cùng Frame/Combo/Step/LTB, trước các điều kiện hình học/Lz/sức kháng. Nếu Cb đã tính hợp lệ, lỗi chuẩn bị D/C không được xóa Cb. Không tính Cb thiết kế từ vector envelope/modal không đồng thời; không tự đổi sang1 khi biểu đồ thiếu mốc (chỉ dùng1 khi chọn phương án bảo thủ). H1 và D/C chỉ có số khi có kiểm tra sức kháng tương ứng. Mỗi dòng lưu metric_reasons riêng; phần Lý do chưa có kết quả nằm dưới bảng gom nguyên nhân và số dòng ảnh hưởng theo Frame/Combo. Chú thích dấu* bên ngoài cả bảng tổ hợp và bảng station định nghĩa D/C đã tính, phạm vi tham khảo Nonprismatic và việc dấu—không phải0. Đây là sửa điều phối/hiển thị; không đổi công thức hay nới điều kiện chấp nhận thiết kế.
+
+## Khai báo đoạn LTB và phạm vi Cb
+
+Khi Lb<Length, không chọn ngầm đoạn0…Lb. Nhập start đã xác định hoặc bấm Chọn đoạn đầu0→Lb để chủ động khai báo đoạn đầu; end được đề xuất bằng start+Lb, không phải tọa độ giằng đọc từ SAP. Có thể chỉnh end hoặc dùng Cuối=đầu+Lb; thay đổi Lb giữ end nhập tay để báo sai khác thay vì âm thầm đổi tọa độ. Khi Lb=Length, giao diện tiếp tục gợi ý toàn frame0…L và ghi nguồn full_frame_length_reference. Mốc MA/MB/MC hiện ngay dưới hai tọa độ. Chỉ đang kiểm tra một đoạn cho mỗi Frame; các station ngoài đoạn vẫn ghi rõ chưa được tính, không coi là đạt toàn member.
+
+Cb1 bảo thủ hoặc console đầu tự do do người dùng khai báo không yêu cầu start/end hay các mô men chia tư; hai ô được vô hiệu và nhánh F1-1 đã xác minh trả1. Lb vẫn cần cho sức kháng. Không tự suy điều kiện console/giằng từ Releases. Từng station luôn kiểm tra phạm vi trước khi dùng lại biểu đồ cache, kể cả cùng combo/step. Các lý do trùng nhau được gom theo nguyên nhân, liệt kê Cb/H1 D-C/D-C bị ảnh hưởng và đếm mỗi dòng nội lực một lần.

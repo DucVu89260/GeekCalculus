@@ -3,10 +3,34 @@ import {calculateHISectionProperties} from './hi-section-properties-core.mjs';
 import {calculateIH36010,cbF11} from './aisc360-10-verified-hi.mjs';
 import {prepareSymmetricComponent} from './sap-component-bridge.mjs';
 const key=r=>JSON.stringify([r.frame,r.case_kind,r.output_case,r.step_type,r.step_num]);
+/** Input/coverage validation only: brace coordinates are declarations, not inferred from ratios. */
+export function reviewLtbSegment(member,options={}){
+ const start=options.segmentStart,end=options.segmentEnd,lb=member?.unbraced_lengths?.ltb?.value,length=member?.length?.value;
+ const result={start,end,lb,length,quarters:[],status:'INPUT_REQUIRED',reason:null};
+ if(options.cbMode==='CONSERVATIVE'||options.cantilever===true)return {...result,status:'NOT_REQUIRED',reason:'Cb = 1: không cần tọa độ đoạn để tính Cb; Lb vẫn cần cho sức kháng.'};
+ const fail=reason=>({...result,reason});
+ if(!Number.isFinite(lb)||lb<=0)return fail('Chưa có Lb dương. Đọc ratio LTB từ SAP hoặc nhập Lb trước.');
+ if(!Number.isFinite(length)||length<=0)return fail('Chưa có chiều dài Frame để kiểm tra tọa độ đoạn LTB.');
+ if(!Number.isFinite(start))return fail('Chưa chọn đầu đoạn LTB. Nhập tọa độ start đã xác định; cuối đoạn có thể lấy start + Lb.');
+ if(!Number.isFinite(end))return fail('Chưa có cuối đoạn LTB. Nhập end hoặc dùng start + Lb.');
+ if(start<0||end<=start||end>length+1e-6)return fail('Đoạn LTB phải có 0 ≤ start < end ≤ Length của Frame.');
+ if(Math.abs(end-start-lb)>1e-6)return fail('Chiều dài đoạn end − start khác Lb. Kiểm tra hai tọa độ hoặc dùng end = start + Lb.');
+ return {...result,status:'READY',quarters:[.25,.5,.75].map(f=>start+f*(end-start))};
+}
+/** One root cause per group, counting force records once even when three metrics depend on it. */
+export function summarizeMissingResults(group){
+ const reasons=new Map();
+ for(const row of group.rows||[])for(const [metric,reason] of Object.entries(row.metric_reasons||{}))if(reason){
+  if(!reasons.has(reason))reasons.set(reason,{reason,metrics:new Set(),records:new Set()});
+  const entry=reasons.get(reason);entry.metrics.add(metric);entry.records.add(row.index);
+ }
+ return [...reasons.values()].map(entry=>({reason:entry.reason,metrics:[...entry.metrics],record_count:entry.records.size}));
+}
 export function comboMomentDiagram(dataset,row,member,options={},sourceRows=null){
  if(options.cbMode==='CONSERVATIVE')return {mode:'CONSERVATIVE',source:{frame:row.frame,case:row.output_case,step:row.step_type,step_num:row.step_num}};
- const start=options.segmentStart,end=options.segmentEnd,lb=member.unbraced_lengths.ltb.value;
- if(!Number.isFinite(start)||!Number.isFinite(end)||start<0||end<=start||Math.abs(end-start-lb)>1e-6||end>member.length.value+1e-6)throw Error('Khai báo đầu/cuối đoạn LTB có chiều dài bằng Lb; không tự suy điểm giằng.');
+ if(options.cantilever===true)return {mode:'QUARTER_POINTS',is_unbraced_cantilever:true,source:{frame:row.frame,case:row.output_case,step:row.step_type,step_num:row.step_num,basis:'User-declared unbraced free-end cantilever; F1-1 Cb=1.'}};
+ const segment=reviewLtbSegment(member,options);if(segment.status!=='READY')throw Error(segment.reason);
+ const {start,end}=segment;
  if(row.station_m<start-1e-6||row.station_m>end+1e-6)throw Error('Station nằm ngoài đoạn LTB đang kiểm tra.');
  const source=sourceRows??dataset.rows.filter(r=>key(r)===key({...row,output_case:row.output_case}));
  const x=[...new Set(source.map(r=>r.station))].sort((a,b)=>a-b);
@@ -65,6 +89,10 @@ export async function calculateReport(job,dataset,optionsFor,factors,onProgress=
   try{
    options=optionsFor(member,row);
    if(row.concurrency!=='concurrent')throw Error('Envelope/modal/nonconcurrent vector: choose a concurrent constituent case/combo/step.');
+   const segment=reviewLtbSegment(member,options);
+   if(segment.status==='INPUT_REQUIRED')throw Error(segment.reason);
+   // This row-level guard must precede the cache: a prior in-segment row cannot authorize another station.
+   if(segment.status==='READY'&&(row.station_m<segment.start-1e-6||row.station_m>segment.end+1e-6))throw Error('Station nằm ngoài đoạn LTB đang kiểm tra.');
    const diagramKey=JSON.stringify([key(row),options.segmentStart,options.segmentEnd,options.cbMode,options.endsBraced,options.cantilever]);
    if(!diagramCache.has(diagramKey))diagramCache.set(diagramKey,comboMomentDiagram(dataset,row,member,options,sources.get(key(row))||[]));
    diagram=diagramCache.get(diagramKey);cb=cbF11(diagram);if(cb.value==null)throw Error(cb.reason);

@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue'
 import data from '../../../../standards/qcvn02-2022-locations.json'
 import { locationDropdownOptions, locationSnapshot, sourcePageUrl } from '../vietnam-location/lookup.js'
 import { moduleHref } from '../modules'
+import LocationHazardIllustration from './LocationHazardIllustration.vue'
 
 const props = defineProps({ locale: { type: String, required: true } })
 const words = {
@@ -95,7 +96,9 @@ function download() {
     <p v-if="!provinceId" class="vn-empty">{{ t('chooseFirst') }}</p>
     <div v-else class="vn-workspace">
       <section class="vn-section" :aria-label="t('wind')">
-        <h3>{{ t('wind') }}</h3><label>{{ t('scope') }}<select v-model="windId" data-vn="wind"><option value="">{{ t('chooseScope') }}</option><option v-for="row in windRows" :key="row.id" :value="row.id">{{ row.location }}</option></select></label>
+        <h3>{{ t('wind') }}</h3>
+        <LocationHazardIllustration kind="wind" :locale="locale" />
+        <label>{{ t('scope') }}<select v-model="windId" data-vn="wind"><option value="">{{ t('chooseScope') }}</option><option v-for="row in windRows" :key="row.id" :value="row.id">{{ row.location }}</option></select></label>
         <p v-if="appliedQuery && !windRows.length" class="vn-filter-empty" role="status">{{ t('noResults') }}</p>
         <p class="vn-hint">{{ t('windHint') }}</p>
         <template v-if="wind"><p class="vn-scope">{{ wind.location }}</p><div class="vn-values">
@@ -106,7 +109,9 @@ function download() {
         </div><a class="vn-page-link" :href="pageUrl(wind.source.pdf_page)" target="_blank" rel="noopener noreferrer">{{ pageLabel(wind.source) }} ↗</a></template>
       </section>
       <section class="vn-section" :aria-label="t('seismic')">
-        <h3>{{ t('seismic') }}</h3><label>{{ t('district') }}<select v-model="seismicId" data-vn="seismic"><option value="">{{ t('chooseDistrict') }}</option><option v-for="row in seismicRows" :key="row.id" :value="row.id">{{ row.location }}</option></select></label>
+        <h3>{{ t('seismic') }}</h3>
+        <LocationHazardIllustration kind="seismic" :locale="locale" />
+        <label>{{ t('district') }}<select v-model="seismicId" data-vn="seismic"><option value="">{{ t('chooseDistrict') }}</option><option v-for="row in seismicRows" :key="row.id" :value="row.id">{{ row.location }}</option></select></label>
         <p v-if="appliedQuery && !seismicRows.length" class="vn-filter-empty" role="status">{{ t('noResults') }}</p>
         <template v-if="seismic"><p class="vn-scope">{{ seismic.location }}</p><div class="vn-values">
           <article v-for="parameter in ['agr', 'ss', 's1']" :key="parameter"><h4>{{ t(parameter) }}</h4><strong :data-vn-value="parameter">{{ seismic[parameter].value_g === null ? t('missing') : number(seismic[parameter].value_g) }} <small v-if="seismic[parameter].value_g !== null">g</small></strong><p>{{ t(parameter + 'Basis') }}</p><a class="vn-page-link" :href="pageUrl(seismic[parameter].source.pdf_page)" target="_blank" rel="noopener noreferrer">{{ pageLabel(seismic[parameter].source) }} ↗</a><p v-if="seismic[parameter].status === 'source_unit_missing'" class="vn-note">{{ t('vinh') }}</p></article>

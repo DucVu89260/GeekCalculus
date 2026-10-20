@@ -1,5 +1,9 @@
 # Repository implementation plan
 
+## AISC 360-10 formula re-audit / Cb — 2026-10-20
+
+`AISC-CB-AUDIT-07`: re-audit active symmetric I/H B4/C/D/E/F/G/H branches and SAP moment/length provenance under accepted external DAM and maximum-length assumptions. Preserve Cb1 default, independent E4 length and tapered-reference barriers. Fix F1-1 finite-input overflow by algebraic normalization, without changing equation/coefficients; add independent uniform, triangular, reverse-curvature, parabolic, interior-peak, zero and scale/sign fixtures plus downstream strength-cap checks. Record edition/hash/page evidence inherited from the prior actual-PDF audit (original unavailable this session), coverage and limitations. Acceptance: focused/full numerical suites, SAP handoff tests, rebuilt browser/kit asset parity and source-only distribution.
+
 ## SAP maximum unbraced lengths / simple Cb — 2026-10-20
 
 `SAP-MAX-LENGTH-06`: user clarification supersedes primary segment workflow: Lx/Ly/Lb are declared maximum design lengths per Frame, not brace/purlin coordinates. Default all-SAP18/19/20 ratios×Length, allow explicit manual fallback per missing field (including Major), never infer0/ProgDet values. Cb1 default over all exported stations; F1-1 actual-segment mode advanced/optional, never apply whole-frame quarters to shorter Lb or infer a brace grid. Primary member table contains just the three lengths alongside section/material; move independent E4 torsional length to advanced settings without inventing its value or renaming it LTB. Provide explicit all-frame Lz=Lb declaration action, not a default/SAP-derived Lz. Missing E4 still reported honestly. Acceptance:9m/1.5m minor/4.5m LTB test using max lengths across all stations without coordinates, missing-overwrite/manual provenance, primary/advanced browser layout and source-bound detailed regression; preserve all actual engineering blockers.

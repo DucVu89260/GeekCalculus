@@ -288,3 +288,20 @@ test('missing SAP maximum-length overwrites allow explicit manual fallback for a
  const lengths=prepareDesignJob({...f,frames:['1'],lengthSource:'sap',manualLengths:{'1':{major:9,minor:1.5,ltb:4.5}}}).members[0].unbraced_lengths;
  for(const [key,value] of [['major',9],['minor',1.5],['ltb',4.5]]){assert.equal(lengths[key].value,value);assert.equal(lengths[key].source,'manual');assert.equal(lengths[key].manual_fallback,true);assert.equal(lengths[key].sap_ratio,null)}
 });
+
+
+test('F1-1 Mmax includes exported off-quarter peaks and conservative discontinuity ties',async()=>{
+ const {comboMomentDiagram}=await import('../frontend/vue/public/sap-steel-report.mjs');
+ const {cbF11}=await import('../standards/aisc360-10-verified-hi.mjs');
+ const row={frame:'F',case_kind:'combination',output_case:'W',step_type:'Step',step_num:2,station_m:1};
+ const source=(id,x,m)=>({...row,record_id:id,element:'E',station:x,M3:m});
+ const rows=[source('s',0,0),source('peak',1,-100),source('a',2,0),source('b',4,0),source('c',6,0),source('e',8,0)];
+ const member={length:{value:8},unbraced_lengths:{ltb:{value:8}}},options={segmentStart:0,segmentEnd:8,endsBraced:true};
+ const diagram=comboMomentDiagram({rows},row,member,options);
+ assert.equal(diagram.mmax,100);assert.equal(cbF11(diagram).value,5);
+ assert.ok(diagram.source.source_record_ids.includes('peak'));
+ // A jump at MA keeps both source records; the larger magnitude reduces Cb.
+ const tied=comboMomentDiagram({rows:[...rows,source('jump',2,-50)]},row,member,options);
+ assert.equal(tied.ma,-50);assert.equal(tied.mmax,100);assert.ok(Math.abs(cbF11(tied).value-25/8)<1e-12);
+ assert.deepEqual(tied.source.samples[1].ids,['a','jump']);
+});

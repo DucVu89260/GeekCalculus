@@ -1,5 +1,16 @@
 # Repository handoff
 
+## AISC-CB-AUDIT-07 — formula re-audit / Cb numerical stability — 2026-10-20
+
+Baseline `8e3d809`, branch `fix/sap2000-portable-bootstrap`. User requests another AISC360-10 review, especially Cb, retaining accepted DAM/maximum-length assumptions. Review artifact: `structural-platform/standards/AISC36010_CB_REAUDIT_2026-10-20.md` records source hash/pages, active B4/C/D/E/F/G/H coverage, independent Cb hand fixtures and remaining scope. Original AISC PDF unavailable in this workspace; inherited actual-source audit evidence is distinguished from current code/numerical review. No new scope/coefficients or blanket certification.
+
+Found/fixed F1-1 weighted numerator/denominator overflow for finite moments and subnormal distortion: normalize quarter magnitudes by Mmax before weighting, preserve zero convention and reject impossible maxima. Require literal boolean true for free-end declaration. Cb1 default and maximum Lx/Ly/Lb workflow unchanged. Added uniform/triangular/reversed/parabolic/interior-peak hand fractions, sign/scale/extreme finite fixtures, F2/F4/F5 propagation/caps and ASD/LRFD independence; SAP off-quarter Mmax/jump ties source check. Existing cache/step/concurrency/no-extrapolation and nonprismatic reference guards preserved. No further formula discrepancy found within reviewed branches/evidence; true tapered stability and actual SAP D/C parity remain unverified.
+
+Executed: focused AISC16 + SAP29 passed, complete `npm test`196 passed; Vue typecheck and demo build `/tmp/geek-cb-audit-demo` passed (existing chunk-size warning); engineering `.venv` pytest `test_sap_v2_kit.py test_aisc360_10_cb.py`11 passed (existing Starlette/httpx deprecation warning). No browser interaction test necessary for numerical-only change; no UI layout changes beyond build label. No live Windows/SAP validation this slice. Rebuilt canonical browser modules, kit and hosted assets. ZIP CRC,58 manifest SHA checks,11 canonical/hosted/ZIP byte-equalities and exclusions passed. Root docs and untracked engineering/build preserved.
+
+Release `2026.10.20-v2-cb-audit.1`; ZIP301603bytes SHA256 `74ffe8f82a515a2f954cb26da3152cdffb415f8221c166552997c2276aeb0e4f`, fixed Windows root `C:\geek_calculus\SAP2000-API`. Main fetch advanced to485a3ab from unrelated work; integrate normally before push, preserving its sections. Source push is separate from Pages deployment. Next engineering evidence: compare real SAP design results with matching edition/method/design section, lengths/overwrites, combo/step/station and moduli; do not remove tapered/E4 barriers merely to fill D/C.
+
+
 ## SAP maximum design lengths / simple default — 2026-10-20
 
 - Build2026.10.20-v2-max-length.1, base28edc3c/CI4bab676. User clarified that Ly/Lb are engineer-chosen maximum unbraced lengths (e.g.9m rafter, Ly1.5m, Lb3/4.5/6m for flying braces), not coordinates requiring a brace grid. This supersedes the primary single-segment workflow. Default now SAP Major/Minor/LTB ratios×I–J Length for all3; missing/getter failure/zero/ProgDet each allow explicit manual fallback including Major. Manual source/SAP failure remain recorded; no0→1 substitution or fictional restraint coordinates. Existing hybrid/manual modes retained.

@@ -11,7 +11,7 @@ export function prepareDesignJob({snapshot,dataset,positions,summary,mode='full'
  if(snapshot.units?.system!=='kN_m_C'||dataset.units!=='kN_m_C'||dataset.axes!=='SAP2000_local_123')throw Error('Expected confirmed kN–m SAP local123 source units/axes')
  if(!['full','summary'].includes(mode))throw Error('Unknown check mode')
  if(standard!=='AISC360-10'||!MODULES.some(m=>m.id===module&&m.standard===standard))throw Error('Unsupported component/edition')
- if(lengthSource!=='sap'&&lengthSource!=='manual')throw Error('Unknown length source')
+ if(!['sap','manual','hybrid'].includes(lengthSource))throw Error('Unknown length source')
  if(method!==null&&!['ASD','LRFD'].includes(method))throw Error('Explicit ASD/LRFD method required')
  if(mode==='summary'&&!summary)throw Error('Build the Section extreme summary first')
  if(positions&&positions.model!==dataset.model)throw Error('Position samples belong to another model')
@@ -41,9 +41,13 @@ export function prepareDesignJob({snapshot,dataset,positions,summary,mode='full'
   const lengths={}
   for(const [key,index] of [['major',18],['minor',19],['ltb',20]]){
    const overwrite=Array.isArray(overwrites)?overwrites.find(o=>o.item===index):null,ratio=field(overwrite,'Value'),prog=field(overwrite,'ProgDet')
-   const valid=lengthSource==='sap'&&referenceLengthConfirmed&&positive(length)&&overwrite?.status==='ok'&&prog===false&&positive(ratio)
-   const value=lengthSource==='manual'?manualLengths[frame]?.[key]:(valid?length*ratio:null)
-   lengths[key]={...item(positive(value)?value:null,'m',lengthSource==='manual'?'manual':'SAP overwrite × confirmed frame I–J reference length'),sap_ratio:ratio??null,ProgDet:prog??null,reference_length_m:positive(length)?length:null}
+   const wantsSap=lengthSource==='sap'||(lengthSource==='hybrid'&&key!=='major');
+   const valid=referenceLengthConfirmed&&positive(length)&&overwrite?.status==='ok'&&prog===false&&positive(ratio);
+   const missingReason=!Array.isArray(overwrites)?'overwrites_not_read':!overwrite?'overwrite_missing':overwrite.status!=='ok'?'getter_unavailable':prog!==false?'program_determined':!positive(ratio)?'invalid_ratio':!positive(length)?'frame_length_missing':!referenceLengthConfirmed?'reference_length_unconfirmed':null;
+   const sapValue=wantsSap&&valid?length*ratio:null;
+   const fallback=lengthSource==='hybrid'&&key!=='major'&&!positive(sapValue)&&positive(manualLengths[frame]?.[key]);
+   const manual=!wantsSap||fallback,value=manual?manualLengths[frame]?.[key]:sapValue;
+   lengths[key]={...item(positive(value)?value:null,'m',manual?'manual':'SAP overwrite × confirmed frame I–J reference length'),requested_source:wantsSap?'sap':'manual',sap_status:missingReason??'provided',manual_fallback:fallback,sap_ratio:ratio??null,ProgDet:prog??null,reference_length_m:positive(length)?length:null};
    if(!positive(value))issues.push('Unbraced length '+key+' requires confirmation/input')
   }
   if(!positive(material?.normalized?.Fy_MPa)||!positive(material?.normalized?.Fu_MPa))issues.push('Material Fy/Fu missing or overwrite unresolved')

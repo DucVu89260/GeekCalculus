@@ -1,8 +1,8 @@
 {
   "sap2000_version": "26.2.0",
   "api_name": "API_IF_SAP26.2.0_V2",
-  "build_id": "2026.10.20-v2-station-design.1",
-  "distribution_sha256": "a5ddc960edeffec47b57f1d368bd9e5c86963a6d4171ee59ff15c2cedc742ed9",
+  "build_id": "2026.10.20-v2-print.1",
+  "distribution_sha256": "deeb5df1e73abbde9ec2daa4bcc34fe55e7dc5fd7e13560d9c74f193b3e3e12d",
   "panel_layout": "Shared V2 package source and CSS",
   "transport": "authenticated loopback Windows connector",
   "local_root": "C:\\geek_calculus\\SAP2000-API"

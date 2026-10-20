@@ -138,10 +138,22 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright')
   assert.equal(await page.locator('#steel-length-source').inputValue(),'sap');assert.equal(await page.locator('#steel-cb-mode').inputValue(),'CONSERVATIVE');assert.equal(await page.locator('#steel-cb-advanced').isVisible(),false);assert.equal(await page.locator('#steel-report-inputs thead tr > *').count(),5);assert.equal(await page.locator('#steel-report-inputs [aria-label="F1 Lz m"]').count(),0);assert.equal(await page.locator('#steel-report-inputs [aria-label="F1 LTB start m"]').count(),0);
   assert.equal(await page.locator('#steel-report-footnote').evaluate(e=>!e.closest('table,.table-wrap')),true);
   assert.match(await page.locator('#steel-report-footnote').textContent(),/không phải D\/C do SAP xuất/);
+  await page.click('#steel-print');
+  let printFrame=page.frameLocator('#steel-print-frame');
+  assert.match(await printFrame.locator('body').textContent(),/Chưa có lần tính còn hiệu lực/);
+  assert.doesNotMatch(await printFrame.locator('body').textContent(),/v2-browser-test-token|#token=|Bearer /);
   await page.selectOption('#steel-method','LRFD');await page.selectOption('#steel-cb-mode','CONSERVATIVE');await page.click('#steel-run-report');
   await page.waitForFunction(()=>document.querySelector('#steel-report-missing').textContent.includes('Lz'));
   const partial=page.locator('#steel-report-results tbody tr').filter({hasText:'F1 · I300'}).filter({hasText:'DEAD'});assert.equal(await partial.locator('td').nth(6).textContent(),'1.00');assert.equal(await partial.locator('td').nth(7).textContent(),'—');
   const missingLz=page.locator('#steel-report-missing details').filter({hasText:'Frame F1 · DEAD'}).locator('li');assert.equal(await missingLz.count(),1);assert.match(await missingLz.textContent(),/Lz/);assert.match(await missingLz.textContent(),/H1 D\/C/);
+  await page.click('#steel-print');printFrame=page.frameLocator('#steel-print-frame');
+  const printText=await printFrame.locator('body').textContent();
+  assert.match(printText,/Lz/);assert.match(printText,/Station: kết quả/);assert.match(printText,/LRFD/);
+  assert.doesNotMatch(printText,/v2-browser-test-token|#token=|Bearer /);
+  assert.equal(await printFrame.locator('button,input,select,textarea').count(),0);
+  assert.equal(await printFrame.locator('details:not([open])').count(),0);
+  const pdfPage=await browser.newPage();await pdfPage.setContent(await printFrame.locator('html').evaluate(e=>e.outerHTML));
+  await pdfPage.pdf({path:'/tmp/sap-quick-summary-diagnostics.pdf',printBackground:true,preferCSSPageSize:true});await pdfPage.close();
   await page.selectOption('#steel-cb-mode','COMBO');
 
   await page.click('#steel-read-lengths');await page.waitForFunction(()=>document.querySelector('#steel-length-status').textContent.startsWith('Đã đọc.'));

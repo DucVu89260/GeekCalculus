@@ -1,6 +1,12 @@
 # SAP2000-API V2 — Web / Local
 
-Build `2026.10.20-v2-station-design.1` · Compatible with SAP2000 v26.2.0 · Windows64-bit, Python3.11–3.13 x64.
+Build `2026.10.20-v2-print.1` · Compatible with SAP2000 v26.2.0 · Windows64-bit, Python3.11–3.13 x64.
+
+## In / Lưu PDF — Print / Save PDF
+
+Trong **Quick check from Summary** hoặc kiểm tra đầy đủ, bấm **In / Lưu PDF** ở đầu cửa sổ, rồi chọn **Save as PDF / Lưu dưới dạng PDF** trong hộp thoại trình duyệt. Có thể in cả khi chưa tính được: báo cáo giữ lựa chọn hiện tại, thông số thiếu, lý do D/C trống, build và nguồn station. Không cần nhập giá trị giả để in; dấu — không phải zero. Token không nằm trong báo cáo. Các dòng station giới hạn5000 với thông báo số lượng rõ ràng; chọn ít Frame/Combo hơn nếu cần in hết.
+
+Print is available before/after calculation. It snapshots current values without changing the live form, expands diagnostic sections and removes scroll clipping. The browser creates the PDF; no connector/server PDF dependency. Connection tokens are excluded. Matching SAP numerical parity is not asserted.
 
 ## Kiểm tra theo station / Per-station design
 

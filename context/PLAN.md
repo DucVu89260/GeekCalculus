@@ -1,5 +1,9 @@
 # Repository implementation plan
 
+## SAP Quick-check printable diagnostics — 2026-10-20
+
+`SAP-PRINT-10`: add VI/EN Print/Save PDF action to Steel Design review, usable before or after calculation. Snapshot current control values, expand relevant details, remove scrolling/controls and include per-record calculated/missing-result diagnostics with source/build/method; no token or full-page capture. Isolated same-origin print frame avoids modal clipping/pop-up blocking and changing live form. Retain all mathematical/missing-input guards. Acceptance: real browser print-frame content for blank and calculated reports, no credentials, all printed station rows bounded with explicit truncation count; PDF rendering smoke and kit parity. Investigate no-result workflow through printed prerequisites, without inventing capacities.
+
 ## SAP per-station design summaries — 2026-10-20
 
 `SAP-STATION-DESIGN-09` (implemented;30 focused/200 frontend/3 kit tests and local browser passed): build Combo/Step/Station drilldown with selectable records, H1/shear ratios, per-station modal summary and direct supported-component details. Reuse existing kernel through lazy one-row evaluation, freeze report options and reject stale source generations; preserve duplicate station records, signed vectors and source provenance. Show material, local geometry, restraint lengths, Cb/quarter source, capacities and H1 terms; SAP design raw data unpaired, no invented percent parity. Tapered results remain reference/REVIEW_REQUIRED, asymmetric pending. No new AISC formula or unverified CSI tapered method. Acceptance: pure station-index/provenance/ratio tests and actual prismatic/nonprismatic browser drilldown, no JSON transfer, stale input guards, kit parity and publication.

@@ -13,6 +13,7 @@ import WindLoadView from './WindLoadView.vue'
 
 // Keep the PDF reader and math fonts out of the ordinary design workspace load.
 const StandardsExplorer = defineAsyncComponent(() => import('./StandardsExplorer.vue'))
+const VietnamLocationLookup = defineAsyncComponent(() => import('./VietnamLocationLookup.vue'))
 
 const sapLaunchDialog = ref(null)
 function showSapLaunchGuide(event) { event.preventDefault(); sapLaunchDialog.value?.showModal() }
@@ -49,7 +50,7 @@ const tools = { concrete: ['beam', 'column', 'slab', 'foundation'], future: ['re
       <a v-for="group in moduleGroups" :key="group.code" :href="moduleHref(group.code)" :class="{ active: currentGroup.code === group.code }">{{ t(group.title) }}</a>
     </nav>
     <nav class="module-navigation" :class="{ 'loading-navigation': currentGroup.code === 'loads', 'steel-navigation': currentGroup.code === 'steel' }" :aria-label="t('navigation')">
-      <a v-for="tool in navigationTools" :key="tool.code" :href="tool.external ? sap2000ApiHref(locale) : moduleHref(tool.route)" @click="tool.external && showSapLaunchGuide($event)"  :rel="tool.external ? 'noopener noreferrer' : undefined" :aria-current="currentTool.code === tool.code ? 'page' : undefined">{{ t(tool.title) }}</a>
+      <a v-for="tool in navigationTools" :key="tool.code" :href="tool.external ? sap2000ApiHref(locale) : moduleHref(tool.route)" @click="tool.external && showSapLaunchGuide($event)"  :rel="tool.external ? 'noopener noreferrer' : undefined" :aria-current="currentTool.code === tool.code || (currentTool.code === 'vietnam-location' && tool.code === 'library') ? 'page' : undefined">{{ t(tool.title) }}</a>
     </nav>
     <dialog ref="sapLaunchDialog" class="sap-launch-guide" aria-labelledby="sap-launch-title">
       <h2 id="sap-launch-title">{{ locale === 'vi' ? 'Hướng dẫn sử dụng SAP2000-API' : 'Using SAP2000-API' }}</h2>
@@ -76,7 +77,8 @@ const tools = { concrete: ['beam', 'column', 'slab', 'foundation'], future: ['re
     <section v-else-if="currentTool.code === 'sap2000-api'" class="module-panel"><a :href="sap2000ApiHref(locale)" @click="showSapLaunchGuide" rel="noopener noreferrer">SAP2000-API ↗</a><p>Compatible with SAP2000v26.2.0</p></section>
     <SectionPropertiesPanel v-else-if="currentTool.code === 'section-properties'" :key="currentGroup.code" :locale="locale" />
     <section v-else-if="currentTool.code === 'standards'" class="module-panel"><p class="standards-breadcrumb"><a :href="moduleHref('steel')">Steel Design</a> / <a :href="moduleHref('steel/library')">Library</a> / <strong>Standards</strong></p><StandardsExplorer :locale="locale" :can-edit="isAdmin" /></section>
-    <section v-else-if="currentTool.code === 'library'" class="module-panel"><LibraryBrowser :key="currentGroup.code" :locale="locale" :can-edit="false" /></section>
+    <section v-else-if="currentTool.code === 'vietnam-location'" class="module-panel"><VietnamLocationLookup :locale="locale" /></section>
+    <section v-else-if="currentTool.code === 'library'" class="module-panel"><p v-if="currentGroup.code === 'steel'" class="vn-library-entry"><a :href="moduleHref('steel/library/vietnam-location')">{{ t('toolVietnamLocation') }} ↗</a><span>{{ t('vietnamLocationDescription') }}</span></p><LibraryBrowser :key="currentGroup.code" :locale="locale" :can-edit="false" /></section>
     <section v-else-if="currentGroup.code === 'concrete' && currentTool.code === 'design'" class="module-panel concrete-module-panel">
       <div class="concrete-design-setup">
         <label class="pending-selector"><span>{{ t('tool') }}</span><select v-model="selectedTools.concrete"><option value="">{{ t('choose') }}</option><option v-for="tool in tools.concrete" :key="tool" :value="tool">{{ t(tool) }}</option></select></label>
@@ -104,6 +106,7 @@ const tools = { concrete: ['beam', 'column', 'slab', 'foundation'], future: ['re
 </template>
 
 <style scoped>
+.vn-library-entry { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin:0 0 22px; padding:16px; border:1px solid #9eafc0; border-radius:9px; background:#fffefa; }.vn-library-entry a { padding:10px 14px; border:1px solid #23395d; border-radius:7px; color:#23395d; font-weight:700; text-decoration:none; }.vn-library-entry a:hover,.vn-library-entry a:focus-visible { background:#23395d; color:white; }.vn-library-entry span { font-size:15px; color:var(--muted-ink); }
 .sap-launch-guide { width: min(560px, calc(100% - 32px)); max-height: calc(100dvh - 32px); overflow: auto; box-sizing: border-box; padding: 24px; border: 1px solid #a6bac5; border-radius: 12px; background: var(--surface-bg, white); color: var(--ink, #23395d); }
 .sap-launch-guide::backdrop { background: rgb(15 34 51 / 55%); }
 .sap-launch-guide h2 { margin: 0 0 16px; font-size: 22px; }

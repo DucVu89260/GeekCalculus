@@ -33,6 +33,7 @@ export function prepareSymmetricComponent(job,index,options={}){
 }
 export function validateComponentPacket(packet){
  if(packet?.schema!=='gc-sap-symmetric-component-1'||packet.standard!=='AISC360-10'||packet.component!=='symmetric_i'||!['LRFD','ASD'].includes(packet.method))throw Error('Unsupported component packet/edition.');
+ if(packet.source?.station_reference||packet.source?.original_section_type?.key==='nonprismatic')throw Error('Tapered station reference is not a prismatic member design packet.');
  const i=packet.input;
  if(!positive(i?.material?.fy_mpa)||!positive(i.material.fu_mpa)||i.material.e_mpa!==200000||i.member?.g_mpa!==77200)throw Error('Invalid component material.');
  if(!['h_mm','bf_mm','tw_mm','tf_mm'].every(k=>positive(i.section?.[k]))||i.section.h_mm<=2*i.section.tf_mm||i.section.fabrication!=='BUILT_UP'||i.section.web_attachment!=='WELDED')throw Error('Invalid component geometry.');

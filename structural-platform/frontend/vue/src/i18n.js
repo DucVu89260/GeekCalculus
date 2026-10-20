@@ -76,6 +76,7 @@ export const copy = {
 }
 
 Object.assign(copy.vi, {
+  toolVietnamLocation: 'Tra cứu địa danh Việt Nam', vietnamLocationDescription: 'Gió và động đất theo QCVN 02:2022/BXD.',
   toolSap2000Api: 'SAP2000-API', sap2000ApiDescription: 'Compatible with SAP2000v26.2.0', toolCfsDesign: 'CFS Design', cfsDescription: 'Thiết kế thép tạo hình nguội · Nối chồng và nút liên kết.',
   structureSteel: 'Steel Structure', structureRC: 'RC Structure', structureLoading: 'Loading',
   structureSteelDescription: 'Kết cấu thép · Thiết kế, đặc trưng tiết diện và thư viện.',
@@ -97,6 +98,7 @@ Object.assign(copy.vi, {
   integrationPending: 'Đang chuẩn bị tích hợp', toolPending: 'Đang phát triển',
 })
 Object.assign(copy.en, {
+  toolVietnamLocation: 'Vietnam location lookup', vietnamLocationDescription: 'Wind and earthquake data from QCVN 02:2022/BXD.',
   toolSap2000Api: 'SAP2000-API', sap2000ApiDescription: 'Compatible with SAP2000v26.2.0', toolCfsDesign: 'CFS Design', cfsDescription: 'Cold-formed steel design · Lapping and connection nodes.',
   structureSteel: 'Steel Structure', structureRC: 'RC Structure', structureLoading: 'Loading',
   structureSteelDescription: 'Steel structures · Design, section properties and library.',

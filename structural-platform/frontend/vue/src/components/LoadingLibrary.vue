@@ -38,7 +38,7 @@ const planned = ['ASCE 7-10', 'ASCE 7-16', 'ASCE 7-22', 'TCVN 2737:2023']
 .loading-library h2 { margin:0 0 22px; font-size:23px; }
 .loading-library-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; }
 .loading-library-card { display:flex; flex-direction:column; align-items:flex-start; gap:14px; min-width:0; padding:22px; border:1px solid #a8bac9; border-radius:12px; background:#fffefa; color:#23395d; text-decoration:none; }
-.loading-library-card h3 { margin:0; font-size:21px; }
+.loading-library-card h3 { margin:0; font-size:21px; color:inherit; }
 .loading-library-card p { margin:0; line-height:1.7; }
 .loading-library-card strong { margin-top:auto; font-size:15px; }
 .library-status { display:inline-block; padding:4px 10px; border:1px solid #b7c6d2; border-radius:20px; background:#edf1f5; font-size:13px; }

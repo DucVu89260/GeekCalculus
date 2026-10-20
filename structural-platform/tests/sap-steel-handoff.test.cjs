@@ -305,3 +305,18 @@ test('F1-1 Mmax includes exported off-quarter peaks and conservative discontinui
  assert.equal(tied.ma,-50);assert.equal(tied.mmax,100);assert.ok(Math.abs(cbF11(tied).value-25/8)<1e-12);
  assert.deepEqual(tied.source.samples[1].ids,['a','jump']);
 });
+
+
+test('station drilldown reuses exact selected record, preserves ties and does not mutate job',async()=>{
+ const {prepareDesignJob}=await load(),{calculateReport,calculateStationResult}=await import('../frontend/vue/public/sap-steel-report.mjs');
+ const f=fixtures();f.positions=null;const a={...f.dataset.rows[0],T:0};
+ f.dataset.rows=[a,{...a,record_id:'same-station-other-side',element:'other',M3:a.M3*2}];
+ const job=prepareDesignJob({...f,frames:['1'],lengthSource:'manual',manualLengths:{'1':{major:5,minor:5,ltb:10}}}),before=JSON.stringify(job);
+ const fs=require('node:fs'),vm=require('node:vm'),factors=vm.runInNewContext(fs.readFileSync(require('node:path').join(__dirname,'../frontend/vue/public/aisc360-10-resistance.js'),'utf8')+';Aisc36010Resistance');
+ const options={...approvals,lz_m:5,cbMode:'CONSERVATIVE'},[group]=await calculateReport(job,f.dataset,()=>options,factors);
+ assert.equal(group.rows.length,2);const record=await calculateStationResult(job,f.dataset,1,options,factors);
+ assert.equal(record.index,1);assert.equal(record.packet.source.record_id,'same-station-other-side');assert.equal(record.packet.source.element,'other');
+ assert.equal(record.packet.input.forces.moment_x_kNm,a.M3*2);assert.equal(record.result.limit_states.interaction.nominal,group.rows[1].interaction);
+ assert.equal(record.calculated_utilization,group.rows[1].utilization);assert.equal(JSON.stringify(job),before);
+ await assert.rejects(()=>calculateStationResult(job,f.dataset,-1,options,factors),/index/);
+});

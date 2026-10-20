@@ -181,7 +181,21 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright')
   await page.click('#steel-run-report');await page.waitForFunction(()=>document.querySelector('#steel-report-status').textContent.includes('nhóm Frame/Combo'))
   assert.equal(await page.locator('#steel-report-results tbody tr').count(),4)
   const reportRow=page.locator('#steel-report-results tbody tr').filter({hasText:'F1 · I300'}).filter({hasText:'DEAD'})
-  await reportRow.getByRole('button',{name:'Các station đã kiểm tra'}).click();assert.ok(await page.locator('#steel-station-results tbody tr').count()>2);assert.match(await page.locator('#steel-station-scope').textContent(),/Mốc thiếu/);await page.click('#steel-station-close');
+  await reportRow.getByRole('button',{name:'Các station đã kiểm tra'}).click();assert.ok(await page.locator('#steel-station-results tbody tr').count()>2);assert.match(await page.locator('#steel-station-scope').textContent(),/Mốc thiếu/);
+  await page.locator('#steel-station-results').getByRole('button',{name:'Xem station',exact:true}).first().click();
+  await page.waitForFunction(()=>document.querySelector('#steel-station-summary-body table'));
+  assert.match(await page.locator('#steel-station-summary-title').textContent(),/Frame F1.*DEAD.*x=0.00/);
+  assert.match(await page.locator('#steel-station-summary-body').textContent(),/H1-1[ab]/);
+  assert.match(await page.locator('#steel-station-summary-body').textContent(),/SAME_SEGMENT_POINTS/);
+  assert.match(await page.locator('#steel-station-summary-body').textContent(),/không tính sai số phần trăm/);
+  assert.equal(await page.locator('#steel-station-detail').isEnabled(),true);
+  await page.locator('#steel-station-summary').screenshot({path:'/tmp/sap-station-design-summary.png'});
+  await page.setViewportSize({width:390,height:844});
+  assert.ok(await page.locator('#steel-station-summary').evaluate(e=>e.getBoundingClientRect().width<=innerWidth));
+  assert.match(await page.locator('#steel-station-summary-body .station-metrics').textContent(),/H1 D\/C/);
+  await page.setViewportSize({width:1440,height:1000});
+  await page.click('#steel-station-detail');await page.frameLocator('#steel-component-frame').locator('#sap-component-origin').filter({hasText:'Frame F1'}).waitFor();
+  await page.click('#steel-component-close');await page.click('#steel-station-summary-close');await page.click('#steel-station-close');
   await reportRow.getByRole('button',{name:'Xem chi tiết',exact:true}).click()
   const component=page.frameLocator('#steel-component-frame');await component.locator('#sap-component-origin').filter({hasText:'Frame F1'}).waitFor()
   assert.equal(await component.locator('[data-key="fy_mpa"]').first().inputValue(),'345')
@@ -217,7 +231,11 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright')
   assert.equal(await npRow.getByRole('button',{name:'Xem chi tiết',exact:true}).count(),0);
   await npRow.getByRole('button',{name:'Các station đã kiểm tra'}).click();assert.match(await page.locator('#steel-station-scope').textContent(),/chưa kiểm tra ổn định/);
   const stationHeights=await page.locator('#steel-station-results tbody td:nth-child(3)').allTextContents();assert.ok(stationHeights.some(v=>v.startsWith('300.00')));assert.ok(stationHeights.some(v=>!v.startsWith('300.00')));
-  await page.click('#steel-station-close');await page.click('#steel-review-close');
+  await page.locator('#steel-station-results').getByRole('button',{name:'Xem station',exact:true}).first().click();
+  await page.waitForFunction(()=>document.querySelector('#steel-station-summary-body table'));
+  assert.match(await page.locator('#steel-station-summary-status').textContent(),/THAM KHẢO/);
+  assert.equal(await page.locator('#steel-station-detail').isDisabled(),true);
+  await page.click('#steel-station-summary-close');await page.click('#steel-station-close');await page.click('#steel-review-close');
   await page.evaluate(()=>{delete v2Snapshot.members.find(m=>m.frame==='F1').data.design_overwrites});await page.click('#design-members');await page.waitForFunction(()=>document.querySelector('#steel-length-status').textContent.startsWith('Đã đọc.')&&v2Snapshot.members.every(m=>Array.isArray(m.data.design_overwrites)));await page.selectOption('#steel-length-source','hybrid');assert.match(await page.locator('#steel-report-inputs').textContent(),/SAP ratio 1 ×/);await page.click('#steel-review-close');
   await page.click('#profile-capabilities');await page.waitForFunction(()=>document.querySelector('#profile-target').value==='@capabilities'&&!document.querySelector('#controls').disabled)
   const caps=await downloadJson('#profile-capabilities-json');assert.ok(caps.data.length>60)

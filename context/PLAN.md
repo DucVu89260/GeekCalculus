@@ -1,5 +1,9 @@
 # Repository implementation plan
 
+## SAP per-station design summaries — 2026-10-20
+
+`SAP-STATION-DESIGN-09` (implemented;30 focused/200 frontend/3 kit tests and local browser passed): build Combo/Step/Station drilldown with selectable records, H1/shear ratios, per-station modal summary and direct supported-component details. Reuse existing kernel through lazy one-row evaluation, freeze report options and reject stale source generations; preserve duplicate station records, signed vectors and source provenance. Show material, local geometry, restraint lengths, Cb/quarter source, capacities and H1 terms; SAP design raw data unpaired, no invented percent parity. Tapered results remain reference/REVIEW_REQUIRED, asymmetric pending. No new AISC formula or unverified CSI tapered method. Acceptance: pure station-index/provenance/ratio tests and actual prismatic/nonprismatic browser drilldown, no JSON transfer, stale input guards, kit parity and publication.
+
 ## SAP force button readiness — 2026-10-20
 
 `SAP-FORCE-READY-08`: user reports Extract button disabled after member metadata read. Remove stale connect-time model.locked gate; connected model and selected output required, backend rechecks current analyzed/locked state. Explain missing connection/output selection in dedicated VI/EN hint, retain busy fieldset and authoritative extraction guards. Acceptance: browser initially-unlocked model response, analysis completed after connection permits extraction; zero selected outputs stays disabled with actionable hint; existing force/filter flows and API guards, kit/web parity.

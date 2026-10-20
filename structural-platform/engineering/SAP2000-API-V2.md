@@ -1,6 +1,15 @@
 # SAP2000-API V2 — Web / Local
 
-Build `2026.10.20-v2-force-ready.1` · Compatible with SAP2000 v26.2.0 · Windows64-bit, Python3.11–3.13 x64.
+Build `2026.10.20-v2-station-design.1` · Compatible with SAP2000 v26.2.0 · Windows64-bit, Python3.11–3.13 x64.
+
+## Kiểm tra theo station / Per-station design
+
+Trong bảng kiểm tra Steel Design, chạy các tổ hợp rồi chọn **Các station đã kiểm tra → Xem station**. Bảng giữa màn hình hiển thị D/C*, H1, shear, Cb; bộ lực đồng thời, vật liệu, hình học tại station, chiều dài và nguồn; sức kháng/điều khoản và các tỷ số H1. Các dòng trùng station giữ Element/Record ID riêng. **Xem thuyết minh** mở trực tiếp component tại đúng dòng được chọn, không cần chuyển JSON.
+
+Select **Checked stations → View station** in a calculated Frame/Combo group. The modal retains the exact step, station, element, source IDs and force vector. Detailed calculation opens the supported component directly. Report inputs are frozen; changed inputs require recalculation. Values display two decimals; raw values remain unchanged.
+
+Nonprismatic: chỉ kết quả tham khảo prismatic tại tiết diện cục bộ; chưa xác minh tapered-member stability theo phương pháp CSI. Không mở thành prismatic member được chấp nhận. Kết quả SAP có thể xem dạng nguồn chưa ghép cặp; chưa tính sai số phần trăm khi chưa xác minh tương ứng combo/step/station và cơ sở thiết kế. / Nonprismatic remains a local prismatic reference, not verified CSI tapered-member design. SAP results remain unpaired source data; no percentage parity is asserted.
+
 
 ## Cài mới / Nâng cấp từ V1 hoặc V2 local
 

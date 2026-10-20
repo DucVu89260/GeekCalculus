@@ -1,0 +1,21 @@
+{
+  "version":"ASCE7-10-seismic-1.0.0",
+  "source":{"edition":"ASCE 7-10","sha256":"ae2997f7a31975965b33065ba54acbf4da441f4f821b2a97372d67c2bd1ca248","pdf_pages":{"site_factors":109,"sdc":110,"systems":118,"period":133,"rs":137,"site":247},"printed_pages":{"site_factors":66,"sdc":67,"systems":75,"period":90,"rs":94,"site":204}},
+  "Fa":{"reference":"Table 11.4-1","x":[0.25,0.5,0.75,1,1.25],"A":[0.8,0.8,0.8,0.8,0.8],"B":[1,1,1,1,1],"C":[1.2,1.2,1.1,1,1],"D":[1.6,1.4,1.2,1.1,1],"E":[2.5,1.7,1.2,0.9,0.9]},
+  "Fv":{"reference":"Table 11.4-2","x":[0.1,0.2,0.3,0.4,0.5],"A":[0.8,0.8,0.8,0.8,0.8],"B":[1,1,1,1,1],"C":[1.7,1.6,1.5,1.4,1.3],"D":[2.4,2,1.8,1.6,1.5],"E":[3.5,3.2,2.8,2.4,2.4]},
+  "Cu":{"reference":"Table 12.8-1","x":[0.1,0.15,0.2,0.3,0.4],"values":[1.7,1.6,1.5,1.4,1.4]},
+  "periods":{"steel_moment":{"Ct":0.028,"x":0.8},"concrete_moment":{"Ct":0.016,"x":0.9},"steel_ebf_brb":{"Ct":0.03,"x":0.75},"other":{"Ct":0.02,"x":0.75}},
+  "systems":[
+    {"id":"B1","name":"Steel eccentrically braced frames","vi":"Khung thép giằng lệch tâm","R":8,"Cd":4,"Omega0":2,"period":"steel_ebf_brb","limits":{"B":null,"C":null,"D":160,"E":160,"F":100},"pdf_page":116},
+    {"id":"B2","name":"Steel special concentrically braced frames","vi":"Khung thép giằng đồng tâm đặc biệt","R":6,"Cd":5,"Omega0":2,"period":"other","limits":{"B":null,"C":null,"D":160,"E":160,"F":100},"pdf_page":116},
+    {"id":"B3","name":"Steel ordinary concentrically braced frames","vi":"Khung thép giằng đồng tâm thông thường","R":3.25,"Cd":3.25,"Omega0":2,"period":"other","limits":{"B":null,"C":null,"D":35,"E":35,"F":false},"pdf_page":116,"note":"Footnote j exceptions are not automatically applied."},
+    {"id":"B25","name":"Steel buckling-restrained braced frames","vi":"Khung thép giằng chống oằn","R":8,"Cd":5,"Omega0":2.5,"period":"steel_ebf_brb","limits":{"B":null,"C":null,"D":160,"E":160,"F":100},"pdf_page":117},
+    {"id":"C1","name":"Steel special moment frames","vi":"Khung thép chịu mô men đặc biệt","R":8,"Cd":5.5,"Omega0":3,"period":"steel_moment","limits":{"B":null,"C":null,"D":null,"E":null,"F":null},"pdf_page":118},
+    {"id":"C3","name":"Steel intermediate moment frames","vi":"Khung thép chịu mô men trung gian","R":4.5,"Cd":4,"Omega0":3,"period":"steel_moment","limits":{"B":null,"C":null,"D":35,"E":false,"F":false},"pdf_page":118,"note":"Footnote h exceptions are not automatically applied."},
+    {"id":"C4","name":"Steel ordinary moment frames","vi":"Khung thép chịu mô men thông thường","R":3.5,"Cd":3,"Omega0":3,"period":"steel_moment","limits":{"B":null,"C":null,"D":false,"E":false,"F":false},"pdf_page":118,"note":"Footnote i exceptions are not automatically applied."},
+    {"id":"C5","name":"Special reinforced concrete moment frames","vi":"Khung bê tông chịu mô men đặc biệt","R":8,"Cd":5.5,"Omega0":3,"period":"concrete_moment","limits":{"B":null,"C":null,"D":null,"E":null,"F":null},"pdf_page":118},
+    {"id":"C6","name":"Intermediate reinforced concrete moment frames","vi":"Khung bê tông chịu mô men trung gian","R":5,"Cd":4.5,"Omega0":3,"period":"concrete_moment","limits":{"B":null,"C":null,"D":false,"E":false,"F":false},"pdf_page":118},
+    {"id":"C7","name":"Ordinary reinforced concrete moment frames","vi":"Khung bê tông chịu mô men thông thường","R":3,"Cd":2.5,"Omega0":3,"period":"concrete_moment","limits":{"B":null,"C":false,"D":false,"E":false,"F":false},"pdf_page":118}
+  ],
+  "coverage":"Verified transcriptions of listed rows only; other Table 12.2-1 systems and exceptions pending review. No automatic mixed-system, isolation, damping, SSI or ELF-method eligibility certification."
+}

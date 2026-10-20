@@ -1,5 +1,10 @@
 # Repository handoff
 
+## Loading standards library and QCVN relocation — 2026-10-20
+
+- Branch `main`, base7fcaabf. New Loading → Library navigation and `LoadingLibrary.vue`: QCVN02:2022/BXD links to the existing working lookup; ASCE7-10/7-16/7-22 and TCVN2737:2023 are explicitly in-development, noninteractive entries. VI/EN, navy hover, mobile layout; existing loading tools retained. New canonical lookup route `loads/library/vietnam-location`; old Steel bookmark resolves to the Loading workspace. Removed lookup entry entirely from Steel Library; Steel/RC catalog and Standards unchanged. Back link returns to Loading Library. No data/formula/backend/DB changes.
+- Changed modules/i18n/ModuleHub, lookup back link and placement contract. Vue typecheck and demo production build passed (existing chunk warnings). Existing Vietnam browser smoke passed: Loading Library entry/active parent,5 cards/4 pending states VI/EN/no fake actions, correct lookup values/source/JSON/combobox,320/390px, back navigation, no Steel/RC lookup entry, old-bookmark compatibility. Desktop/mobile screenshots inspected. Structure-group smoke's expected Loading nav list includes the new Library; its unrelated full legacy flow was not rerun. Owned HTTP server to stop after publication. Next: source push, CI-generated docs and live Pages verification.
+
 ## Editable province dropdown — 2026-10-20
 
 - Branch `main`, base `a499783` (preserves concurrent SAP updates). User replaces the separate global search form with a single editable province dropdown. `LocationCombobox.vue` opens all63 source provinces on click/focus; typing narrows names immediately using existing accent/case-insensitive folding. Mouse/touch or arrows+Enter select; Escape/blur restores the committed source name. Empty text restores all options; no-match message is localized. No new dependency/network query. Province selection changes clear dependent wind/seismic choices; reselecting the same province preserves them.

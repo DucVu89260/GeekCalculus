@@ -146,7 +146,7 @@ async function verifySharedCalculator(page, route) {
     await modulePage.locator('.workspace-group-navigation a[href$="#/modules/loads"]').click()
     await modulePage.locator('.module-heading').getByRole('heading', { name: 'Combo Generator', exact: true }).waitFor()
     assert.equal(await modulePage.locator('.module-heading h1').innerText(), 'Combo Generator', 'Loading opens its default Combo Generator page')
-    assert.deepEqual(await navHashes(modulePage.locator('.module-navigation')), expectedHash(loadRoutes.map(route => `loads/${route}`)))
+    assert.deepEqual(await navHashes(modulePage.locator('.module-navigation')), expectedHash([...loadRoutes, 'library'].map(route => `loads/${route}`)))
     for (let index = 0; index < loadRoutes.length; index += 1) {
       const route = `loads/${loadRoutes[index]}`
       const link = modulePage.locator(`.module-navigation a[href$="#/modules/${route}"]`)

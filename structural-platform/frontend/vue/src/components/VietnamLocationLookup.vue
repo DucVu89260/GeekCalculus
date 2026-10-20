@@ -9,7 +9,7 @@ import LocationCombobox from './LocationCombobox.vue'
 const props = defineProps({ locale: { type: String, required: true } })
 const words = {
   vi: {
-    title: 'Tra cứu địa danh Việt Nam', subtitle: 'Gió và động đất · QCVN 02:2022/BXD', back: 'Về Steel Library',
+    title: 'Tra cứu địa danh Việt Nam', subtitle: 'Gió và động đất · QCVN 02:2022/BXD', back: 'Về thư viện Loading',
     edition: 'Địa danh và phạm vi hành chính theo tài liệu năm 2022; chưa quy đổi sang địa danh sau sáp nhập.',
     province: 'Tỉnh / thành phố theo nguồn', chooseProvince: 'Chọn hoặc gõ tên tỉnh / thành phố…',
     noResults: 'Không tìm thấy tỉnh / thành phố phù hợp.',
@@ -32,7 +32,7 @@ const words = {
     count: '63 tỉnh/thành · 334 phạm vi gió · 705 địa danh động đất', raw: 'Nguồn ghi',
   },
   en: {
-    title: 'Vietnam location lookup', subtitle: 'Wind and earthquake · QCVN 02:2022/BXD', back: 'Back to Steel Library',
+    title: 'Vietnam location lookup', subtitle: 'Wind and earthquake · QCVN 02:2022/BXD', back: 'Back to Loading Library',
     edition: 'Administrative names and coverage follow the 2022 source; later mergers have not been mapped.',
     province: 'Source province / municipality', chooseProvince: 'Choose or type a province / municipality…',
     noResults: 'No matching province / municipality.',
@@ -78,7 +78,7 @@ function download() {
 
 <template>
   <section class="vn-lookup" :aria-label="t('title')">
-    <header class="vn-header"><div><a :href="moduleHref('steel/library')">← {{ t('back') }}</a><h2>{{ t('title') }}</h2><p>{{ t('subtitle') }}</p><small>{{ t('count') }}</small></div><button type="button" class="quiet-button" :disabled="!wind && !seismic" @click="download">{{ t('export') }}</button></header>
+    <header class="vn-header"><div><a :href="moduleHref('loads/library')">← {{ t('back') }}</a><h2>{{ t('title') }}</h2><p>{{ t('subtitle') }}</p><small>{{ t('count') }}</small></div><button type="button" class="quiet-button" :disabled="!wind && !seismic" @click="download">{{ t('export') }}</button></header>
     <p class="vn-edition" role="note">{{ t('edition') }}</p>
     <div class="vn-filters">
       <LocationCombobox id="vn-province" :model-value="provinceId" :options="data.provinces"

@@ -9,7 +9,11 @@ import DesignCodeSelect from './DesignCodeSelect.vue'
 import SectionCalculatedProperties from './SectionCalculatedProperties.vue'
 import SectionPropertiesPanel from './SectionPropertiesPanel.vue'
 
-const props = defineProps({ locale: { type: String, required: true }, canEdit: { type: Boolean, default: false } })
+const props = defineProps({
+  locale: { type: String, required: true }, canEdit: { type: Boolean, default: false },
+  initialResource: { type: String, default: 'materials', validator: value => ['materials', 'section_types', 'sections'].includes(value) },
+  showTabs: { type: Boolean, default: true },
+})
 const t = (key) => copy[props.locale]?.[key] ?? copy.en[key] ?? key
 const transferId = useId()
 const regionDatalistId = useId()
@@ -34,7 +38,7 @@ const resourceDefinitions = {
   sections: { endpoint: '/api/sections', schemaKey: 'sections', addKey: 'addSection' },
 }
 const resourceKeys = ['materials', 'section_types', 'sections']
-const activeResource = ref('materials')
+const activeResource = ref(props.initialResource)
 const schema = ref(null)
 const records = ref({ materials: [], section_types: [], sections: [] })
 const loading = ref(true)
@@ -740,7 +744,7 @@ onMounted(async () => {
 <template>
   <section class="library-browser" :aria-label="t('databaseTitle')">
     <div class="library-toolbar">
-      <div class="library-tabs" role="tablist" :aria-label="t('databaseTitle')">
+      <div v-if="showTabs" class="library-tabs" role="tablist" :aria-label="t('databaseTitle')">
         <button v-for="resource in resourceKeys" :key="resource" type="button" role="tab" :aria-selected="activeResource === resource" :class="{ active: activeResource === resource }" @click="setResource(resource)">{{ t(resource === 'section_types' ? 'sectionTypes' : resource) }}</button>
         <StandardsNavigation />
       </div>

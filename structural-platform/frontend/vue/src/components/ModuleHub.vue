@@ -7,12 +7,14 @@ import SteelDesignView from './SteelDesignView.vue'
 import CfsDesignView from './CfsDesignView.vue'
 import SectionPropertiesPanel from './SectionPropertiesPanel.vue'
 import LibraryBrowser from './LibraryBrowser.vue'
+import SteelLibrary from './SteelLibrary.vue'
 import LoadingLibrary from './LoadingLibrary.vue'
 import StructureIllustration from './StructureIllustration.vue'
 import ComboGeneratorView from './ComboGeneratorView.vue'
 import WindLoadView from './WindLoadView.vue'
 
 // Keep the PDF reader and math fonts out of the ordinary design workspace load.
+const SeismicLoadView = defineAsyncComponent(() => import('./SeismicLoadView.vue'))
 const StandardsExplorer = defineAsyncComponent(() => import('./StandardsExplorer.vue'))
 const VietnamLocationLookup = defineAsyncComponent(() => import('./VietnamLocationLookup.vue'))
 
@@ -80,6 +82,7 @@ const tools = { concrete: ['beam', 'column', 'slab', 'foundation'], future: ['re
     <section v-else-if="currentTool.code === 'standards'" class="module-panel"><p class="standards-breadcrumb"><a :href="moduleHref('steel')">Steel Design</a> / <a :href="moduleHref('steel/library')">Library</a> / <strong>Standards</strong></p><StandardsExplorer :locale="locale" :can-edit="isAdmin" /></section>
     <section v-else-if="currentTool.code === 'vietnam-location'" class="module-panel"><VietnamLocationLookup :locale="locale" /></section>
     <section v-else-if="currentGroup.code === 'loads' && currentTool.code === 'library'" class="module-panel"><LoadingLibrary :locale="locale" /></section>
+    <section v-else-if="currentGroup.code === 'steel' && currentTool.code === 'library'" class="module-panel"><SteelLibrary :locale="locale" /></section>
     <section v-else-if="currentTool.code === 'library'" class="module-panel"><LibraryBrowser :key="currentGroup.code" :locale="locale" :can-edit="false" /></section>
     <section v-else-if="currentGroup.code === 'concrete' && currentTool.code === 'design'" class="module-panel concrete-module-panel">
       <div class="concrete-design-setup">
@@ -88,6 +91,7 @@ const tools = { concrete: ['beam', 'column', 'slab', 'foundation'], future: ['re
       </div>
     </section>
     <WindLoadView v-else-if="currentGroup.code === 'loads' && currentTool.code === 'wind'" :locale="locale" :workspace="moduleCode.endsWith('/envelope-low-rise') ? 'envelope' : moduleCode.endsWith('/directional-walls') ? 'directional' : ''" />
+    <SeismicLoadView v-else-if="currentGroup.code === 'loads' && currentTool.code === 'seismic'" :locale="locale" />
     <ComboGeneratorView v-else-if="currentGroup.code === 'loads' && currentTool.code === 'combo'" :locale="locale" :demo-mode="demoMode" :user="user" />
     <section v-else-if="currentGroup.code === 'loads'" class="module-panel loading-pending-panel" :data-loading-tool="currentTool.code">
       <StructureIllustration group="loads" :label="t(currentTool.title)" />

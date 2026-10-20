@@ -160,18 +160,18 @@ test('linear-depth reference is explicit, source-bound, immutable and never a pr
  const report=await calculateReport(job,f.dataset,()=>({...approvals,segmentStart:0,segmentEnd:5,cbMode:'CONSERVATIVE'}),factors);
  const group=report[0];assert.equal(group.coverage,5);assert.equal(group.incomplete,true);
  assert.ok(group.rows.every(r=>Number.isFinite(r.utilization)&&r.reference.scope==='PRISMATIC_REFERENCE_AT_STATION'));
- assert.equal(group.governing.status,'REVIEW_REQUIRED');assert.match(group.governing.reason,/not tapered-member stability/);
+ assert.equal(group.governing.status,'REVIEW_REQUIRED');assert.equal(group.governing.result.overall_status,'REVIEW_REQUIRED');assert.match(group.governing.reason,/not tapered-member stability/);
  assert.throws(()=>validateComponentPacket(group.governing.packet),/not a prismatic member/);
  assert.equal(JSON.stringify(job),before);
 });
-test('reference rejects partial assignments, varying plates, multiple segments, mixed materials and extrapolation',async()=>{
+test('reference rejects partial assignments, varying plates, invalid segment types, mixed materials and extrapolation',async()=>{
  const {prepareDesignJob}=await load(),{stationReferenceMember}=await import('../frontend/vue/public/sap-steel-report.mjs');
  const job=prepareDesignJob({...taperedFixture(),frames:['1']}),base=job.members[0],row=job.cases[0];
  for(const [patch,reason] of [
  [m=>m.nonprismatic_assignment.data.sVarRelStartLoc=.2,/assignment/],
  [m=>m.nonprismatic_assignment.status='unavailable',/assignment/],
  [m=>m.component_sections[1].geometry.value.tw=10,/flange\/web/],
- [m=>m.nonprismatic_segments.push({...m.nonprismatic_segments[0]}),/one full-length/],
+ [m=>m.nonprismatic_segments[0].length_type=7,/length type/],
  [m=>m.component_sections[1].material_name='Other',/material/],
  [m=>m.material_overwrite.status='unavailable',/material/],
  ]){const member=structuredClone(base);patch(member);assert.throws(()=>stationReferenceMember(member,row),reason)}
@@ -319,4 +319,28 @@ test('station drilldown reuses exact selected record, preserves ties and does no
  assert.equal(record.packet.input.forces.moment_x_kNm,a.M3*2);assert.equal(record.result.limit_states.interaction.nominal,group.rows[1].interaction);
  assert.equal(record.calculated_utilization,group.rows[1].utilization);assert.equal(JSON.stringify(job),before);
  await assert.rejects(()=>calculateStationResult(job,f.dataset,-1,options,factors),/index/);
+});
+
+
+test('piecewise absolute reference maps constant and tapered segments with disclosed length rounding',async()=>{
+ const {prepareDesignJob}=await load(),{stationReferenceMember,nonprismaticSegmentLayout,calculateReport}=await import('../frontend/vue/public/sap-steel-report.mjs');
+ const f=taperedFixture();f.snapshot.sections.I2.i_dimensions_mm.h=620;
+ f.snapshot.sections.NP.segments=[{start_section:'I1',end_section:'I1',length:3.4249,length_type:2},{start_section:'I1',end_section:'I2',length:.8,length_type:2}];
+ f.snapshot.members[0].data.geometry.length_m=4.224878696483485;
+ const job=prepareDesignJob({...f,frames:['1'],lengthSource:'manual',manualLengths:{'1':{major:4.2,minor:4.2,ltb:4.2}}}),member=job.members[0];
+ assert.equal(member.length.value,4.224878696483485);
+ const layout=nonprismaticSegmentLayout(member),boundary=layout[0].end_m;
+ assert.ok(Math.abs(boundary-3.424882730389057)<1e-10);
+ assert.ok(layout[0].absolute_length_scale<1);assert.match(layout[0].length_basis,/0.1 mm/);
+ for(const [x,h] of [[0,400],[2,400],[boundary,400],[(boundary+member.length.value)/2,510],[member.length.value+5e-16,620]]){
+  const value=stationReferenceMember(member,{station_m:x});assert.ok(Math.abs(value.member.geometry.value.h-h)<1e-8);assert.equal(value.reference.scope,'PRISMATIC_REFERENCE_AT_STATION');
+ }
+ const mismatch=structuredClone(member);mismatch.nonprismatic_segments[1].length=1;assert.throws(()=>nonprismaticSegmentLayout(mismatch),/do not cover/);
+ const mixed=structuredClone(member);mixed.length.value=10;mixed.nonprismatic_segments=[{start_section:'I1',end_section:'I1',length:2,length_type:2},{start_section:'I1',end_section:'I2',length:1,length_type:1}];
+ assert.equal(nonprismaticSegmentLayout(mixed)[0].end_m,2);assert.equal(stationReferenceMember(mixed,{station_m:6}).member.geometry.value.h,510);
+ const discontinuous=structuredClone(mixed);discontinuous.nonprismatic_segments[1].start_section='I2';assert.throws(()=>stationReferenceMember(discontinuous,{station_m:2}),/discontinuous/);
+ // Nonconcurrent demands still cannot produce H1; valid mapped geometry is retained.
+ job.cases[0].concurrency='nonconcurrent';job.cases=[job.cases[0]];
+ const [group]=await calculateReport(job,f.dataset,()=>({...approvals,lz_m:4.2,cbMode:'CONSERVATIVE'}),{});
+ assert.equal(group.rows[0].interaction,null);assert.equal(group.rows[0].utilization,null);assert.equal(group.rows[0].geometry.value.h,400);assert.match(group.rows[0].metric_reasons.Cb,/nonconcurrent/);
 });

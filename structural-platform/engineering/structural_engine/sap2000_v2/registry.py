@@ -42,6 +42,8 @@ for key, method in {'load_point':'GetLoadPoint','load_distributed':'GetLoadDistr
                     'load_gravity':'GetLoadGravity','load_temperature':'GetLoadTemperature'}.items():
     add(key,'FrameObj.'+method,'loads','SAP_defined; preserve CSys/Dir/relative and absolute positions')
 for key, path in {
+    'output_nl_static':'Results.Setup.GetOptionNLStatic','output_multistep_static':'Results.Setup.GetOptionMultiStepStatic',
+    'output_multivalued_combo':'Results.Setup.GetOptionMultiValuedCombo',
     'combo_type':'RespCombo.GetTypeOAPI','combo_components':'RespCombo.GetCaseList',
     'case_type':'LoadCases.GetTypeOAPI','nonlinear_geometry':'LoadCases.StaticNonlinear.GetGeometricNonlinearity',
     'linear_loads':'LoadCases.StaticLinear.GetLoads','nonlinear_loads':'LoadCases.StaticNonlinear.GetLoads',

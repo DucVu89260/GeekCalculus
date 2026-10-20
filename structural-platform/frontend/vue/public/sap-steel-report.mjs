@@ -51,30 +51,49 @@ export function comboMomentDiagram(dataset,row,member,options={},sourceRows=null
   mmax,ma:samples[1].value,mb:samples[2].value,mc:samples[3].value,
   source:{frame:row.frame,case_kind:row.case_kind,case:row.output_case,step:row.step_type,step_num:row.step_num,start_m:start,end_m:end,samples,source_record_ids:originals.map(r=>r.record_id),coverage:'Mmax from all exported stations plus segment samples; complete SAP station export assumed as declared, not an independent analysis.'}};
 }
-/** A user-declared linear-depth reference, not CSI's EI interpolation or tapered-member design. */
+/** CSI MyType1=relative,2=absolute; local reference mapping, not tapered stability. */
+export function nonprismaticSegmentLayout(member){
+ const segments=member.nonprismatic_segments,length=member.length?.value;
+ if(!(Number.isFinite(length)&&length>0)||!Array.isArray(segments)||!segments.length)throw Error('Nonprismatic: confirmed length and segment definitions are required.');
+ if(segments.some(s=>![1,2].includes(s.length_type)||!Number.isFinite(s.length)||s.length<=0))throw Error('Nonprismatic: invalid segment length or length type.');
+ const absolute=segments.filter(s=>s.length_type===2).reduce((sum,s)=>sum+s.length,0),relative=segments.filter(s=>s.length_type===1).reduce((sum,s)=>sum+s.length,0);
+ if(!Number.isFinite(absolute)||!Number.isFinite(relative))throw Error('Nonprismatic: segment length totals must be finite.');
+ let scale=1;
+ if(!relative){
+  if(Math.abs(absolute-length)>1e-4)throw Error('Nonprismatic: absolute segment lengths do not cover the Frame; verify property assignment.');
+  scale=length/absolute;
+ }else if(absolute>=length)throw Error('Nonprismatic: no positive Frame length remains for relative segments.');
+ let cursor=0;
+ return segments.map((segment,index)=>{const span=segment.length_type===2?segment.length*scale:(length-absolute)*segment.length/relative,start=cursor;cursor+=span;return {...segment,index:index+1,start_m:start,end_m:index===segments.length-1?length:cursor,span_m:span,absolute_length_scale:scale,length_basis:relative?'absolute lengths plus remaining length by relative weights':scale===1?'absolute lengths':'absolute lengths proportionally reconciled to Frame within 0.1 mm'};});
+}
+/** User-declared piecewise linear depth, not CSI EI interpolation or tapered-member design. */
 export function stationReferenceMember(member,row){
  if(member?.section_type?.key==='i_wide_flange')return {member,reference:null};
  if(member?.section_type?.key!=='nonprismatic')throw Error('Unsupported section family.');
  const assignment=member.nonprismatic_assignment;
  const field=(block,name)=>Object.entries(block?.data||{}).find(([k])=>k.toLowerCase()===name.toLowerCase())?.[1];
  if(assignment?.status!=='ok'||field(assignment,'sVarTotalLength')!==0||field(assignment,'sVarRelStartLoc')!==0)throw Error('Nonprismatic: partial/unknown property assignment requires verified station mapping.');
- const segments=member.nonprismatic_segments;
- if(segments?.length!==1||segments[0].length_type!==1||!(segments[0].length>0))throw Error('Nonprismatic: reference currently requires one full-length relative segment.');
- const segment=segments[0],start=member.component_sections.find(c=>c.name===segment.start_section),end=member.component_sections.find(c=>c.name===segment.end_section);
- if(![start,end].every(c=>c?.section_type?.key==='i_wide_flange'&&c.geometry?.unit==='mm'))throw Error('Nonprismatic: both endpoint I/Wide Flange geometries are required.');
- const a=start.geometry.value,b=end.geometry.value,keys=['h','bf_top','bf_bottom','tf_top','tf_bottom','tw'];
- if(!keys.every(k=>Number.isFinite(a?.[k])&&a[k]>0&&Number.isFinite(b?.[k])&&b[k]>0))throw Error('Nonprismatic: endpoint dimensions are incomplete.');
- if(keys.filter(k=>k!=='h').some(k=>Math.abs(a[k]-b[k])>1e-6))throw Error('Nonprismatic: varying flange/web dimensions are outside the linear-depth reference.');
- const overwrite=member.material_overwrite;
- const assigned=field(overwrite,'PropName');
- const confirmed=overwrite&&['ok','empty'].includes(overwrite.status);
- const noOverwrite=typeof assigned==='string'&&['','none'].includes(assigned.trim().toLowerCase());
- if(!confirmed||(!noOverwrite&&assigned!==member.material_name)||(noOverwrite&&(!start.material_name||start.material_name!==end.material_name||start.material_name!==member.material_name)))throw Error('Nonprismatic: effective endpoint material/overwrite is unresolved or differs.');
- const length=member.length?.value,x=row.station_m;
- if(!(length>0)||!Number.isFinite(x)||x<0||x>length)throw Error('Nonprismatic: station must lie within confirmed I–J length.');
- const fraction=x/length,d={...a,h:a.h+(b.h-a.h)*fraction};
- const reference={scope:'PRISMATIC_REFERENCE_AT_STATION',status:'REVIEW_REQUIRED',station_m:x,fraction,start_section:start.name,end_section:end.name,start_dimensions_mm:structuredClone(a),end_dimensions_mm:structuredClone(b),dimensions_mm:d,
-  basis:'User-requested linear depth over full I–J length; constant flange/web dimensions. Not inferred from EI33/EI22 variation. Not verified CSI tapered-member geometry or stability.',
+ const layout=nonprismaticSegmentLayout(member),length=member.length.value,x=row.station_m,tolerance=1e-6;
+ if(!Number.isFinite(x)||x< -tolerance||x>length+tolerance)throw Error('Nonprismatic: station must lie within confirmed I–J length.');
+ const effectiveX=Math.max(0,Math.min(length,x)),keys=['h','bf_top','bf_bottom','tf_top','tf_bottom','tw'];
+ const overwrite=member.material_overwrite,assigned=field(overwrite,'PropName'),confirmed=overwrite&&['ok','empty'].includes(overwrite.status),noOverwrite=typeof assigned==='string'&&['','none'].includes(assigned.trim().toLowerCase());
+ function resolve(segment){
+  const start=member.component_sections.find(c=>c.name===segment.start_section),end=member.component_sections.find(c=>c.name===segment.end_section);
+  if(![start,end].every(c=>c?.section_type?.key==='i_wide_flange'&&c.geometry?.unit==='mm'))throw Error('Nonprismatic: both endpoint I/Wide Flange geometries are required.');
+  const a=start.geometry.value,b=end.geometry.value;
+  if(!keys.every(k=>Number.isFinite(a?.[k])&&a[k]>0&&Number.isFinite(b?.[k])&&b[k]>0))throw Error('Nonprismatic: endpoint dimensions are incomplete.');
+  if(keys.filter(k=>k!=='h').some(k=>Math.abs(a[k]-b[k])>1e-6))throw Error('Nonprismatic: varying flange/web dimensions are outside the linear-depth reference.');
+  if(!confirmed||(!noOverwrite&&assigned!==member.material_name)||(noOverwrite&&(!start.material_name||start.material_name!==end.material_name||start.material_name!==member.material_name)))throw Error('Nonprismatic: effective endpoint material/overwrite is unresolved or differs.');
+  const fraction=Math.max(0,Math.min(1,(effectiveX-segment.start_m)/segment.span_m)),d={...a,h:a.h+(b.h-a.h)*fraction};
+  return {segment,start,end,a,b,fraction,d};
+ }
+ const candidates=layout.filter(s=>effectiveX>=s.start_m-1e-9&&effectiveX<=s.end_m+1e-9).map(resolve);
+ const selected=candidates[0];
+ if(!selected)throw Error('Nonprismatic: station has no mapped segment.');
+ if(candidates.some(c=>keys.some(k=>Math.abs(c.d[k]-selected.d[k])>1e-3)))throw Error('Nonprismatic: discontinuous section at segment boundary; source side requires verification.');
+ const {segment,start,end,a,b,fraction,d}=selected;
+ const reference={scope:'PRISMATIC_REFERENCE_AT_STATION',status:'REVIEW_REQUIRED',station_m:x,effective_station_m:effectiveX,fraction,frame_fraction:effectiveX/length,segment_index:segment.index,boundary_segment_indices:candidates.map(c=>c.segment.index),segment_start_m:segment.start_m,segment_end_m:segment.end_m,segment_layout:layout,start_section:start.name,end_section:end.name,start_dimensions_mm:structuredClone(a),end_dimensions_mm:structuredClone(b),dimensions_mm:d,
+  basis:'User-requested linear depth within each mapped segment; constant flange/web dimensions within the segment. Absolute/relative lengths retained; sub-0.1mm full-length discrepancy proportionally reconciled and disclosed. Not inferred from EI33/EI22 variation. Not verified CSI tapered-member stability.',
   limitation:'D/C is the existing prismatic engine evaluated with this station geometry and declared lengths. It is not tapered-member stability or a code-compliant tapered-member D/C.'};
  return {member:{...member,section_type:{...member.section_type,key:'i_wide_flange'},geometry:{value:d,unit:'mm',source:reference.basis,status:'reference_assumption'}},reference};
 }
@@ -83,7 +102,7 @@ export async function calculateReport(job,dataset,optionsFor,factors,onProgress=
  for(const row of dataset.rows){const k=key(row);if(!sources.has(k))sources.set(k,[]);sources.get(k).push(row)}
  const score=r=>Math.max(-Infinity,...(r.result?.member_compliance.checks||[]).map(c=>c.utilization).filter(Number.isFinite));
  for(const [index,row] of job.cases.entries()){
-  let record,cb=null,diagram=null,cbReason=null;
+  let record,cb=null,diagram=null,cbReason=null,resolved=null;
   const member=job.members.find(m=>m.frame===row.frame);
   let options;
   try{
@@ -98,7 +117,7 @@ export async function calculateReport(job,dataset,optionsFor,factors,onProgress=
    diagram=diagramCache.get(diagramKey);cb=cbF11(diagram);if(cb.value==null)throw Error(cb.reason);
   }catch(error){cbReason=error.message;cb=null}
   try{
-   const resolved=stationReferenceMember(member,row),reference=resolved.reference;
+   resolved=stationReferenceMember(member,row);const reference=resolved.reference;
    if(!(options?.lz_m>0))throw Error('Nhập Lz khống chế xoắn; không tự lấy bằng chiều dài major.');
    if(cbReason)throw Error(cbReason);
    const calculationJob=reference?{...job,members:job.members.map(m=>m.frame===row.frame?resolved.member:m)}:job;
@@ -108,9 +127,9 @@ export async function calculateReport(job,dataset,optionsFor,factors,onProgress=
    const hash=JSON.stringify(packet.input.section);
    if(!geometryCache.has(hash))geometryCache.set(hash,await calculateHISectionProperties(packet.input.section,{}));
    const geometry=geometryCache.get(hash),result=calculateIH36010({...packet.input,method:job.method,geometry_hash:geometry.geometry_hash},geometry.canonical,factors);
-   if(reference){result.member_compliance.status='REVIEW_REQUIRED';result.member_compliance.scope=reference.scope;result.member_compliance.blockers.push({key:'tapered_stability',reason:reference.limitation})}
+   if(reference){result.overall_status='REVIEW_REQUIRED';result.member_compliance.status='REVIEW_REQUIRED';result.member_compliance.scope=reference.scope;result.member_compliance.blockers.push({key:'tapered_stability',reason:reference.limitation})}
    record={index,packet,result,cb,reference,status:result.member_compliance.status,reason:result.member_compliance.blockers.map(b=>b.reason).join('; ')};
-  }catch(error){record={index,frame:row.frame,case:row.output_case,cb,reason:error.message,status:'INPUT_REQUIRED'}}
+  }catch(error){record={index,frame:row.frame,case:row.output_case,cb,reference:resolved?.reference??null,geometry:resolved?.member.geometry??null,reason:error.message,status:'INPUT_REQUIRED'}}
   const interaction=record.result?.limit_states.interaction;
   const knownChecks=(record.result?.member_compliance.checks||[]).filter(c=>Number.isFinite(c.utilization));
   record.metric_reasons={Cb:cbReason,H1:Number.isFinite(interaction?.nominal)?null:(interaction?.reason||record.reason||'H1 resistance/demand is incomplete.'),DC:knownChecks.length?null:(record.reason||'No applicable resistance check was calculated.')};
@@ -121,7 +140,7 @@ export async function calculateReport(job,dataset,optionsFor,factors,onProgress=
   group.missing_positions=(job.coverage?.unavailable_positions||[]).filter(p=>p.frame===row.frame&&p.case_kind===row.case_kind&&p.output_case===row.output_case);
   if(group.missing_positions.length)group.incomplete=true;
   const blocked=!record.result||record.result.member_compliance.blockers.length>0;
-  group.incomplete||=blocked;group.rows.push({index,status:record.status,reason:record.reason,blocked,reference:record.reference??null,geometry:record.packet?.source.geometry??null,cb:record.cb??null,metric_reasons:record.metric_reasons,utilization:record.calculated_utilization,interaction:record.result?.limit_states.interaction?.nominal??null,checks:Object.fromEntries(knownChecks.map(c=>[c.key,c.utilization]))});
+  group.incomplete||=blocked;group.rows.push({index,status:record.status,reason:record.reason,blocked,reference:record.reference??null,geometry:record.packet?.source.geometry??record.geometry??null,cb:record.cb??null,metric_reasons:record.metric_reasons,utilization:record.calculated_utilization,interaction:record.result?.limit_states.interaction?.nominal??null,checks:Object.fromEntries(knownChecks.map(c=>[c.key,c.utilization]))});
   if(!group.governing||score(record)>score(group.governing)||(!group.governing.packet&&record.packet)||(!group.governing.result&&!group.governing.cb&&record.cb))group.governing=record;
   onProgress(index+1,job.cases.length);if(index%20===0)await new Promise(resolve=>setTimeout(resolve,0));
  }

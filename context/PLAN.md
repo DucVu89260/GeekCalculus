@@ -1,5 +1,9 @@
 # Repository implementation plan
 
+## MB1 multi-segment reference and source diagnostics — 2026-10-20
+
+`SAP-NP-11`: supplied Summary JSON confirms two absolute segments3.4249+0.8m, actual I–J4.224878696483485m, same I400 first segment then I400→I620. Implement source-bound multi-segment local geometry for existing prismatic-reference scope, relative/absolute lengths and explicit sub0.1mm proportional rounding reconciliation; no tapered stability approval. Preserve boundary ties, reject discontinuous geometry/material/partial assignment, clamp numerical endpoint tolerance only. Keep nonconcurrent vectors blocked; add one read-only diagnostic action to retrieve selected combo tree + actual assignment/segments via existing snapshot API, print/export this evidence. Uploaded file is Summary, not prepared-input JSON; do not infer combo type from its name or Max/Min alone. Acceptance: independent two-segment h400/h510/h620 and boundaries, nonconcurrent no-H1 regression, real browser diagnostic read/print and kit parity.
+
 ## SAP Quick-check printable diagnostics — 2026-10-20
 
 `SAP-PRINT-10`: add VI/EN Print/Save PDF action to Steel Design review, usable before or after calculation. Snapshot current control values, expand relevant details, remove scrolling/controls and include per-record calculated/missing-result diagnostics with source/build/method; no token or full-page capture. Isolated same-origin print frame avoids modal clipping/pop-up blocking and changing live form. Retain all mathematical/missing-input guards. Acceptance: real browser print-frame content for blank and calculated reports, no credentials, all printed station rows bounded with explicit truncation count; PDF rendering smoke and kit parity. Investigate no-result workflow through printed prerequisites, without inventing capacities.

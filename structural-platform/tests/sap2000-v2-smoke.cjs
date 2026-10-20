@@ -146,6 +146,13 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright')
   await page.waitForFunction(()=>document.querySelector('#steel-report-missing').textContent.includes('Lz'));
   const partial=page.locator('#steel-report-results tbody tr').filter({hasText:'F1 · I300'}).filter({hasText:'DEAD'});assert.equal(await partial.locator('td').nth(6).textContent(),'1.00');assert.equal(await partial.locator('td').nth(7).textContent(),'—');
   const missingLz=page.locator('#steel-report-missing details').filter({hasText:'Frame F1 · DEAD'}).locator('li');assert.equal(await missingLz.count(),1);assert.match(await missingLz.textContent(),/Lz/);assert.match(await missingLz.textContent(),/H1 D\/C/);
+  await page.click('#steel-read-diagnostics');
+  await page.waitForFunction(()=>!document.querySelector('#steel-diagnostics-json').disabled&&!document.querySelector('#controls').disabled);
+  assert.match(await page.locator('#steel-source-diagnostics').textContent(),/Linear Additive/);
+  assert.match(await page.locator('#steel-source-diagnostics').textContent(),/output_multivalued_combo/);
+  const diagnostic=await downloadJson('#steel-diagnostics-json');
+  assert.equal(diagnostic.schema_version,'sap-steel-source-diagnostics-1');assert.equal(diagnostic.load_catalog.output_options.output_multivalued_combo.data.Value,1);
+  assert.equal(diagnostic.read_only,true);
   await page.click('#steel-print');printFrame=page.frameLocator('#steel-print-frame');
   const printText=await printFrame.locator('body').textContent();
   assert.match(printText,/Lz/);assert.match(printText,/Station: kết quả/);assert.match(printText,/LRFD/);
@@ -232,8 +239,8 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright')
   await page.click('#steel-run-report');await page.waitForFunction(()=>document.querySelector('#steel-report-status').textContent.includes('nhóm Frame/Combo'))
   assert.ok(await page.locator('#steel-report-results tbody tr').count()>0)
   await page.click('#steel-review-close')
-  // Synthetic full-property one-segment NP exercises the reference UI without claiming a live CSI verification.
-  await page.evaluate(()=>{v2Snapshot.sections.NP1.segments=[{...v2Snapshot.sections.NP1.segments[0]}]});
+  // Constant+linear absolute segments exercise the same mapping as the supplied MB1 example.
+  await page.evaluate(()=>{const s=v2Snapshot.sections.NP1.segments[0];v2Snapshot.sections.NP1.segments=[{...s,end_section:s.start_section,length:3,length_type:2},{...s,length:9,length_type:2}]});
   await page.click('#design-members');await page.selectOption('#steel-length-source','manual');await page.selectOption('#steel-method','LRFD');await page.selectOption('#steel-cb-mode','CONSERVATIVE');
   for(const [key,value] of [['major','2'],['minor','2'],['ltb','4']]){const input=page.getByRole('spinbutton',{name:'F2 '+key+' m',exact:true});await input.fill(value);await input.press('Tab')}
   await page.getByRole('spinbutton',{name:'F2 Lz m',exact:true}).fill('2.2');await page.getByRole('spinbutton',{name:'F2 Lz m',exact:true}).press('Tab');

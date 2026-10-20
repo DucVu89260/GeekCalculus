@@ -1,6 +1,12 @@
 # SAP2000-API V2 — Web / Local
 
-Build `2026.10.20-v2-print.1` · Compatible with SAP2000 v26.2.0 · Windows64-bit, Python3.11–3.13 x64.
+Build `2026.10.20-v2-segments.1` · Compatible with SAP2000 v26.2.0 · Windows64-bit, Python3.11–3.13 x64.
+
+## Nonprismatic nhiều đoạn / Multi-segment reference
+
+Hỗ trợ ánh xạ station trong nhiều đoạn relative hoặc absolute của property toàn chiều dài. MyType1=relative,2=absolute; đoạn absolute giữ chiều dài, phần còn lại chia theo trọng số relative. Nếu toàn absolute và tổng lệch Length không quá0.1mm, bản tham khảo chuẩn hóa tỷ lệ toàn bộ và ghi rõ scale; lệch lớn hơn bị chặn. Hình học h tuyến tính **trong từng đoạn**, không kéo tuyến tính từ đầu đến cuối cả Frame. Plate dimensions/material phải được xác nhận, không tự gán phía tại chỗ gián đoạn. Đây vẫn là prismatic reference tại station, không phải xác minh tapered stability của CSI.
+
+Trong cửa sổ Steel Design, **Đọc định nghĩa Combo / Read Combo definitions → Tải chẩn đoán JSON / Download diagnostics** lấy đúng loại Combo, cây case/hệ số, output options và gán/đoạn section bằng các getter chỉ đọc. File `sap-steel-source-diagnostics.json` phục vụ xác định vì sao forces bị phân loại nonconcurrent. Không thay output settings, không đổi Combo, không chạy analysis/design và không tự coi Max/Min là một vector đồng thời. Cần cập nhật kit local để đọc thêm ba output-option getter mới; UI/profile group selection giữ nguyên.
 
 ## In / Lưu PDF — Print / Save PDF
 

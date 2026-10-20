@@ -284,6 +284,7 @@ class SteelReader:
                     entry['geometric_nonlinearity']=self.read('nonlinear_geometry',Name=case.name)
         for case in cases:visit(case)
         return {'cases_and_combinations':catalog,'patterns':self.read('load_patterns'),
+                'output_options':{key:self.read(key) for key in ('output_nl_static','output_multistep_static','output_multivalued_combo')},
                 'basis':'Original combo types/factors; not expanded algebraically or assumed concurrent'}
 
     def snapshot(self,request:SnapshotRequest):

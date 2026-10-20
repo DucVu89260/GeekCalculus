@@ -36,7 +36,7 @@ export function prepareDesignJob({snapshot,dataset,positions,summary,mode='full'
   if(type!=='i_wide_flange')issues.push(type==='nonprismatic'?'Tapered member requires a separately verified design method':'No supported component for this section family')
   if(module!=='symmetric_i')issues.push('Asymmetric I/H component is not supported by this handoff')
   if(d&&(![d.h,d.bf_top,d.bf_bottom,d.tf_top,d.tf_bottom,d.tw].every(positive)||Math.abs(d.bf_top-d.bf_bottom)>1e-6||Math.abs(d.tf_top-d.tf_bottom)>1e-6))issues.push('Symmetric I/H geometry not confirmed')
-  if(!d)issues.push('I-section dimensions missing')
+  if(!d&&type!=='nonprismatic')issues.push('I-section dimensions missing')
   const length=m?.data?.geometry?.length_m,overwrites=m?.data?.design_overwrites
   const lengths={}
   for(const [key,index] of [['major',18],['minor',19],['ltb',20]]){
@@ -54,7 +54,7 @@ export function prepareDesignJob({snapshot,dataset,positions,summary,mode='full'
   if(!method)issues.push('Confirm ASD/LRFD and demand basis')
   issues.push('Confirm both exports represent the same analysis state, local-axis/sign mapping, fabrication, DAM assumptions, Lz and module-specific inputs before calculation')
   return {frame,section:m?.analysis_section??null,section_type:section?.section_type??null,material_name:materialName??null,
-   geometry:item(d??null,'mm','SAP GetISection'),material:item(material?.normalized?Object.fromEntries(['Fy_MPa','Fu_MPa','E_MPa','G_MPa','expected_Fy_MPa','expected_Fu_MPa'].map(k=>[k,material.normalized[k]??null])):null,'MPa','Assigned SAP material; design overrides remain separate'),
+   geometry:item(d??null,'mm',type==='nonprismatic'?'Per-station geometry from nonprismatic component sections':'SAP GetISection',type==='nonprismatic'?'per_station':d?'provided':'input_required'),material:item(material?.normalized?Object.fromEntries(['Fy_MPa','Fu_MPa','E_MPa','G_MPa','expected_Fy_MPa','expected_Fu_MPa'].map(k=>[k,material.normalized[k]??null])):null,'MPa','Assigned SAP material; design overrides remain separate'),
    poisson_ratio:item(material?.normalized?.poisson_ratio??null,'—','SAP GetMPIsotropic'),length:item(positive(length)?length:null,'m','SAP Global I/J coordinates'),unbraced_lengths:lengths,
    nonprismatic_assignment:structuredClone(m?.data?.sections?.nonprismatic_assignment??null),material_overwrite:structuredClone(m?.data?.materials?.member_overwrite??null),sap_design_results:structuredClone(m?.data?.design_results??null),component_sections:componentSections,nonprismatic_segments:structuredClone(section?.segments||[]),design_overwrites:structuredClone(overwrites??null),issues}
  })

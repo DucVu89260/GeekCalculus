@@ -47,6 +47,7 @@ class FixtureRuntime:
         elif key in ('springs','hinges'):data={'NumberSprings' if key=='springs' else 'NumberHinges':0};status='empty'
         elif key=='material_temperature':data={'Temp':20.}
         elif key in ('load_point','load_distributed','load_gravity','load_temperature'):data={'NumberItems':0};status='empty'
+        elif key in ('output_nl_static','output_multistep_static','output_multivalued_combo'):data={'Value':1}
         elif key=='combo_type':data={'ComboType':1 if name=='ENV' else 0}
         elif key=='combo_components':data={'NumberItems':1,'CNameType':[0],'CName':['DEAD'],'SF':[1.4]}
         elif key=='case_type':data={'CaseType':1,'SubType':0}

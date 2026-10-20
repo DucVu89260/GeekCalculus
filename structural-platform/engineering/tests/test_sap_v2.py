@@ -279,3 +279,15 @@ def test_component_assets_are_allowlisted_and_same_origin_only():
     assert client.get('/steel_component/private-model.sdb').status_code==404
     assert client.get('/steel_component/connector.py').status_code==404
     assert client.get(API_PREFIX+'/connection').status_code==401
+
+
+def test_combo_diagnostics_include_readonly_output_options_and_original_component_tree():
+    model,data=read(groups=['sections','loads'],output_cases=[{'name':'ENV','kind':'combination'}])
+    catalog=data['model_data']['loads']
+    assert field(catalog['cases_and_combinations']['combination:ENV']['kind'],'ComboType')==1
+    assert field(catalog['cases_and_combinations']['combination:ENV']['components'],'CName')==['DEAD']
+    assert 'case:DEAD' in catalog['cases_and_combinations']
+    for key in ('output_nl_static','output_multistep_static','output_multivalued_combo'):
+        assert field(catalog['output_options'][key],'Value')==1
+        assert catalog['output_options'][key]['source'].startswith('Results.Setup.GetOption')
+    assert model.units==9

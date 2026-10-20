@@ -26,6 +26,7 @@ export const groupTools = {
     { code: 'seismic', title: 'toolSeismic', description: 'seismicDescription', route: 'loads/seismic' },
     { code: 'snow', title: 'toolSnow', description: 'snowDescription', route: 'loads/snow' },
     { code: 'temperature', title: 'toolTemperature', description: 'temperatureDescription', route: 'loads/temperature' },
+    { code: 'library', title: 'toolLoadingLibrary', description: 'loadingLibraryDescription', route: 'loads/library' },
   ],
 }
 
@@ -34,12 +35,13 @@ const legacyRoutes = {
   analysis: 'steel/section-properties',
   library: 'steel/library',
   future: 'steel/future',
+  'steel/library/vietnam-location': 'loads/library/vietnam-location',
 }
 export function resolveModuleRoute(code) {
   const normalized = legacyRoutes[code] ?? code
   if (['loads/wind/envelope-low-rise','loads/wind/directional-walls'].includes(normalized)) return { group: moduleGroups.find(g => g.code === 'loads'), tool: { code:'wind',title:'toolWind',description:'windDescription',route:normalized } }
   const [groupCode, toolCode, extra] = String(normalized).split('/')
-  if (normalized === 'steel/library/vietnam-location') return { group: moduleGroups.find(g => g.code === 'steel'), tool: { code: 'vietnam-location', title: 'toolVietnamLocation', description: 'vietnamLocationDescription', route: normalized } }
+  if (normalized === 'loads/library/vietnam-location') return { group: moduleGroups.find(g => g.code === 'loads'), tool: { code: 'vietnam-location', title: 'toolVietnamLocation', description: 'vietnamLocationDescription', route: normalized } }
   if (normalized === 'steel/cfs/lapping-node') return { group: moduleGroups.find(g => g.code === 'steel'), tool: groupTools.steel.find(tool => tool.code === 'cfs') }
   if (normalized === 'steel/crane-beam') return { group: moduleGroups.find(g => g.code === 'steel'), tool: { code: 'crane-beam', title: 'Crane Beam', description: 'steelDescription', route: 'steel/crane-beam' } }
   if (normalized === 'steel/library/standards') return { group: moduleGroups.find(g => g.code === 'steel'), tool: { code: 'standards', title: 'toolSteelLibrary', description: 'libraryDescription', route: 'steel/library/standards' } }

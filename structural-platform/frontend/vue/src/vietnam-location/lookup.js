@@ -16,6 +16,22 @@ export function searchLocations(data, query, limit = 30) {
   }).slice(0, limit)
 }
 
+export function locationDropdownOptions(data, provinceId, query) {
+  const filtered = Boolean(foldLocation(query))
+  const matches = filtered ? searchLocations(data, query, Infinity) : [...data.wind, ...data.seismic]
+  const ids = new Set(matches.map(row => row.id))
+  const provinces = new Set(matches.map(row => row.province_id))
+  // Retain the selected province as context even when it has no text matches.
+  const provinceRows = data.provinces.filter(row => provinces.has(row.id) || row.id === provinceId)
+  const inScope = row => (!provinceId || row.province_id === provinceId) && ids.has(row.id)
+  return {
+    provinces: provinceRows,
+    wind: provinceId ? data.wind.filter(inScope) : [],
+    seismic: provinceId ? data.seismic.filter(inScope) : [],
+    counts: { wind: data.wind.filter(inScope).length, seismic: data.seismic.filter(inScope).length },
+  }
+}
+
 export function sourcePageUrl(data, page) {
   if (!Number.isInteger(page) || page < 1 || page > data.source.pdf_pages) throw new Error('Invalid source page')
   return `${data.source.url}#page=${page}`

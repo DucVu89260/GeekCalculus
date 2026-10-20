@@ -1,5 +1,11 @@
 # Repository handoff
 
+## Vietnam lookup dropdown filtering — 2026-10-20
+
+- Branch `main`, initial base `0914e51`, synchronized through `a0e2c85` while preserving concurrent SAP changes. UI-only refinement: typing a draft then Search/Enter filters the actual province, wind-scope and earthquake-location dropdown options. Clear filter/empty input restores full options; source province remains explicit context. Out-of-filter selected records are cleared on apply so hidden stale results cannot be exported. Wind and seismic scopes remain independent; no numeric/source/schema/formula changes.
+- Added untruncated dropdown-options helper (the previous separate 30-row quick-result list is replaced), VI/EN Search/Clear controls, applied-filter counts and no-match states. Mobile controls wrap; navy hover/keyboard outlines retain readable contrast without global theme edits. Source data and JSON snapshot semantics unchanged.
+- Verification: seven matching Node tests passed; typecheck/native+demo production builds passed. Existing browser smoke covers both native synthetic read-only session and real demo login: draft vs explicit submit, Enter/click, narrowing Da Nang to Cẩm Lệ, global Củ Chi province narrowing, no matches/selection clearing/export guard, clear/empty restoration, prior values/source/VI-EN parity and320/390px. Screenshots inspected. No source re-extraction, engineering/back-end suites or DB actions needed; CI/Pages checked separately after push.
+
 ## SAP DAM lengths workflow — 2026-10-20
 
 - Build `2026.10.20-v2-lengths.1`, branch fix/sap2000-portable-bootstrap, source base67c7804; remote0914e51 also contains a separate Vietnam location lookup delivery, preserved during integration. Default hybrid manual Lx / confirmed SAP Minor×I–J Ly / SAP LTB×I–J Lb. Keep all-SAP and all-manual. Hybrid manual fallback for missing Ly/Lb preserves original SAP status and explicit manual source; valid SAP values supersede old fallback. Distinguish unread/missing/getter failure/ProgDet/invalid ratio/length/unconfirmed reference. No0→1 default or inference of a program-determined result.

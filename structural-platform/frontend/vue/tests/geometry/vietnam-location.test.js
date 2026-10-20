@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
-import { foldLocation, locationSnapshot, searchLocations, sourcePageUrl } from '../../src/vietnam-location/lookup.js'
+import { foldLocation, locationDropdownOptions, locationSnapshot, searchLocations, sourcePageUrl } from '../../src/vietnam-location/lookup.js'
 
 const data = JSON.parse(readFileSync(new URL('../../../../standards/qcvn02-2022-locations.json', import.meta.url)))
 const find = (province, name) => data.seismic.find(r => r.province_id === province && r.location === name)
@@ -103,4 +103,26 @@ test('export is a source snapshot, preserves null/status and rejects cross-provi
   const vinh = find('p41','Thành phố Vinh')
   assert.equal(locationSnapshot(data, { provinceId:'p41',seismicId:vinh.id }).seismic_location.ss.value_g,null)
   assert.equal(JSON.stringify(data),before)
+})
+
+test('dropdown filters narrow provinces and source rows without truncating or remapping results', () => {
+  const before = JSON.stringify(data)
+  const full = locationDropdownOptions(data, 'p04', '')
+  assert.equal(full.provinces.length, 63)
+  assert.equal(full.wind.length, 4)
+  assert.equal(full.seismic.length, 8)
+  const narrowed = locationDropdownOptions(data, 'p04', 'cam le')
+  assert.equal(narrowed.seismic.length, 1)
+  assert.equal(narrowed.seismic[0].location, 'Quận Cẩm Lệ')
+  assert.equal(narrowed.wind.length, 0) // Do not infer a wind scope from district coverage.
+  assert.deepEqual(narrowed.provinces.map(p => p.id), ['p04'])
+  const global = locationDropdownOptions(data, '', 'Cu Chi')
+  assert.deepEqual(global.provinces.map(p => p.id), ['p02'])
+  assert.deepEqual(global.counts, { wind: 2, seismic: 1 })
+  const empty = locationDropdownOptions(data, 'p04', 'unknownxyz')
+  assert.deepEqual(empty.provinces.map(p => p.id), ['p04']) // Keep current search context.
+  assert.deepEqual(empty.counts, { wind: 0, seismic: 0 })
+  assert.ok(locationDropdownOptions(data, '', 'huyen').counts.seismic > 30)
+  assert.deepEqual(locationDropdownOptions(data, 'p04', '  '), full)
+  assert.equal(JSON.stringify(data), before)
 })

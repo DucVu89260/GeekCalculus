@@ -266,3 +266,25 @@ test('declared free-end cantilever Cb uses verified F1-1 branch without unused m
  const diagram=comboMomentDiagram({rows:[]},row,null,{cantilever:true});
  assert.equal(cbF11(diagram).value,1);assert.equal(cbF11(diagram).source,'F1-1 unbraced free end');assert.equal(diagram.source.case,'C');assert.equal('mmax' in diagram,false);
 });
+
+test('maximum design lengths cover a 9m rafter at all exported stations with conservative Cb1',async()=>{
+ const {prepareDesignJob}=await load(),{calculateReport}=await import('../frontend/vue/public/sap-steel-report.mjs');
+ const f=fixtures();f.positions=null;f.snapshot.members[0].data.geometry.length_m=9;
+ for(const [index,ratio] of [[18,1],[19,1/6],[20,.5]])f.snapshot.members[0].data.design_overwrites.find(o=>o.item===index).data.Value=ratio;
+ const a=f.dataset.rows[0];f.dataset.rows=[0,1,1.5,3,4.5,6,7.5,8,9].map((station,i)=>({...a,station,record_id:'rafter-'+i,M3:station-4.5}));
+ const job=prepareDesignJob({...f,frames:['1'],lengthSource:'sap'}),lengths=job.members[0].unbraced_lengths;
+ assert.equal(lengths.major.value,9);assert.equal(lengths.minor.value,1.5);assert.equal(lengths.ltb.value,4.5);assert.equal(lengths.ltb.application,'declared_maximum_for_frame_checks');
+ const fs=require('node:fs'),vm=require('node:vm'),path=require('node:path'),factors=vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../frontend/vue/public/aisc360-10-resistance.js'),'utf8')+';Aisc36010Resistance');
+ // The separate E4 source is explicitly declared for this fixture; it is not inferred from LTB naming.
+ const [group]=await calculateReport(job,f.dataset,()=>({...approvals,lz_m:4.5,lz_source:'declared_Lz_equals_Lb',cbMode:'CONSERVATIVE'}),factors);
+ assert.equal(group.coverage,9);assert.ok(group.rows.every(row=>row.cb.value===1&&Number.isFinite(row.utilization)));
+ assert.equal(group.governing.packet.input.member.ly_mm,1500);assert.equal(group.governing.packet.input.member.lb_mm,4500);
+ assert.equal(group.governing.packet.source.Lz.source,'declared_Lz_equals_Lb');
+});
+test('missing SAP maximum-length overwrites allow explicit manual fallback for all three axes',async()=>{
+ const {prepareDesignJob}=await load(),f=fixtures();delete f.snapshot.members[0].data.design_overwrites;
+ const missing=prepareDesignJob({...f,frames:['1'],lengthSource:'sap'}).members[0].unbraced_lengths;
+ assert.ok(['major','minor','ltb'].every(k=>missing[k].value===null&&missing[k].sap_status==='overwrites_not_read'));
+ const lengths=prepareDesignJob({...f,frames:['1'],lengthSource:'sap',manualLengths:{'1':{major:9,minor:1.5,ltb:4.5}}}).members[0].unbraced_lengths;
+ for(const [key,value] of [['major',9],['minor',1.5],['ltb',4.5]]){assert.equal(lengths[key].value,value);assert.equal(lengths[key].source,'manual');assert.equal(lengths[key].manual_fallback,true);assert.equal(lengths[key].sap_ratio,null)}
+});

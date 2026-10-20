@@ -45,9 +45,9 @@ export function prepareDesignJob({snapshot,dataset,positions,summary,mode='full'
    const valid=referenceLengthConfirmed&&positive(length)&&overwrite?.status==='ok'&&prog===false&&positive(ratio);
    const missingReason=!Array.isArray(overwrites)?'overwrites_not_read':!overwrite?'overwrite_missing':overwrite.status!=='ok'?'getter_unavailable':prog!==false?'program_determined':!positive(ratio)?'invalid_ratio':!positive(length)?'frame_length_missing':!referenceLengthConfirmed?'reference_length_unconfirmed':null;
    const sapValue=wantsSap&&valid?length*ratio:null;
-   const fallback=lengthSource==='hybrid'&&key!=='major'&&!positive(sapValue)&&positive(manualLengths[frame]?.[key]);
+   const fallback=wantsSap&&!positive(sapValue)&&positive(manualLengths[frame]?.[key]);
    const manual=!wantsSap||fallback,value=manual?manualLengths[frame]?.[key]:sapValue;
-   lengths[key]={...item(positive(value)?value:null,'m',manual?'manual':'SAP overwrite × confirmed frame I–J reference length'),requested_source:wantsSap?'sap':'manual',sap_status:missingReason??'provided',manual_fallback:fallback,sap_ratio:ratio??null,ProgDet:prog??null,reference_length_m:positive(length)?length:null};
+   lengths[key]={...item(positive(value)?value:null,'m',manual?'manual':'SAP overwrite × confirmed frame I–J reference length'),requested_source:wantsSap?'sap':'manual',sap_status:missingReason??'provided',manual_fallback:fallback,sap_ratio:ratio??null,ProgDet:prog??null,reference_length_m:positive(length)?length:null,application:'declared_maximum_for_frame_checks'};
    if(!positive(value))issues.push('Unbraced length '+key+' requires confirmation/input')
   }
   if(!positive(material?.normalized?.Fy_MPa)||!positive(material?.normalized?.Fu_MPa))issues.push('Material Fy/Fu missing or overwrite unresolved')

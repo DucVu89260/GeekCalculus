@@ -77,15 +77,17 @@ function critical(fe,fy) {return fy/fe<=2.25?Math.pow(.658,fy/fe)*fy:.877*fe;}
 export function cbF11(moment) {
  if(moment?.mode==='CONSERVATIVE') return {value:1,source:'CONSERVATIVE',clause:'F1-1 (Cb=1 conservative)'}
  if(moment?.mode!=='QUARTER_POINTS') return {value:null,source:'INPUT_REQUIRED',clause:'F1-1',reason:'Supply a verified segment moment diagram or choose Cb=1 conservative.'}
- if(moment.is_unbraced_cantilever) return {value:1,source:'F1-1 unbraced free end',clause:'F1-1'}
+ if(moment.is_unbraced_cantilever===true) return {value:1,source:'F1-1 unbraced free end',clause:'F1-1'}
  if(moment.ends_braced!==true || moment.same_case!==true) return {value:null,source:'REVIEW_REQUIRED',clause:'F1-1',reason:'Both segment ends must be braced; all moment stations must come from one load case/combo.'}
  if(moment.segment_maximum_confirmed!==true) return {value:null,source:'REVIEW_REQUIRED',clause:'F1-1',reason:'Confirm Mmax is the maximum absolute moment over the entire unbraced segment; the quarter-point samples alone do not establish it.'}
  const moments=['mmax','ma','mb','mc'].map(k=>Math.abs(check(moment[k],k)));
  const [mmax,ma,mb,mc]=moments;
- const denom=2.5*mmax+3*ma+4*mb+3*mc;
- if(denom===0) return {value:1,source:'ZERO_MOMENT',clause:'F1-1'}
  if(mmax<Math.max(ma,mb,mc)) return {value:null,source:'REVIEW_REQUIRED',clause:'F1-1',reason:'Mmax is smaller than one of the quarter point magnitudes.'}
- return {value:12.5*mmax/denom,source:'SAME_SEGMENT_POINTS',clause:'F1-1',moments:{mmax,ma,mb,mc}};
+ if(mmax===0) return {value:1,source:'ZERO_MOMENT',clause:'F1-1'}
+ // Homogeneous F1-1: normalize before weighting to avoid finite-input
+ // overflow/underflow. No universal 2.3 cap; Chapter F still caps Mn.
+ const denom=2.5+3*(ma/mmax)+4*(mb/mmax)+3*(mc/mmax);
+ return {value:12.5/denom,source:'SAME_SEGMENT_POINTS',clause:'F1-1',moments:{mmax,ma,mb,mc}};
 }
 export function classifyI(input) {
  const {section,material}=input;

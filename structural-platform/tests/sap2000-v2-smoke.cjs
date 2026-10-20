@@ -125,6 +125,14 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright')
   assert.equal(await page.locator('#steel-unstiffened-confirmed').isChecked(),true)
   assert.match(await page.locator('.report-basis').textContent(),/DAM/)
   assert.equal(await page.locator('#steel-length-source').inputValue(),'hybrid');
+  assert.equal(await page.locator('#steel-report-footnote').evaluate(e=>!e.closest('table,.table-wrap')),true);
+  assert.match(await page.locator('#steel-report-footnote').textContent(),/không phải D\/C do SAP xuất/);
+  await page.selectOption('#steel-method','LRFD');await page.selectOption('#steel-cb-mode','CONSERVATIVE');await page.click('#steel-run-report');
+  await page.waitForFunction(()=>document.querySelector('#steel-report-missing').textContent.includes('Lz'));
+  const partial=page.locator('#steel-report-results tbody tr').filter({hasText:'F1 · I300'}).filter({hasText:'DEAD'});assert.equal(await partial.locator('td').nth(6).textContent(),'1.00');assert.equal(await partial.locator('td').nth(7).textContent(),'—');
+  assert.match(await page.locator('#steel-report-missing').textContent(),/H1.*Lz/);
+  await page.selectOption('#steel-cb-mode','COMBO');
+
   await page.click('#steel-read-lengths');await page.waitForFunction(()=>document.querySelector('#steel-length-status').textContent.startsWith('Đã đọc.'));
   assert.match(await page.locator('#steel-report-inputs').textContent(),/SAP ratio 1 ×/);
   assert.equal(await page.getByRole('spinbutton',{name:'F1 major m',exact:true}).count(),1);
@@ -183,7 +191,7 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright')
   const table=await downloadJson('#profile-table-json');assert.equal(table.total_records,2);assert.equal(table.truncated,true)
   assert.deepEqual(table.rows,[['F1','I300','0.01']]);assert.equal(table.raw.data.TableData,undefined)
   const snapshot=await page.evaluate(()=>JSON.stringify(v2Snapshot))
-  await page.click('#lang-en');assert.equal(await page.locator('#selected-panel > h2').textContent(),'3. Selected members');assert.match(await page.locator('#profile-member-groups h3').textContent(),/^3.1. Materials/);assert.equal(await page.locator('#profile-design-groups h3').textContent(),'3.2. Design parameters');assert.equal(await page.locator('#extreme-title').textContent(),'4.2. Internal force extremes')
+  await page.click('#lang-en');assert.match(await page.locator('#steel-report-footnote').textContent(),/not a D\/C exported by SAP/);assert.equal(await page.locator('#selected-panel > h2').textContent(),'3. Selected members');assert.match(await page.locator('#profile-member-groups h3').textContent(),/^3.1. Materials/);assert.equal(await page.locator('#profile-design-groups h3').textContent(),'3.2. Design parameters');assert.equal(await page.locator('#extreme-title').textContent(),'4.2. Internal force extremes')
   assert.equal(await page.locator('#profile-groups input:checked').count(),9)
   await page.selectOption('#profile-target','frame:F1');await page.selectOption('#profile-category','assignments')
   assert.equal(await page.locator('#profile-release-i tbody tr').nth(5).locator('td').nth(4).textContent(),'Released (true)')

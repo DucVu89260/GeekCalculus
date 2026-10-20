@@ -207,3 +207,23 @@ test('declared Lz=Lb keeps an explicit assumption source and rejects mismatched 
  assert.equal(packet.input.member.lz_mm,5000);assert.equal(packet.source.Lz.source,'declared_Lz_equals_Lb');assert.deepEqual(validateComponentPacket(packet),packet);const edited=structuredClone(packet);edited.input.member.lz_mm=4000;assert.throws(()=>validateComponentPacket(edited),/mismatch/);
  assert.throws(()=>prepareSymmetricComponent(job,0,{...approvals,lz_source:'declared_Lz_equals_Lb'}),/must match/);
 });
+
+test('report retains independent combo Cb when Lz or section mapping prevents D/C',async()=>{
+ const {prepareDesignJob}=await load(),{calculateReport}=await import('../frontend/vue/public/sap-steel-report.mjs');
+ const f=fixtures();f.positions=null;const a=f.dataset.rows[0];f.dataset.rows=[a,{...a,record_id:'end',station:10,M3:0}];
+ const job=prepareDesignJob({...f,frames:['1'],lengthSource:'manual',manualLengths:{'1':{major:5,minor:5,ltb:10}}});
+ let report=await calculateReport(job,f.dataset,()=>({segmentStart:0,segmentEnd:10,endsBraced:true}),{});
+ assert.ok(Math.abs(report[0].governing.cb.value-5/3)<1e-12);
+ assert.equal(report[0].governing.calculated_utilization,null);assert.equal(report[0].governing.metric_reasons.Cb,null);assert.match(report[0].governing.metric_reasons.H1,/Lz/);
+ const unsupported=structuredClone(job);unsupported.members[0].section_type.key='channel';
+ report=await calculateReport(unsupported,f.dataset,()=>({lz_m:5,segmentStart:0,segmentEnd:10,endsBraced:true}),{});
+ assert.ok(Math.abs(report[0].governing.cb.value-5/3)<1e-12);assert.match(report[0].governing.metric_reasons.DC,/section family/);
+});
+test('report explains unavailable Cb and never supplies one for a nonconcurrent vector',async()=>{
+ const {prepareDesignJob}=await load(),{calculateReport}=await import('../frontend/vue/public/sap-steel-report.mjs');
+ const f=fixtures();f.positions=null;const job=prepareDesignJob({...f,frames:['1']});
+ let report=await calculateReport(job,f.dataset,()=>({lz_m:5,segmentStart:0,segmentEnd:5,endsBraced:true}),{});
+ assert.equal(report[0].governing.cb,null);assert.match(report[0].governing.metric_reasons.Cb,/không ngoại suy/);assert.ok(report[0].governing.metric_reasons.H1);
+ job.cases[0].concurrency='nonconcurrent';report=await calculateReport(job,f.dataset,()=>({lz_m:5,cbMode:'CONSERVATIVE'}),{});
+ assert.equal(report[0].governing.cb,null);assert.match(report[0].governing.metric_reasons.Cb,/nonconcurrent/);
+});

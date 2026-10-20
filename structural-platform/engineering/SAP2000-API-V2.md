@@ -1,6 +1,6 @@
 # SAP2000-API V2 — Web / Local
 
-Build `2026.10.20-v2-lengths.1` · Compatible with SAP2000 v26.2.0 · Windows64-bit, Python3.11–3.13 x64.
+Build `2026.10.20-v2-results.1` · Compatible with SAP2000 v26.2.0 · Windows64-bit, Python3.11–3.13 x64.
 
 ## Cài mới / Nâng cấp từ V1 hoặc V2 local
 
@@ -115,3 +115,7 @@ Mặc định Hybrid: Lx nhập tay, Ly=SAP Minor ratio×Length I–J, Lb=SAP LT
 Lz là chiều dài khống chế mất ổn định xoắn trong nhánh E4-4 của bộ tính I/H, độc lập với K=1 theo DAM. Danh mục AISC360-10 GetOverwrite đã xác minh chỉ có Major/Minor/LTB ratios, chưa có Lz độc lập. Chọn Lz nhập tay hoặc chủ động chọn **Lz=Lb — xác nhận cùng khống chế xoắn** nếu điều kiện thực tế cho phép; nguồn được lưu `declared_Lz_equals_Lb`, không phải giá trị Lz do SAP trả về. Không tự suy Lz=Lx/Ly/Lb từ DAM.
 
 LTB start/end là tọa độ theo local1 của hai đầu đoạn không giằng dùng để tính Cb, không phải hai bước xà gồ. Ví dụ đoạn2–4m có Lb2m, quarters tại2.5/3/3.5m. Giằng xà gồ cần đúng điều kiện khống chế cánh nén/xoắn; không coi mọi vị trí xà gồ tự động là giằng. Một ratio chỉ cho chiều dài, không cho danh sách tọa độ giằng. Giao diện hiện xét một đoạn đã khai báo mỗi Frame; nếu nhiều đoạn/khác bước thì cần xét từng đoạn, không tự lấy0…Lb làm toàn bộ phạm vi.
+
+## Cb và kết quả chưa tính được
+
+Cb được xử lý độc lập từ biểu đồ cùng Frame/Combo/Step/LTB, trước các điều kiện hình học/Lz/sức kháng. Nếu Cb đã tính hợp lệ, lỗi chuẩn bị D/C không được xóa Cb. Không tính Cb thiết kế từ vector envelope/modal không đồng thời; không tự đổi sang1 khi biểu đồ thiếu mốc (chỉ dùng1 khi chọn phương án bảo thủ). H1 và D/C chỉ có số khi có kiểm tra sức kháng tương ứng. Mỗi dòng lưu metric_reasons riêng; phần Lý do chưa có kết quả nằm dưới bảng gom nguyên nhân và số dòng ảnh hưởng theo Frame/Combo. Chú thích dấu* bên ngoài cả bảng tổ hợp và bảng station định nghĩa D/C đã tính, phạm vi tham khảo Nonprismatic và việc dấu—không phải0. Đây là sửa điều phối/hiển thị; không đổi công thức hay nới điều kiện chấp nhận thiết kế.

@@ -59,15 +59,20 @@ export async function calculateReport(job,dataset,optionsFor,factors,onProgress=
  for(const row of dataset.rows){const k=key(row);if(!sources.has(k))sources.set(k,[]);sources.get(k).push(row)}
  const score=r=>Math.max(-Infinity,...(r.result?.member_compliance.checks||[]).map(c=>c.utilization).filter(Number.isFinite));
  for(const [index,row] of job.cases.entries()){
-  let record;
+  let record,cb=null,diagram=null,cbReason=null;
+  const member=job.members.find(m=>m.frame===row.frame);
+  let options;
   try{
-   const member=job.members.find(m=>m.frame===row.frame),options=optionsFor(member,row);
-   const resolved=stationReferenceMember(member,row),reference=resolved.reference;
-   if(!(options.lz_m>0))throw Error('Nhập Lz khống chế xoắn; không tự lấy bằng chiều dài major.');
-   if(options.cbMode!=='CONSERVATIVE'&&(row.station_m<options.segmentStart-1e-6||row.station_m>options.segmentEnd+1e-6))throw Error('Station nằm ngoài đoạn LTB đang kiểm tra.');
+   options=optionsFor(member,row);
+   if(row.concurrency!=='concurrent')throw Error('Envelope/modal/nonconcurrent vector: choose a concurrent constituent case/combo/step.');
    const diagramKey=JSON.stringify([key(row),options.segmentStart,options.segmentEnd,options.cbMode,options.endsBraced,options.cantilever]);
    if(!diagramCache.has(diagramKey))diagramCache.set(diagramKey,comboMomentDiagram(dataset,row,member,options,sources.get(key(row))||[]));
-   const diagram=diagramCache.get(diagramKey),cb=cbF11(diagram);if(cb.value==null)throw Error(cb.reason);
+   diagram=diagramCache.get(diagramKey);cb=cbF11(diagram);if(cb.value==null)throw Error(cb.reason);
+  }catch(error){cbReason=error.message;cb=null}
+  try{
+   const resolved=stationReferenceMember(member,row),reference=resolved.reference;
+   if(!(options?.lz_m>0))throw Error('Nhập Lz khống chế xoắn; không tự lấy bằng chiều dài major.');
+   if(cbReason)throw Error(cbReason);
    const calculationJob=reference?{...job,members:job.members.map(m=>m.frame===row.frame?resolved.member:m)}:job;
    const packet=prepareSymmetricComponent(calculationJob,index,{...options,mappingConfirmed:true,builtUpConfirmed:true,damConfirmed:true,momentDiagram:diagram,cbOneConfirmed:diagram.mode==='CONSERVATIVE'});
    if(reference){packet.source.station_reference=structuredClone(reference);packet.source.original_section_type=structuredClone(member.section_type)}
@@ -77,15 +82,19 @@ export async function calculateReport(job,dataset,optionsFor,factors,onProgress=
    const geometry=geometryCache.get(hash),result=calculateIH36010({...packet.input,method:job.method,geometry_hash:geometry.geometry_hash},geometry.canonical,factors);
    if(reference){result.member_compliance.status='REVIEW_REQUIRED';result.member_compliance.scope=reference.scope;result.member_compliance.blockers.push({key:'tapered_stability',reason:reference.limitation})}
    record={index,packet,result,cb,reference,status:result.member_compliance.status,reason:result.member_compliance.blockers.map(b=>b.reason).join('; ')};
-  }catch(error){record={index,frame:row.frame,case:row.output_case,reason:error.message,status:'INPUT_REQUIRED'}}
+  }catch(error){record={index,frame:row.frame,case:row.output_case,cb,reason:error.message,status:'INPUT_REQUIRED'}}
+  const interaction=record.result?.limit_states.interaction;
+  const knownChecks=(record.result?.member_compliance.checks||[]).filter(c=>Number.isFinite(c.utilization));
+  record.metric_reasons={Cb:cbReason,H1:Number.isFinite(interaction?.nominal)?null:(interaction?.reason||record.reason||'H1 resistance/demand is incomplete.'),DC:knownChecks.length?null:(record.reason||'No applicable resistance check was calculated.')};
+  record.calculated_utilization=knownChecks.length?record.result.member_compliance.utilization:null;
   const groupKey=JSON.stringify([row.frame,row.case_kind,row.output_case]);
   if(!groups.has(groupKey))groups.set(groupKey,{rows:[],governing:null,incomplete:false,coverage:0});
   const group=groups.get(groupKey);group.coverage++;
   group.missing_positions=(job.coverage?.unavailable_positions||[]).filter(p=>p.frame===row.frame&&p.case_kind===row.case_kind&&p.output_case===row.output_case);
   if(group.missing_positions.length)group.incomplete=true;
   const blocked=!record.result||record.result.member_compliance.blockers.length>0;
-  group.incomplete||=blocked;group.rows.push({index,status:record.status,reason:record.reason,blocked,reference:record.reference??null,geometry:record.packet?.source.geometry??null,cb:record.cb??null,utilization:record.result?.member_compliance.utilization??null,interaction:record.result?.limit_states.interaction?.nominal??null});
-  if(!group.governing||score(record)>score(group.governing)||(!group.governing.packet&&record.packet))group.governing=record;
+  group.incomplete||=blocked;group.rows.push({index,status:record.status,reason:record.reason,blocked,reference:record.reference??null,geometry:record.packet?.source.geometry??null,cb:record.cb??null,metric_reasons:record.metric_reasons,utilization:record.calculated_utilization,interaction:record.result?.limit_states.interaction?.nominal??null});
+  if(!group.governing||score(record)>score(group.governing)||(!group.governing.packet&&record.packet)||(!group.governing.result&&!group.governing.cb&&record.cb))group.governing=record;
   onProgress(index+1,job.cases.length);if(index%20===0)await new Promise(resolve=>setTimeout(resolve,0));
  }
  return [...groups.values()];

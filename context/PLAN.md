@@ -1,5 +1,9 @@
 # Repository implementation plan
 
+## SAP report missing-result explanations — 2026-10-20
+
+`SAP-RESULT-04`: compute source-bound Cb independently before geometry/Lz capacity gates; retain valid Cb when downstream capacity preparation fails. Reject nonconcurrent diagrams, retain per-metric reason fields, show all uncomputed-result reasons below the table and bilingual asterisk definitions outside both report/station tables. No capacity defaults, formulas or tapered-scope relaxation. Acceptance: independent Cb retention on missing Lz/unsupported geometry, missing Cb reasons, browser blank-result explanations/footnotes and standard report/kit checks.
+
 ## SAP DAM length workflow — 2026-10-20
 
 `SAP-LENGTH-03`: default hybrid manual Lx / SAP Minor×Length Ly / SAP LTB×Length Lb; keep all-SAP/manual modes and allow manual fallback only when the requested SAP value is unavailable. Display exact missing/not-read/ProgDet/invalid reason, no0→1 ratio substitution. Explicit re-read button requests exported frame IDs and preserves profile group selection while including overwrites/setup. Independent Lz remains unknown unless manual or user explicitly selects the declared Lz=Lb restraint assumption; not an SAP field or DAM consequence. Explain LTB segment coordinates and quarter-point Cb, retaining missing brace-point barriers. Acceptance: hybrid provenance/no fallback defaults/source tests, actual browser overwrite re-read and Lz source choice, package parity; unchanged canonical AISC kernel.

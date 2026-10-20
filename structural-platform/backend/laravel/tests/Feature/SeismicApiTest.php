@@ -91,4 +91,15 @@ class SeismicApiTest extends TestCase
         $this->postJson('/api/v1/seismic/imports/preview', ['tables' => $t])->assertUnprocessable()->assertJsonPath('code', 'SEISMIC_INPUT_INVALID');
         $this->assertDatabaseCount('seismic_imports', 0);
     }
+
+    public function test_unrelated_sheet_can_be_ignored_without_header_or_units(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $tables = SapFixture::tables();
+        $tables[] = ['table_key' => 'Unrelated notes', 'model' => 'synthetic.sdb', 'truncated' => false, 'columns' => ['Note'], 'rows' => [['Synthetic export metadata']]];
+        $preview = $this->postJson('/api/v1/seismic/imports/preview', ['tables' => $tables])->assertOk()->json('data');
+        $maps = SapFixture::mapping($preview['preview']);
+        $maps[4] = ['name' => 'Unrelated notes', 'role' => 'ignore'];
+        $this->postJson('/api/v1/seismic/imports/'.$preview['import_id'].'/confirm', ['mappings' => $maps])->assertOk()->assertJsonCount(1, 'data.dto.definitions');
+    }
 }

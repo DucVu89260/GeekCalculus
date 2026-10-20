@@ -124,6 +124,17 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright')
   assert.equal(await page.locator('#steel-map-confirmed').isVisible(),false)
   assert.equal(await page.locator('#steel-unstiffened-confirmed').isChecked(),true)
   assert.match(await page.locator('.report-basis').textContent(),/DAM/)
+  assert.equal(await page.locator('#steel-length-source').inputValue(),'hybrid');
+  await page.click('#steel-read-lengths');await page.waitForFunction(()=>document.querySelector('#steel-length-status').textContent.startsWith('Đã đọc.'));
+  assert.match(await page.locator('#steel-report-inputs').textContent(),/SAP ratio 1 ×/);
+  assert.equal(await page.getByRole('spinbutton',{name:'F1 major m',exact:true}).count(),1);
+  assert.equal(await page.getByRole('spinbutton',{name:'F1 minor m',exact:true}).count(),0);
+  await page.selectOption('[aria-label="F1 Lz source"]','lb');
+  assert.equal(await page.getByRole('spinbutton',{name:'F1 Lz m',exact:true}).isDisabled(),true);
+  assert.equal(await page.getByRole('spinbutton',{name:'F1 Lz m',exact:true}).inputValue(),'5');
+  await page.selectOption('#steel-length-source','manual');const temporaryLb=page.getByRole('spinbutton',{name:'F1 ltb m',exact:true});await temporaryLb.fill('3');await temporaryLb.press('Tab');assert.equal(await page.getByRole('spinbutton',{name:'F1 Lz m',exact:true}).inputValue(),'3');
+  await page.selectOption('[aria-label="F1 Lz source"]','manual');
+
   await page.selectOption('#steel-length-source','manual');await page.selectOption('#steel-method','LRFD')
   for(const [key,value] of [['major','2'],['minor','2'],['ltb','4']]){const input=page.getByRole('spinbutton',{name:'F1 '+key+' m',exact:true});await input.fill(value);await input.press('Tab')}
   for(const [name,value] of [['F1 Lz m','2.2'],['F1 LTB start m','0'],['F1 LTB end m','4']]){const input=page.getByRole('spinbutton',{name,exact:true});await input.fill(value);await input.press('Tab')}
@@ -162,6 +173,7 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright')
   await npRow.getByRole('button',{name:'Các station đã kiểm tra'}).click();assert.match(await page.locator('#steel-station-scope').textContent(),/chưa kiểm tra ổn định/);
   const stationHeights=await page.locator('#steel-station-results tbody td:nth-child(3)').allTextContents();assert.ok(stationHeights.some(v=>v.startsWith('300.00')));assert.ok(stationHeights.some(v=>!v.startsWith('300.00')));
   await page.click('#steel-station-close');await page.click('#steel-review-close');
+  await page.evaluate(()=>{delete v2Snapshot.members.find(m=>m.frame==='F1').data.design_overwrites});await page.click('#design-members');await page.waitForFunction(()=>document.querySelector('#steel-length-status').textContent.startsWith('Đã đọc.')&&v2Snapshot.members.every(m=>Array.isArray(m.data.design_overwrites)));await page.selectOption('#steel-length-source','hybrid');assert.match(await page.locator('#steel-report-inputs').textContent(),/SAP ratio 1 ×/);await page.click('#steel-review-close');
   await page.click('#profile-capabilities');await page.waitForFunction(()=>document.querySelector('#profile-target').value==='@capabilities'&&!document.querySelector('#controls').disabled)
   const caps=await downloadJson('#profile-capabilities-json');assert.ok(caps.data.length>60)
   await page.locator('#profile-panel > details > summary').click();await page.click('#profile-tables')

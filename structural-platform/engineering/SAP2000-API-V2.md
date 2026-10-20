@@ -1,6 +1,6 @@
 # SAP2000-API V2 — Web / Local
 
-Build `2026.10.20-v2-stations.1` · Compatible with SAP2000 v26.2.0 · Windows64-bit, Python3.11–3.13 x64.
+Build `2026.10.20-v2-lengths.1` · Compatible with SAP2000 v26.2.0 · Windows64-bit, Python3.11–3.13 x64.
 
 ## Cài mới / Nâng cấp từ V1 hoặc V2 local
 
@@ -107,3 +107,11 @@ Reference: Ephraim-Bryski/SAP-Tooltips@608415951abf7c601c3939ed0296cd1daa45eda5.
 ## Màu section / Section bands
 
 Bảng4.1 dùng hai màu nền luân phiên theo danh sách tên section sắp xếp từ toàn bộ dữ liệu đã xuất. Mọi Frame chung section giữ cùng màu khi lọc hoặc đổi trang; màu chỉ hỗ trợ đọc, không biểu diễn đạt/không đạt. Dòng nội suy có vạch bên trái, giữ nguồn và giá trị gốc/độ chính xác JSON.
+
+## DAM lengths / Chiều dài thiết kế
+
+Mặc định Hybrid: Lx nhập tay, Ly=SAP Minor ratio×Length I–J, Lb=SAP LTB ratio×Length I–J. Ratio phải đọc thành công, dương và ProgDet=false. Không chuyển0/Program Determined thành1. Nếu chưa có overwrites, mở report sẽ đọc lại hồ sơ cho đúng các Frame đã xuất, gồm geometry/material/section/preferences/overwrites và các nhóm hồ sơ trước đó. Không chạy analysis/design hoặc đổi checkbox nhóm. Có nút Đọc lại để chủ động cập nhật. Thiếu giá trị được ghi rõ; hybrid cho nhập tay dự phòng Ly/Lb với nguồn manual, không ghi là SAP. Vẫn có chế độ toàn SAP hoặc toàn nhập tay.
+
+Lz là chiều dài khống chế mất ổn định xoắn trong nhánh E4-4 của bộ tính I/H, độc lập với K=1 theo DAM. Danh mục AISC360-10 GetOverwrite đã xác minh chỉ có Major/Minor/LTB ratios, chưa có Lz độc lập. Chọn Lz nhập tay hoặc chủ động chọn **Lz=Lb — xác nhận cùng khống chế xoắn** nếu điều kiện thực tế cho phép; nguồn được lưu `declared_Lz_equals_Lb`, không phải giá trị Lz do SAP trả về. Không tự suy Lz=Lx/Ly/Lb từ DAM.
+
+LTB start/end là tọa độ theo local1 của hai đầu đoạn không giằng dùng để tính Cb, không phải hai bước xà gồ. Ví dụ đoạn2–4m có Lb2m, quarters tại2.5/3/3.5m. Giằng xà gồ cần đúng điều kiện khống chế cánh nén/xoắn; không coi mọi vị trí xà gồ tự động là giằng. Một ratio chỉ cho chiều dài, không cho danh sách tọa độ giằng. Giao diện hiện xét một đoạn đã khai báo mỗi Frame; nếu nhiều đoạn/khác bước thì cần xét từng đoạn, không tự lấy0…Lb làm toàn bộ phạm vi.

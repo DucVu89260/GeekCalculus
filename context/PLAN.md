@@ -1,5 +1,9 @@
 # Repository implementation plan
 
+## SAP DAM length workflow — 2026-10-20
+
+`SAP-LENGTH-03`: default hybrid manual Lx / SAP Minor×Length Ly / SAP LTB×Length Lb; keep all-SAP/manual modes and allow manual fallback only when the requested SAP value is unavailable. Display exact missing/not-read/ProgDet/invalid reason, no0→1 ratio substitution. Explicit re-read button requests exported frame IDs and preserves profile group selection while including overwrites/setup. Independent Lz remains unknown unless manual or user explicitly selects the declared Lz=Lb restraint assumption; not an SAP field or DAM consequence. Explain LTB segment coordinates and quarter-point Cb, retaining missing brace-point barriers. Acceptance: hybrid provenance/no fallback defaults/source tests, actual browser overwrite re-read and Lz source choice, package parity; unchanged canonical AISC kernel.
+
 ## SAP station coverage and section bands — 2026-10-20
 
 `SAP-STATION-02`: stable alternating section bands in4.1; full mode checks all original and available five-point samples; quick mode selects Frame/Combo pairs from Summary then expands those pairs to all stations/steps. Preserve signed vectors, source IDs and unavailable positions. Add explicitly scoped prismatic-reference D/C at linearly interpolated nonprismatic I/H stations, never promote reference results to tapered-member stability approval. Initially restrict geometry to one relative segment, zero/full-property assignment, fixed flange/web dimensions, actual endpoint I geometries/materials; complex assignment/segment/material cases remain blocked. Source geometry assumption is user-requested linear h, not a verified CSI stiffness-to-geometry rule. Acceptance: independent midpoint dimensions and scope barriers, coverage/ties/step isolation, material/assignment gates, browser color/filter and station details, canonical engine regressions, kit parity. No new AISC formula or tapered stability method.

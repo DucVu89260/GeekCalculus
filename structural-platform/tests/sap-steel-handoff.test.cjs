@@ -177,3 +177,33 @@ test('reference rejects partial assignments, varying plates, multiple segments, 
  ]){const member=structuredClone(base);patch(member);assert.throws(()=>stationReferenceMember(member,row),reason)}
  assert.throws(()=>stationReferenceMember(base,{...row,station_m:11}),/within/);
 });
+
+test('hybrid DAM lengths keep Lx manual and Ly/Lb from confirmed SAP ratios',async()=>{
+ const {prepareDesignJob}=await load(),f=fixtures();
+ const job=prepareDesignJob({...f,lengthSource:'hybrid',manualLengths:{'1':{major:3,minor:99,ltb:99}}});
+ const lengths=job.members[0].unbraced_lengths;
+ assert.equal(lengths.major.value,3);assert.equal(lengths.major.source,'manual');
+ assert.equal(lengths.minor.value,5);assert.equal(lengths.ltb.value,5);
+ assert.equal(lengths.minor.sap_ratio,.5);assert.equal(lengths.minor.sap_status,'provided');assert.equal(lengths.minor.manual_fallback,false);
+ assert.equal(job.members[1].unbraced_lengths.major.value,null);
+});
+test('hybrid distinguishes unread/ProgDet/invalid SAP lengths and records explicit manual fallback',async()=>{
+ const {prepareDesignJob}=await load(),f=fixtures();
+ f.snapshot.members[0].data.design_overwrites[1].data.ProgDet=true;
+ f.snapshot.members[0].data.design_overwrites[2].data.Value=0;
+ delete f.snapshot.members[1].data.design_overwrites;
+ const options={...f,lengthSource:'hybrid'};let job=prepareDesignJob(options);
+ assert.equal(job.members[0].unbraced_lengths.minor.value,null);assert.equal(job.members[0].unbraced_lengths.minor.sap_status,'program_determined');
+ assert.equal(job.members[0].unbraced_lengths.ltb.sap_status,'invalid_ratio');
+ assert.equal(job.members[1].unbraced_lengths.ltb.sap_status,'overwrites_not_read');
+ job=prepareDesignJob({...options,manualLengths:{'1':{major:2,minor:3,ltb:4}}});
+ assert.equal(job.members[0].unbraced_lengths.minor.value,3);assert.equal(job.members[0].unbraced_lengths.minor.source,'manual');assert.equal(job.members[0].unbraced_lengths.minor.manual_fallback,true);
+ assert.equal(job.members[0].unbraced_lengths.ltb.value,4);assert.equal(job.members[0].unbraced_lengths.ltb.sap_status,'invalid_ratio');
+});
+
+test('declared Lz=Lb keeps an explicit assumption source and rejects mismatched lengths',async()=>{
+ const {prepareDesignJob}=await load(),{prepareSymmetricComponent,validateComponentPacket}=await loadComponent(),job=prepareDesignJob(fixtures());
+ const packet=prepareSymmetricComponent(job,0,{...approvals,lz_m:5,lz_source:'declared_Lz_equals_Lb'});
+ assert.equal(packet.input.member.lz_mm,5000);assert.equal(packet.source.Lz.source,'declared_Lz_equals_Lb');assert.deepEqual(validateComponentPacket(packet),packet);const edited=structuredClone(packet);edited.input.member.lz_mm=4000;assert.throws(()=>validateComponentPacket(edited),/mismatch/);
+ assert.throws(()=>prepareSymmetricComponent(job,0,{...approvals,lz_source:'declared_Lz_equals_Lb'}),/must match/);
+});

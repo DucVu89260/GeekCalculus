@@ -122,6 +122,7 @@ async function verifySharedCalculator(page, route) {
 
     for (const route of ['steel/library', 'concrete/library']) {
       await modulePage.goto(moduleUrl(route))
+      if (route === 'steel/library') await modulePage.locator('[data-library-category="materials"]').click()
       const library = modulePage.locator('.library-browser')
       await library.getByText('Read only', { exact: true }).waitFor()
       assert.equal(await library.locator('.library-add-button').count(), 0, `${route} should remain read only`)
@@ -180,7 +181,7 @@ async function verifySharedCalculator(page, route) {
     for (const route of ['analysis', 'library', 'future']) {
       await modulePage.goto(moduleUrl(route))
       if (route === 'analysis') await modulePage.locator('.section-properties-panel').waitFor({ state: 'visible' })
-      if (route === 'library') await modulePage.locator('.library-browser').getByText('Read only', { exact: true }).waitFor()
+      if (route === 'library') { await modulePage.locator('[data-library-category="materials"]').click(); await modulePage.locator('.library-browser').getByText('Read only', { exact: true }).waitFor() }
       if (route === 'future') assert.match(await modulePage.locator('.module-page').innerText(), /awaiting implementation/i)
     }
 

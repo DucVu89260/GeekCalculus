@@ -7,6 +7,7 @@ import SteelDesignView from './SteelDesignView.vue'
 import CfsDesignView from './CfsDesignView.vue'
 import SectionPropertiesPanel from './SectionPropertiesPanel.vue'
 import LibraryBrowser from './LibraryBrowser.vue'
+import SteelLibrary from './SteelLibrary.vue'
 import LoadingLibrary from './LoadingLibrary.vue'
 import StructureIllustration from './StructureIllustration.vue'
 import ComboGeneratorView from './ComboGeneratorView.vue'
@@ -80,6 +81,7 @@ const tools = { concrete: ['beam', 'column', 'slab', 'foundation'], future: ['re
     <section v-else-if="currentTool.code === 'standards'" class="module-panel"><p class="standards-breadcrumb"><a :href="moduleHref('steel')">Steel Design</a> / <a :href="moduleHref('steel/library')">Library</a> / <strong>Standards</strong></p><StandardsExplorer :locale="locale" :can-edit="isAdmin" /></section>
     <section v-else-if="currentTool.code === 'vietnam-location'" class="module-panel"><VietnamLocationLookup :locale="locale" /></section>
     <section v-else-if="currentGroup.code === 'loads' && currentTool.code === 'library'" class="module-panel"><LoadingLibrary :locale="locale" /></section>
+    <section v-else-if="currentGroup.code === 'steel' && currentTool.code === 'library'" class="module-panel"><SteelLibrary :locale="locale" /></section>
     <section v-else-if="currentTool.code === 'library'" class="module-panel"><LibraryBrowser :key="currentGroup.code" :locale="locale" :can-edit="false" /></section>
     <section v-else-if="currentGroup.code === 'concrete' && currentTool.code === 'design'" class="module-panel concrete-module-panel">
       <div class="concrete-design-setup">

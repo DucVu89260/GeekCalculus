@@ -1,5 +1,11 @@
 # Repository handoff
 
+## Editable province dropdown — 2026-10-20
+
+- Branch `main`, base `a499783` (preserves concurrent SAP updates). User replaces the separate global search form with a single editable province dropdown. `LocationCombobox.vue` opens all63 source provinces on click/focus; typing narrows names immediately using existing accent/case-insensitive folding. Mouse/touch or arrows+Enter select; Escape/blur restores the committed source name. Empty text restores all options; no-match message is localized. No new dependency/network query. Province selection changes clear dependent wind/seismic choices; reselecting the same province preserves them.
+- `VietnamLocationLookup.vue` removes separate Search/Clear buttons, filter counts and draft/apply state. Wind and earthquake selectors retain their full province-specific, independent source scopes. Illustrations, source data/pages/units and JSON snapshots unchanged. Legacy pure search helpers remain available but are no longer used by this UI.
+- Verified Vue typecheck and demo production build (existing chunk warnings), updated existing browser smoke: click/full list, immediate unaccented/case-insensitive filtering, keyboard selection/Escape/Tab, empty/no-match/reopen behavior, changing province clears dependent results, JSON/source/VI-EN parity,320/390px and actual touch option selection. Screenshots inspected; no page errors. No backend, formula or database changes. Next: source push and existing CI/Pages publication. Owned temporary HTTP server to stop after delivery.
+
 ## SAP missing result diagnostics — 2026-10-20
 
 - Build2026.10.20-v2-results.1, source base94a9507. User reported Cb/H1/D-C blank and missing asterisk explanation. Found report orchestration checked geometry/Lz before Cb and discarded valid Cb on downstream failure. Split source-bound Cb calculation from capacity preparation, retain successful Cb on geometry/Lz/material/length failures; do not compute design Cb from nonconcurrent rows or silently substitute1 when an explicit diagram is incomplete. Canonical AISC equations unchanged.

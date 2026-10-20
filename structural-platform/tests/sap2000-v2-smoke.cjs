@@ -124,7 +124,7 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright')
   assert.equal(await page.locator('#steel-map-confirmed').isVisible(),false)
   assert.equal(await page.locator('#steel-unstiffened-confirmed').isChecked(),true)
   assert.match(await page.locator('.report-basis').textContent(),/DAM/)
-  assert.equal(await page.locator('#steel-length-source').inputValue(),'hybrid');
+  assert.equal(await page.locator('#steel-length-source').inputValue(),'sap');assert.equal(await page.locator('#steel-cb-mode').inputValue(),'CONSERVATIVE');assert.equal(await page.locator('#steel-cb-advanced').isVisible(),false);assert.equal(await page.locator('#steel-report-inputs thead tr > *').count(),5);assert.equal(await page.locator('#steel-report-inputs [aria-label="F1 Lz m"]').count(),0);assert.equal(await page.locator('#steel-report-inputs [aria-label="F1 LTB start m"]').count(),0);
   assert.equal(await page.locator('#steel-report-footnote').evaluate(e=>!e.closest('table,.table-wrap')),true);
   assert.match(await page.locator('#steel-report-footnote').textContent(),/không phải D\/C do SAP xuất/);
   await page.selectOption('#steel-method','LRFD');await page.selectOption('#steel-cb-mode','CONSERVATIVE');await page.click('#steel-run-report');
@@ -135,8 +135,9 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright')
 
   await page.click('#steel-read-lengths');await page.waitForFunction(()=>document.querySelector('#steel-length-status').textContent.startsWith('Đã đọc.'));
   assert.match(await page.locator('#steel-report-inputs').textContent(),/SAP ratio 1 ×/);
-  assert.equal(await page.getByRole('spinbutton',{name:'F1 major m',exact:true}).count(),1);
+  assert.equal(await page.getByRole('spinbutton',{name:'F1 major m',exact:true}).count(),0);
   assert.equal(await page.getByRole('spinbutton',{name:'F1 minor m',exact:true}).count(),0);
+  await page.locator('#steel-e4-settings > summary').click();await page.click('#steel-e4-use-lb');assert.equal(await page.locator('[aria-label="F1 Lz source"]').inputValue(),'lb');await page.selectOption('#steel-cb-mode','CONSERVATIVE');await page.click('#steel-run-report');await page.waitForFunction(()=>document.querySelector('#steel-report-status').textContent.includes('nhóm Frame/Combo'));const simple=page.locator('#steel-report-results tbody tr').filter({hasText:'F1 · I300'}).filter({hasText:'DEAD'});assert.equal(await simple.locator('td').nth(6).textContent(),'1.00');assert.match(await simple.locator('td').nth(7).textContent(),/^\d+\.\d{2}$/);assert.ok(!(await page.locator('#steel-report-missing').textContent()).includes('đầu đoạn LTB'));await page.selectOption('#steel-cb-mode','COMBO');for(const frame of ['F1','F2'])await page.selectOption('[aria-label="'+frame+' Lz source"]','manual');
   await page.selectOption('[aria-label="F1 Lz source"]','lb');
   assert.equal(await page.getByRole('spinbutton',{name:'F1 Lz m',exact:true}).isDisabled(),true);
   assert.equal(await page.getByRole('spinbutton',{name:'F1 Lz m',exact:true}).inputValue(),'5');
@@ -151,7 +152,7 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright')
   await page.click('#steel-run-report');await page.waitForFunction(()=>document.querySelector('#steel-report-missing').textContent.includes('Chưa chọn đầu đoạn'));
   const prerequisite=page.locator('#steel-report-missing details').filter({hasText:'Frame F1 · DEAD'});
   assert.equal(await prerequisite.locator('li').count(),1);assert.match(await prerequisite.textContent(),/Ảnh hưởng: Cb, H1 D\/C, D\/C\*/);
-  const memberInputRow=page.locator('#steel-report-inputs tbody tr').filter({hasText:'F1 · I300'});
+  const memberInputRow=page.locator('#steel-cb-inputs tbody tr').filter({hasText:'F1 · I300'});
   await memberInputRow.getByRole('button',{name:'Chọn đoạn đầu 0 → Lb',exact:true}).click();
   assert.equal(await page.getByRole('spinbutton',{name:'F1 LTB start m',exact:true}).inputValue(),'0');
   assert.equal(await page.getByRole('spinbutton',{name:'F1 LTB end m',exact:true}).inputValue(),'4');
@@ -161,8 +162,8 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright')
   await memberInputRow.getByRole('button',{name:'Cuối = đầu + Lb',exact:true}).click();
   assert.equal(await page.getByRole('spinbutton',{name:'F1 LTB end m',exact:true}).inputValue(),'4');
   await page.selectOption('#steel-cb-mode','CONSERVATIVE');
-  assert.equal(await page.getByRole('spinbutton',{name:'F1 LTB start m',exact:true}).isDisabled(),true);
-  assert.equal(await page.getByRole('spinbutton',{name:'F1 LTB end m',exact:true}).isDisabled(),true);
+  assert.equal(await page.locator('#steel-cb-advanced').isVisible(),false);assert.equal(await page.locator('[aria-label="F1 LTB start m"]').isDisabled(),true);
+  assert.equal(await page.locator('[aria-label="F1 LTB end m"]').isDisabled(),true);
   assert.match(await page.locator('[data-ltb-frame="F1"]').textContent(),/Lb vẫn cần/);
   await page.selectOption('#steel-cb-mode','COMBO');
   for(const [name,value] of [['F1 Lz m','2.2'],['F1 LTB start m','0'],['F1 LTB end m','4']]){const input=page.getByRole('spinbutton',{name,exact:true});await input.fill(value);await input.press('Tab')}

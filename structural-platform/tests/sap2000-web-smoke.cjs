@@ -65,7 +65,7 @@ const base=process.env.SAP_WEB_BASE||'http://127.0.0.1/GeekCalculus/'
   await live.click('#design-members');await live.locator('#steel-review').waitFor({state:'visible'})
   assert.equal(await live.locator('#steel-standard').inputValue(),'AISC360-10')
   assert.match(await live.locator('#steel-review-status').textContent(),/INPUT_REVIEW_ONLY/)
-  await live.selectOption('#steel-length-source','manual');await live.selectOption('#steel-method','LRFD')
+  await live.selectOption('#steel-length-source','manual');await live.selectOption('#steel-method','LRFD');await live.selectOption('#steel-cb-mode','COMBO');await live.locator('#steel-e4-settings > summary').click()
   for(const [key,value] of [['major','2'],['minor','2'],['ltb','4']]){const input=live.getByRole('spinbutton',{name:'F1 '+key+' m',exact:true});await input.fill(value);await input.press('Tab')}
   for(const [name,value] of [['F1 Lz m','1.5'],['F1 LTB start m','0'],['F1 LTB end m','4']]){const input=live.getByRole('spinbutton',{name,exact:true});await input.fill(value);await input.press('Tab')}
   await live.click('#steel-run-report');await live.waitForFunction(()=>/nhóm Frame\/Combo|Frame\/Combo groups/.test(document.querySelector('#steel-report-status').textContent))

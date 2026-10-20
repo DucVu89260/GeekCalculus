@@ -1,6 +1,6 @@
 # SAP2000-API V2 — Web / Local
 
-Build `2026.10.20-v2-ltb.1` · Compatible with SAP2000 v26.2.0 · Windows64-bit, Python3.11–3.13 x64.
+Build `2026.10.20-v2-max-length.1` · Compatible with SAP2000 v26.2.0 · Windows64-bit, Python3.11–3.13 x64.
 
 ## Cài mới / Nâng cấp từ V1 hoặc V2 local
 
@@ -125,3 +125,11 @@ Cb được xử lý độc lập từ biểu đồ cùng Frame/Combo/Step/LTB, 
 Khi Lb<Length, không chọn ngầm đoạn0…Lb. Nhập start đã xác định hoặc bấm Chọn đoạn đầu0→Lb để chủ động khai báo đoạn đầu; end được đề xuất bằng start+Lb, không phải tọa độ giằng đọc từ SAP. Có thể chỉnh end hoặc dùng Cuối=đầu+Lb; thay đổi Lb giữ end nhập tay để báo sai khác thay vì âm thầm đổi tọa độ. Khi Lb=Length, giao diện tiếp tục gợi ý toàn frame0…L và ghi nguồn full_frame_length_reference. Mốc MA/MB/MC hiện ngay dưới hai tọa độ. Chỉ đang kiểm tra một đoạn cho mỗi Frame; các station ngoài đoạn vẫn ghi rõ chưa được tính, không coi là đạt toàn member.
 
 Cb1 bảo thủ hoặc console đầu tự do do người dùng khai báo không yêu cầu start/end hay các mô men chia tư; hai ô được vô hiệu và nhánh F1-1 đã xác minh trả1. Lb vẫn cần cho sức kháng. Không tự suy điều kiện console/giằng từ Releases. Từng station luôn kiểm tra phạm vi trước khi dùng lại biểu đồ cache, kể cả cùng combo/step. Các lý do trùng nhau được gom theo nguyên nhân, liệt kê Cb/H1 D-C/D-C bị ảnh hưởng và đếm mỗi dòng nội lực một lần.
+
+## Chiều dài lớn nhất và Cb đơn giản — thay thế luồng chính theo đoạn
+
+Lx/Major, Ly/Minor, Lb/LTB là chiều dài thiết kế lớn nhất do người dùng xác định cho Frame. Ví dụ Frame9m với xà gồ1.5m hoặc4@1.5+3@1.0 có thể dùng Ly1.5m và Lb3/4.5/6m theo cấu tạo flying bracing do kỹ sư chọn. Web không dựng vị trí giằng từ những số này. Ưu tiên ratio Major/Minor/LTB SAP×Length I–J cho cả3; thiếu/Program Determined/không hợp lệ cho phép nhập tay từng trường với nguồn manual. Không tự biến ratio0 thành1. Chế độ hybrid/manual trước đây vẫn có.
+
+Mặc định **Cb1 bảo thủ**, dùng cùng các chiều dài lớn nhất tại mọi station thuộc phạm vi đã chọn, không yêu cầu start/end. Các station/step/combo và bộ6 lực vẫn độc lập. Cb theo biểu đồ F1-1 là lựa chọn nâng cao riêng: cần đoạn thực, không lấy chia tư toàn Frame rồi coi là Cb cho mọi đoạn Lb nhỏ hơn. Không tự chọn giá trị Cb>1 từ giả thiết khoảng cách giằng.
+
+Bảng chính chỉ có3 chiều dài. Lz xoắn E4 của engine được chuyển vào mục bổ sung, không đổi tên thành LTB và không tự đặt bằng Lb. Có thể nhập tay/khai báo Lz=Lb từng Frame hoặc chủ động bấm áp dụng quy ước này cho các Frame đang kiểm tra khi điều kiện thực tế cho phép; source=declared_Lz_equals_Lb, không phải SAP-provided Lz. Thiếu E4 được báo cho H1; không tạo kết quả giả. Không đổi công thức sức kháng hoặc nới phạm vi Nonprismatic tham khảo.

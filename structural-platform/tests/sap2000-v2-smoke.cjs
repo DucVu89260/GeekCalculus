@@ -130,7 +130,7 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright')
   await page.selectOption('#steel-method','LRFD');await page.selectOption('#steel-cb-mode','CONSERVATIVE');await page.click('#steel-run-report');
   await page.waitForFunction(()=>document.querySelector('#steel-report-missing').textContent.includes('Lz'));
   const partial=page.locator('#steel-report-results tbody tr').filter({hasText:'F1 · I300'}).filter({hasText:'DEAD'});assert.equal(await partial.locator('td').nth(6).textContent(),'1.00');assert.equal(await partial.locator('td').nth(7).textContent(),'—');
-  assert.match(await page.locator('#steel-report-missing').textContent(),/H1.*Lz/);
+  const missingLz=page.locator('#steel-report-missing details').filter({hasText:'Frame F1 · DEAD'}).locator('li');assert.equal(await missingLz.count(),1);assert.match(await missingLz.textContent(),/Lz/);assert.match(await missingLz.textContent(),/H1 D\/C/);
   await page.selectOption('#steel-cb-mode','COMBO');
 
   await page.click('#steel-read-lengths');await page.waitForFunction(()=>document.querySelector('#steel-length-status').textContent.startsWith('Đã đọc.'));
@@ -145,6 +145,26 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright')
 
   await page.selectOption('#steel-length-source','manual');await page.selectOption('#steel-method','LRFD')
   for(const [key,value] of [['major','2'],['minor','2'],['ltb','4']]){const input=page.getByRole('spinbutton',{name:'F1 '+key+' m',exact:true});await input.fill(value);await input.press('Tab')}
+  const lzInput=page.getByRole('spinbutton',{name:'F1 Lz m',exact:true});await lzInput.fill('2.2');await lzInput.press('Tab');
+  assert.equal(await page.getByRole('spinbutton',{name:'F1 LTB start m',exact:true}).inputValue(),'');
+  assert.match(await page.locator('[data-ltb-frame="F1"]').textContent(),/Chưa chọn đầu đoạn/);
+  await page.click('#steel-run-report');await page.waitForFunction(()=>document.querySelector('#steel-report-missing').textContent.includes('Chưa chọn đầu đoạn'));
+  const prerequisite=page.locator('#steel-report-missing details').filter({hasText:'Frame F1 · DEAD'});
+  assert.equal(await prerequisite.locator('li').count(),1);assert.match(await prerequisite.textContent(),/Ảnh hưởng: Cb, H1 D\/C, D\/C\*/);
+  const memberInputRow=page.locator('#steel-report-inputs tbody tr').filter({hasText:'F1 · I300'});
+  await memberInputRow.getByRole('button',{name:'Chọn đoạn đầu 0 → Lb',exact:true}).click();
+  assert.equal(await page.getByRole('spinbutton',{name:'F1 LTB start m',exact:true}).inputValue(),'0');
+  assert.equal(await page.getByRole('spinbutton',{name:'F1 LTB end m',exact:true}).inputValue(),'4');
+  assert.match(await page.locator('[data-ltb-frame="F1"]').textContent(),/MA\/MB\/MC: 1.00 \/ 2.00 \/ 3.00 m/);
+  const endInput=page.getByRole('spinbutton',{name:'F1 LTB end m',exact:true});await endInput.fill('3');await endInput.press('Tab');
+  assert.match(await page.locator('[data-ltb-frame="F1"]').textContent(),/khác Lb/);
+  await memberInputRow.getByRole('button',{name:'Cuối = đầu + Lb',exact:true}).click();
+  assert.equal(await page.getByRole('spinbutton',{name:'F1 LTB end m',exact:true}).inputValue(),'4');
+  await page.selectOption('#steel-cb-mode','CONSERVATIVE');
+  assert.equal(await page.getByRole('spinbutton',{name:'F1 LTB start m',exact:true}).isDisabled(),true);
+  assert.equal(await page.getByRole('spinbutton',{name:'F1 LTB end m',exact:true}).isDisabled(),true);
+  assert.match(await page.locator('[data-ltb-frame="F1"]').textContent(),/Lb vẫn cần/);
+  await page.selectOption('#steel-cb-mode','COMBO');
   for(const [name,value] of [['F1 Lz m','2.2'],['F1 LTB start m','0'],['F1 LTB end m','4']]){const input=page.getByRole('spinbutton',{name,exact:true});await input.fill(value);await input.press('Tab')}
   await page.click('#steel-run-report');await page.waitForFunction(()=>document.querySelector('#steel-report-status').textContent.includes('nhóm Frame/Combo'))
   assert.equal(await page.locator('#steel-report-results tbody tr').count(),4)
@@ -164,6 +184,11 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright')
   assert.equal(componentExport.sap_source.moment_diagram.source.case,'DEAD')
   await page.locator('#steel-component-dialog').screenshot({path:'/tmp/sap-symmetric-component-result.png'})
   await page.click('#steel-component-close');await page.locator('#steel-review').evaluate(e=>{e.scrollTop=0});await page.locator('#steel-review').screenshot({path:'/tmp/sap-steel-report.png'})
+  await page.selectOption('#steel-brace-condition','CANTILEVER');assert.equal(await page.getByRole('spinbutton',{name:'F1 LTB start m',exact:true}).isDisabled(),true);
+  await page.click('#steel-run-report');await page.waitForFunction(()=>document.querySelector('#steel-report-status').textContent.includes('nhóm Frame/Combo'));
+  const freeEnd=page.locator('#steel-report-results tbody tr').filter({hasText:'F1 · I300'}).filter({hasText:'DEAD'});assert.equal(await freeEnd.locator('td').nth(6).textContent(),'1.00');
+  await freeEnd.getByRole('button',{name:'Xem chi tiết',exact:true}).click();const freeComponent=page.frameLocator('#steel-component-frame');await freeComponent.locator('#sap-component-origin').filter({hasText:'F1-1 unbraced free end'}).waitFor();assert.ok(!(await freeComponent.locator('#cb1-note').textContent()).includes('undefined'));await page.click('#steel-component-close');
+  await page.selectOption('#steel-brace-condition','BRACED');
   await page.keyboard.press('Escape');await page.click('#design-summary');await page.locator('#steel-review').waitFor({state:'visible'})
   assert.equal(await page.locator('#steel-mode').inputValue(),'summary')
   await page.click('#steel-run-report');await page.waitForFunction(()=>document.querySelector('#steel-report-status').textContent.includes('nhóm Frame/Combo'))

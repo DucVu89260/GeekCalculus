@@ -1,5 +1,9 @@
 # Repository implementation plan
 
+## SAP LTB segment usability and cache coverage — 2026-10-20
+
+`SAP-LTB-05`: recheck each station against selected segment before using cached Cb (prevent out-of-segment rows borrowing an earlier in-segment diagram). No strength-rule change. Shared segment-input validation distinguishes missing Lb/start/end/invalid length/outside frame, user-entered start proposes end=start+Lb, no implicit first segment when Lb<L. Full-span0…L suggestion only when Lb=L; explicit first-segment button records user choice. Show quarter coordinates inline and disable segment fields for conservative/free-cantilever Cb1, reusing verified F1-1 branch. Aggregate duplicate missing-result reasons by unique record and list affected metrics once. Acceptance: independent cache-order/segment boundary and cantilever/no-extrapolation tests, seven-record dedup counts, actual browser input/quarter hints/disabled fields/errors, kit parity and existing report/core regressions. Retain all missing-input/tapered-scope guards; no automatic brace grid or multi-segment certification.
+
 ## SAP report missing-result explanations — 2026-10-20
 
 `SAP-RESULT-04`: compute source-bound Cb independently before geometry/Lz capacity gates; retain valid Cb when downstream capacity preparation fails. Reject nonconcurrent diagrams, retain per-metric reason fields, show all uncomputed-result reasons below the table and bilingual asterisk definitions outside both report/station tables. No capacity defaults, formulas or tapered-scope relaxation. Acceptance: independent Cb retention on missing Lz/unsupported geometry, missing Cb reasons, browser blank-result explanations/footnotes and standard report/kit checks.

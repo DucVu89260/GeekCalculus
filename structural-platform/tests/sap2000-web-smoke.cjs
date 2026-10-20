@@ -67,7 +67,7 @@ const base=process.env.SAP_WEB_BASE||'http://127.0.0.1/GeekCalculus/'
   assert.match(await live.locator('#steel-review-status').textContent(),/INPUT_REVIEW_ONLY/)
   await live.selectOption('#steel-length-source','manual');await live.selectOption('#steel-method','LRFD')
   for(const [key,value] of [['major','2'],['minor','2'],['ltb','4']]){const input=live.getByRole('spinbutton',{name:'F1 '+key+' m',exact:true});await input.fill(value);await input.press('Tab')}
-  for(const [name,value] of [['F1 Lz m','1.5'],['F1 LTB end m','4']]){const input=live.getByRole('spinbutton',{name,exact:true});await input.fill(value);await input.press('Tab')}
+  for(const [name,value] of [['F1 Lz m','1.5'],['F1 LTB start m','0'],['F1 LTB end m','4']]){const input=live.getByRole('spinbutton',{name,exact:true});await input.fill(value);await input.press('Tab')}
   await live.click('#steel-run-report');await live.waitForFunction(()=>/nhóm Frame\/Combo|Frame\/Combo groups/.test(document.querySelector('#steel-report-status').textContent))
   await live.locator('#steel-report-results tbody tr').filter({hasText:'F1 · I300'}).getByRole('button',{name:/Xem chi tiết|View details/}).click()
   const component=live.frameLocator('#steel-component-frame');await component.locator('#sap-component-origin').filter({hasText:'Frame F1'}).waitFor()

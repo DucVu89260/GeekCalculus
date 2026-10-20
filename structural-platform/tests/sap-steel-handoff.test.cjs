@@ -102,7 +102,7 @@ test('Cb diagram stays in one signed combo/step and uses full segment stations',
  const {cbF11}=await import('../standards/aisc360-10-verified-hi.mjs');assert.ok(Math.abs(cbF11(diagram).value-5/3)<1e-12)
  assert.deepEqual(diagram.source.source_record_ids,['a','b'])
  assert.throws(()=>comboMomentDiagram({rows:[source('b',10,0)]},row,member,{segmentStart:0,segmentEnd:10,endsBraced:true}),/không ngoại suy/)
- assert.throws(()=>comboMomentDiagram(dataset,row,member,{segmentStart:0,segmentEnd:5,endsBraced:true}),/bằng Lb/)
+ assert.throws(()=>comboMomentDiagram(dataset,row,member,{segmentStart:0,segmentEnd:5,endsBraced:true}),/khác Lb/)
 })
 
 test('report ranks calculated shear as well as H1 without combining vectors',async()=>{
@@ -226,4 +226,43 @@ test('report explains unavailable Cb and never supplies one for a nonconcurrent 
  assert.equal(report[0].governing.cb,null);assert.match(report[0].governing.metric_reasons.Cb,/không ngoại suy/);assert.ok(report[0].governing.metric_reasons.H1);
  job.cases[0].concurrency='nonconcurrent';report=await calculateReport(job,f.dataset,()=>({lz_m:5,cbMode:'CONSERVATIVE'}),{});
  assert.equal(report[0].governing.cb,null);assert.match(report[0].governing.metric_reasons.Cb,/nonconcurrent/);
+});
+
+test('LTB input review identifies missing fields, mismatched span and quarter coordinates',async()=>{
+ const {reviewLtbSegment}=await import('../frontend/vue/public/sap-steel-report.mjs');
+ const member={length:{value:10},unbraced_lengths:{ltb:{value:2}}};
+ assert.match(reviewLtbSegment(member,{}).reason,/đầu đoạn/);
+ assert.match(reviewLtbSegment(member,{segmentStart:2}).reason,/cuối đoạn/);
+ assert.match(reviewLtbSegment(member,{segmentStart:2,segmentEnd:5}).reason,/khác Lb/);
+ assert.match(reviewLtbSegment(member,{segmentStart:9,segmentEnd:11}).reason,/Length/);
+ const valid=reviewLtbSegment(member,{segmentStart:2,segmentEnd:4});assert.equal(valid.status,'READY');assert.deepEqual(valid.quarters,[2.5,3,3.5]);
+ assert.equal(reviewLtbSegment(member,{cbMode:'CONSERVATIVE'}).status,'NOT_REQUIRED');
+ assert.equal(reviewLtbSegment(member,{cantilever:true}).status,'NOT_REQUIRED');
+ member.unbraced_lengths.ltb.value=null;assert.match(reviewLtbSegment(member,{}).reason,/Lb dương/);
+});
+test('duplicate prerequisites list metrics once and count unique force records, not metric occurrences',async()=>{
+ const {summarizeMissingResults}=await import('../frontend/vue/public/sap-steel-report.mjs');
+ const rows=Array.from({length:7},(_,index)=>({index,metric_reasons:{Cb:'choose segment',H1:'choose segment',DC:'choose segment'}}));
+ assert.deepEqual(summarizeMissingResults({rows}),[{reason:'choose segment',metrics:['Cb','H1','DC'],record_count:7}]);
+ rows[0].metric_reasons.H1='missing Lz';rows[0].metric_reasons.DC='missing Lz';
+ const reasons=summarizeMissingResults({rows});assert.equal(reasons[0].record_count,7);assert.deepEqual(reasons[1],{reason:'missing Lz',metrics:['H1','DC'],record_count:1});
+});
+test('cached diagrams never authorize stations outside the chosen LTB segment, in either row order',async()=>{
+ const {prepareDesignJob}=await load(),{calculateReport}=await import('../frontend/vue/public/sap-steel-report.mjs');
+ const fs=require('node:fs'),vm=require('node:vm'),path=require('node:path'),factors=vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../frontend/vue/public/aisc360-10-resistance.js'),'utf8')+';Aisc36010Resistance');
+ for(const stations of [[0,2,4,6,8,10],[10,8,6,4,2,0]]){
+  const f=fixtures(),a=f.dataset.rows[0];f.positions=null;
+  f.dataset.rows=stations.map(station=>({...a,record_id:'station-'+station,station,V2:station===8?1e6:2,M3:10-station}));
+  const job=prepareDesignJob({...f,frames:['1'],lengthSource:'manual',manualLengths:{'1':{major:5,minor:5,ltb:4}}});
+  const [group]=await calculateReport(job,f.dataset,()=>({...approvals,lz_m:5,segmentStart:2,segmentEnd:6,endsBraced:true}),factors);
+  assert.equal(group.coverage,6);assert.equal(group.incomplete,true);
+  for(const record of group.rows){const x=job.cases[record.index].station_m;if(x>=2&&x<=6){assert.ok(Number.isFinite(record.utilization));assert.ok(record.cb)}else{assert.equal(record.utilization,null);assert.equal(record.cb,null);assert.match(record.metric_reasons.Cb,/ngoài đoạn/)}}
+  assert.ok([2,4,6].includes(job.cases[group.governing.index].station_m));
+ }
+});
+test('declared free-end cantilever Cb uses verified F1-1 branch without unused moment samples',async()=>{
+ const {comboMomentDiagram}=await import('../frontend/vue/public/sap-steel-report.mjs'),{cbF11}=await import('../standards/aisc360-10-verified-hi.mjs');
+ const row={frame:'1',case_kind:'combination',output_case:'C',step_type:'',step_num:0,station_m:3};
+ const diagram=comboMomentDiagram({rows:[]},row,null,{cantilever:true});
+ assert.equal(cbF11(diagram).value,1);assert.equal(cbF11(diagram).source,'F1-1 unbraced free end');assert.equal(diagram.source.case,'C');assert.equal('mmax' in diagram,false);
 });

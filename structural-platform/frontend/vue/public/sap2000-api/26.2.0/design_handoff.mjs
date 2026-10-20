@@ -18,18 +18,21 @@ export function prepareDesignJob({snapshot,dataset,positions,summary,mode='full'
  if(summary&&summary.model!==dataset.model)throw Error('Summary belongs to another model')
  for(const source of [positions,summary])if(source?.extracted_at&&source.extracted_at!==dataset.extracted_at)throw Error('Derived results are stale; recompute from the current force dataset')
  const wanted=frames?new Set(frames):new Set([...(dataset.members||[]).map(m=>m.frame),...dataset.rows.map(r=>r.frame)]),profiles=new Map(snapshot.members.map(m=>[m.frame,m])),rows=new Map(),provenance=new Map()
- const add=r=>{if(wanted.has(r.frame))rows.set(r.record_id,r)}
- if(mode==='full'){
-  dataset.rows.forEach(add)
-  for(const sample of positions?.data||[])for(const row of sample.rows||[]){add(row);provenance.set(row.record_id,{method:sample.method,source_record_ids:sample.source_record_ids||[],weight:sample.weight??null})}
- }else for(const group of summary.data||[])for(const type of ['min','max'])for(const [i,row] of (group[type]?.rows||[]).entries()){add(row);const location=group[type]?.locations?.[i];if(location)provenance.set(row.record_id,{method:location.method,source_record_ids:location.source_record_ids||[],weight:location.weight??null})}
+ const pair=r=>JSON.stringify([r.frame,r.case_kind,r.output_case]);
+ const selectedPairs=new Set();
+ if(mode==='summary')for(const group of summary.data||[])for(const type of ['min','max'])for(const row of group[type]?.rows||[])if(wanted.has(row.frame))selectedPairs.add(pair(row));
+ const add=r=>{if(wanted.has(r.frame)&&(mode==='full'||selectedPairs.has(pair(r))))rows.set(r.record_id,r)};
+ // Summary selects Frame/Combo pairs, not independent component vectors. Expand every selected pair
+ // to original stations and available five-point samples, preserving all steps and boundary sides.
+ dataset.rows.forEach(add);
+ for(const sample of positions?.data||[])for(const row of sample.rows||[]){add(row);if(rows.has(row.record_id))provenance.set(row.record_id,{method:sample.method,source_record_ids:sample.source_record_ids||[],weight:sample.weight??null})}
  const forceFrames=new Set([...rows.values()].map(r=>r.frame))
  const members=[...wanted].map(frame=>{
   const m=profiles.get(frame),section=snapshot.sections[m?.analysis_section],materialName=m?.data?.materials?.effective_material,material=snapshot.materials[materialName],issues=[]
   if(!m)issues.push('Member snapshot missing')
   if(!forceFrames.has(frame))issues.push('No governing force rows available for this member in the selected mode')
   const type=section?.section_type?.key,d=section?.i_dimensions_mm
-  const componentSections=(section?.components||[]).map(c=>{const child=snapshot.sections[c.name];return {name:c.name,section_type:structuredClone(child?.section_type??c.section_type??null),geometry:item(child?.i_dimensions_mm??child?.dimensions_mm??null,'mm','SAP component section '+c.name)}})
+  const componentSections=(section?.components||[]).map(c=>{const child=snapshot.sections[c.name];return {name:c.name,section_type:structuredClone(child?.section_type??c.section_type??null),geometry:item(child?.i_dimensions_mm??child?.dimensions_mm??null,'mm','SAP component section '+c.name),material_name:field(child?.geometry,'MatProp')||field(child?.material_file,'MatProp')||null}})
   if(type!=='i_wide_flange')issues.push(type==='nonprismatic'?'Tapered member requires a separately verified design method':'No supported component for this section family')
   if(module!=='symmetric_i')issues.push('Asymmetric I/H component is not supported by this handoff')
   if(d&&(![d.h,d.bf_top,d.bf_bottom,d.tf_top,d.tf_bottom,d.tw].every(positive)||Math.abs(d.bf_top-d.bf_bottom)>1e-6||Math.abs(d.tf_top-d.tf_bottom)>1e-6))issues.push('Symmetric I/H geometry not confirmed')
@@ -49,7 +52,7 @@ export function prepareDesignJob({snapshot,dataset,positions,summary,mode='full'
   return {frame,section:m?.analysis_section??null,section_type:section?.section_type??null,material_name:materialName??null,
    geometry:item(d??null,'mm','SAP GetISection'),material:item(material?.normalized?Object.fromEntries(['Fy_MPa','Fu_MPa','E_MPa','G_MPa','expected_Fy_MPa','expected_Fu_MPa'].map(k=>[k,material.normalized[k]??null])):null,'MPa','Assigned SAP material; design overrides remain separate'),
    poisson_ratio:item(material?.normalized?.poisson_ratio??null,'—','SAP GetMPIsotropic'),length:item(positive(length)?length:null,'m','SAP Global I/J coordinates'),unbraced_lengths:lengths,
-   sap_design_results:structuredClone(m?.data?.design_results??null),component_sections:componentSections,nonprismatic_segments:structuredClone(section?.segments||[]),design_overwrites:structuredClone(overwrites??null),issues}
+   nonprismatic_assignment:structuredClone(m?.data?.sections?.nonprismatic_assignment??null),material_overwrite:structuredClone(m?.data?.materials?.member_overwrite??null),sap_design_results:structuredClone(m?.data?.design_results??null),component_sections:componentSections,nonprismatic_segments:structuredClone(section?.segments||[]),design_overwrites:structuredClone(overwrites??null),issues}
  })
  const cases=[...rows.values()].map(row=>({frame:row.frame,record_id:row.record_id,output_case:row.output_case,case_kind:row.case_kind,step_type:row.step_type,step_num:row.step_num,element:row.element,station_m:row.station,
   provenance:provenance.get(row.record_id)||{method:'SAP_original',source_record_ids:[row.record_id],weight:null},forces:Object.fromEntries(['P','V2','V3','T','M2','M3'].map(k=>[k,row[k]])),force_units:{P:'kN',V2:'kN',V3:'kN',T:'kN·m',M2:'kN·m',M3:'kN·m'},axes:'SAP2000_local_123',concurrency:row.concurrency,
@@ -57,7 +60,7 @@ export function prepareDesignJob({snapshot,dataset,positions,summary,mode='full'
   Cb:{value:null,status:'input_required',basis:'Separate Combo/Step/Lb diagram and applicability confirmations required; no default Cb inferred'}}))
  return {schema_version:'sap-steel-handoff-1',status:'INPUT_REVIEW_ONLY',standard,module,method,mode,model:dataset.model,pid:snapshot.pid,
   source_times:{snapshot:snapshot.extracted_at,forces:dataset.extracted_at},members,cases,
-  coverage:{scope:mode==='full'?'all exported members, original stations plus available five-point samples':'only exported Summary governing previews; not all cases or all ties',requested_frames:[...wanted],record_count:cases.length,
-   five_point_samples:positions?'available samples only; see unavailable_positions':'not available; five-point coverage not established',missing_force_results:structuredClone(dataset.missing_results||[]),unavailable_positions:(positions?.data||[]).filter(p=>wanted.has(p.frame)&&p.method==='unavailable').map(p=>({frame:p.frame,output_case:p.output_case,step_type:p.step_type,step_num:p.step_num,fraction:p.fraction,reason:p.reason}))},
+  coverage:{scope:mode==='full'?'all exported members, original stations plus available five-point samples':'Summary governing Frame/Combo pairs expanded to all exported stations/steps plus available five-point samples; not all cases',requested_frames:[...wanted],record_count:cases.length,selected_frame_combos:mode==='summary'?[...selectedPairs].map(JSON.parse):null,
+   five_point_samples:positions?'available samples only; see unavailable_positions':'not available; five-point coverage not established',missing_force_results:structuredClone(dataset.missing_results||[]),unavailable_positions:(positions?.data||[]).filter(p=>wanted.has(p.frame)&&(mode==='full'||selectedPairs.has(pair(p)))&&p.method==='unavailable').map(p=>({frame:p.frame,case_kind:p.case_kind,output_case:p.output_case,step_type:p.step_type,step_num:p.step_num,fraction:p.fraction,reason:p.reason}))},
   note:'Preparation only, not design acceptance. Original signed force vectors retained; no capacities, utilization, Cb or tapered geometry calculated.'}
 }

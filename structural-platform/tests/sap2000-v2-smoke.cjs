@@ -80,6 +80,10 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright')
   assert.equal(await page.locator('#profile-design-message').textContent(),'Members have not been designed')
   await page.click('#extract');await page.waitForFunction(()=>document.querySelectorAll('#results tr').length===8&&!document.querySelector('#controls').disabled)
 
+  const sectionColors=await page.evaluate(()=>Object.fromEntries([...document.querySelectorAll('#results tr')].map(tr=>[tr.dataset.section,getComputedStyle(tr).backgroundColor])));
+  assert.equal(Object.keys(sectionColors).length,2);assert.equal(new Set(Object.values(sectionColors)).size,2);
+  for(const section of Object.keys(sectionColors)){await page.selectOption('#filter-section',section);assert.ok((await page.locator('#results tr').evaluateAll(rows=>rows.map(tr=>getComputedStyle(tr).backgroundColor))).every(color=>color===sectionColors[section]))}
+  await page.selectOption('#filter-section','');
   for(const value of await page.locator('#results td:nth-child(n+9):nth-child(-n+14)').allTextContents())assert.match(value,/^-?\d+\.\d{2}$/)
   for(const position of ['release_start','release_end']){
    await page.selectOption('#filter-position',position)
@@ -126,7 +130,8 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright')
   await page.click('#steel-run-report');await page.waitForFunction(()=>document.querySelector('#steel-report-status').textContent.includes('nhóm Frame/Combo'))
   assert.equal(await page.locator('#steel-report-results tbody tr').count(),4)
   const reportRow=page.locator('#steel-report-results tbody tr').filter({hasText:'F1 · I300'}).filter({hasText:'DEAD'})
-  await reportRow.getByRole('button',{name:'Xem chi tiết'}).click()
+  await reportRow.getByRole('button',{name:'Các station đã kiểm tra'}).click();assert.ok(await page.locator('#steel-station-results tbody tr').count()>2);assert.match(await page.locator('#steel-station-scope').textContent(),/Mốc thiếu/);await page.click('#steel-station-close');
+  await reportRow.getByRole('button',{name:'Xem chi tiết',exact:true}).click()
   const component=page.frameLocator('#steel-component-frame');await component.locator('#sap-component-origin').filter({hasText:'Frame F1'}).waitFor()
   assert.equal(await component.locator('[data-key="fy_mpa"]').first().inputValue(),'345')
   assert.equal(await component.locator('#aisc-lz').inputValue(),'2200')
@@ -145,6 +150,18 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright')
   await page.click('#steel-run-report');await page.waitForFunction(()=>document.querySelector('#steel-report-status').textContent.includes('nhóm Frame/Combo'))
   assert.ok(await page.locator('#steel-report-results tbody tr').count()>0)
   await page.click('#steel-review-close')
+  // Synthetic full-property one-segment NP exercises the reference UI without claiming a live CSI verification.
+  await page.evaluate(()=>{v2Snapshot.sections.NP1.segments=[{...v2Snapshot.sections.NP1.segments[0]}]});
+  await page.click('#design-members');await page.selectOption('#steel-length-source','manual');await page.selectOption('#steel-method','LRFD');await page.selectOption('#steel-cb-mode','CONSERVATIVE');
+  for(const [key,value] of [['major','2'],['minor','2'],['ltb','4']]){const input=page.getByRole('spinbutton',{name:'F2 '+key+' m',exact:true});await input.fill(value);await input.press('Tab')}
+  await page.getByRole('spinbutton',{name:'F2 Lz m',exact:true}).fill('2.2');await page.getByRole('spinbutton',{name:'F2 Lz m',exact:true}).press('Tab');
+  await page.click('#steel-run-report');await page.waitForFunction(()=>document.querySelector('#steel-report-status').textContent.includes('nhóm Frame/Combo'));
+  const npRow=page.locator('#steel-report-results tbody tr').filter({hasText:'F2 · NP1'}).filter({hasText:'DEAD'});
+  assert.match(await npRow.textContent(),/D\/C tham khảo/);assert.match(await npRow.locator('td').nth(8).textContent(),/^\d+\.\d{2}$/);
+  assert.equal(await npRow.getByRole('button',{name:'Xem chi tiết',exact:true}).count(),0);
+  await npRow.getByRole('button',{name:'Các station đã kiểm tra'}).click();assert.match(await page.locator('#steel-station-scope').textContent(),/chưa kiểm tra ổn định/);
+  const stationHeights=await page.locator('#steel-station-results tbody td:nth-child(3)').allTextContents();assert.ok(stationHeights.some(v=>v.startsWith('300.00')));assert.ok(stationHeights.some(v=>!v.startsWith('300.00')));
+  await page.click('#steel-station-close');await page.click('#steel-review-close');
   await page.click('#profile-capabilities');await page.waitForFunction(()=>document.querySelector('#profile-target').value==='@capabilities'&&!document.querySelector('#controls').disabled)
   const caps=await downloadJson('#profile-capabilities-json');assert.ok(caps.data.length>60)
   await page.locator('#profile-panel > details > summary').click();await page.click('#profile-tables')

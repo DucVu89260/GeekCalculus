@@ -1,6 +1,6 @@
 # SAP2000-API V2 — current web/local kit
 
-Download [API_IF_SAP26.2.0_V2.zip](API_IF_SAP26.2.0_V2.zip?raw=true). Build **2026.10.19-v2-report.1**, SAP2000 **26.2.0**.
+Download [API_IF_SAP26.2.0_V2.zip](API_IF_SAP26.2.0_V2.zip?raw=true). Build **2026.10.20-v2-stations.1**, SAP2000 **26.2.0**.
 
 Portable update: startup automatically backs up and recreates a broken machine-specific `.venv`. Install Python 3.13 x64 with `py` on each PC (3.12/3.11 also supported); Python 3.15 is not selected. Runtime is not bundled; initial dependency installation needs Internet. Extract at `C:\geek_calculus\SAP2000-API` and run `start-sap2000-v2.cmd` or the existing web launcher.
 
@@ -40,3 +40,5 @@ Current build: **2026.10.17-web-panel.14**. Uses direct `SAP2000v1.dll` loading 
 Build .2 fixes response combination extraction using `RespCombo.GetTypeOAPI`; covers mixed cases/combinations and nested combinations. Envelope/statistical results remain nonconcurrent and cannot be exported as connection action vectors.
 
 Model discovery uses Windows tasklist plus direct DLL/PID reads to show all running SAP2000 models. Multiple instances are supported through explicit filename/PID selection. Inaccessible or unsaved models are listed with errors instead of silently omitted. Discovery is verified with simulated Windows processes and model interfaces; native multi-instance discovery still requires a Windows check.
+
+Station update: full mode uses original stations plus available five-point samples. Quick mode expands Summary governing Frame/Combo pairs to the same station set. Nonprismatic linear-depth I/H has explicitly labelled prismatic-reference D/C only; tapered-member stability remains REVIEW_REQUIRED. See kit guide for restrictions.

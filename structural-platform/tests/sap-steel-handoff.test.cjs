@@ -5,7 +5,7 @@ function fixtures(){
  const snapshot={units:{system:'kN_m_C'},model:'fixture.sdb',pid:123,extracted_at:'one',members:[member('1'),member('2')],sections:{I1:{section_type:{key:'i_wide_flange'},i_dimensions_mm:{h:400,bf_top:200,bf_bottom:200,tf_top:12,tf_bottom:12,tw:8}}},materials:{S:{normalized:{Fy_MPa:345,Fu_MPa:450}}}}
  const row=(frame,id,station=0)=>({frame,record_id:id,station,element:frame+'e',output_case:'ULS',case_kind:'combination',step_type:'',step_num:0,P:-11,V2:2,V3:-3,T:0,M2:4,M3:-55,concurrency:'concurrent'})
  const dataset={units:'kN_m_C',axes:'SAP2000_local_123',model:'fixture.sdb',extracted_at:'two',rows:[row('1','a'),row('2','b')],missing_results:[]}
- const positions={model:'fixture.sdb',data:[{frame:'1',method:'linear',rows:[row('1','quarter',2.5)]},{frame:'1',method:'unavailable',fraction:.5,reason:'no bracket'}]}
+ const positions={model:'fixture.sdb',data:[{frame:'1',method:'linear',rows:[row('1','quarter',2.5)]},{frame:'1',case_kind:'combination',output_case:'ULS',step_type:'',step_num:0,method:'unavailable',fraction:.5,reason:'no bracket'}]}
  const summary={model:'fixture.sdb',data:[{min:{rows:[row('1','a')]},max:{rows:[row('2','b')]}}]}
  return {snapshot,dataset,positions,summary,method:'LRFD',referenceLengthConfirmed:true}
 }
@@ -16,7 +16,7 @@ test('full preserves signed vectors and per-member lengths even with identical s
  assert.equal(job.cases[0].Cb.value,null);assert.equal(job.status,'INPUT_REVIEW_ONLY');assert.equal(job.standard,'AISC360-10')
  assert.equal(job.coverage.unavailable_positions.length,1);assert.equal(JSON.stringify(f),before)
 })
-test('quick only retains summary rows and explicitly limits preview coverage',async()=>{
+test('quick limits selected Frame/Combo coverage to Summary pairs',async()=>{
  const {prepareDesignJob}=await load(),f=fixtures(),job=prepareDesignJob({...f,mode:'summary',frames:['2']})
  assert.equal(job.cases.length,1);assert.equal(job.members[0].frame,'2');assert.match(job.coverage.scope,/not all cases/)
  assert.throws(()=>prepareDesignJob({...f,mode:'summary',summary:null}),/summary/i)
@@ -127,3 +127,53 @@ test('zero/reversed moments and cantilever retain combo-specific Cb basis',async
  assert.equal(cbF11(comboMomentDiagram(source(0),row,member,options)).value,1)
  assert.equal(cbF11(comboMomentDiagram(source(1),row,member,{...options,cantilever:true,endsBraced:false})).value,1)
 })
+
+test('Summary selects Frame/Combo pairs and expands all stations, steps and available quarter samples',async()=>{
+ const {prepareDesignJob}=await load(),f=fixtures(),a=f.dataset.rows[0];
+ f.dataset.rows=[a,{...a,record_id:'end',station:10},{...a,record_id:'tie-side',station:10,element:'other'},
+ {...a,record_id:'step-two',station:7,step_num:2},{...a,record_id:'foreign',output_case:'OTHER'},f.dataset.rows[1]];
+ const job=prepareDesignJob({...f,mode:'summary',frames:['1']});
+ assert.deepEqual(job.cases.map(r=>r.record_id),['a','end','tie-side','step-two','quarter']);
+ assert.equal(job.cases.find(r=>r.record_id==='step-two').step_num,2);
+ assert.equal(job.cases.find(r=>r.record_id==='quarter').provenance.method,'linear');
+ assert.deepEqual(job.coverage.selected_frame_combos,[['1','combination','ULS']]);
+ assert.equal(job.coverage.unavailable_positions.length,1);
+});
+function taperedFixture(){
+ const f=fixtures(),d=f.snapshot.sections.I1.i_dimensions_mm;
+ f.snapshot.sections.I1.geometry={data:{MatProp:'S'}};
+ f.snapshot.sections.I2={section_type:{key:'i_wide_flange'},geometry:{data:{MatProp:'S'}},i_dimensions_mm:{...d,h:800}};
+ f.snapshot.sections.NP={section_type:{key:'nonprismatic'},components:[{name:'I1'},{name:'I2'}],segments:[{start_section:'I1',end_section:'I2',length:1,length_type:1,EI33_variation:2}]};
+ f.snapshot.members[0].analysis_section='NP';
+ f.snapshot.members[0].data.sections={nonprismatic_assignment:{status:'ok',data:{PropName:'NP',sVarTotalLength:0,sVarRelStartLoc:0}}};
+ f.snapshot.members[0].data.materials.member_overwrite={status:'ok',data:{PropName:'None'}};
+ return f;
+}
+test('linear-depth reference is explicit, source-bound, immutable and never a prismatic design transfer',async()=>{
+ const {prepareDesignJob}=await load(),{stationReferenceMember,calculateReport}=await import('../frontend/vue/public/sap-steel-report.mjs'),{validateComponentPacket}=await loadComponent();
+ const f=taperedFixture(),a=f.dataset.rows[0];f.positions=null;
+ f.dataset.rows=[0,2.5,5,7.5,10].map((station,i)=>({...a,record_id:'p'+i,station}));
+ const job=prepareDesignJob({...f,frames:['1']}),before=JSON.stringify(job),member=job.members[0];
+ assert.deepEqual(job.cases.map(r=>stationReferenceMember(member,r).member.geometry.value.h),[400,500,600,700,800]);
+ assert.equal(stationReferenceMember(member,job.cases[2]).reference.fraction,.5);
+ const fs=require('node:fs'),vm=require('node:vm'),path=require('node:path'),factors=vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../frontend/vue/public/aisc360-10-resistance.js'),'utf8')+';Aisc36010Resistance');
+ const report=await calculateReport(job,f.dataset,()=>({...approvals,segmentStart:0,segmentEnd:5,cbMode:'CONSERVATIVE'}),factors);
+ const group=report[0];assert.equal(group.coverage,5);assert.equal(group.incomplete,true);
+ assert.ok(group.rows.every(r=>Number.isFinite(r.utilization)&&r.reference.scope==='PRISMATIC_REFERENCE_AT_STATION'));
+ assert.equal(group.governing.status,'REVIEW_REQUIRED');assert.match(group.governing.reason,/not tapered-member stability/);
+ assert.throws(()=>validateComponentPacket(group.governing.packet),/not a prismatic member/);
+ assert.equal(JSON.stringify(job),before);
+});
+test('reference rejects partial assignments, varying plates, multiple segments, mixed materials and extrapolation',async()=>{
+ const {prepareDesignJob}=await load(),{stationReferenceMember}=await import('../frontend/vue/public/sap-steel-report.mjs');
+ const job=prepareDesignJob({...taperedFixture(),frames:['1']}),base=job.members[0],row=job.cases[0];
+ for(const [patch,reason] of [
+ [m=>m.nonprismatic_assignment.data.sVarRelStartLoc=.2,/assignment/],
+ [m=>m.nonprismatic_assignment.status='unavailable',/assignment/],
+ [m=>m.component_sections[1].geometry.value.tw=10,/flange\/web/],
+ [m=>m.nonprismatic_segments.push({...m.nonprismatic_segments[0]}),/one full-length/],
+ [m=>m.component_sections[1].material_name='Other',/material/],
+ [m=>m.material_overwrite.status='unavailable',/material/],
+ ]){const member=structuredClone(base);patch(member);assert.throws(()=>stationReferenceMember(member,row),reason)}
+ assert.throws(()=>stationReferenceMember(base,{...row,station_m:11}),/within/);
+});

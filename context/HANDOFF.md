@@ -1,5 +1,10 @@
 # Repository handoff
 
+## Vietnam lookup hazard illustrations — 2026-10-20
+
+- Branch `main`, base `a56be70`. Added `LocationHazardIllustration.vue`, used immediately below the wind/earthquake headings in `VietnamLocationLookup.vue`: wind streams/pressure on a building and a frame/foundation with horizontal ground motion and aɡR. Responsive inline SVG, navy/soft blue on a light background, localized VI/EN accessible names/captions. Schematic only, without numerical scale or calculated spectrum. No dataset, units, formulas, selection/search/export or global-theme changes.
+- Verification: Vue typecheck and demo production build passed (existing chunk-size warnings). Existing `vietnam-location-smoke.cjs` passed, extended with VI/EN image accessibility checks; prior source values/pages, independent scopes, filtering, export parity, reload and320/390px checks retained. Desktop/mobile screenshots inspected. No backend/engineering/DB changes or additional suites needed. Next delivery step: push source, let existing CI generate docs, verify Pages publication; no manual root-docs edits.
+
 ## Vietnam lookup dropdown filtering — 2026-10-20
 
 - Branch `main`, initial base `0914e51`, synchronized through `a0e2c85` while preserving concurrent SAP changes. UI-only refinement: typing a draft then Search/Enter filters the actual province, wind-scope and earthquake-location dropdown options. Clear filter/empty input restores full options; source province remains explicit context. Out-of-filter selected records are cleared on apply so hidden stale results cannot be exported. Wind and seismic scopes remain independent; no numeric/source/schema/formula changes.

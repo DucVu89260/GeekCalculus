@@ -64,3 +64,19 @@ Phase A: inspect current Loading page + backend; implement versioned coefficient
 Phase B: mass-source, RS import and base shear/scale.
 Phase C: story-by-story drift and P-delta hooks.
 Phase D: reports, persisted calculation runs, and SAP2000 API bridge.
+
+
+## Updated implementation scope — 2026-10-20
+**Active implementation sections: 01–06.** 07–09 are navigation placeholders only.
+
+04: SAP2000 Mass Source extraction through Excel export or existing API. It must extract and report load patterns/contribution factors and verify the actual effective seismic weight W, distinguishing a definition from numeric model mass/weight. Do not fabricate W when source incomplete; normalize and validate units and spreadsheet provenance. Both import modes share DTO.
+
+05: ELF Base Shear, sourced from 04 (not manual arbitrary W). Apply 12.8 Cs branches and compare X/Y. Preserve unit audit.
+
+06: Response Spectrum and verification against ELF using SAP2000 Excel-exported RS base reactions or SAP API results. Normalize signed global FX/FY, case and scale provenance; avoid double scaling. Compute suggested scaling only where applicable per ASCE 7-10.
+
+07: Story Drift and P-Delta — Coming Soon (navigation placeholder).
+08: Reports and Export — Coming Soon (navigation placeholder).
+09: QA and Design Review UI — Coming Soon (navigation placeholder; automated tests for 01–06 still mandatory).
+
+**Implementation task**: https://github.com/DucVu89260/GeekCalculus/issues/25. The issue's acceptance criteria govern this scope update. This document is a specification, not a claim of implementation.

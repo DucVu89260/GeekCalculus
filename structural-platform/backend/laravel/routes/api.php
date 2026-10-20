@@ -27,6 +27,13 @@ Route::middleware('web')->group(function () {
             Route::get('/combo-generator/workspace', [ComboGeneratorWorkspaceController::class, 'show']);
             Route::put('/combo-generator/workspace', [ComboGeneratorWorkspaceController::class, 'update'])->middleware('throttle:20,1');
         });
+        Route::prefix('v1/seismic')->middleware('throttle:30,1')->group(function () {
+            Route::get('/coefficients', [\App\Http\Controllers\SeismicController::class, 'coefficients']);
+            Route::post('/imports/preview', [\App\Http\Controllers\SeismicController::class, 'preview']);
+            Route::post('/imports/{id}/confirm', [\App\Http\Controllers\SeismicController::class, 'confirm'])->whereNumber('id');
+            Route::post('/calculate', [\App\Http\Controllers\SeismicController::class, 'calculate']);
+            Route::get('/runs/{id}', [\App\Http\Controllers\SeismicController::class, 'run'])->whereNumber('id');
+        });
         Route::get('/v1/standards', [StandardsController::class, 'index']);
         Route::get('/v1/standards/{code}', [StandardsController::class, 'show']);
         Route::get('/v1/standards/{code}/clauses', [StandardsController::class, 'clauses']);

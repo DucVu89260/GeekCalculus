@@ -14,6 +14,7 @@ import ComboGeneratorView from './ComboGeneratorView.vue'
 import WindLoadView from './WindLoadView.vue'
 
 // Keep the PDF reader and math fonts out of the ordinary design workspace load.
+const SeismicLoadView = defineAsyncComponent(() => import('./SeismicLoadView.vue'))
 const StandardsExplorer = defineAsyncComponent(() => import('./StandardsExplorer.vue'))
 const VietnamLocationLookup = defineAsyncComponent(() => import('./VietnamLocationLookup.vue'))
 
@@ -90,6 +91,7 @@ const tools = { concrete: ['beam', 'column', 'slab', 'foundation'], future: ['re
       </div>
     </section>
     <WindLoadView v-else-if="currentGroup.code === 'loads' && currentTool.code === 'wind'" :locale="locale" :workspace="moduleCode.endsWith('/envelope-low-rise') ? 'envelope' : moduleCode.endsWith('/directional-walls') ? 'directional' : ''" />
+    <SeismicLoadView v-else-if="currentGroup.code === 'loads' && currentTool.code === 'seismic'" :locale="locale" />
     <ComboGeneratorView v-else-if="currentGroup.code === 'loads' && currentTool.code === 'combo'" :locale="locale" :demo-mode="demoMode" :user="user" />
     <section v-else-if="currentGroup.code === 'loads'" class="module-panel loading-pending-panel" :data-loading-tool="currentTool.code">
       <StructureIllustration group="loads" :label="t(currentTool.title)" />

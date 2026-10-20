@@ -8,8 +8,16 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright')
   await page.goto('http://127.0.0.1:8012/?lang=vi#token=v2-browser-test-token-000000000000000000')
   await page.waitForFunction(()=>document.querySelectorAll('#instance option').length===3&&!document.querySelector('#controls').disabled)
   assert.equal(new URL(page.url()).hash,'');assert.equal(await page.locator('#sap-title').textContent(),'SAP2000-API V2')
+  // Simulate connecting BEFORE analysis. The real fixture is locked at extract
+  // time; only the connect-time response is stale/unlocked.
+  await page.route('**/API_IF_SAP26.2.0_V2/model',async route=>{
+   const response=await route.fetch(),body=await response.json();body.locked=false;
+   await route.fulfill({response,json:body});
+  });
   await page.selectOption('#instance','20948');await page.click('#connect')
   await page.waitForFunction(()=>document.querySelector('#filename').textContent==='V2-steel.sdb'&&!document.querySelector('#controls').disabled)
+  assert.equal(await page.locator('#extract').isDisabled(),true)
+  assert.match(await page.locator('#force-readiness').textContent(),/Chọn ít nhất một Case/)
   assert.equal(await page.locator('#profile-groups input').count(),9)
   assert.equal(await page.evaluate(()=>document.querySelector('#selected-panel').contains(document.querySelector('#profile-panel'))),true)
   assert.equal(await page.locator('#profile-member-groups input').count(),6)
@@ -78,6 +86,9 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright')
   assert.equal(full.members[0].data.design_results.status,'ok')
   await page.selectOption('#profile-target','frame:F2');await page.selectOption('#profile-category','design_results')
   assert.equal(await page.locator('#profile-design-message').textContent(),'Members have not been designed')
+  assert.equal(await page.locator('#extract').isEnabled(),true)
+  assert.match(await page.locator('#modelstate').textContent(),/Model chưa khóa/)
+  assert.match(await page.locator('#force-readiness').textContent(),/2 Case\/Combo/)
   await page.click('#extract');await page.waitForFunction(()=>document.querySelectorAll('#results tr').length===8&&!document.querySelector('#controls').disabled)
 
   const sectionColors=await page.evaluate(()=>Object.fromEntries([...document.querySelectorAll('#results tr')].map(tr=>[tr.dataset.section,getComputedStyle(tr).backgroundColor])));

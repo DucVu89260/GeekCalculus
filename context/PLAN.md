@@ -1,5 +1,9 @@
 # Repository implementation plan
 
+## SAP force button readiness — 2026-10-20
+
+`SAP-FORCE-READY-08`: user reports Extract button disabled after member metadata read. Remove stale connect-time model.locked gate; connected model and selected output required, backend rechecks current analyzed/locked state. Explain missing connection/output selection in dedicated VI/EN hint, retain busy fieldset and authoritative extraction guards. Acceptance: browser initially-unlocked model response, analysis completed after connection permits extraction; zero selected outputs stays disabled with actionable hint; existing force/filter flows and API guards, kit/web parity.
+
 ## AISC 360-10 formula re-audit / Cb — 2026-10-20
 
 `AISC-CB-AUDIT-07`: re-audit active symmetric I/H B4/C/D/E/F/G/H branches and SAP moment/length provenance under accepted external DAM and maximum-length assumptions. Preserve Cb1 default, independent E4 length and tapered-reference barriers. Fix F1-1 finite-input overflow by algebraic normalization, without changing equation/coefficients; add independent uniform, triangular, reverse-curvature, parabolic, interior-peak, zero and scale/sign fixtures plus downstream strength-cap checks. Record edition/hash/page evidence inherited from the prior actual-PDF audit (original unavailable this session), coverage and limitations. Acceptance: focused/full numerical suites, SAP handoff tests, rebuilt browser/kit asset parity and source-only distribution.

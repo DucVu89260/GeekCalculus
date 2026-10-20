@@ -1,5 +1,14 @@
 # Repository handoff
 
+## SAP-FORCE-READY-08 — extraction button stale-lock gate — 2026-10-20
+
+User clarified Extract stays disabled despite member/profile read. Found connect-time model.locked in enable condition; analysis run later never updates it. Remove cached lock gate, retain connected model + nonempty Case/Combo selection + busy fieldset; backend current-model/analyzed/locked/output-result guards unchanged. Dedicated VI/EN readiness text explains missing connection/output selection and that profile read does not select combinations. No automatic selection, force/default/formula changes or SAP writes.
+
+Browser regression intercepts only connect-time model response as unlocked, actual synthetic SAP remains locked at extraction; initial no-output disabled + message, selected2 outputs enables Extract despite stale lock and actual extraction/filter/extreme/Summary/detail flows pass. Full local Chromium smoke passed including VI/EN/mobile/reset isolation. Pytest test_sap_v2.py + test_sap_v2_kit.py21 passed (existing Starlette/httpx warning). Earlier baseline smoke/33API+position tests passed but lacked this stale-state scenario. No actual Windows reproduction or design parity claimed. Numerical suites from previous release remain applicable.
+
+Build2026.10.20-v2-force-ready.1; ZIP301867bytes SHA256bd2625ee4b97344eaf64887728ab6d19e2b94316ce318fa4d4ac6577d28347a7. CRC58hashes, source/local panel equality, hosted script equality and kit equality passed. Hosted full HTML intentionally adds connector meta/download footer, so full HTML byte equality is not expected. Web/source kit rebuilt; root docs and untracked engineering/build preserved. Root C:\geek_calculus\SAP2000-API unchanged. Main push is distinct from Pages publication. User reloads page, selects Case/Combo in2 then extracts in4; current backend still properly requests analysis if SAP truly lacks results.
+
+
 ## AISC-CB-AUDIT-07 — formula re-audit / Cb numerical stability — 2026-10-20
 
 Baseline `8e3d809`, branch `fix/sap2000-portable-bootstrap`. User requests another AISC360-10 review, especially Cb, retaining accepted DAM/maximum-length assumptions. Review artifact: `structural-platform/standards/AISC36010_CB_REAUDIT_2026-10-20.md` records source hash/pages, active B4/C/D/E/F/G/H coverage, independent Cb hand fixtures and remaining scope. Original AISC PDF unavailable in this workspace; inherited actual-source audit evidence is distinguished from current code/numerical review. No new scope/coefficients or blanket certification.

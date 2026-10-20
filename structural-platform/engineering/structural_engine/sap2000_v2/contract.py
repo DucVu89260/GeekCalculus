@@ -1,6 +1,6 @@
 API_NAME = 'API_IF_SAP26.2.0_V2'
 API_PREFIX = '/' + API_NAME
-BUILD_ID = '2026.10.20-v2-cb-audit.1'
+BUILD_ID = '2026.10.20-v2-force-ready.1'
 SAP_VERSION = '26.2.0'
 PORT = 8010
 REFERENCE_URL = 'https://github.com/Ephraim-Bryski/SAP-Tooltips'

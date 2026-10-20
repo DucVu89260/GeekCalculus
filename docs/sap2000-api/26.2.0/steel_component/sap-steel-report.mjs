@@ -121,9 +121,18 @@ export async function calculateReport(job,dataset,optionsFor,factors,onProgress=
   group.missing_positions=(job.coverage?.unavailable_positions||[]).filter(p=>p.frame===row.frame&&p.case_kind===row.case_kind&&p.output_case===row.output_case);
   if(group.missing_positions.length)group.incomplete=true;
   const blocked=!record.result||record.result.member_compliance.blockers.length>0;
-  group.incomplete||=blocked;group.rows.push({index,status:record.status,reason:record.reason,blocked,reference:record.reference??null,geometry:record.packet?.source.geometry??null,cb:record.cb??null,metric_reasons:record.metric_reasons,utilization:record.calculated_utilization,interaction:record.result?.limit_states.interaction?.nominal??null});
+  group.incomplete||=blocked;group.rows.push({index,status:record.status,reason:record.reason,blocked,reference:record.reference??null,geometry:record.packet?.source.geometry??null,cb:record.cb??null,metric_reasons:record.metric_reasons,utilization:record.calculated_utilization,interaction:record.result?.limit_states.interaction?.nominal??null,checks:Object.fromEntries(knownChecks.map(c=>[c.key,c.utilization]))});
   if(!group.governing||score(record)>score(group.governing)||(!group.governing.packet&&record.packet)||(!group.governing.result&&!group.governing.cb&&record.cb))group.governing=record;
   onProgress(index+1,job.cases.length);if(index%20===0)await new Promise(resolve=>setTimeout(resolve,0));
  }
  return [...groups.values()];
+}
+
+/** Reuse the batch kernel on demand; do not retain a full packet for every station. */
+export async function calculateStationResult(job,dataset,index,options,factors){
+ if(!Number.isInteger(index)||index<0||index>=job.cases.length)throw Error('Invalid station record index.');
+ const row=job.cases[index];
+ const groups=await calculateReport({...job,cases:[row]},dataset,()=>structuredClone(options),factors);
+ const record=groups[0].governing;
+ return {...record,index};
 }

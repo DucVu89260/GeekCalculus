@@ -81,6 +81,14 @@ không dựa vào việc ẩn nút trên UI. Chặn tự xóa/hạ quyền tài 
 đăng nhập và bảo vệ admin cuối cùng. Dự án legacy không có chủ sở hữu chỉ admin
 nhìn thấy. Tên người dùng nhập không được tự dịch.
 
+## Ghi chú PDF cá nhân
+
+Vào **Loading → Library → Ghi chú PDF cá nhân** để thêm PDF, đọc/chuyển trang,
+tìm kiếm, sửa tên/mô tả, tải bản gốc hoặc xóa ghi chú. Bản Docker lưu riêng theo
+tài khoản trong database và private storage; bản GitHub Pages lưu PDF trong
+IndexedDB của trình duyệt, không đồng bộ sang Docker. Các PDF cá nhân không nằm
+trong Git hay bản xuất JSON thư viện vật liệu. Xem [lưu trữ, migration và sao lưu](../context/PERSONAL-PDF-NOTES.md).
+
 ## Database kỹ thuật và CRUD
 
 Admin quản lý ba tab; user mở **Engineering Library / Thư viện kỹ thuật** để xem:

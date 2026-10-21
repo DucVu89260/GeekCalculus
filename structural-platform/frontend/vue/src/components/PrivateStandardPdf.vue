@@ -13,6 +13,8 @@ const props = defineProps({
   pageCount: { type: Number, default: null },
   printedPage: { type: [Number, String], default: null },
   locale: { type: String, default: 'en' },
+  documentTitle: { type: String, default: '' },
+  fileName: { type: String, default: '' },
 })
 const emit = defineEmits(['pagechange'])
 
@@ -200,11 +202,11 @@ onUnmounted(async () => {
 </script>
 
 <template>
-  <section class="std-pdf-viewer" :aria-label="words.title">
+  <section class="std-pdf-viewer" :aria-label="documentTitle || words.title">
     <header class="std-pdf-toolbar">
-      <strong>{{ words.title }}</strong>
+      <strong>{{ documentTitle || words.title }}</strong>
       <a v-if="documentUrl" class="std-pdf-open" :href="`${documentUrl}#page=${currentPage}`" target="_blank" rel="noopener">{{ locale === 'vi' ? 'Mở trang PDF' : 'Open PDF page' }}</a>
-      <a v-if="documentUrl" :href="documentUrl" download>{{ locale === 'vi' ? 'Tải PDF' : 'Download PDF' }}</a>
+      <a v-if="documentUrl" :href="documentUrl" :download="fileName">{{ locale === 'vi' ? 'Tải PDF' : 'Download PDF' }}</a>
       <span v-if="printedPage != null" class="std-pdf-printed">{{ words.printed }} {{ printedPage }}</span>
       <div class="std-pdf-controls">
         <button type="button" :aria-label="words.previous" :disabled="loading || !pdfDocument || currentPage <= 1" @click="navigate(currentPage - 1)">‹</button>

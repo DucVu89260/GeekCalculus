@@ -10,6 +10,7 @@ use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 use Tests\Feature\Concerns\SectionPropertyTestSupport;
 use Tests\TestCase;
 
@@ -21,6 +22,7 @@ class AuthLibraryTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        Storage::fake('local');
         $this->seed(DatabaseSeeder::class);
     }
 

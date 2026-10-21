@@ -76,6 +76,7 @@ export const copy = {
 }
 
 Object.assign(copy.vi, {
+  toolPersonalPdfNotes: 'Ghi chú PDF cá nhân', personalPdfNotesDescription: 'Lưu, sắp xếp và đọc lại các tài liệu PDF của bạn.',
   toolLoadingLibrary: 'Thư viện', loadingLibraryDescription: 'Dữ liệu tra cứu tải trọng và các tiêu chuẩn tham khảo.',
   toolVietnamLocation: 'Tra cứu địa danh Việt Nam', vietnamLocationDescription: 'Gió và động đất theo QCVN 02:2022/BXD.',
   toolSap2000Api: 'SAP2000-API', sap2000ApiDescription: 'Compatible with SAP2000v26.2.0', toolCfsDesign: 'CFS Design', cfsDescription: 'Thiết kế thép tạo hình nguội · Nối chồng và nút liên kết.',
@@ -99,6 +100,7 @@ Object.assign(copy.vi, {
   integrationPending: 'Đang chuẩn bị tích hợp', toolPending: 'Đang phát triển',
 })
 Object.assign(copy.en, {
+  toolPersonalPdfNotes: 'Personal PDF notes', personalPdfNotesDescription: 'Keep, organize and revisit your own PDF documents.',
   toolLoadingLibrary: 'Library', loadingLibraryDescription: 'Load reference data and standards libraries.',
   toolVietnamLocation: 'Vietnam location lookup', vietnamLocationDescription: 'Wind and earthquake data from QCVN 02:2022/BXD.',
   toolSap2000Api: 'SAP2000-API', sap2000ApiDescription: 'Compatible with SAP2000v26.2.0', toolCfsDesign: 'CFS Design', cfsDescription: 'Cold-formed steel design · Lapping and connection nodes.',

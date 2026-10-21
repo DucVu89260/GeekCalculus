@@ -17,6 +17,7 @@ import WindLoadView from './WindLoadView.vue'
 const SeismicLoadView = defineAsyncComponent(() => import('./SeismicLoadView.vue'))
 const StandardsExplorer = defineAsyncComponent(() => import('./StandardsExplorer.vue'))
 const VietnamLocationLookup = defineAsyncComponent(() => import('./VietnamLocationLookup.vue'))
+const PersonalPdfNotes = defineAsyncComponent(() => import('./PersonalPdfNotes.vue'))
 
 const sapLaunchDialog = ref(null)
 function showSapLaunchGuide(event) { event.preventDefault(); sapLaunchDialog.value?.showModal() }
@@ -53,7 +54,7 @@ const tools = { concrete: ['beam', 'column', 'slab', 'foundation'], future: ['re
       <a v-for="group in moduleGroups" :key="group.code" :href="moduleHref(group.code)" :class="{ active: currentGroup.code === group.code }">{{ t(group.title) }}</a>
     </nav>
     <nav class="module-navigation" :class="{ 'loading-navigation': currentGroup.code === 'loads', 'steel-navigation': currentGroup.code === 'steel' }" :aria-label="t('navigation')">
-      <a v-for="tool in navigationTools" :key="tool.code" :href="tool.external ? sap2000ApiHref(locale) : moduleHref(tool.route)" @click="tool.external && showSapLaunchGuide($event)"  :rel="tool.external ? 'noopener noreferrer' : undefined" :aria-current="currentTool.code === tool.code || (currentTool.code === 'vietnam-location' && tool.code === 'library') ? 'page' : undefined">{{ t(tool.title) }}</a>
+      <a v-for="tool in navigationTools" :key="tool.code" :href="tool.external ? sap2000ApiHref(locale) : moduleHref(tool.route)" @click="tool.external && showSapLaunchGuide($event)"  :rel="tool.external ? 'noopener noreferrer' : undefined" :aria-current="currentTool.code === tool.code || (['vietnam-location', 'personal-pdf-notes'].includes(currentTool.code) && tool.code === 'library') ? 'page' : undefined">{{ t(tool.title) }}</a>
     </nav>
     <dialog ref="sapLaunchDialog" class="sap-launch-guide" aria-labelledby="sap-launch-title">
       <h2 id="sap-launch-title">{{ locale === 'vi' ? 'Hướng dẫn sử dụng SAP2000-API' : 'Using SAP2000-API' }}</h2>
@@ -81,6 +82,7 @@ const tools = { concrete: ['beam', 'column', 'slab', 'foundation'], future: ['re
     <SectionPropertiesPanel v-else-if="currentTool.code === 'section-properties'" :key="currentGroup.code" :locale="locale" />
     <section v-else-if="currentTool.code === 'standards'" class="module-panel"><p class="standards-breadcrumb"><a :href="moduleHref('steel')">Steel Design</a> / <a :href="moduleHref('steel/library')">Library</a> / <strong>Standards</strong></p><StandardsExplorer :locale="locale" :can-edit="isAdmin" /></section>
     <section v-else-if="currentTool.code === 'vietnam-location'" class="module-panel"><VietnamLocationLookup :locale="locale" /></section>
+    <section v-else-if="currentTool.code === 'personal-pdf-notes'" class="module-panel"><PersonalPdfNotes :locale="locale" :user="user" /></section>
     <section v-else-if="currentGroup.code === 'loads' && currentTool.code === 'library'" class="module-panel"><LoadingLibrary :locale="locale" /></section>
     <section v-else-if="currentGroup.code === 'steel' && currentTool.code === 'library'" class="module-panel"><SteelLibrary :locale="locale" /></section>
     <section v-else-if="currentTool.code === 'library'" class="module-panel"><LibraryBrowser :key="currentGroup.code" :locale="locale" :can-edit="false" /></section>

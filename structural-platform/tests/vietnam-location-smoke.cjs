@@ -144,7 +144,7 @@ const wind = (province, prefix) => data.wind.find(r => r.province_id === provinc
     if (demo) {
       await page.locator('.vn-header a').click()
       await page.locator('.loading-library').waitFor()
-      assert.equal(await page.locator('.loading-library-card').count(), 5)
+      assert.equal(await page.locator('.loading-library-card').count(), 6)
       assert.equal(await page.locator('.library-planned').count(), 4)
       await page.locator('a.vn-library-entry').hover()
       await page.waitForFunction(() => getComputedStyle(document.querySelector('.vn-library-entry h3')).color === 'rgb(255, 255, 255)')

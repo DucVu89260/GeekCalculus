@@ -7,10 +7,12 @@ const words = computed(() => props.locale === 'vi' ? {
   title: 'Danh sách thư viện', lookup: 'Tra thông số theo địa danh',
   description: 'Thông số gió, gia tốc nền và gia tốc phổ chu kỳ ngắn / dài theo địa danh Việt Nam.',
   available: 'Có thể tra cứu', pending: 'Đang phát triển',
+  notes: 'Ghi chú PDF cá nhân', notesDescription: 'Thêm tài liệu PDF của bạn để đọc lại, tìm kiếm và quản lý trong thư viện.', notesOpen: 'Mở ghi chú PDF',
 } : {
   title: 'Standards libraries', lookup: 'Look up location parameters',
   description: 'Wind, ground acceleration and short / long-period spectral acceleration by Vietnamese location.',
   available: 'Available', pending: 'In development',
+  notes: 'Personal PDF notes', notesDescription: 'Add your own PDF documents to read, search and organize in your library.', notesOpen: 'Open PDF notes',
 })
 const planned = ['ASCE 7-10', 'ASCE 7-16', 'ASCE 7-22', 'TCVN 2737:2023']
 </script>
@@ -24,6 +26,9 @@ const planned = ['ASCE 7-10', 'ASCE 7-16', 'ASCE 7-22', 'TCVN 2737:2023']
         <h3>QCVN 02:2022/BXD</h3>
         <p>{{ words.description }}</p>
         <strong>{{ words.lookup }} →</strong>
+      </a>
+      <a class="loading-library-card personal-notes-entry" :href="moduleHref('loads/library/notes')">
+        <h3>{{ words.notes }}</h3><p>{{ words.notesDescription }}</p><strong>{{ words.notesOpen }} →</strong>
       </a>
       <article v-for="standard in planned" :key="standard" class="loading-library-card library-planned">
         <span class="library-status">{{ words.pending }}</span>

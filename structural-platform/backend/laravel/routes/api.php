@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\PersonalPdfNoteController;
 use App\Http\Controllers\MemberForceController;
 use App\Http\Controllers\StandardsController;
 use App\Http\Controllers\StandardsReviewController;
@@ -19,6 +20,13 @@ Route::middleware('web')->group(function () {
     Route::post('/auth/login', [AuthController::class, 'login'])->middleware('throttle:10,1');
     Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::middleware('auth')->group(function () {
+        Route::prefix('v1/personal-pdf-notes')->group(function () {
+            Route::get('/', [PersonalPdfNoteController::class, 'index']);
+            Route::post('/', [PersonalPdfNoteController::class, 'store'])->middleware('throttle:20,1');
+            Route::get('/{id}/file', [PersonalPdfNoteController::class, 'file'])->whereUuid('id');
+            Route::patch('/{id}', [PersonalPdfNoteController::class, 'update'])->whereUuid('id');
+            Route::delete('/{id}', [PersonalPdfNoteController::class, 'destroy'])->whereUuid('id');
+        });
         Route::post('/API_IF_SAP26.2.0_V1/{operation}', [MemberForceController::class, 'process'])
             ->whereIn('operation', ['extremes', 'connection-export'])->middleware('throttle:30,1');
         Route::prefix('v1')->group(function () {

@@ -80,3 +80,25 @@ Phase D: reports, persisted calculation runs, and SAP2000 API bridge.
 09: QA and Design Review UI — Coming Soon (navigation placeholder; automated tests for 01–06 still mandatory).
 
 **Implementation task**: https://github.com/DucVu89260/GeekCalculus/issues/25. The issue's acceptance criteria govern this scope update. This document is a specification, not a claim of implementation.
+
+
+## Interactive Design Response Spectrum chart — approved addition (2026-10-21)
+**Implement actual frontend chart inside 02 Design Spectrum in existing GeekCalculus UI (not merely a placeholder).** Data should recompute reactively from Ss, S1, Site Class, verified Fa/Fv and TL. Keep same calculation state and validated values used by 05 ELF and 06 RS verification.
+
+For ASCE 7-10 §11.4.5, as applicable (5%-damped horizontal design spectrum):
+- SMS = Fa * Ss; SM1 = Fv * S1; SDS = (2/3)SMS; SD1 = (2/3)SM1
+- T0 = 0.2*SD1/SDS; Ts = SD1/SDS.
+- 0 <= T < T0: Sa = SDS*(0.4 + 0.6*T/T0)
+- T0 <= T <= Ts: Sa = SDS
+- Ts < T <= TL: Sa = SD1/T
+- T > TL: Sa = SD1*TL/T^2
+Units: T seconds, Sa in g. Confirm TL sourced/entered in seconds and enforce TL >= Ts. Handle zero/invalid values with explicit validation (no divide by zero).
+- Graph axes: T (s), Sa (g); dynamic colored single line, vertical dashed lines and labeled markers T0, Ts, TL, adjustable max T, good responsive mobile/desktop layout, hover tooltips showing T, Sa and branch.
+- Show current numeric values Ss, S1, Fa, Fv, SDS, SD1, T0, Ts, TL above/below graph; label input vs derived values and traceable ASCE 7-10 §11.4.5.
+- Provide button to overlay SAP2000 model Tmodal UX and UY as point markers on the SAME design spectrum, with evaluated Sa(Tx), Sa(Ty). If modal data missing, just show design spectrum (do not fake).
+- Clearly distinguish **design response spectrum curve** vs SAP2000 *modal response-spectrum base shear results*. Diagram is a design spectrum (not a capacity/pushover curve).
+- Ensure data-point sampling includes exact breakpoints T0, Ts, TL (to preserve kinks) and tests of transitions, monotonicity of decay branches, invalid inputs, and reactive UI changes.
+- Source data must be versioned code coefficients; do not interpolate unverified table cells, especially site-specific exceptions for Site E/F.
+- Reuse project's existing frontend charting dependency if any, otherwise use small SVG implementation or existing graphing pattern rather than adding heavyweight dependencies.
+- Screenshots and tests for fixture: Ss=.38g, S1=.14g, Site E, Fa=2.08, Fv=3.38 => SDS=.526933333g, SD1=.315466667g, T0=.119736842s, Ts=.598684211s.
+- Ensure build passes; if actual coding agent not active, treat this document as a tracked requirement not evidence of delivered feature.
